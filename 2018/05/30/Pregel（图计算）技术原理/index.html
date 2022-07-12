@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="图计算简介图结构数据： 许多大数据都是以大规模图或网络的形式呈现。 许多非图结构的大数据，也常常会被转换为图模型后进行分析。 图数据结构很好地表达了数据之间的关联性。 关联性计算是大数据计算的核心——通过获得数据的关联性，可以从噪音很多的海量数据中抽取有用的信息。  传统图计算解决方案的不足之处：很多传统的图计算算法都存在以下几个典型问题：  常常表现出比较差的内存访问局部性 针对单个顶点的处理工">
+<meta name="keywords" content="Hadoop,Pregel,Hama">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pregel（图计算）技术原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="图计算简介图结构数据： 许多大数据都是以大规模图或网络的形式呈现。 许多非图结构的大数据，也常常会被转换为图模型后进行分析。 图数据结构很好地表达了数据之间的关联性。 关联性计算是大数据计算的核心——通过获得数据的关联性，可以从噪音很多的海量数据中抽取有用的信息。  传统图计算解决方案的不足之处：很多传统的图计算算法都存在以下几个典型问题：  常常表现出比较差的内存访问局部性 针对单个顶点的处理工">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/超步.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/有向图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/顶点.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/消息传递.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/状态机.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/实例.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/combine人.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/执行过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/最短路径.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/Hama结构.png">
+<meta property="og:updated_time" content="2019-11-15T14:38:12.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pregel（图计算）技术原理">
+<meta name="twitter:description" content="图计算简介图结构数据： 许多大数据都是以大规模图或网络的形式呈现。 许多非图结构的大数据，也常常会被转换为图模型后进行分析。 图数据结构很好地表达了数据之间的关联性。 关联性计算是大数据计算的核心——通过获得数据的关联性，可以从噪音很多的海量数据中抽取有用的信息。  传统图计算解决方案的不足之处：很多传统的图计算算法都存在以下几个典型问题：  常常表现出比较差的内存访问局部性 针对单个顶点的处理工">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/超步.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Pregel（图计算）技术原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Pregel（图计算）技术原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-30 16:44:15" itemprop="dateCreated datePublished" datetime="2018-05-30T16:44:15+08:00">2018-05-30</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-15 22:38:12" itemprop="dateModified" datetime="2019-11-15T22:38:12+08:00">2019-11-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,427</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 19</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="图计算简介"><a href="#图计算简介" class="headerlink" title="图计算简介"></a>图计算简介</h1><h2 id="图结构数据："><a href="#图结构数据：" class="headerlink" title="图结构数据："></a>图结构数据：</h2><ul>
+<li>许多大数据都是以大规模图或网络的形式呈现。</li>
+<li>许多非图结构的大数据，也常常会被转换为图模型后进行分析。</li>
+<li>图数据结构很好地表达了数据之间的<strong>关联性</strong>。</li>
+<li><strong>关联性计算是大数据计算的核心</strong>——通过获得数据的关联性，可以从噪音很多的海量数据中抽取有用的信息。</li>
+</ul>
+<h2 id="传统图计算解决方案的不足之处："><a href="#传统图计算解决方案的不足之处：" class="headerlink" title="传统图计算解决方案的不足之处："></a>传统图计算解决方案的不足之处：</h2><p>很多传统的图计算算法都存在以下几个典型问题：</p>
+<ol>
+<li>常常表现出比较差的内存访问局部性</li>
+<li>针对单个顶点的处理工作过少</li>
+<li>计算过程中伴随着并行度的改变</li>
+</ol>
+<p>针对大型图（比如社交网络和网络图）的计算问题，可能的解决方案及其不足之处具体如下：</p>
+<ol>
+<li>为特定的图应用定制相应的分布式实现</li>
+<li>基于现有的分布式计算平台进行图计算</li>
+<li>使用单机的图算法库：比如BGL、LEAD、NetworkX、JDSL、Standford GraphBase和FGL等</li>
+<li>使用已有的并行图计算系统：比如，Parallel BGL和CGM Graph，实现了很多并行图算法</li>
+</ol>
+<h2 id="图计算通用软件："><a href="#图计算通用软件：" class="headerlink" title="图计算通用软件："></a>图计算通用软件：</h2><p>针对大型图的计算，目前通用的图计算软件主要包括两种：</p>
+<ul>
+<li><strong>第一种主要是基于遍历算法的、实时的图数据库</strong>，如Neo4j、OrientDB、DEX和 Infinite Graph。</li>
+<li><strong>第二种则是以图顶点为中心的</strong>、基于消息传递批处理的并行引擎，如GoldenOrb、Giraph、Pregel和Hama，这些图处理软件主要是<strong>基于BSP模型</strong>实现的并行图处理系统。</li>
+</ul>
+<p>一次BSP(Bulk Synchronous Parallel Computing Model，块同步并行计算模型,又称“大同步”模型)计算过程包括一系列全局超步（所谓的<strong>超步就是计算中的一次迭代</strong>），每个超步主要包括三个组件：</p>
+<ol>
+<li>局部计算：每个参与的处理器都有自身的计算任务。</li>
+<li>通讯：处理器群相互交换数据。</li>
+<li>栅栏同步(Barrier Synchronization)：当一个处理器遇到“路障”（或栅栏），会等到其他所有处理器完成它们的计算步骤。</li>
+</ol>
+<p><img src="/2018/05/30/Pregel（图计算）技术原理/超步.png" alt="超步"></p>
+<p><center>图：一个超步的垂直结构图<center></center></center></p>
+<h1 id="Pregel图计算模型"><a href="#Pregel图计算模型" class="headerlink" title="Pregel图计算模型"></a>Pregel图计算模型</h1><h2 id="Pregel简介"><a href="#Pregel简介" class="headerlink" title="Pregel简介:"></a>Pregel简介:</h2><p>谷歌公司在2003年到2004年公布了GFS、MapReduce和BigTable</p>
+<p>谷歌在后Hadoop时代的新“三驾马车”</p>
+<ul>
+<li>Caffeine</li>
+<li>Dremel</li>
+<li>Pregel</li>
+</ul>
+<p>Pregel是一种基于BSP模型实现的并行图处理系统。</p>
+<p>为了解决大型图的分布式计算问题，Pregel搭建了一套可扩展的、有容错机制的平台，该平台提供了一套非常灵活的API，可以描述各种各样的图计算。</p>
+<p><strong>Pregel作为分布式图计算的计算框架</strong>，<strong>主要用于图遍历、最短路径、PageRank计算等等。</strong></p>
+<h2 id="有向图和顶点："><a href="#有向图和顶点：" class="headerlink" title="有向图和顶点："></a>有向图和顶点：</h2><p><img src="/2018/05/30/Pregel（图计算）技术原理/有向图.png" alt="有向图"></p>
+<p><center>图：有向图和顶点<center></center></center></p>
+<ul>
+<li>Pregel计算模型以有向图作为输入</li>
+<li>有向图的每个顶点都有一个String类型的顶点ID</li>
+<li>每个顶点都有一个可修改的用户自定义值与之关联</li>
+<li>每条有向边都和其源顶点关联，并记录了其目标顶点ID</li>
+<li>边上有一个可修改的用户自定义值与之关联</li>
+</ul>
+<p><img src="/2018/05/30/Pregel（图计算）技术原理/顶点.png" alt="顶点"></p>
+<p><center>图：超步示意图<center></center></center></p>
+<ul>
+<li>在每个超步S中，图中的所有顶点都会并行执行相同的用户自定义函数。</li>
+<li>每个顶点可以接收前一个超步(S-1)中发送给它的消息，修改其自身及其出射边的状态，并发送消息给其他顶点，甚至是修改整个图的拓扑结构。</li>
+<li>在这种计算模式中，“边。”并不是核心对象，在边上面不会运行相应的计算，只有顶点才会执行用户自定义函数进行相应计算。</li>
+</ul>
+<h2 id="顶点之间的消息传递"><a href="#顶点之间的消息传递" class="headerlink" title="顶点之间的消息传递:"></a>顶点之间的消息传递:</h2><p><img src="/2018/05/30/Pregel（图计算）技术原理/消息传递.png" alt="消息传递"></p>
+<p><center>图：纯消息传递模型图<center></center></center></p>
+<p>采用消息传递模型主要基于以下两个原因：</p>
+<ol>
+<li>消息传递具有足够的表达能力，没有必要使用远程读取或共享内存的方式.</li>
+<li>有助于提升系统整体性能.</li>
+</ol>
+<h2 id="Pregel的计算过程："><a href="#Pregel的计算过程：" class="headerlink" title="Pregel的计算过程："></a>Pregel的计算过程：</h2><p>Pregel的计算过程是由一系列被称为“<strong>超步</strong>”的迭代组成的。</p>
+<p>在每个超步中，每个顶点上面都会并行执行用户自定义的函数，该函数描述了一个顶点V在一个超步S中需要执行的操作。</p>
+<p>该函数可以读取前一个超步(S-1)中其他顶点发送给顶点V的消息，执行相应计算后，修改顶点V及其出射边的状态，然后沿着顶点V的出射边发送消息给其他顶点，而且，一个消息可能经过多条边的传递后被发送到任意已知ID的目标顶点上去。</p>
+<p>这些消息将会在下一个超步(S+1)中被目标顶点接收，然后像上述过程一样开始下一个超步(S+1)的迭代过程。</p>
+<p>在Pregel计算过程中，一个算法什么时候可以结束，是由所有顶点的状态决定的。</p>
+<p><strong>在第0个超步，所有顶点处于活跃状态。</strong></p>
+<p><strong>当一个顶点不需要继续执行进一步的计算时，就会把自己的状态设置为“停机”，进入非活跃状态。</strong></p>
+<p>当一个处于非活跃状态的顶点收到来自其他顶点的消息时，Pregel计算框架必须根据条件判断来决定是否将其显式唤醒进入活跃状态。</p>
+<p>当图中所有的顶点都已经标识其自身达到“非活跃（inactive）”状态，并且没有消息在传送的时候，算法就可以停止运行。</p>
+<p><img src="/2018/05/30/Pregel（图计算）技术原理/状态机.png" alt="状态机"></p>
+<p><center>图：一个简单的状态机图<center></center></center></p>
+<h2 id="一个简单示例："><a href="#一个简单示例：" class="headerlink" title="一个简单示例："></a>一个简单示例：</h2><p><img src="/2018/05/30/Pregel（图计算）技术原理/实例.png" alt="实例"></p>
+<p><center>图：一个求最大值的Pregel计算过程图<center></center></center></p>
+<h1 id="Pregel的工作原理"><a href="#Pregel的工作原理" class="headerlink" title="Pregel的工作原理"></a>Pregel的工作原理</h1><h2 id="Pregel的C-API："><a href="#Pregel的C-API：" class="headerlink" title="Pregel的C++ API："></a>Pregel的C++ API：</h2><p>Pregel已经预先定义好一个基类——Vertex类：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> VertexValue, <span class="keyword">typename</span> EdgeValue, <span class="keyword">typename</span> MessageValue&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Vertex</span> &#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">	<span class="comment">//定义的虚函数，Computer（）；用户的处理逻辑在这实现</span></span><br><span class="line">	<span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Compute</span><span class="params">(MessageIterator* msgs)</span> </span>= <span class="number">0</span>;</span><br><span class="line">	<span class="comment">//参数顶点ID</span></span><br><span class="line">	<span class="function"><span class="keyword">const</span> <span class="built_in">string</span>&amp; <span class="title">vertex_id</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">	<span class="comment">//记录执行的超步数</span></span><br><span class="line">	<span class="function">int64 <span class="title">superstep</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">	<span class="comment">//获取顶点关联的值</span></span><br><span class="line">	<span class="function"><span class="keyword">const</span> VertexValue&amp; <span class="title">GetValue</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function">VertexValue* <span class="title">MutableValue</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//出射边迭代器，获取所有的出射边</span></span><br><span class="line">	<span class="function">OutEdgeIterator <span class="title">GetOutEdgeIterator</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="comment">//发送消息</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">SendMessageTo</span><span class="params">(<span class="keyword">const</span> <span class="built_in">string</span>&amp; dest_vertex, <span class="keyword">const</span> MessageValue&amp; message)</span></span>;</span><br><span class="line">	<span class="comment">//设为停机</span></span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">VoteToHalt</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在Vetex类中，定义了三个值类型参数，分别表示顶点、边和消息。每一个顶点都有一个给定类型的值与之对应。</p>
+<p>编写Pregel程序时，需要继承Vertex类，并且覆写Vertex类的虚函数Compute()。</p>
+<h2 id="消息传递机制："><a href="#消息传递机制：" class="headerlink" title="消息传递机制："></a>消息传递机制：</h2><p>顶点之间的通讯是借助于<strong>消息传递机制</strong>来实现的，每条消息都包含了消息值和需要到达的目标顶点ID。用户可以通过Vertex类的模板参数来设定消息值的数据类型。</p>
+<p>在一个超步S中，一个顶点可以发送任意数量的消息，这些消息将在下一个超步（S+1）中被其他顶点接收。</p>
+<p>一个顶点V通过与之关联的出射边向外发送消息，并且，消息要到达的目标顶点并不一定是与顶点V相邻的顶点，一个消息可以连续经过多条连通的边到达某个与顶点V不相邻的顶点U，U可以从接收的消息中获取到与其不相邻的顶点V的ID。</p>
+<h2 id="Combiner："><a href="#Combiner：" class="headerlink" title="Combiner："></a>Combiner：</h2><p>Pregel计算框架在消息发出去之前，Combiner可以将发往同一个顶点的多个整型值进行求和得到一个值，只需向外发送这个“求和结果”，从而实现了由多个消息合并成一个消息，大大减少了传输和缓存的开销。</p>
+<p> 在默认情况下，Pregel计算框架并不会开启Combiner功能。</p>
+<p> 当用户打算开启Combiner功能时，可以继承Combiner类并覆写虚函数Combine()。</p>
+<p>此外，通常只对那些<strong>满足交换律和结合律的操作才可以去开启Combiner功能</strong>。</p>
+<p><img src="/2018/05/30/Pregel（图计算）技术原理/combine人.png" alt="combine人"></p>
+<p><center>图：Combiner应用的例子<center></center></center></p>
+<h2 id="Aggregator"><a href="#Aggregator" class="headerlink" title="Aggregator:"></a>Aggregator:</h2><p>Aggregator提供了一种<strong>全局通信、监控和数据查看的机制</strong>。</p>
+<p>在一个超步S中，每一个顶点都可以向一个Aggregator提供一个数据，Pregel计算框架会对这些值进行聚合操作产生一个值，在下一个超步（S+1）中，图中的所有顶点都可以看见这个值。</p>
+<p>Aggregator的聚合功能，允许在整型和字符串类型上执行最大值、最小值、求和操作，比如，可以定义一个“Sum”Aggregator来统计每个顶点的出射边数量，最后相加可以得到整个图的边的数量。</p>
+<p>Aggregator还可以实现全局协同的功能，比如，可以设计“and” Aggregator来决定在某个超步中Compute()函数是否执行某些逻辑分支，只有当“and” Aggregator显示所有顶点都满足了某条件时，才去执行这些逻辑分支。</p>
+<h2 id="拓扑改变："><a href="#拓扑改变：" class="headerlink" title="拓扑改变："></a>拓扑改变：</h2><p>Pregel计算框架允许用户在自定义函数Compute()中定义操作，修改图的拓扑结构，比如在图中增加（或删除）边或顶点。</p>
+<p>对于全局拓扑改变，Pregel采用了惰性协调机制。</p>
+<p>对于本地的局部拓扑改变，是不会引发冲突的，顶点或边的本地增减能够立即生效，很大程度上简化了分布式编程。</p>
+<h2 id="输入和输出："><a href="#输入和输出：" class="headerlink" title="输入和输出："></a>输入和输出：</h2><p>在Pregel计算框架中，图的保存格式多种多样，包括文本文件、关系数据库或键值数据库等。</p>
+<p>在Pregel中，“从输入文件生成得到图结构”和“执行图计算”这两个过程是分离的，从而不会限制输入文件的格式。</p>
+<p>对于输出，Pregel也采用了灵活的方式，可以以多种方式进行输出。</p>
+<h1 id="Pregel的体系结构"><a href="#Pregel的体系结构" class="headerlink" title="Pregel的体系结构"></a>Pregel的体系结构</h1><h2 id="Pregel的执行过程："><a href="#Pregel的执行过程：" class="headerlink" title="Pregel的执行过程："></a>Pregel的执行过程：</h2><p><img src="/2018/05/30/Pregel（图计算）技术原理/图.png" alt="图"></p>
+<p><center>图：图的划分图<center></center></center></p>
+<ul>
+<li>在Pregel计算框架中，一个大型图会被划分成许多个分区，每个分区都包含了一部分顶点以及以其为起点的边。</li>
+<li>一个顶点应该被分配到哪个分区上，是由一个函数决定的，系统默认函数为hash(ID) mod N，其中，N为所有分区总数，ID是这个顶点的标识符；当然，用户也可以自己定义这个函数。</li>
+<li>这样，无论在哪台机器上，都可以简单根据顶点ID判断出该顶点属于哪个分区，即使该顶点可能已经不存在了。</li>
+</ul>
+<p><img src="/2018/05/30/Pregel（图计算）技术原理/执行过程.png" alt="执行过程"></p>
+<p><center>图：Pregel的执行过程<center></center></center></p>
+<p>在理想的情况下（不发生任何错误），一个Pregel用户程序的执行过程如下：</p>
+<ol>
+<li>选择集群中的多台机器执行图计算任务，有一台机器会被选为Master，其他机器作为Worker。</li>
+<li>Master把一个图分成多个分区，并把分区分配到多个Worker。一个Worker会领到一个或多个分区，每个Worker知道所有其他Worker所分配到的分区情况。</li>
+<li>Master会把用户输入划分成多个部分。然后，Master会<br>为每个Worker分配用户输入的一部分。如果一个Worker从输入内容中加载到的顶点，刚好是自己所分配到的分区中的顶点，就会立即更新相应的数据结构。否则，该Worker会根据加载到的顶点的ID，把它发送到其所属的分区所在的Worker上。当所有的输入都被加载后，图中的所有顶点都会被标记为“活跃”状态。</li>
+<li>Master向每个Worker发送指令，Worker收到指令后，开始运行一个超步。当一个超步中的所有工作都完成以后，Worker会通知Master，并把自己在下一个超步还处于“活跃”状态的顶点的数量报告给Master。上述步骤会被不断重复，直到所有顶点都不再活跃并且系统中不会有任何消息在传输，这时，执行过程才会结束。</li>
+<li>计算过程结束后，Master会给所有的Worker发送指令，通知每个Worker对自己的计算结果进行持久化存储。</li>
+</ol>
+<h2 id="容错性："><a href="#容错性：" class="headerlink" title="容错性："></a>容错性：</h2><p>Pregel采用<strong>检查点机制</strong>来实现容错。在每个超步的开始，Master会通知所有的Worker把自己管辖的分区的状态写入到持久化存储设备。</p>
+<p>Master会周期性地向每个Worker发送ping消息，Worker收到ping消息后会给Master发送反馈消息。</p>
+<p>每个Worker上都保存了一个或多个分区的状态信息，当一个Worker发生故障时，它所负责维护的分区的当前状态信息就会丢失。Master监测到一个Worker发生故障“失效”后，会把失效Worker所分配到的分区，重新分配到其他处于正常工作状态的Worker集合上，然后，所有这些分区会从最近的某超步S开始时写出的检查点中，重新加载状态信息。</p>
+<h2 id="Worker"><a href="#Worker" class="headerlink" title="Worker:"></a>Worker:</h2><p>在一个Worker中，它所管辖的分区的状态信息是保存在内存中的。分区中的顶点的状态信息包括：</p>
+<ul>
+<li>顶点的当前值。</li>
+<li>以该顶点为起点的出射边列表，每条出射边包含了目标顶点ID和边的值。</li>
+<li>消息队列，包含了所有接收到的、发送给该顶点的消息。</li>
+<li>标志位，用来标记顶点是否处于活跃状态。</li>
+</ul>
+<p>在每个超步中，Worker会对自己所管辖的分区中的每个顶点进行遍历，并调用顶点上的Compute()函数，在调用时，会把以下三个参数传递进去：</p>
+<ul>
+<li>该顶点的当前值</li>
+<li>一个接收到的消息的迭代器</li>
+<li>一个出射边的迭代器</li>
+</ul>
+<p>在Pregel中，为了获得更好的性能，“标志位”和输入消息队列是分开保存的。</p>
+<p>对于每个顶点而言，Pregel只保存一份顶点值和边值，但是，会保存两份“标志位”和输入消息队列，分别用于当前超步和下一个超步。</p>
+<p>如果一个顶点V在超步S接收到消息，那么，它表示V将会在下一个超步S+1中（而不是当前超步S中）处于“活跃”状态。</p>
+<p>当一个Worker上的一个顶点V需要发送消息到其他顶点U时，该Worker会首先判断目标顶点U是否位于自己机器上。</p>
+<p>如果目标顶点U在自己的机器上，就直接把消息放入到与目标顶点U对应的输入消息队列中。</p>
+<p>如果发现目标顶点U在远程机器上，这个消息就会被暂时缓存到本地，当缓存中的消息数目达到一个事先设定的阈值时，这些缓存消息会被批量异步发送出去，传输到目标顶点所在的Worker上。</p>
+<h2 id="Master："><a href="#Master：" class="headerlink" title="Master："></a>Master：</h2><p>Master的主要作用：</p>
+<ul>
+<li>Master主要负责协调各个Worker执行任务，每个Worker会借助于名称服务系统定位到Master的位置，并向Master发送自己的注册信息，Master会为每个Worker分配一个唯一的ID。</li>
+<li>Master维护着关于当前处于“有效”状态的所有Worker的各种信息，包括每个Worker的ID和地址信息，以及每个Worker被分配到的分区信息。</li>
+<li>Master中保存这些信息的数据结构的大小，只与分区的数量有关，而与顶点和边的数量无关。</li>
+</ul>
+<p>Master与Worker的交互：</p>
+<ul>
+<li>一个大规模图计算任务会被Master分解到多个Worker去执行，在每个超步开始时，Master都会向所有处于“有效”状态的Worker发送相同的指令，然后等待这些Worker的回应。</li>
+<li>如果在指定时间内收不到某个Worker的反馈，Master就认为这个Worker失效。</li>
+<li>如果参与任务执行的多个Worker中的任意一个发生了故障失效，Master就会进入恢复模式。</li>
+<li>在每个超步中，图计算的各种工作，比如输入、输出、计算、保存和从检查点中恢复，都会在“路障（barrier）”之前结束。</li>
+</ul>
+<p>Master在内部运行了一个HTTP服务器来显示图计算过程的各种信息。用户可以通过网页随时监控图计算执行过程各个细节：</p>
+<ul>
+<li>图的大小</li>
+<li>关于出度分布的柱状图</li>
+<li>处于活跃状态的顶点数量</li>
+<li>在当前超步的时间信息和消息流量</li>
+<li>所有用户自定义Aggregator的值</li>
+</ul>
+<h2 id="Aggregator："><a href="#Aggregator：" class="headerlink" title="Aggregator："></a>Aggregator：</h2><p>每个用户自定义的Aggregator都会采用聚合函数对一个值集合进行聚合计算得到一个全局值。</p>
+<p>每个Worker都保存了一个Aggregator的实例集，其中的每个实例都是由类型名称和实例名称来标识的。</p>
+<p>在执行图计算过程的某个超步S中，每个Worker会利用一个Aggregator对当前本地分区中包含的所有顶点的值进行归约，得到一个本地的局部归约值。</p>
+<p>在超步S结束时，所有Worker会将所有包含局部归约值的Aggregator的值进行最后的汇总，得到全局值，然后提交给Master。</p>
+<p>在下一个超步S+1开始时，Master就会将Aggregator的全局值发送给每个Worker。</p>
+<h1 id="Pregel的应用实例—单源最短路径"><a href="#Pregel的应用实例—单源最短路径" class="headerlink" title="Pregel的应用实例—单源最短路径"></a>Pregel的应用实例—单源最短路径</h1><p><img src="/2018/05/30/Pregel（图计算）技术原理/最短路径.png" alt="最短路径"></p>
+<p><center>图：Dijkstra算法是解决单源最短路径问题的贪婪算法<center></center></center></p>
+<p>Pregel非常适合用来解决单源最短路径问题，实现代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ShortestPathVertex</span></span></span><br><span class="line"><span class="class">	:</span> <span class="keyword">public</span> Vertex&lt;<span class="keyword">int</span>, <span class="keyword">int</span>, <span class="keyword">int</span>&gt; &#123;</span><br><span class="line">	 <span class="function"><span class="keyword">void</span> <span class="title">Compute</span><span class="params">(MessageIterator* msgs)</span> </span>&#123;</span><br><span class="line">	 <span class="keyword">int</span> mindist = IsSource(vertex_id()) ? <span class="number">0</span> : INF;</span><br><span class="line">	 <span class="keyword">for</span> (; !msgs-&gt;Done(); msgs-&gt;Next())</span><br><span class="line">	 	mindist = min(mindist, msgs-&gt;Value());</span><br><span class="line">	 <span class="keyword">if</span> (mindist &lt; GetValue()) &#123;</span><br><span class="line">		 *MutableValue() = mindist;</span><br><span class="line">	 	OutEdgeIterator iter = 	GetOutEdgeIterator();</span><br><span class="line"> 		<span class="keyword">for</span> (; !iter.Done(); iter.Next())</span><br><span class="line"> 		SendMessageTo(iter.Target(),</span><br><span class="line"> 		mindist + iter.GetValue());</span><br><span class="line"> 	&#125;</span><br><span class="line">	VoteToHalt();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h1 id="Hama简介"><a href="#Hama简介" class="headerlink" title="Hama简介"></a>Hama简介</h1><h2 id="Hama概述："><a href="#Hama概述：" class="headerlink" title="Hama概述："></a>Hama概述：</h2><ul>
+<li>Hama是Google Pregel的开源实现。</li>
+<li>与Hadoop适合于分布式大数据处理不同，Hama主要用于分布式的矩阵、graph、网络算法的计算。</li>
+<li>Hama是在HDFS上实现的BSP(Bulk Synchronous Parallel)计算框架，弥补Hadoop在计算能力上的不足。</li>
+</ul>
+<p>Hama是基于BSP(BulkSynchronous Parallel)计算技术的并行计算框架，用于大量的科学计算（比如矩阵、图论、网络等）。BSP计算技术最大的优势是加快迭代，在解决最小路径等问题中可以快速得到可行解。同时，Hama提供简单的编程，比如flexible模型、传统的消息传递模型，而且兼容很多分布式文件系统，比如HDFS、Hbase等。用户可以使用现有的Hadoop集群进行Hama BSP.</p>
+<p>现在Hama最新的版本为2012年6月31号发行的0.5.0.这是 Hama 做为 Apache 顶级项目后首次发布的版本，该版本包含两个显著的新特性，分别是消息压缩器和完整的 Google Pregel 克隆，另外在计算系统性能和可持续性上都得以提升。</p>
+<h2 id="Hama结构："><a href="#Hama结构：" class="headerlink" title="Hama结构："></a>Hama结构：</h2><p>Hama主要有三部分构成：BSPMaster、GroomServers 和Zookeeper。与Hadoop结构很相似，但没有通信和同步机制的部分。</p>
+<p>Hama的集群由一个BSPMaster和多个互不关联的GroomServer作计算结点组成，HDFS和Zookeeper都可以是独立的集群。启动从BSPMaster开始，如果是master会启动BSPMaster、GroomServer两个进程，如果只是计算结点则只会启动GroomServer，启动/关闭脚本都是Master机器远程在GroomServer机器上执行。</p>
+<p><img src="/2018/05/30/Pregel（图计算）技术原理/Hama结构.png" alt="Hama结构"></p>
+<p><center>图：Hama体系结构<center></center></center></p>
+<h2 id="BSPMaster"><a href="#BSPMaster" class="headerlink" title="BSPMaster:"></a>BSPMaster:</h2><p>BSPMaster 即集群的主，负责了集群各GroomServer结点的管理与作业的调度，就我所知它还存在单点的问题。相当于Hadoop的JobTracker或HDFS的NameNode。其基本作用如下：</p>
+<ol>
+<li>维持Groom服务器状态。</li>
+<li>维护supersteps和集群中的计数器。</li>
+<li>维护Job的进度信息。</li>
+<li>调度作业和任务分配给Groom服务器</li>
+<li>分配执行的类和配置，整个Groom服务器。</li>
+<li>为用户提供集群控制接口（Web和基于控制台）。</li>
+</ol>
+<h2 id="GroomServer："><a href="#GroomServer：" class="headerlink" title="GroomServer："></a>GroomServer：</h2><p> GroomServer是一个process，通过BSPMaster启动BSP任务。每一个Groom都有BSPMaster通信，可以通过BSPMaster获取任务，报告状态。GroomServer在HDFS或者其他文件系统上运行，通常，GroomServer与与数据结点在一个物理结点上运行，以保证获得最佳性能。</p>
+<h2 id="Zookeeper："><a href="#Zookeeper：" class="headerlink" title="Zookeeper："></a>Zookeeper：</h2><p>Zookeeper用来管理BSPPeer的同步，用于实现BarrierSynchronisation机制。在ZK上，进入BSPPeer主要有进入Barrier和离开Barrier操作，所有进入Barrier的Peer会在zk上创建一个EPHEMERAL的node（/bsp/JobID/Superstep NO./TaskID），最后一个进入Barrier的Peer同时还会创建一个readynode(/bsp/JobID/Superstep NO./ready)，Peer进入阻塞状态等待zk上所有task的node都删除后退出Barrier。</p>
+<h2 id="BSP-Programming-Model："><a href="#BSP-Programming-Model：" class="headerlink" title="BSP Programming Model："></a>BSP Programming Model：</h2><p>BSP(BulkSynchronous Parallel，整体同步并行计算模型)是英国计算机科学家Viliant在上世纪80年代提出的一种并行计算模型。Google发布的一往篇论文(《Pregel: A System for Large-Scale Graph Processing》)使得这一概念被更多人所认识，据说在Google 80%的程序运行在MapReduce上，20%的程序运行在Pregel上。和MapReduce一样，Google并没有开源Pregel，Apache按Pregel的思想提供了类似框架Hama。</p>
+<hr>
+<blockquote>
+<p>以上内容为听华为大数据培训课程和大学MOOC上厦门大学 林子雨的《大数据技术原理与应用》课程而整理的笔记。</p>
+<p><strong><a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">大数据技术原理与应用</a></strong>： <a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">https://www.icourse163.org/course/XMU-1002335004</a> </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/" title="Pregel（图计算）技术原理">https://cshihong.github.io/2018/05/30/Pregel（图计算）技术原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+            <a href="/tags/Pregel/" rel="tag"># Pregel</a>
+          
+            <a href="/tags/Hama/" rel="tag"># Hama</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/25/Spark技术原理/" rel="next" title="Spark技术原理">
+                <i class="fa fa-chevron-left"></i> Spark技术原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/31/Flink技术原理/" rel="prev" title="Flink技术原理">
+                Flink技术原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#图计算简介"><span class="nav-number">1.</span> <span class="nav-text">图计算简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#图结构数据："><span class="nav-number">1.1.</span> <span class="nav-text">图结构数据：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传统图计算解决方案的不足之处："><span class="nav-number">1.2.</span> <span class="nav-text">传统图计算解决方案的不足之处：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图计算通用软件："><span class="nav-number">1.3.</span> <span class="nav-text">图计算通用软件：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pregel图计算模型"><span class="nav-number">2.</span> <span class="nav-text">Pregel图计算模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pregel简介"><span class="nav-number">2.1.</span> <span class="nav-text">Pregel简介:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有向图和顶点："><span class="nav-number">2.2.</span> <span class="nav-text">有向图和顶点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#顶点之间的消息传递"><span class="nav-number">2.3.</span> <span class="nav-text">顶点之间的消息传递:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pregel的计算过程："><span class="nav-number">2.4.</span> <span class="nav-text">Pregel的计算过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一个简单示例："><span class="nav-number">2.5.</span> <span class="nav-text">一个简单示例：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pregel的工作原理"><span class="nav-number">3.</span> <span class="nav-text">Pregel的工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pregel的C-API："><span class="nav-number">3.1.</span> <span class="nav-text">Pregel的C++ API：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息传递机制："><span class="nav-number">3.2.</span> <span class="nav-text">消息传递机制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Combiner："><span class="nav-number">3.3.</span> <span class="nav-text">Combiner：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Aggregator"><span class="nav-number">3.4.</span> <span class="nav-text">Aggregator:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拓扑改变："><span class="nav-number">3.5.</span> <span class="nav-text">拓扑改变：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#输入和输出："><span class="nav-number">3.6.</span> <span class="nav-text">输入和输出：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pregel的体系结构"><span class="nav-number">4.</span> <span class="nav-text">Pregel的体系结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pregel的执行过程："><span class="nav-number">4.1.</span> <span class="nav-text">Pregel的执行过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容错性："><span class="nav-number">4.2.</span> <span class="nav-text">容错性：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Worker"><span class="nav-number">4.3.</span> <span class="nav-text">Worker:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Master："><span class="nav-number">4.4.</span> <span class="nav-text">Master：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Aggregator："><span class="nav-number">4.5.</span> <span class="nav-text">Aggregator：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Pregel的应用实例—单源最短路径"><span class="nav-number">5.</span> <span class="nav-text">Pregel的应用实例—单源最短路径</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hama简介"><span class="nav-number">6.</span> <span class="nav-text">Hama简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hama概述："><span class="nav-number">6.1.</span> <span class="nav-text">Hama概述：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hama结构："><span class="nav-number">6.2.</span> <span class="nav-text">Hama结构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BSPMaster"><span class="nav-number">6.3.</span> <span class="nav-text">BSPMaster:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GroomServer："><span class="nav-number">6.4.</span> <span class="nav-text">GroomServer：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper："><span class="nav-number">6.5.</span> <span class="nav-text">Zookeeper：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BSP-Programming-Model："><span class="nav-number">6.6.</span> <span class="nav-text">BSP Programming Model：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/05/30/Pregel（图计算）技术原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

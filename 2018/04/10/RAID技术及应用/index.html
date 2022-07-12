@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="RAID基本概念与技术原理RAID基本概念：RAID（Redundant Array of Independent Disks）：独立冗余磁盘阵列，简称磁盘阵列。 RAID的实现方式：RAID的主要实现方式分为硬件RAID方式和软件RAID方式。 硬件RAID：采用集成了处理器的RAID适配卡（简称RAiD卡）来说实现的。它有自己的控制处理器、I/O处理芯片和存储器，减少对上机CPU运算时间的占用">
+<meta name="keywords" content="华为网络大赛,存储,RAID">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RAID技术及应用">
+<meta property="og:url" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="RAID基本概念与技术原理RAID基本概念：RAID（Redundant Array of Independent Disks）：独立冗余磁盘阵列，简称磁盘阵列。 RAID的实现方式：RAID的主要实现方式分为硬件RAID方式和软件RAID方式。 硬件RAID：采用集成了处理器的RAID适配卡（简称RAiD卡）来说实现的。它有自己的控制处理器、I/O处理芯片和存储器，减少对上机CPU运算时间的占用">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/条带.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/校验.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/状态.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/RAID5.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/pq.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/dp.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/raid10.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/RAID50.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/RAID比较.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/RAID应用.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/59.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/写.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/值.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/2.0.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/2.0+.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/2.0.2.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/逻辑.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/负载.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/系统.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/重构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/LUN.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/s.png">
+<meta property="og:updated_time" content="2018-04-10T15:11:52.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RAID技术及应用">
+<meta name="twitter:description" content="RAID基本概念与技术原理RAID基本概念：RAID（Redundant Array of Independent Disks）：独立冗余磁盘阵列，简称磁盘阵列。 RAID的实现方式：RAID的主要实现方式分为硬件RAID方式和软件RAID方式。 硬件RAID：采用集成了处理器的RAID适配卡（简称RAiD卡）来说实现的。它有自己的控制处理器、I/O处理芯片和存储器，减少对上机CPU运算时间的占用">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/04/10/RAID技术及应用/条带.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/04/10/RAID技术及应用/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>RAID技术及应用 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/04/10/RAID技术及应用/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">RAID技术及应用
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-10 20:58:20 / 修改时间：23:11:52" itemprop="dateCreated datePublished" datetime="2018-04-10T20:58:20+08:00">2018-04-10</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/存储/" itemprop="url" rel="index"><span itemprop="name">存储</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 2,898</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 11</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="RAID基本概念与技术原理"><a href="#RAID基本概念与技术原理" class="headerlink" title="RAID基本概念与技术原理"></a>RAID基本概念与技术原理</h1><h2 id="RAID基本概念："><a href="#RAID基本概念：" class="headerlink" title="RAID基本概念："></a>RAID基本概念：</h2><p>RAID（Redundant Array of Independent Disks）：独立冗余磁盘阵列，简称磁盘阵列。</p>
+<h2 id="RAID的实现方式："><a href="#RAID的实现方式：" class="headerlink" title="RAID的实现方式："></a>RAID的实现方式：</h2><p>RAID的主要实现方式分为硬件RAID方式和软件RAID方式。</p>
+<p>硬件RAID：采用集成了处理器的RAID适配卡（简称RAiD卡）来说实现的。它有自己的控制处理器、I/O处理芯片和存储器，减少对上机CPU运算时间的占用，塔高数据传输速度。</p>
+<p>软件RAID：安全依赖于主机的CPU，没有额外的处理器和I/O芯片，软件RAID需要占用CPU处理周期，并且依赖于操作系统。</p>
+<h2 id="RAID技术："><a href="#RAID技术：" class="headerlink" title="RAID技术："></a>RAID技术：</h2><p>基于RAID技术，有两个基本的概念：</p>
+<ol>
+<li>RAID采用分条带，并行的方式进行存储。更有效的数据组织。</li>
+<li>RAID采用校验、镜像的方式对数据安全提供保护。</li>
+</ol>
+<ul>
+<li><p>条带：磁盘中单个或者多个连续的扇区构成一个条带。它是组成分条的元素。</p>
+<p><strong>注：硬盘容量大小。硬盘接口类型，硬盘速率要求都要保持相同。</strong></p>
+</li>
+<li><p>分条：同一磁盘阵列中的多个磁盘驱动器上的相同“位置”（或者说是相同编号）的条带。</p>
+</li>
+</ul>
+<p><img src="/2018/04/10/RAID技术及应用/条带.png" alt="条带"></p>
+<p><center>图：条带和分条示意图<center></center></center></p>
+<ul>
+<li><p>传统的RAID数据保护主要采用的镜像和校验。</p>
+<p>XOR校验的算法—–相同为假，相异为真。</p>
+<p>0⊕0=0；0⊕1=1；1⊕0=1；1⊕1=0；</p>
+</li>
+</ul>
+<p><img src="/2018/04/10/RAID技术及应用/校验.png" alt="校验"></p>
+<h2 id="RAID组的四个状态："><a href="#RAID组的四个状态：" class="headerlink" title="RAID组的四个状态："></a>RAID组的四个状态：</h2><p><img src="/2018/04/10/RAID技术及应用/状态.png" alt="状态"></p>
+<p><center>图：RAID组的四个状态<center></center></center></p>
+<h1 id="RAID技术与应用"><a href="#RAID技术与应用" class="headerlink" title="RAID技术与应用"></a>RAID技术与应用</h1><h2 id="RAID级别："><a href="#RAID级别：" class="headerlink" title="RAID级别："></a>RAID级别：</h2><p>RAID技术将多个单独的物理硬盘以不同的方式组合成一个逻辑硬盘，提高了硬盘的读写性能和数据安全性，根据不同的组合方式可以分为不同的RAID级别。</p>
+<p>常用RAID级别有：RAID0、RAID1、RAID3、RAID5、RAID6、组和RAID：RAID10、RAID50。</p>
+<h2 id="RAID0："><a href="#RAID0：" class="headerlink" title="RAID0："></a>RAID0：</h2><p>RAID0：数据条带化，无校验。它代表了所有RAID接班中最高的存储性能，RAID 0 至少使用两个磁盘驱动器。</p>
+<p>优点：在读的过程中是多块硬盘同时进行工作。读写性能是最高的。磁盘利用率最高。</p>
+<p>缺点：没有冗余。阵列中某一个驱动器发生故障，将导致其中的数据丢失。</p>
+<h2 id="RAID-1："><a href="#RAID-1：" class="headerlink" title="RAID 1："></a>RAID 1：</h2><p>RAID 1：数据镜像，无校验。RAID 1使用两组磁盘互补镜像，速度没有提高，但允许单个磁盘故障，数据可靠性最高。</p>
+<p>优点：可以允许有一份数据可丢失。</p>
+<p>缺点：读写性能不如RAID 0。但读性能与RAID 0相似。写的性能比RAID 0 有很大差距。</p>
+<h2 id="RAID-3："><a href="#RAID-3：" class="headerlink" title="RAID 3："></a>RAID 3：</h2><p>RAID 3：数据条带化读写，校验信息存放 + 专用硬盘。当N+1个硬盘中的其中一个硬盘出现故障时，可以通过硬盘恢复数据。</p>
+<p>优点：冗余较好。</p>
+<p>缺点：在校验过程汇中，容易出现校验盘负载过大，使整个校验盘失效。在数据写入时，是写入最慢的，每次写入都要与校验盘校验，校验盘也成为这个存储的瓶颈。数据读取相对较快，采用多块硬盘同时读取。</p>
+<h2 id="RAID-5："><a href="#RAID-5：" class="headerlink" title="RAID 5："></a>RAID 5：</h2><p>RAID 5：数据条带化，校验信息分布式存放。分布式奇偶校验码的独立磁盘结构。校验信息均匀的分部在阵列所属的硬盘上，没块硬盘上既有数据信息也有校验信息。</p>
+<p><img src="/2018/04/10/RAID技术及应用/RAID5.png" alt="RAID5"></p>
+<p><center>图：RAID5结构<center></center></center></p>
+<p>优点：校验信息在每块盘上，相对出故障的概率更小。数据写入相对比较快，所有盘都参与进来做校验。数据读取相对以比较快，采用条带化存储。可靠性高。</p>
+<p>缺点：当有两块磁盘出现故障时，磁盘失效。</p>
+<h2 id="RAID-6："><a href="#RAID-6：" class="headerlink" title="RAID 6："></a>RAID 6：</h2><p>RAID 6：带有两个校验的独立磁盘结构，采用两种奇偶校验方法。需要至少N+2（N&gt;2）个磁盘构成阵列。一般用在数据可靠性，可用性要求高的应用场合。</p>
+<p>常用的RAID6技术：RAID6P＋Q、RAID6DP。</p>
+<p><strong>RAID 6P+Q：</strong></p>
+<p>RAID6P＋Q需要计算出两个校验数据P和Q，当有两个数据丢失时，根据P和Q恢复出丢失的数据。相当于两次RAID5的过程。校验数据P和Q是由以下公式计算得来的：<br>​    P=D0⊕D1⊕D2……<br>​    Q=(α⊗D0)⊕(β⊗D1)⊕(γ⊗D2)……</p>
+<p><img src="/2018/04/10/RAID技术及应用/pq.png" alt="pq"></p>
+<p><center>图：RAID6 P+Q结构<center></center></center></p>
+<p>优点：可以允许有两块盘同时出现故障，而不影响整个数据的丢失。数据磁盘的可丢失率为2.</p>
+<p>缺点：因为要做两次校验，所需写入性能相对一般。数据读取比较快。</p>
+<p><strong>RAID 6 DP：</strong></p>
+<p>DP－DoubleParity，就是在RAID4所使用的一个行XOR校验磁盘的基础上又增加了一个磁盘用于存放斜向的XOR校验信息。</p>
+<ul>
+<li><p>横向校验盘中P0—P3为各个数据盘中横向数据的校验信息</p>
+<p>例：P0=D0 XOR D1 XOR D2 XO RD3</p>
+</li>
+<li><p>斜向校验盘中DP0—DP3为各个数据盘及横向校验盘的斜向数据校验信息</p>
+<p>例：DP0=D0  XOR D5 XOR D10 XOR D15</p>
+</li>
+</ul>
+<p><img src="/2018/04/10/RAID技术及应用/dp.png" alt="dp"></p>
+<p><center>图：RAID6 DP结构<center></center></center></p>
+<p>优点：可以允许有两块盘同时出现故障，而不影响整个数据的丢失。数据磁盘的可丢失率为2.</p>
+<p>缺点：数据写入过程比较慢。读取比较快。</p>
+<h2 id="RAID-10："><a href="#RAID-10：" class="headerlink" title="RAID 10："></a>RAID 10：</h2><p>RAID10：是将镜像和条带进行组合的RAID级别，先进行RAID1镜像然后再做RAID0。RAID10也是一种应用比较广泛的RAID级别。</p>
+<p><img src="/2018/04/10/RAID技术及应用/raid10.png" alt="raid10"></p>
+<p><center>图：RAID10结构<center></center></center></p>
+<h2 id="RAID50"><a href="#RAID50" class="headerlink" title="RAID50:"></a>RAID50:</h2><p>RAID50：是将RAID5和RAID0进行两级组合的RAID级别，第一级是RAID5，第二级为RAID0。至少需要6块硬盘。</p>
+<p><img src="/2018/04/10/RAID技术及应用/RAID50.png" alt="RAID50"></p>
+<p><center>图：RAID50结构<center></center></center></p>
+<h2 id="RAID比较："><a href="#RAID比较：" class="headerlink" title="RAID比较："></a>RAID比较：</h2><p><img src="/2018/04/10/RAID技术及应用/RAID比较.png" alt="RAID比较"></p>
+<h2 id="RAID应用场景选择："><a href="#RAID应用场景选择：" class="headerlink" title="RAID应用场景选择："></a>RAID应用场景选择：</h2><p><img src="/2018/04/10/RAID技术及应用/RAID应用.png" alt="RAID应用"></p>
+<h2 id="RAID级别选择："><a href="#RAID级别选择：" class="headerlink" title="RAID级别选择："></a>RAID级别选择：</h2><p>从可靠性、性能和成本简单比较各RAID级别的优劣（相对而言），供在实际项目中选择时参考。</p>
+<p><img src="/2018/04/10/RAID技术及应用/图.png" alt="图"></p>
+<ul>
+<li><p>空间利用率:</p>
+<p>RAID5明显优于RAID10</p>
+</li>
+<li><p>可靠性:</p>
+<p>RAID5低于RAID10</p>
+</li>
+<li><p>性能:</p>
+<p>业务是一些大文件的读写操作时，RAID5的性能会明显好于RAID10</p>
+<p>业务以随机的小数据块读写为主的时候，RAID10是最优的选择</p>
+</li>
+</ul>
+<h3 id="随机读写性能比较："><a href="#随机读写性能比较：" class="headerlink" title="随机读写性能比较："></a>随机读写性能比较：</h3><p>RAID5和RAID10下分条深度变化随机写性能规律：<br><img src="/2018/04/10/RAID技术及应用/59.png" alt="59"></p>
+<ul>
+<li>RAID5规律：随着分条深度的增加，随机写IOPS先会不断的增加，到达一定程度之后，随机写IOPS会不断的递减;</li>
+<li>RAID10规律：随着分条深度的增加，随机写IOPS不断的增长，当分条深度增大到一定程度后，随机写IOPS保持一个较为稳定的状态;</li>
+</ul>
+<h3 id="写惩罚："><a href="#写惩罚：" class="headerlink" title="写惩罚："></a>写惩罚：</h3><p>假设由5块硬盘组成的RAID5，每块盘同一条带数据如下：</p>
+<p><img src="/2018/04/10/RAID技术及应用/写.png" alt="写"></p>
+<p>如果有一个数据要写入，假设在第1个磁盘上写入的数据为0111。那么整个RAID5需要完成写入的过程分为：</p>
+<ol>
+<li>读取原数据，然后与新数据0111做XOR操作：1010XOR 0111= 1101</li>
+<li>读取原有的校验位1111</li>
+<li>用第一步算出的数值与原校验再做一次XOR操作：1101XOR 1111= 0010</li>
+<li>然后将0111新数据写入到数据磁盘，将第三步计算出来的新的校验位写入校验盘。</li>
+</ol>
+<blockquote>
+<p>由上述几个步骤可见，对于任何一次写入，在存储端，需要分别进行两次读+两次写，所以说RAID5的Write Penalty的值是4。</p>
+</blockquote>
+<p><strong>常见RAID级别的Write Penalty值：</strong></p>
+<p><img src="/2018/04/10/RAID技术及应用/值.png" alt="值"></p>
+<p>在实际存储方案设计的过程中，计算实际可用IOPS的过程中必须纳入RAID的写惩罚计算。<br>计算的公式如下：<br>​    物理磁盘总的IOPS= 物理磁盘的IOPS×磁盘数目</p>
+<p>​    可用的IOPS= (物理磁盘总的IOPS×写百分比÷RAID写惩罚) + (物理磁盘总的IOPS×读百分比)</p>
+<p>假设组成RAID5的物理磁盘总共可以提供500 IOPS，使用该存储的应用程序读写比例是50%/50%，那么对于前端主机而言，实际可用的IOPS是：(500 ×50% ÷4)+ ( 500 * 50%) = 312.5 IOPS</p>
+<h1 id="RAID数据保护，RAID与LUN"><a href="#RAID数据保护，RAID与LUN" class="headerlink" title="RAID数据保护，RAID与LUN"></a>RAID数据保护，RAID与LUN</h1><h2 id="热备盘："><a href="#热备盘：" class="headerlink" title="热备盘："></a>热备盘：</h2><p>热备（HotSpare）：当冗余的RAID阵列中某个磁盘失效时，在不干扰当前RAID系统正常使用的情况下，用RAID系统中另外一个正常的备用磁盘顶替失效磁盘。</p>
+<ul>
+<li>全局热备盘</li>
+<li>局部热备盘。</li>
+</ul>
+<p>热备盘要求和RAID组成员盘的容量，接口类型，速率一致，最好是采用同一厂家的同型号硬盘。</p>
+<h2 id="预拷贝："><a href="#预拷贝：" class="headerlink" title="预拷贝："></a>预拷贝：</h2><p>预拷贝：系统通过监控发现RAID组中某成员盘即将故障时，将即将故障成员盘中的数据提前拷贝到热备盘中，有效降低数据丢失风险。</p>
+<h2 id="重构："><a href="#重构：" class="headerlink" title="重构："></a>重构：</h2><p>重构：RAID阵列中发生故障的磁盘上的所有用户数据和校验数据的重新生成，并将这些数据写到热备盘上的过程。</p>
+<h2 id="RAID与LUN："><a href="#RAID与LUN：" class="headerlink" title="RAID与LUN："></a>RAID与LUN：</h2><p>RAID由几个硬盘组成，从整体上看相当于由多个硬盘组成的一个大的物理卷。在物理卷的基础上可以按照指定容量创建一个或多个逻辑单元，这些逻辑单元称作LUN，可以做为映射给主机的基本块设备。</p>
+<h1 id="RAID-2-0"><a href="#RAID-2-0" class="headerlink" title="RAID 2.0"></a>RAID 2.0</h1><h2 id="RAID-2-0原理："><a href="#RAID-2-0原理：" class="headerlink" title="RAID 2.0原理："></a>RAID 2.0原理：</h2><ul>
+<li>RAID 2.0：为增强型RAID技术，有效解决了机械硬盘容量越来越大，重构一块机械硬盘所需时间越来越长，传统RAID组重构窗口越来越大而导致重构期间又故障一块硬盘而彻底丢失数据风险的问题。</li>
+<li>RAID2.0+：在RAID 2.0的基础上提供了更细粒度（可以达几十KB粒度）的资源颗粒，形成存储资源的标准分配及回收单位，类似计算虚拟化中的虚拟机，我们称之为虚拟块技术。</li>
+<li>华为RAID2.0+：是华为针对传统RAID 的缺点，设计的一种满足存储技术虚拟化架构发展趋势的全新的RAID 技术，其变传统固定管理模式为两层虚拟化管理模式，在底层块级虚拟化（Virtual for Disk）硬盘管理的基础之上，通过一系列Smart 效率提升软件，实现了上层虚拟化（Virtual for Pool）的高效资源管理。</li>
+</ul>
+<p><img src="/2018/04/10/RAID技术及应用/2.0.png" alt="2.0"></p>
+<p><center>图：RAID2.0结构<center></center></center></p>
+<ol>
+<li>将硬盘划分成若干个连续的固定大小的存储空间，称为存储块（chunk）简称CK。</li>
+<li>Ck按RAID策略组合成RAID组，称为存储块组（chunkgroup）简称CKG。</li>
+<li>在CKG中划分若干小数据块（extent），LUN就是由来自不同CKG的extent组成。</li>
+<li>用作热备空间的CK也是分散在各个盘上的。</li>
+</ol>
+<h2 id="RAID2-0-原理："><a href="#RAID2-0-原理：" class="headerlink" title="RAID2.0+原理："></a>RAID2.0+原理：</h2><p><img src="/2018/04/10/RAID技术及应用/2.0+.png" alt="2.0+"></p>
+<p><img src="/2018/04/10/RAID技术及应用/2.0.2.png" alt="2.0.2"></p>
+<p><strong>软件逻辑对象：</strong></p>
+<p><img src="/2018/04/10/RAID技术及应用/逻辑.png" alt="逻辑"></p>
+<p><center>图：软件逻辑对象<center></center></center></p>
+<ul>
+<li>Volume即卷，是存储系统内部管理对象。</li>
+<li>LUN是可以直接映射给主机读写的存储单元，是Volume对象的对外体现。</li>
+</ul>
+<h2 id="RAID2-0-优势："><a href="#RAID2-0-优势：" class="headerlink" title="RAID2.0+优势："></a>RAID2.0+优势：</h2><h3 id="自动负载均衡"><a href="#自动负载均衡" class="headerlink" title="自动负载均衡"></a>自动负载均衡</h3><p>RAID 2.0+使得各硬盘均衡分担负载，不再有热点硬盘，提升了系统的性能和硬盘可靠性。</p>
+<p><img src="/2018/04/10/RAID技术及应用/负载.png" alt="负载"></p>
+<h3 id="系统可靠性高："><a href="#系统可靠性高：" class="headerlink" title="系统可靠性高："></a>系统可靠性高：</h3><p><img src="/2018/04/10/RAID技术及应用/系统.png" alt="系统"></p>
+<h3 id="快速精简重构："><a href="#快速精简重构：" class="headerlink" title="快速精简重构："></a>快速精简重构：</h3><p><img src="/2018/04/10/RAID技术及应用/重构.png" alt="重构"></p>
+<h3 id="提升单LUN性能："><a href="#提升单LUN性能：" class="headerlink" title="提升单LUN性能："></a>提升单LUN性能：</h3><p><img src="/2018/04/10/RAID技术及应用/LUN.png" alt="LUN"></p>
+<h3 id="SmartTier"><a href="#SmartTier" class="headerlink" title="SmartTier:"></a>SmartTier:</h3><p>LUN上的数据可以根据数据的活跃度，自动调整，迁移到存储池中的不同存储层。</p>
+<p><img src="/2018/04/10/RAID技术及应用/s.png" alt="s"></p>
+<ol>
+<li>I/O监控：统计每个数据块的活跃度计数</li>
+<li>数据分布分析：对每个数据的活跃度计数进行排序</li>
+<li>数据迁移：根据排名结果和数据迁移策略实施数据迁移</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/04/10/RAID技术及应用/" title="RAID技术及应用">https://cshihong.github.io/2018/04/10/RAID技术及应用/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/华为网络大赛/" rel="tag"># 华为网络大赛</a>
+          
+            <a href="/tags/存储/" rel="tag"># 存储</a>
+          
+            <a href="/tags/RAID/" rel="tag"># RAID</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/10/存储基础知识/" rel="next" title="存储基础知识">
+                <i class="fa fa-chevron-left"></i> 存储基础知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/11/存储阵列技术及应用/" rel="prev" title="存储阵列技术及应用">
+                存储阵列技术及应用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RAID基本概念与技术原理"><span class="nav-number">1.</span> <span class="nav-text">RAID基本概念与技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID基本概念："><span class="nav-number">1.1.</span> <span class="nav-text">RAID基本概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID的实现方式："><span class="nav-number">1.2.</span> <span class="nav-text">RAID的实现方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID技术："><span class="nav-number">1.3.</span> <span class="nav-text">RAID技术：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID组的四个状态："><span class="nav-number">1.4.</span> <span class="nav-text">RAID组的四个状态：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RAID技术与应用"><span class="nav-number">2.</span> <span class="nav-text">RAID技术与应用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID级别："><span class="nav-number">2.1.</span> <span class="nav-text">RAID级别：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID0："><span class="nav-number">2.2.</span> <span class="nav-text">RAID0：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-1："><span class="nav-number">2.3.</span> <span class="nav-text">RAID 1：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-3："><span class="nav-number">2.4.</span> <span class="nav-text">RAID 3：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-5："><span class="nav-number">2.5.</span> <span class="nav-text">RAID 5：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-6："><span class="nav-number">2.6.</span> <span class="nav-text">RAID 6：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-10："><span class="nav-number">2.7.</span> <span class="nav-text">RAID 10：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID50"><span class="nav-number">2.8.</span> <span class="nav-text">RAID50:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID比较："><span class="nav-number">2.9.</span> <span class="nav-text">RAID比较：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID应用场景选择："><span class="nav-number">2.10.</span> <span class="nav-text">RAID应用场景选择：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID级别选择："><span class="nav-number">2.11.</span> <span class="nav-text">RAID级别选择：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#随机读写性能比较："><span class="nav-number">2.11.1.</span> <span class="nav-text">随机读写性能比较：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写惩罚："><span class="nav-number">2.11.2.</span> <span class="nav-text">写惩罚：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RAID数据保护，RAID与LUN"><span class="nav-number">3.</span> <span class="nav-text">RAID数据保护，RAID与LUN</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#热备盘："><span class="nav-number">3.1.</span> <span class="nav-text">热备盘：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#预拷贝："><span class="nav-number">3.2.</span> <span class="nav-text">预拷贝：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重构："><span class="nav-number">3.3.</span> <span class="nav-text">重构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID与LUN："><span class="nav-number">3.4.</span> <span class="nav-text">RAID与LUN：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RAID-2-0"><span class="nav-number">4.</span> <span class="nav-text">RAID 2.0</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID-2-0原理："><span class="nav-number">4.1.</span> <span class="nav-text">RAID 2.0原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID2-0-原理："><span class="nav-number">4.2.</span> <span class="nav-text">RAID2.0+原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RAID2-0-优势："><span class="nav-number">4.3.</span> <span class="nav-text">RAID2.0+优势：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#自动负载均衡"><span class="nav-number">4.3.1.</span> <span class="nav-text">自动负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#系统可靠性高："><span class="nav-number">4.3.2.</span> <span class="nav-text">系统可靠性高：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速精简重构："><span class="nav-number">4.3.3.</span> <span class="nav-text">快速精简重构：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#提升单LUN性能："><span class="nav-number">4.3.4.</span> <span class="nav-text">提升单LUN性能：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SmartTier"><span class="nav-number">4.3.5.</span> <span class="nav-text">SmartTier:</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/04/10/RAID技术及应用/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

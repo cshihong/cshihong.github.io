@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="rsync简介：rsync命令（ Remote Sync）是一个远程数据同步工具，可通过LAN/WAN快速同步多台主机间的文件。rsync使用所谓的“rsync算法”来使本地和远程两个主机之间的文件达到同步，这个算法只传送两个文件的不同部分，而不是每次都整份传送，因此速度相当快。 它的特性如下：  可以镜像保存整个目录树和文件系统。 可以很容易做到保持原来文件的权限、时间、软硬链接等等。 无须特殊">
+<meta name="keywords" content="Linux学习笔记,Linux命令">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux下的数据备份工具rsync">
+<meta property="og:url" content="https://cshihong.github.io/2018/07/06/Linux下的数据备份工具rsync/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="rsync简介：rsync命令（ Remote Sync）是一个远程数据同步工具，可通过LAN/WAN快速同步多台主机间的文件。rsync使用所谓的“rsync算法”来使本地和远程两个主机之间的文件达到同步，这个算法只传送两个文件的不同部分，而不是每次都整份传送，因此速度相当快。 它的特性如下：  可以镜像保存整个目录树和文件系统。 可以很容易做到保持原来文件的权限、时间、软硬链接等等。 无须特殊">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-07-06T09:10:40.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linux下的数据备份工具rsync">
+<meta name="twitter:description" content="rsync简介：rsync命令（ Remote Sync）是一个远程数据同步工具，可通过LAN/WAN快速同步多台主机间的文件。rsync使用所谓的“rsync算法”来使本地和远程两个主机之间的文件达到同步，这个算法只传送两个文件的不同部分，而不是每次都整份传送，因此速度相当快。 它的特性如下：  可以镜像保存整个目录树和文件系统。 可以很容易做到保持原来文件的权限、时间、软硬链接等等。 无须特殊">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/07/06/Linux下的数据备份工具rsync/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Linux下的数据备份工具rsync | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/07/06/Linux下的数据备份工具rsync/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Linux下的数据备份工具rsync
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-07-06 11:21:07 / 修改时间：17:10:40" itemprop="dateCreated datePublished" datetime="2018-07-06T11:21:07+08:00">2018-07-06</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 6,113</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 28</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="rsync简介："><a href="#rsync简介：" class="headerlink" title="rsync简介："></a>rsync简介：</h2><p><strong>rsync命令</strong>（ Remote Sync）是一个远程数据同步工具，可通过LAN/WAN快速同步多台主机间的文件。rsync使用所谓的“rsync算法”来使本地和远程两个主机之间的文件达到同步，这个算法只传送两个文件的不同部分，而不是每次都整份传送，因此速度相当快。</p>
+<p><strong>它的特性如下：</strong></p>
+<blockquote>
+<p>可以<a href="https://baike.baidu.com/item/%E9%95%9C%E5%83%8F" target="_blank" rel="noopener">镜像</a>保存整个目录树和文件系统。</p>
+<p>可以很容易做到保持原来文件的权限、时间、软硬链接等等。</p>
+<p>无须特殊权限即可安装。</p>
+<p><strong>快速</strong>：第一次同步时 rsync 会复制全部内容，但在下一次只传输修改过的文件。rsync 在传输数据的过程中可以实行压缩及<a href="https://baike.baidu.com/item/%E8%A7%A3%E5%8E%8B%E7%BC%A9" target="_blank" rel="noopener">解压缩</a>操作，因此可以使用更少的带宽。</p>
+<p><strong>安全</strong>：可以使用scp、ssh等方式来传输文件，当然也可以通过直接的socket连接。</p>
+<p><strong>支持匿名传输，</strong>以方便进行网站镜象。</p>
+</blockquote>
+<h2 id="rsync语法："><a href="#rsync语法：" class="headerlink" title="rsync语法："></a>rsync语法：</h2><h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">rsync [OPTION]... SRC DEST</span><br><span class="line">rsync [OPTION]... SRC [USER@]host:DEST</span><br><span class="line">rsync [OPTION]... [USER@]HOST:SRC DEST</span><br><span class="line">rsync [OPTION]... [USER@]HOST::SRC DEST</span><br><span class="line">rsync [OPTION]... SRC [USER@]HOST::DEST</span><br><span class="line">rsync [OPTION]... rsync://[USER@]HOST[:PORT]/SRC [DEST]</span><br></pre></td></tr></table></figure>
+<p>对应于以上六种命令格式，rsync有六种不同的工作模式：</p>
+<ol>
+<li>拷贝本地文件。当SRC和DES路径信息都不包含有单个冒号”:”分隔符时就启动这种工作模式。如：<code>rsync -a /data /backup</code></li>
+<li>使用一个远程shell程序(如<a href="http://man.linuxde.net/rsh" target="_blank" rel="noopener">rsh</a>、<a href="http://man.linuxde.net/ssh" target="_blank" rel="noopener">ssh</a>)来实现将本地机器的内容拷贝到远程机器。当DST路径地址包含单个冒号”:”分隔符时启动该模式。如：<code>rsync -avz *.c foo:src</code></li>
+<li>使用一个远程shell程序(如rsh、ssh)来实现将远程机器的内容拷贝到本地机器。当SRC地址路径包含单个冒号”:”分隔符时启动该模式。如：<code>rsync -avz foo:src/bar /data</code></li>
+<li>从远程rsync服务器中拷贝文件到本地机。当SRC路径信息包含”::”分隔符时启动该模式。如：<code>rsync -av root@192.168.78.192::www /databack</code></li>
+<li>从本地机器拷贝文件到远程rsync服务器中。当DST路径信息包含”::”分隔符时启动该模式。如：<code>rsync -av /databack root@192.168.78.192::www</code></li>
+<li>列远程机的文件列表。这类似于rsync传输，不过只要在命令中省略掉本地机信息即可。如：<code>rsync -v rsync://192.168.78.192/www</code></li>
+</ol>
+<h3 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">-v, --verbose 详细模式输出。</span><br><span class="line">-q, --quiet 精简输出模式。</span><br><span class="line">-c, --checksum 打开校验开关，强制对文件传输进行校验。</span><br><span class="line">-a, --archive 归档模式，表示以递归方式传输文件，并保持所有文件属性，等于-rlptgoD。</span><br><span class="line">-r, --recursive 对子目录以递归模式处理。</span><br><span class="line">-R, --relative 使用相对路径信息。</span><br><span class="line">-b, --backup 创建备份，也就是对于目的已经存在有同样的文件名时，将老的文件重新命名为~filename。可以使用--suffix选项来指定不同的备份文件前缀。</span><br><span class="line">--backup-dir 将备份文件(如~filename)存放在在目录下。</span><br><span class="line">-suffix=SUFFIX 定义备份文件前缀。</span><br><span class="line">-u, --update 仅仅进行更新，也就是跳过所有已经存在于DST，并且文件时间晚于要备份的文件，不覆盖更新的文件。</span><br><span class="line">-l, --links 保留软链接。</span><br><span class="line">-L, --copy-links 想对待常规文件一样处理软链结。</span><br><span class="line">--copy-unsafe-links 仅仅拷贝指向SRC路径目录树以外的链结。</span><br><span class="line">--safe-links 忽略指向SRC路径目录树以外的链结。</span><br><span class="line">-H, --hard-links 保留硬链结。</span><br><span class="line">-p, --perms 保持文件权限。</span><br><span class="line">-o, --owner 保持文件属主信息。</span><br><span class="line">-g, --group 保持文件属组信息。</span><br><span class="line">-D, --devices 保持设备文件信息。</span><br><span class="line">-t, --times 保持文件时间信息。</span><br><span class="line">-S, --sparse 对稀疏文件进行特殊处理以节省DST的空间。</span><br><span class="line">-n, --dry-run现实哪些文件将被传输。</span><br><span class="line">-w, --whole-file 拷贝文件，不进行增量检测。</span><br><span class="line">-x, --one-file-system 不要跨越文件系统边界。</span><br><span class="line">-B, --block-size=SIZE 检验算法使用的块尺寸，默认是700字节。</span><br><span class="line">-e, --rsh=command 指定使用rsh、ssh方式进行数据同步。</span><br><span class="line">--rsync-path=PATH 指定远程服务器上的rsync命令所在路径信息。</span><br><span class="line">-C, --cvs-exclude 使用和CVS一样的方法自动忽略文件，用来排除那些不希望传输的文件。</span><br><span class="line">--existing 仅仅更新那些已经存在于DST的文件，而不备份那些新创建的文件。</span><br><span class="line">--delete 删除那些DST中SRC没有的文件。</span><br><span class="line">--delete-excluded 同样删除接收端那些被该选项指定排除的文件。</span><br><span class="line">--delete-after 传输结束以后再删除。</span><br><span class="line">--ignore-errors 及时出现IO错误也进行删除。</span><br><span class="line">--max-delete=NUM 最多删除NUM个文件。</span><br><span class="line">--partial 保留那些因故没有完全传输的文件，以是加快随后的再次传输。</span><br><span class="line">--force 强制删除目录，即使不为空。</span><br><span class="line">--numeric-ids 不将数字的用户和组id匹配为用户名和组名。</span><br><span class="line">--timeout=time ip超时时间，单位为秒。</span><br><span class="line">-I, --ignore-times 不跳过那些有同样的时间和长度的文件。</span><br><span class="line">--size-only 当决定是否要备份文件时，仅仅察看文件大小而不考虑文件时间。</span><br><span class="line">--modify-window=NUM 决定文件是否时间相同时使用的时间戳窗口，默认为0。</span><br><span class="line">-T --temp-dir=DIR 在DIR中创建临时文件。</span><br><span class="line">--compare-dest=DIR 同样比较DIR中的文件来决定是否需要备份。</span><br><span class="line">-P 等同于 --partial。</span><br><span class="line">--progress 显示备份过程。</span><br><span class="line">-z, --compress 对备份的文件在传输时进行压缩处理。</span><br><span class="line">--exclude=PATTERN 指定排除不需要传输的文件模式。</span><br><span class="line">--include=PATTERN 指定不排除而需要传输的文件模式。</span><br><span class="line">--exclude-from=FILE 排除FILE中指定模式的文件。</span><br><span class="line">--include-from=FILE 不排除FILE指定模式匹配的文件。</span><br><span class="line">--version 打印版本信息。</span><br><span class="line">--address 绑定到特定的地址。</span><br><span class="line">--config=FILE 指定其他的配置文件，不使用默认的rsyncd.conf文件。</span><br><span class="line">--port=PORT 指定其他的rsync服务端口。</span><br><span class="line">--blocking-io 对远程shell使用阻塞IO。</span><br><span class="line">-stats 给出某些文件的传输状态。</span><br><span class="line">--progress 在传输时现实传输过程。</span><br><span class="line">--log-format=formAT 指定日志文件格式。</span><br><span class="line">--password-file=FILE 从FILE中得到密码。</span><br><span class="line">--bwlimit=KBPS 限制I/O带宽，KBytes per second。</span><br><span class="line">-h, --help 显示帮助信息。</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>常用的有-a，-V –delete –exclude。</strong></p>
+</blockquote>
+<h2 id="常用选项的实例："><a href="#常用选项的实例：" class="headerlink" title="常用选项的实例："></a>常用选项的实例：</h2><p>（1）首先建立目录以及文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# mkdir rsync</span><br><span class="line">[root@localhost ~]# cd rsync</span><br><span class="line">[root@localhost rsync]# mkdir test1</span><br><span class="line">[root@localhost rsync]# cd test1</span><br><span class="line">[root@localhost test1]# touch 1 2 3</span><br><span class="line">[root@localhost test1]# ln -s /root/123.txt ./123.txt</span><br><span class="line">[root@localhost test1]# ls -l</span><br><span class="line">总用量 0</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 1</span><br><span class="line">lrwxrwxrwx 1 root root 13 7月   6 13:57 123.txt -&gt; /root/123.txt</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 2</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 3</span><br></pre></td></tr></table></figure>
+<p>（2）使用-a选项：</p>
+<blockquote>
+<p>-a, –archive 归档模式，表示以递归方式传输文件，并保持所有文件属性</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rsync -a test1 test2</span><br><span class="line">[root@localhost rsync]# ls test2</span><br><span class="line">test1</span><br><span class="line">[root@localhost rsync]# ls test2/test1/</span><br><span class="line">1  123.txt  2  3</span><br></pre></td></tr></table></figure>
+<p>这里有一个问题，就是本来想把test1目录直接拷贝成test2目录，可结果rsync却新建了test2目录然后把test1放到test2当中。为了避免这样的情况发生，可以这样做:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rm -rf test2</span><br><span class="line">[root@localhost rsync]# rsync -a test1/ test2/</span><br><span class="line">[root@localhost rsync]# ls -l test2/</span><br><span class="line">总用量 0</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 1</span><br><span class="line">lrwxrwxrwx 1 root root 13 7月   6 13:57 123.txt -&gt; /root/123.txt</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 2</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 3</span><br></pre></td></tr></table></figure>
+<p>加一个斜杠就好了，所以建议在使用rsync备份目录时要养成加斜杠的习惯。在上面讲了-a选项等同于-rlptgoD，而且 -a 还可以和 <code>--no-OPTIN</code><br>一并使用。下面看看-l选项的作用:</p>
+<blockquote>
+<p>-l, –links 保留软链接。</p>
+<p>-v, –verbose 详细模式输出。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rsync -av --no-l test1/ test2/</span><br><span class="line">sending incremental file list</span><br><span class="line">created directory test2</span><br><span class="line">./</span><br><span class="line">1</span><br><span class="line">skipping non-regular file "123.txt"</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line"></span><br><span class="line">sent 200 bytes  received 72 bytes  544.00 bytes/sec</span><br><span class="line">total size is 13  speedup is 0.05</span><br></pre></td></tr></table></figure>
+<p>使用-v选项看来就是方便呀，上例告诉我们跳过了非普通文件123.txt，其实123.txt是一个软连接文件，如果不使用-l选项则不理会软连接文件的。虽然加上-l选项会把软连接文件给拷贝过去，但是软连接的目标文件却没有拷贝过去，有时候咱们指向拷贝软连接文件所指向的目标文件，那这时候该怎么办呢？</p>
+<p>（3）使用-L选项：</p>
+<blockquote>
+<p>-L, –copy-links 想对待常规文件一样处理软链结。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rsync -avL test1/ test2/</span><br><span class="line">sending incremental file list</span><br><span class="line">created directory test2</span><br><span class="line">./</span><br><span class="line">1</span><br><span class="line">123.txt</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line"></span><br><span class="line">sent 231 bytes  received 91 bytes  644.00 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br><span class="line">[root@localhost rsync]# ls -l test2/</span><br><span class="line">总用量 0</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 1</span><br><span class="line">lrwxrwxrwx 1 root root 13 7月   6 13:57 123.txt</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 2</span><br><span class="line">-rw-r--r-- 1 root root  0 7月   6 13:37 3</span><br></pre></td></tr></table></figure>
+<p>加上 -L 选项就可以把SRC中软连接的目标文件给拷贝到DST.</p>
+<p>（4）使用-u选项：</p>
+<blockquote>
+<p>-u, –update 仅仅进行更新，也就是跳过所有已经存在于DST，并且文件时间晚于要备份的文件，不覆盖更新的文件。</p>
+</blockquote>
+<p>首先查看一下test1/1 和test2/1的创建时间（肯定是一样的），然后使用touch修改一下test2/1的创建时间（此时test2/1要比test1/1的创建时间晚了一些），如果不加-u选项的话，会把test2/1的创建时间变成和test1/1的创建时间一样。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# ll test1/1 test2/1</span><br><span class="line">-rw-r--r-- 1 root root 0  6月 10 12:58 test1/1</span><br><span class="line">-rw-r--r-- 1 root root 0  6月 10 12:58 test2/1</span><br></pre></td></tr></table></figure>
+<p>两者之间的创建时间是一样的，下面修改test2/1 的创建时间，然后不加-u同步:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# touch test2/1</span><br><span class="line">[root@localhost rsync]# ll test2/1</span><br><span class="line">-rw-r--r-- 1 root root 0  6月 10 13:20 test2/1</span><br><span class="line">[root@localhost rsync]# rsync -a test1/1 test2/</span><br><span class="line">[root@localhost rsync]# ll test2/1</span><br><span class="line">-rw-r--r-- 1 root root 0  6月 10 12:58 test2/1</span><br></pre></td></tr></table></figure>
+<p>test2/1 的创建时间又变成和test1/1的创建时间一样了。下面加上 -u 再看看结果是怎么样的:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# touch test2/1</span><br><span class="line">[root@localhost rsync]# ll test2/1</span><br><span class="line">-rw-r--r-- 1 root root 0  6月 10 13:31 test2/1</span><br><span class="line">[root@localhost rsync]# rsync -avu test1/ test2/</span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">123.txt -&gt; /root/123.txt</span><br><span class="line"></span><br><span class="line">sent 100 bytes  received 18 bytes  236.00 bytes/sec</span><br><span class="line">total size is 13  speedup is 0.11</span><br><span class="line">[root@localhost rsync]# ll test2/1</span><br><span class="line">-rw-r--r-- 1 root root 0  6月 10 13:31 test2/1</span><br><span class="line">[root@localhost rsync]# ll test1/1</span><br><span class="line">-rw-r--r-- 1 root root 0  6月 10 12:58 test1/1</span><br></pre></td></tr></table></figure>
+<p>加上-u 选项后，不会再把 test1/1 同步为 test2/1 了。</p>
+<p>（5）使用–delete选项：</p>
+<blockquote>
+<p>–delete 删除那些DST中SRC没有的文件。</p>
+</blockquote>
+<p>首先删除test1/123.txt:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rm -f test1/123.txt</span><br><span class="line">[root@localhost rsync]# ls test1/</span><br><span class="line">1  2  3</span><br></pre></td></tr></table></figure>
+<p>然后把test1/ 目录 同步到 test2/ 目录下:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rsync -av test1/ test2/</span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">1</span><br><span class="line"></span><br><span class="line">sent 94 bytes  received 34 bytes  256.00 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br><span class="line">[root@localhost rsync]# ls test2/</span><br><span class="line">1  123.txt  2  3</span><br></pre></td></tr></table></figure>
+<p>test2/目录并没有删除掉123.txt, 下面加上 <code>--delete</code> 选项:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rsync -av --delete test1/ test2/</span><br><span class="line">sending incremental file list</span><br><span class="line">deleting 123.txt</span><br><span class="line"></span><br><span class="line">sent 52 bytes  received 12 bytes  128.00 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br><span class="line">[root@localhost rsync]# ls test2/</span><br><span class="line">1  2  3</span><br></pre></td></tr></table></figure>
+<p>test2/ 目录里的123.txt也被删除了，这就是 <code>--delete</code> 选项的用处。还有一种情况就是如果在DST增加文件了，而SRC当中没有这些文件，同步时加上 <code>--delete</code> 选项后同样会删除新增的文件:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# touch test2/4</span><br><span class="line">[root@localhost rsync]# ls test1/</span><br><span class="line">1  2  3</span><br><span class="line">[root@localhost rsync]# ls test2/</span><br><span class="line">1  2  3  4</span><br><span class="line">[root@localhost rsync]# rsync -a --delete test1/ test2/</span><br><span class="line">[root@localhost rsync]# ls test1/</span><br><span class="line">1  2  3</span><br><span class="line">[root@localhost rsync]# ls test2/</span><br><span class="line">1  2  3</span><br></pre></td></tr></table></figure>
+<p>（6）使用–exclude选项：</p>
+<blockquote>
+<p>–exclude=PATTERN 指定排除不需要传输的文件模式。</p>
+<p>–progress 在传输时现实传输过程。</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# touch test1/4</span><br><span class="line">[root@localhost rsync]# rsync -a --exclude="4" test1/ test2/</span><br><span class="line">[root@localhost rsync]# ls test1/</span><br><span class="line">1  2  3  4</span><br><span class="line">[root@localhost rsync]# ls test2/</span><br><span class="line">1  2  3</span><br></pre></td></tr></table></figure>
+<p>另外还可以使用匹配字符 <code>*</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# touch test1/1.txt test1/2.txt</span><br><span class="line">[root@localhost rsync]# ls test1/</span><br><span class="line">1  1.txt  2  2.txt  3  4</span><br><span class="line">[root@localhost rsync]# rsync -a --progress --exclude="*.txt" test1/ test2/</span><br><span class="line">sending incremental file list</span><br><span class="line">./</span><br><span class="line">4</span><br><span class="line">           0 100%    0.00kB/s    0:00:00 (xfer#1, to-check=0/5)</span><br><span class="line"></span><br><span class="line">sent 104 bytes  received 34 bytes  276.00 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br><span class="line">[root@localhost rsync]# ls test2/</span><br><span class="line">1  2  3  4</span><br></pre></td></tr></table></figure>
+<p>上例中，也连带着使用了 <code>--progress</code> 选项，这个主要是用来观察rsync同步过程的状态的。最后简单总结一下，平时使用rsync同步数据的时候，使用-a选项基本上就可以达到我们想要的效果了，只是有时候会有个别的需求，会用到 <code>-a --no-OPTION</code>, -u, -L, <code>--delete</code>, <code>--exclude</code> 以及 <code>progress</code> 这些选项。</p>
+<h2 id="rsync应用实例："><a href="#rsync应用实例：" class="headerlink" title="rsync应用实例："></a>rsync应用实例：</h2><h3 id="（1）通过ssh的方式："><a href="#（1）通过ssh的方式：" class="headerlink" title="（1）通过ssh的方式："></a><strong>（1）通过ssh的方式：</strong></h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rsync -avL test1/ 192.168.171.128:/tmp/test2/</span><br><span class="line">sending incremental file list</span><br><span class="line">created directory /tmp/test2</span><br><span class="line">./</span><br><span class="line">1</span><br><span class="line">123.txt</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line"></span><br><span class="line">sent 278 bytes  received 128 bytes  812.00 bytes/sec</span><br><span class="line">total size is 10  speedup is 0.02</span><br></pre></td></tr></table></figure>
+<p>这种方式就是前面介绍的第二种方式了，是通过ssh拷贝的数据，需要输入192.168.171.128 那台机器root账户的密码。当然也可以使用第三种方式拷贝:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost rsync]# rsync -avL www@192.168.171.128:/tmp/test2/ /tmp/test3/</span><br><span class="line">receiving incremental file list</span><br><span class="line">created directory /tmp/test3</span><br><span class="line">./</span><br><span class="line">1</span><br><span class="line">123.txt</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line"></span><br><span class="line">sent 103 bytes  received 282 bytes  770.00 bytes/sec</span><br><span class="line">total size is 10  speedup is 0.03</span><br></pre></td></tr></table></figure>
+<p>以上两种方式如果写到脚本里，备份起来就有麻烦了，因为要输入密码，脚本本来就是自动的，不可能做到的。但是不代表没有解决办法。那就是通过密钥验证，密钥不设立密码就ok了。</p>
+<p>上面操作都没有输入密码，因为我已经做好了免认证。免认证登录操作如下：</p>
+<p>在操作之前我们先讲明主机信息： 192.168.171.129 （主机名[root@localhost ~]）和 192.168.171.128 （主机名root@ubuntu:）。我在两台主机之间做了ssh登录免认证。将对方的公钥文件都保存在自己的主机上。</p>
+<p>首先确认一下两台主机上是否有这个文件 /root/.ssh/id_rsa.pub:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh-keygen</span><br><span class="line">Generating public/private rsa key pair.</span><br></pre></td></tr></table></figure>
+<p>因为之前生成过密钥对，所以这个文件已经存在了，如果您的Linux不存在这个文件，请按照如下方法生成:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# ssh-keygen</span><br><span class="line">Generating public/private rsa key pair.</span><br><span class="line">Enter file in which to save the key (/root/.ssh/id_rsa):</span><br><span class="line">Enter passphrase (empty for no passphrase):</span><br><span class="line">Enter same passphrase again:</span><br><span class="line">Your identification has been saved in /root/.ssh/id_rsa.</span><br><span class="line">Your public key has been saved in /root/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is:</span><br><span class="line">3b:74:af:e8:08:ac:99:30:3f:ef:84:7a:a0:a6:3d:89 root@localhost</span><br></pre></td></tr></table></figure>
+<p>在这个过程中会有一些交互的过程，它首先提示要输入这个密钥的密码，出于安全考虑应该定义个密码，但是我们的目的就是为了自动化同步数据，所以这里不输入任何密码，直接按回车，即密码为空。最后则生成了私钥(/root/.ssh/id_rsa)和公钥文件(/root/.ssh/id_rsa.pub)</p>
+<p>把公钥文件的内容拷贝到目标机器上:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# cat .ssh/id_rsa.pub</span><br><span class="line">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDDxysdnnem+g5qA/3St3cubGjyT8D+u0SkpNT8z9F9mgSf8THCaZBh3I8urgJ4XfmIajj+Cz0LFd3UrB0HUt7BO1xUP36W4PbOeGei25W2qhRJIEn/RdwtUHkApWd6I43JdlPJNmy+9JgvXb6eOxUn8UgsBn13D0mOtBuE5uWQOcKDYi4DvqD5xVGhBNVvOvSS1Puvu9xygbf5H2l4fwih57hr7YTki/5DcMvdH0YkGbmOjLBHkqQZg6ZjzGuCGtIEh4yGghKoV1oPaYoCcXNKmQo48FjomUyyTrRxkRH4pAq6ckml22lxCe0av7Qu9yK2phUW+3Bo0AT8fSoJQ5EJ root@localhost</span><br></pre></td></tr></table></figure>
+<p>复制主机localhost的/root/.ssh/id_rsa.pub文件内容，并粘贴到主机Ubuntu的 ~/.ssh/authorized_keys中:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@ubuntu ~]# vim .ssh/authorized_keys</span><br></pre></td></tr></table></figure>
+<p>在这一步也许您会遇到.ssh目录不存在的问题，可以手动创建，并修改目录权限为700也可以执行ssh-keygen命令生成这个目录。保存.ssh/authorized_keys文件后，就可以在localhost主机上不用输入密码就能ssh登录Ubuntu主机。然后可以用相同的方法把Ubuntu的公钥复制到localhost主机上。</p>
+<p>然后可进行如下rsync操作：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rsync -av rsync/test1/ 192.168.171.128:/tmp/test4/</span><br><span class="line">sending incremental file list</span><br><span class="line">created directory /tmp/test2</span><br><span class="line">./</span><br><span class="line">1</span><br><span class="line">123.txt</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line"></span><br><span class="line">sent 278 bytes  received 128 bytes  812.00 bytes/sec</span><br><span class="line">total size is 10  speedup is 0.02</span><br></pre></td></tr></table></figure>
+<h3 id="（2）-通过后台服务的方式"><a href="#（2）-通过后台服务的方式" class="headerlink" title="（2） 通过后台服务的方式"></a><strong>（2） 通过后台服务的方式</strong></h3><p>这种方式可以理解成这样，在远程主机上建立一个rsync的服务器，在服务器上配置好rsync的各种应用，然后本机作为rsync的一个客户端去连接远程的rsync服务器。配置rsync服务器的步骤：</p>
+<p>在实验中我将192.168.171.128，主机名Ubuntu作为rsync服务器。192.168.171.129作为客户端。</p>
+<ol>
+<li>建立并配置rsync的配置文件 /etc/rsyncd.conf </li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:/# cat /etc/rsyncd.conf </span><br><span class="line">port=873</span><br><span class="line">log file=/var/log/rsync.log</span><br><span class="line">pid file=/var/run/rsyncd.pid</span><br><span class="line">address=192.168.171.128</span><br><span class="line"></span><br><span class="line">[root]</span><br><span class="line">path=/root/rsync</span><br><span class="line">use chroot=true</span><br><span class="line">max connections=4</span><br><span class="line">read only=no</span><br><span class="line">list=true</span><br><span class="line">uid=root</span><br><span class="line">gid=root</span><br><span class="line">auth users=root</span><br><span class="line">secrets file=/etc/rsyncd.passwd</span><br><span class="line">hosts allow=192.168.171.129</span><br></pre></td></tr></table></figure>
+<p>其中配置文件分为两部分：全部配置部分和模块配置部分，全局部分就是几个参数而已，就像rsyncd.conf中port, log file, pid file, address这些都属于全局配置，而[root]以下部分就是模块配置部分了。一个配置文件中可以有多个模块，模块名自定义。其实模块中的一些参数例如use chroot, max connections, udi, gid, auth users, secrets file以及hosts allow都可以配置成全局的参数。下面就简单解释一下这些参数的意义：</p>
+<blockquote>
+<p>port 指定在哪个端口启动rsyncd服务，默认是873</p>
+<p>log file 指定日志文件</p>
+<p>pid file 指定pid文件，这个文件的作用涉及到服务的启动以及停止等进程管理操作</p>
+<p>address 指定启动rsyncd服务的IP，假如你的机器有多个IP，就可以指定其中一个启动rsyncd服务，默认是在全部IP上启动</p>
+<p>[test] 指定模块名，自定义</p>
+<p>path 指定数据存放的路径</p>
+<p>use chroot true|false 默认是true，意思是在传输文件以前首先chroot到path参数所指定的目录下。这样做的原因是实现额外的安全防护，但是缺点是需要以roots权限，并且不能备份指向外部的符号连接所指向的目录文件。默认情况下chroot值为true，如果你的数据当中有软连接文件的话建议设置成false。</p>
+<p>max connections 指定最大的连接数，默认是0即没有限制</p>
+<p>read only ture|false 如果为true则不能上传到该模块指定的路径下</p>
+<p>list 指定当用户查询该服务器上的可用模块时，该模块是否被列出，设定为true则列出，false则隐藏</p>
+<p>uid/gid 指定传输文件时，以哪个用户/组的身份传输</p>
+<p>auth users 指定传输时要使用的用户名</p>
+<p>secrets file 指定密码文件，该参数连同上面的参数如果不指定则不使用密码验证，注意该密码文件的权限一定要是600</p>
+<p>hosts allow 指定被允许连接该模块的主机，可以是IP或者网段，如果是多个，之间用空格隔开</p>
+</blockquote>
+<ol start="2">
+<li>编辑secrets file，保存后要赋予600权限，如果权限不对，不能完成同步 </li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:/# cat /etc/rsyncd.passwd </span><br><span class="line">root:test123</span><br><span class="line">root@ubuntu:/# chmod 600 /etc/rsyncd.passwd</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>启动rsyncd服务 </li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:~# rsync --daemon --config=/etc/rsyncd.conf</span><br></pre></td></tr></table></figure>
+<p>启动后，可以查看一下日志，并查看端口是否启动:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:~# cat /var/log/rsync.log </span><br><span class="line">2018/07/06 16:44:15 [4178] rsyncd version 3.1.1 starting, listening on port 873</span><br><span class="line">root@ubuntu:~# netstat -lnp | grep 873</span><br><span class="line">tcp        0      0 192.168.171.128:873     0.0.0.0:*               LISTEN      4178/rsync</span><br></pre></td></tr></table></figure>
+<p>如果想开机启动，请把 <code>rsync --daemon --confg=/etc/rsyncd.conf</code> 写入到/etc/rc.d/rc.local文件。</p>
+<ol start="4">
+<li>到另一台机器上测试 </li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rsync -avL root@192.168.171.128::root/test/ /tmp/</span><br><span class="line">Password: </span><br><span class="line">receiving incremental file list</span><br><span class="line">./</span><br><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line"></span><br><span class="line">sent 84 bytes  received 200 bytes  63.11 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br></pre></td></tr></table></figure>
+<p>刚刚提到有一个选项叫做 “use chroot” 默认为true，如果是true，同步的文件中如果有软连接，则会有问题，首先在主机Ubuntu的/root/rsync/test/ 目录下创建一个软连接文件:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:~/rsync/test# ln -s /root/test.txt test.txt</span><br><span class="line">root@ubuntu:~/rsync/test# ls</span><br><span class="line">1  2  3  test.txt</span><br><span class="line">root@ubuntu:~/rsync/test# ll test.txt </span><br><span class="line">lrwxrwxrwx 1 root root 14 7月   6 17:01 test.txt -&gt; /root/test.txt</span><br></pre></td></tr></table></figure>
+<p>然后再到主机localhost上，同步:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rsync -avL root@192.168.171.128::root/test/ /tmp/</span><br><span class="line">Password: </span><br><span class="line">receiving incremental file list</span><br><span class="line">symlink has no referent: "/test/test.txt" (in root)</span><br><span class="line">./</span><br><span class="line"></span><br><span class="line">sent 27 bytes  received 146 bytes  49.43 bytes/sec</span><br><span class="line">total size is 0  speedup is 0.00</span><br><span class="line">rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1650) [generator=3.1.2]</span><br></pre></td></tr></table></figure>
+<p>可以看到，如果设置 “use chroot” 为true则同步软连接文件会有问题，下面把主机Ubuntu的rsync配置文件修改一下，把true改为false:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:~# cat /etc/rsyncd.conf </span><br><span class="line">port=873</span><br><span class="line">log file=/var/log/rsync.log</span><br><span class="line">pid file=/var/run/rsyncd.pid</span><br><span class="line">address=192.168.171.128</span><br><span class="line"></span><br><span class="line">[root]</span><br><span class="line">path=/root/rsync</span><br><span class="line">use chroot=false</span><br><span class="line">max connections=4</span><br><span class="line">read only=no</span><br><span class="line">list=true</span><br><span class="line">uid=root</span><br><span class="line">gid=root</span><br><span class="line">auth users=root</span><br><span class="line">secrets file=/etc/rsyncd.passwd</span><br><span class="line">hosts allow=192.168.171.0/24</span><br></pre></td></tr></table></figure>
+<p>然后再到主机localhost上再次执行同步:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rsync -avL root@192.168.171.128::root/test/ /tmp/</span><br><span class="line">Password: </span><br><span class="line">receiving incremental file list</span><br><span class="line">test.txt</span><br><span class="line"></span><br><span class="line">sent 43 bytes  received 1,755 bytes  513.71 bytes/sec</span><br><span class="line">total size is 1,600  speedup is 0.89</span><br></pre></td></tr></table></figure>
+<p>因为rsync有一个特定机制，配置文件时即时生效的，所以修改完配置文件后不用重启服务。</p>
+<p>上面的例子中，都需要输入密码，这样同样也不能写入脚本中自动执行，其实这种方式也是可以不用手动输入密码的，它有两种实现方式。</p>
+<p><strong>第一种，指定密码文件</strong></p>
+<p>在客户端上，也就是主机localhost上，编辑一个密码文件:加入root的密码</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# vim /etc/pass</span><br><span class="line">[root@localhost ~]# cat /etc/pass</span><br><span class="line">test123</span><br></pre></td></tr></table></figure>
+<p>修改密码文件的权限:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# chmod 600 /etc/pass</span><br></pre></td></tr></table></figure>
+<p>在同步的时候，指定一下密码文件，就可以省去输入密码的步骤了:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rsync -avL root@192.168.171.128::root/test/ /tmp/ --password-file=/etc/pass</span><br><span class="line">receiving incremental file list</span><br><span class="line">./</span><br><span class="line"></span><br><span class="line">sent 27 bytes  received 115 bytes  94.67 bytes/sec</span><br><span class="line">total size is 1,600  speedup is 11.27</span><br></pre></td></tr></table></figure>
+<p><strong>第二种：在rsync服务器端不指定用户</strong></p>
+<p>在服务端也就是主机Ubuntu上修改配置文件rsyncd.conf, 去掉关于认证账户的配置项(auth user 和 secrets file这两行):</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">root@ubuntu:~# sed -i 's/auth users/#auth users/;s/secrets file/#secrets file/' /etc/rsyncd.conf</span><br><span class="line">root@ubuntu:~# cat /etc/rsyncd.conf </span><br><span class="line">port=873</span><br><span class="line">log file=/var/log/rsync.log</span><br><span class="line">pid file=/var/run/rsyncd.pid</span><br><span class="line">address=192.168.171.128</span><br><span class="line"></span><br><span class="line">[root]</span><br><span class="line">path=/root/rsync</span><br><span class="line">use chroot=false</span><br><span class="line">max connections=4</span><br><span class="line">read only=no</span><br><span class="line">list=true</span><br><span class="line">uid=root</span><br><span class="line">gid=root</span><br><span class="line"><span class="meta">#</span><span class="bash">auth users=root</span></span><br><span class="line"><span class="meta">#</span><span class="bash">secrets file=/etc/rsyncd.passwd</span></span><br><span class="line">hosts allow=192.168.171.0/24</span><br><span class="line">root@ubuntu:~#</span><br></pre></td></tr></table></figure>
+<p>上面的这个命令是把 “auth users” 和 “secrets file” 两行的最前面加一个 “#”, 这样就把这两行注释掉，使其失去意义。然后我们再到客户端主机localhost上测试:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# rsync -avL root@192.168.171.128::root/test/ /tmp/</span><br><span class="line">receiving incremental file list</span><br><span class="line"></span><br><span class="line">sent 20 bytes  received 108 bytes  256.00 bytes/sec</span><br><span class="line">total size is 1,600  speedup is 12.50</span><br></pre></td></tr></table></figure>
+<p>注意，这里不用再加root这个用户了，默认是以root的身份拷贝的，现在已经不需要输入密码了。</p>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/07/06/Linux下的数据备份工具rsync/" title="Linux下的数据备份工具rsync">https://cshihong.github.io/2018/07/06/Linux下的数据备份工具rsync/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux学习笔记/" rel="tag"># Linux学习笔记</a>
+          
+            <a href="/tags/Linux命令/" rel="tag"># Linux命令</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/03/Linux系统日常管理/" rel="next" title="Linux系统日常管理">
+                <i class="fa fa-chevron-left"></i> Linux系统日常管理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/07/08/MySQL学习笔记（1）基础操作/" rel="prev" title="MySQL学习笔记（1）基础操作">
+                MySQL学习笔记（1）基础操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#rsync简介："><span class="nav-number">1.</span> <span class="nav-text">rsync简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rsync语法："><span class="nav-number">2.</span> <span class="nav-text">rsync语法：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#语法"><span class="nav-number">2.1.</span> <span class="nav-text">语法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选项"><span class="nav-number">2.2.</span> <span class="nav-text">选项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常用选项的实例："><span class="nav-number">3.</span> <span class="nav-text">常用选项的实例：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#rsync应用实例："><span class="nav-number">4.</span> <span class="nav-text">rsync应用实例：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#（1）通过ssh的方式："><span class="nav-number">4.1.</span> <span class="nav-text">（1）通过ssh的方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（2）-通过后台服务的方式"><span class="nav-number">4.2.</span> <span class="nav-text">（2） 通过后台服务的方式</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/07/06/Linux下的数据备份工具rsync/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

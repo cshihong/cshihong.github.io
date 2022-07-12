@@ -1,0 +1,2326 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="流计算概述什么是流数据：数据有静态数据和流数据。 静态数据： 很多企业为了支持决策分析而构建的数据仓库系统，其中存放的大量历史数据就是静态数据。技术人员可以利用数据挖掘和OLAP（On-Line Analytical Processing）分析工具从静态数据中找到对企业有价值的信息。  图：静态数据的一般处理流程 流数据： 近年来，在Web应用、网络监控、传感监测等领域，兴起了一种新的数据密集型应">
+<meta name="keywords" content="Hadoop,Storm,流计算">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Storm（流计算）技术原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="流计算概述什么是流数据：数据有静态数据和流数据。 静态数据： 很多企业为了支持决策分析而构建的数据仓库系统，其中存放的大量历史数据就是静态数据。技术人员可以利用数据挖掘和OLAP（On-Line Analytical Processing）分析工具从静态数据中找到对企业有价值的信息。  图：静态数据的一般处理流程 流数据： 近年来，在Web应用、网络监控、传感监测等领域，兴起了一种新的数据密集型应">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/静态.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/模型.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/流计算示意图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/位置.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/流计算处理流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/数据采集.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/实时计算.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/系统价格.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/Topology示意图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/Worker.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/Task.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/分钟.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/对比.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/工作流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/HA.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/容灾.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/可靠.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/ACK.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/其他组件.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/Spark.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/处理.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/Dsteam.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/数据流图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/类别.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/过程.png">
+<meta property="og:updated_time" content="2019-11-15T14:39:06.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Storm（流计算）技术原理">
+<meta name="twitter:description" content="流计算概述什么是流数据：数据有静态数据和流数据。 静态数据： 很多企业为了支持决策分析而构建的数据仓库系统，其中存放的大量历史数据就是静态数据。技术人员可以利用数据挖掘和OLAP（On-Line Analytical Processing）分析工具从静态数据中找到对企业有价值的信息。  图：静态数据的一般处理流程 流数据： 近年来，在Web应用、网络监控、传感监测等领域，兴起了一种新的数据密集型应">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/静态.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Storm（流计算）技术原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Storm（流计算）技术原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-24 14:45:21" itemprop="dateCreated datePublished" datetime="2018-05-24T14:45:21+08:00">2018-05-24</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-15 22:39:06" itemprop="dateModified" datetime="2019-11-15T22:39:06+08:00">2019-11-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,934</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 21</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="流计算概述"><a href="#流计算概述" class="headerlink" title="流计算概述"></a>流计算概述</h1><h2 id="什么是流数据："><a href="#什么是流数据：" class="headerlink" title="什么是流数据："></a>什么是流数据：</h2><p>数据有静态数据和流数据。</p>
+<p><strong>静态数据：</strong></p>
+<p>很多企业为了支持决策分析而构建的数据仓库系统，其中存放的大量历史数据就是<strong>静态数据</strong>。技术人员可以利用数据挖掘和OLAP（On-Line Analytical Processing）分析工具从静态数据中找到对企业有价值的信息。</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/静态.png" alt="静态"></p>
+<p><center>图：静态数据的一般处理流程<center></center></center></p>
+<p><strong>流数据：</strong></p>
+<p>近年来，在Web应用、网络监控、传感监测等领域，兴起了一种新的数据密集型应用——流数据，即数据以大量、快速、时变的流形式持续到达。</p>
+<ul>
+<li>实例：PM2.5检测、电子商务网站用户点击流</li>
+</ul>
+<p><strong>流数据具有如下特征：</strong></p>
+<ul>
+<li>数据快速持续到达，潜在大小也许是无穷无尽的。</li>
+<li>数据来源众多，格式复杂。</li>
+<li>数据量大，但是不十分关注存储，一旦经过处理，要么被丢弃，要么被归档存储。</li>
+<li>注重数据的整体价值，不过分关注个别数据。</li>
+<li>数据顺序颠倒，或者不完整，系统无法控制将要处理的新到达的数据元素的顺序。</li>
+</ul>
+<h2 id="批量计算和实时计算："><a href="#批量计算和实时计算：" class="headerlink" title="批量计算和实时计算："></a>批量计算和实时计算：</h2><p>对静态数据和流数据的处理，对应着两种截然不同的计算模式：批量计算和实时计算。</p>
+<ul>
+<li>批量计算：充裕时间处理静态数据，如Hadoop。</li>
+<li>流计算：流数据不适合采用批量计算，因为流数据不适合用传统的关系模型建模。流数据必须采用<strong>实时计算</strong>，<strong>响应时间为秒级</strong>。在大数据时代，数据格式复杂、来源众多、数据量巨大，对实时计算提出了很大的挑战。因此，针对流数据的实时计算——流计算，应运而生。</li>
+</ul>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/模型.png" alt="模型"></p>
+<p><center>图：数据的两种处理模型<center></center></center></p>
+<h2 id="流计算的概念："><a href="#流计算的概念：" class="headerlink" title="流计算的概念："></a>流计算的概念：</h2><p>流计算：实时获取来自不同数据源的海量数据，经过实时分析处理，获得有价值的信息。</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/流计算示意图.png" alt="流计算示意图"></p>
+<p><center>图：流计算示意图<center></center></center></p>
+<p>流计算秉承一个基本理念，即<strong>数据的价值随着时间的流逝而降低</strong>，如用户点击流。因此，当事件出现时就应该立即进行处理，而不是缓存起来进行批量处理。为了及时处理流数据，就需要一个低延迟、可扩展、高可靠的处理引擎.</p>
+<p>对于一个流计算系统来说，它应达到如下需求：</p>
+<ul>
+<li>高性能</li>
+<li>海量式</li>
+<li>实时性</li>
+<li>分布式</li>
+<li>易用性</li>
+<li>可靠性</li>
+</ul>
+<h2 id="Streaming定义："><a href="#Streaming定义：" class="headerlink" title="Streaming定义："></a>Streaming定义：</h2><p>Streaming是基于开源Storm，是一个分布式、实时计算框架。</p>
+<p>特点：</p>
+<ul>
+<li>实时响应，低延时。</li>
+<li>数据不存储，先计算</li>
+<li>连续查询</li>
+<li>事件驱动</li>
+</ul>
+<p>传统数据库计算：数据先存储，在查询处理。</p>
+<h2 id="流计算与Hadoop"><a href="#流计算与Hadoop" class="headerlink" title="流计算与Hadoop:"></a>流计算与Hadoop:</h2><p>Hadoop设计的初衷是面向大规模数据的批量处理。</p>
+<p>MapReduce是专门面向静态数据的批量处理的，内部各种实现机制都为批处理做了高度优化，不适合用于处理持续到达的动态数据。</p>
+<p>可能会想到一种“变通”的方案来降低批处理的时间延迟——将基于MapReduce的批量处理转为小批量处理，将输入数据切成小的片段，每隔一个周期就启动一次MapReduce作业。但这种方式也无法有效处理流数据。</p>
+<ul>
+<li>切分成小片段，可以降低延迟，但是也增加了附加开销，还要处理片段之间依赖关系。</li>
+<li>需要改造MapReduce以支持流式处理。</li>
+</ul>
+<blockquote>
+<p>结论：鱼和熊掌不可兼得，Hadoop擅长批处理，不适合流计算。</p>
+</blockquote>
+<h2 id="Streaming在FusionInsight中的位置："><a href="#Streaming在FusionInsight中的位置：" class="headerlink" title="Streaming在FusionInsight中的位置："></a>Streaming在FusionInsight中的位置：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/位置.png" alt="位置"></p>
+<p><center>图：Streaming在FusionInsight中的位置<center></center></center></p>
+<p>Streaming是一个实时分布式的实时计算框架，在实时业务汇总有广泛的应用。</p>
+<h2 id="流计算框架："><a href="#流计算框架：" class="headerlink" title="流计算框架："></a>流计算框架：</h2><p>当前业界诞生了许多专门的流数据实时计算系统来满足各自需求。</p>
+<p>商业级：IBM InfoSphere Streams和IBM StreamBase。</p>
+<p>开源流计算框架</p>
+<ul>
+<li><strong>Twitter Storm</strong>：免费、开源的分布式实时计算系统，可简单、高效、可靠地处理大量的流数据。</li>
+<li><strong>Yahoo! S4</strong>（Simple Scalable Streaming System）：开源流计算平台，是通用的、分布式的、可扩展的、分区容错的、可插拔的流式系统。</li>
+</ul>
+<p>公司为支持自身业务开发的流计算框架：</p>
+<ul>
+<li>Facebook Puma</li>
+<li>Dstream（百度）</li>
+<li>银河流数据处理平台（淘宝）</li>
+</ul>
+<h2 id="流计算的应用："><a href="#流计算的应用：" class="headerlink" title="流计算的应用："></a>流计算的应用：</h2><p>流计算是针对流数据的实时计算，可以应用在多种场景中。如百度、淘宝等大型网站中，每天都会产生大量流数据，包括用户的搜索内容、用户的浏览记录等数据。采用流计算进行实时数据分析，可以了解每个时刻的流量变化情况，甚至可以分析用户的实时浏览轨迹，从而进行实时个性化内容推荐。但是，并不是每个应用场景都需要用到流计算的。流计算适合于需要处理持续到达的流数据、对数据处理有较高实时性要求的场景。</p>
+<p>主要应用于以下几种场景：</p>
+<ol>
+<li><strong>实时分析</strong>：如实时日志处理、交通流量分析等。</li>
+<li><strong>实时统计</strong>：如网站的实时访问统计、排序等。</li>
+<li><strong>实时推荐</strong>：如实时的广告定位、时间营销等。</li>
+</ol>
+<h1 id="流计算处理流程"><a href="#流计算处理流程" class="headerlink" title="流计算处理流程"></a>流计算处理流程</h1><h2 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h2><p>传统的数据处理流程，需要先采集数据并存储在关系数据库等数据管理系统中，之后由用户通过查询操作和数据管理系统进行交互。</p>
+<p>传统的数据处理流程隐含了两个前提：</p>
+<ul>
+<li><strong>存储的数据是旧的</strong>。存储的静态数据是过去某一时刻的快照，这些数据在查询时可能已不具备时效性了。</li>
+<li>需要用户<strong>主动</strong>发出查询来获取结果。</li>
+</ul>
+<p>流计算的处理流程一般包含三个阶段：<strong>数据实时采集、数据实时计算、实时查询服务</strong>。</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/流计算处理流程.png" alt="流计算处理流程"></p>
+<p><ceneter>图：流计算处理流程示意图<center></center></ceneter></p>
+<h2 id="数据实时采集："><a href="#数据实时采集：" class="headerlink" title="数据实时采集："></a>数据实时采集：</h2><p>数据实时采集阶段通常采集多个数据源的海量数据，需要保证实时性、低延迟与稳定可靠。</p>
+<p>以日志数据为例，由于分布式集群的广泛应用，数据分散存储在不同的机器上，因此需要实时汇总来自不同机器上的日志数据。</p>
+<p>目前有许多互联网公司发布的开源分布式日志采集系统均可满足每秒数百MB的数据采集和传输需求，如：</p>
+<ul>
+<li>Facebook的Scribe</li>
+<li>LinkedIn的Kafka</li>
+<li>淘宝的Time Tunnel</li>
+<li>基于Hadoop的Chukwa和Flume</li>
+</ul>
+<p>数据采集系统的基本架构一般有以下三个部分：</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/数据采集.png" alt="数据采集"></p>
+<p><center>图：数据采集系统基本框架<center></center></center></p>
+<ol>
+<li>Agent：主动采集数据，并把数据推送到Collector部分。</li>
+<li>Collector：接收多个Agent的数据，并实现有序、可靠、高性能的转发。</li>
+<li>Store：存储Collector转发过来的数据（对于流计算不存储数据）。</li>
+</ol>
+<h2 id="数据实时计算："><a href="#数据实时计算：" class="headerlink" title="数据实时计算："></a>数据实时计算：</h2><p>数据实时计算阶段对采集的数据进行实时的分析和计算，并反馈实时结果。</p>
+<p>经流处理系统处理后的数据，可视情况进行存储，以便之后再进行分析计算。在时效性要求较高的场景中，处理之后的数据也可以直接丢弃。</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/实时计算.png" alt="实时计算"></p>
+<p><center>图：数据实时计算流程<center></center></center></p>
+<h2 id="实时查询服务："><a href="#实时查询服务：" class="headerlink" title="实时查询服务："></a>实时查询服务：</h2><p>实时查询服务：经由流计算框架得出的结果可供用户进行实时查询、展示或储存。</p>
+<p>传统的数据处理流程，用户需要主动发出查询才能获得想要的结果。而在流处理流程中，实时查询服务可以不断更新结果，并将用户所需的结果实时推送给用户。</p>
+<p>虽然通过对传统的数据处理系统进行定时查询，也可以实现不断地更新结果和结果推送，但通过这样的方式获取的结果，仍然是根据过去某一时刻的数据得到的结果，与实时结果有着本质的区别。</p>
+<p>可见，<strong>流处理系统与传统的数据处理系统有如下不同</strong>：</p>
+<ol>
+<li>流处理系统处理的是实时的数据，而传统的数据处理系统处理的是预先存储好的静态数据。</li>
+<li>用户通过流处理系统获取的是实时结果，而通过传统的数据处理系统，获取的是过去某一时刻的结果。</li>
+<li>流处理系统无需用户主动发出查询，实时查询服务可以主动将实时结果推送给用户。</li>
+</ol>
+<h1 id="开源流计算框架Storm"><a href="#开源流计算框架Storm" class="headerlink" title="开源流计算框架Storm"></a>开源流计算框架Storm</h1><h2 id="Storm简介："><a href="#Storm简介：" class="headerlink" title="Storm简介："></a>Storm简介：</h2><p>Twitter Storm是一个免费、开源的分布式实时计算系统，Storm对于实时计算的意义类似于Hadoop对于批处理的意义，Storm可以简单、高效、可靠地处理流数据，并支持多种编程语言。</p>
+<p>Storm框架可以方便地与数据库系统进行整合，从而开发出强大的实时计算系统。</p>
+<p>Twitter是全球访问量最大的社交网站之一，Twitter开发Storm流处理框架也是为了应对其不断增长的流数据实时处理需求。</p>
+<h2 id="Storm的特点："><a href="#Storm的特点：" class="headerlink" title="Storm的特点："></a>Storm的特点：</h2><p>Storm可用于许多领域中，如实时分析、在线机器学习、持续计算、远程RPC、数据提取加载转换等。</p>
+<p>Storm具有以下主要特点：</p>
+<ul>
+<li>整合性</li>
+<li>简易的API</li>
+<li>可扩展性</li>
+<li>可靠的消息处理</li>
+<li>支持各种编程语言</li>
+<li>快速部署</li>
+<li>免费、开源</li>
+</ul>
+<h2 id="系统架构："><a href="#系统架构：" class="headerlink" title="系统架构："></a>系统架构：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/系统价格.png" alt="系统价格"></p>
+<p><center>图：流计算系统架构图<center></center></center></p>
+<h3 id="基本概念："><a href="#基本概念：" class="headerlink" title="基本概念："></a>基本概念：</h3><p>Storm主要术语包括Streams、Spouts、Bolts、Topology和Stream Groupings.</p>
+<ul>
+<li><p>Topology：Streaming中运行的一个实时应用程序。</p>
+</li>
+<li><p>Nimbus：负责资源分配和任务调度。</p>
+</li>
+<li><p>Supervisor：负责接收Nimbus分配的任务，启动和停止属于自己管理的worker进程。</p>
+</li>
+<li><p>Worker：Topology运行时的物理进程。每个Worker是一个JVM进程。</p>
+</li>
+<li><p>Spout：Storm认为每个Stream都有一个源头，并把这个源头抽象为Spout。</p>
+<p><strong>在一个Topology中产生源数据流的组件。</strong></p>
+<p>通常Spout会从外部数据源（队列、数据库等）读取数据，然后封装成Tuple形式，发送到Stream中。Spout是一个主动的角色，在接口内部有个nextTuple函数，Storm框架会不停的调用该函数。</p>
+</li>
+<li><p>Bolt：在一个Topology中接收数据后然后执行处理的组件。</p>
+</li>
+<li><p>Task：Worker中每一个Spout/Bolt的线程称为一个Task。</p>
+</li>
+<li><p>Tuple：Streaming的核心数据结构，是消息传递的基本单元，不可变Key-Value对，这些Tuple会以一种分布式的方式进程创建和处理。</p>
+</li>
+<li><p>Stream：Storm将流数据Stream描述成一个无限的Tuple序列，这些Tuple序列会以分布式的方式并行地创建和处理。即<strong>无界的Tuple序列</strong>。</p>
+</li>
+<li><p>Zookeeper：为Streaming服务中各自进程提供分布式的协作服务、主备Nimbus、Supervisor、Worker将自己的信息注册到Zookeeper中，Nimbus据此感知各个角色的监控状态。</p>
+</li>
+</ul>
+<h3 id="Topology介绍："><a href="#Topology介绍：" class="headerlink" title="Topology介绍："></a>Topology介绍：</h3><p><img src="/2018/05/24/Storm（流计算）技术原理/Topology示意图.png" alt="Topology示意图"></p>
+<p><center>图：Topology示意图<center></center></center></p>
+<p>Storm将Spouts和Bolts组成的网络抽象成Topology，它可以被提<br>交到Storm集群执行。Topology可视为流转换图，图中节点是一个Spout或Bolt，边则表示Bolt订阅了哪个Stream。当Spout或者Bolt发送元组时，它会把元组发送到每个订阅了该Stream的Bolt上进行处理。</p>
+<p>Topology里面的每个处理组件（Spout或Bolt）都包含处理逻辑， 而组件之间的连接则表示数据流动的方向。</p>
+<p>Topology里面的每一个组件都是并行运行的：</p>
+<ul>
+<li>在Topology里面可以指定每个组件的并行度，Storm会在集群里面分配那么多的线程来同时计算。</li>
+</ul>
+<ul>
+<li>在Topology的具体实现上，Storm中的Topology定义仅仅是一些Thrift结构体（二进制高性能的通信中间件），支持各种编程语言进行定义。</li>
+</ul>
+<p><strong>一个Topology是由一组Spout组件(数据源)和Bolt组件（逻辑处理）通过Stream Groupings进行连接的有向无环图（DAG）。</strong></p>
+<p>业务处理逻辑被封装进Streaming中的Topology中。</p>
+<h3 id="Worker介绍："><a href="#Worker介绍：" class="headerlink" title="Worker介绍："></a>Worker介绍：</h3><p><img src="/2018/05/24/Storm（流计算）技术原理/Worker.png" alt="Worker"></p>
+<p><center>图：Worker Process示意图<center></center></center></p>
+<p>Worker：一个Worker是一个JVM进程，所有的Topology都是在一个或者多个Worker中运行的。Worker启动后是长期运行的，除非人工停止。Worker进程的个数取决于Topology的设置，且无设置上限，具体可获得并调度启动的Worker个数则取决于Supervisor配置的slot个数。</p>
+<p>Executor：在一个单独的Worker进程中会运行一个或多个Executor线程。每个Executor只能运Spout或者Bolt中的一个或多个Task实例。</p>
+<p>Task：是最终完成数据处理的实体单元。</p>
+<h3 id="Task介绍："><a href="#Task介绍：" class="headerlink" title="Task介绍："></a>Task介绍：</h3><p><img src="/2018/05/24/Storm（流计算）技术原理/Task.png" alt="Task"></p>
+<p><center>图：Task示意图<center></center></center></p>
+<p>Topology里面的每一个Component(组件)（Spout/Blot）节点都是并行运行的。在Topology里面，可以指定每个节点的并发度，Streaming则会在集群里分配响应的Task来同时计算，以增强系统的处理能力。</p>
+<h3 id="消息分发策略（Stream-Groupings）："><a href="#消息分发策略（Stream-Groupings）：" class="headerlink" title="消息分发策略（Stream Groupings）："></a>消息分发策略（Stream Groupings）：</h3><p>Groupings：Storm中的Stream Groupings用于告知Topology如何在两个组件间（如Spout和Bolt之间，或者不同的Bolt之间）进行Tuple的传送。每一个Spout和Bolt都可以有多个分布式任务，一个任务在什么时候、以什么方式发送Tuple就是由Stream Groupings来决定的。</p>
+<p>目前，Storm中的Stream Groupings有如下几种方式：</p>
+<ol>
+<li>ShuffleGrouping：随机分组，随机分发Stream中的Tuple，保证每个Bolt的Task接收Tuple数量大致一致。</li>
+<li>FieldsGrouping：按照字段分组，保证相同字段的Tuple分配到同一个Task中。</li>
+<li>AllGrouping：广播发送，每一个Task都会收到所有的Tuple。</li>
+<li>GlobalGrouping：全局分组，所有的Tuple都发送到同一个Task中。</li>
+<li>NonGrouping：不分组，和ShuffleGrouping类似，当前Task的执行会和它的被订阅者在同一个线程中执行。</li>
+<li>DirectGrouping：直接分组，直接指定由某个Task来执行Tuple的处理。</li>
+</ol>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/分钟.png" alt="分钟"></p>
+<h2 id="Storm框架设计："><a href="#Storm框架设计：" class="headerlink" title="Storm框架设计："></a>Storm框架设计：</h2><p>Storm集群采用“Master—Worker”的节点方式：</p>
+<ul>
+<li>Master节点运行名为“Nimbus”的后台程序（类似Hadoop中的“JobTracker”），负责在集群范围内分发代码、为Worker分配任务和监测故障。</li>
+</ul>
+<ul>
+<li>Worker节点运行名为“Supervisor”的后台程序，负责监听分配给它所在机器的工作，即根据Nimbus分配的任务来决定启动或停止Worker进程，一个Worker节点上同时运行若干个Worker进程。</li>
+<li>Storm使用Zookeeper来作为分布式协调组件，负责Nimbus和多个Supervisor之间的所有协调工作。借助于Zookeeper，若Nimbus进程或Supervisor进程意外终止，重启时也能读取、恢复之前的状态并继续工作，使得Storm极其稳定。</li>
+</ul>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/架构.png" alt="架构"></p>
+<p><center>图：Storm集群架构示意图<center></center></center></p>
+<blockquote>
+<p>Nimbus并不直接和Supervisor交换，而是通过Zookeeper进行消息的传递。</p>
+</blockquote>
+<h2 id="Storm和Hadoop架构组件功能对应关系："><a href="#Storm和Hadoop架构组件功能对应关系：" class="headerlink" title="Storm和Hadoop架构组件功能对应关系："></a>Storm和Hadoop架构组件功能对应关系：</h2><p>Storm运行任务的方式与Hadoop类似：Hadoop运行的是MapReduce作业，而Storm运行的是“Topology”。</p>
+<p>但两者的任务大不相同，主要的不同是：MapReduce作业最终会完成计算并结束运行，而Topology将持续处理消息（直到人为终止）。</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/对比.png" alt="对比"></p>
+<p><center>图：Storm和Hadoop架构组件功能对应关系<center></center></center></p>
+<h2 id="Storm工作流程："><a href="#Storm工作流程：" class="headerlink" title="Storm工作流程："></a>Storm工作流程：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/工作流程.png" alt="工作流程"></p>
+<p><center>图：Storm工作流程示意图<center></center></center></p>
+<p>Storm工作流程为：</p>
+<ol>
+<li>提交Topology</li>
+<li>将任务存储在Zookeeper中</li>
+<li>获取分配的任务，并启动Worker</li>
+<li>Worker进程执行具体的任务</li>
+</ol>
+<p>所有Topology任务的提交必须在Storm客户端节点上进行，提交后，由Nimbus节点分配给其他Supervisor节点进行处理。</p>
+<p>Nimbus节点首先将提交的Topology进行分片，分成一个个Task，分配给相应的Supervisor，并将Task和Supervisor相关<br>的信息提交到Zookeeper集群上。</p>
+<p>Supervisor会去Zookeeper集群上认领自己的Task，通知自己的Worker进程进行Task的处理。</p>
+<h2 id="Streaming提供的接口："><a href="#Streaming提供的接口：" class="headerlink" title="Streaming提供的接口："></a>Streaming提供的接口：</h2><p>REST接口：（Representational State Transfer）表述性状态转移接口。</p>
+<p>Thrift接口：由Nimbus提供。Thrift是一个基于静态代码生成的跨语言的RPC协议栈实现，它可以生成包括C++,Java,Python, Ruby ， PHP等主流语言的代码实现，这些代码实现了RPC的协议层和传输层功能，从而让用户可以集中精力与服务的调用和实现。</p>
+<h1 id="Streaming的关键特性介绍"><a href="#Streaming的关键特性介绍" class="headerlink" title="Streaming的关键特性介绍"></a>Streaming的关键特性介绍</h1><h2 id="Nimbus-HA："><a href="#Nimbus-HA：" class="headerlink" title="Nimbus HA："></a>Nimbus HA：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/HA.png" alt="HA"></p>
+<p><center>图：Nimbus HA架构<center></center></center></p>
+<ul>
+<li><p><strong>使用Zookeeper分布式锁：</strong></p>
+<p>Nimbus HA的实现是使用Zookeeper分布式锁，通过主备间争抢模式完成的Leader选举和主备切换。</p>
+</li>
+<li><p><strong>主备间元数据同步：</strong></p>
+<p>主备Nimbus之间会周期性的同步元数据，保证在发生主备切换后拓扑数据不丢失，业务不受损。</p>
+</li>
+</ul>
+<h2 id="容灾能力："><a href="#容灾能力：" class="headerlink" title="容灾能力："></a>容灾能力：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/容灾.png" alt="容灾"></p>
+<p><center>图：容灾示意图<center></center></center></p>
+<p><strong>容灾能力：节点失效，自动迁移到正常节点，业务不中断。</strong></p>
+<blockquote>
+<p>整个过程无需人工干预！</p>
+</blockquote>
+<h2 id="消息可靠性："><a href="#消息可靠性：" class="headerlink" title="消息可靠性："></a>消息可靠性：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/可靠.png" alt="可靠"></p>
+<p>在Streaming里面一个Tuple被完全处理的意思是：这个Tuple所派生的所有tuple都被成功处理。如果这个消息在Timeout所指定的时间内没有成功处理，这个tuple就被认为处理失败了。</p>
+<p>可靠性级别设置：</p>
+<p>​    如果并不要求每个消息必须被处理（允许在处理过程中丢失一些信息），那么可以关闭消息的可靠性处理机制，从而可以获得较好的性能。关闭消息的可靠性机制一位着系统中的消息数会减半。</p>
+<p>有三种方法可以关闭消息的可靠性处理机制：</p>
+<ol>
+<li>将参数Config.TOPOLGY_ACKERS设置为0.</li>
+<li>Spout发送一个消息时，使用不指定消息message ID的接口进行发送。</li>
+<li>Blot发送消息时使用Unanchor方式发送，使Tuple树不往下延伸，从而关闭派生消息的可靠性。</li>
+</ol>
+<h2 id="ACK机制："><a href="#ACK机制：" class="headerlink" title="ACK机制："></a>ACK机制：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/ACK.png" alt="ACK"></p>
+<p><center>图：Ack机制<center></center></center></p>
+<ul>
+<li>一个Spout发送一个Tuple时，会通知Acker一个新的根消息产生了，Acker会创建一个新的Tuple tree，并初始化校验和为0.</li>
+<li>Bolt发送消息时间向Acker发送anchor tuple，刷新tuple tree，并在发送成功后向Acker反馈结果。如果成功则重新刷新校验和，如果失败则Acker会立即通知Spout处理失败。</li>
+<li>当Tuple tree被完成吹了（校验和为0），Acker会通知Spout处理成功。</li>
+<li>Spout提供ack（）和Fail（）接口方法用户处理Acker的反馈结果，需要用户实现。一般在fail（）方法中实现消息重发逻辑。</li>
+</ul>
+<h2 id="Streaming与其他组件："><a href="#Streaming与其他组件：" class="headerlink" title="Streaming与其他组件："></a>Streaming与其他组件：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/其他组件.png" alt="其他组件"></p>
+<p>整合HDFS/HBase等外部组件，将实时结构提供给其他组件，进程离线分析。</p>
+<h1 id="Spark-Streaming"><a href="#Spark-Streaming" class="headerlink" title="Spark Streaming"></a>Spark Streaming</h1><h2 id="Spark-Streaming设计："><a href="#Spark-Streaming设计：" class="headerlink" title="Spark Streaming设计："></a>Spark Streaming设计：</h2><p>Spark Streaming可整合多种输入数据源，如Kafka、Flume、<br>HDFS，甚至是普通的TCP套接字。经处理后的数据可存储至文件<br>系统、数据库，或显示在仪表盘里。</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/Spark.png" alt="Spark"></p>
+<p><center>图：SPark Streaming支持的输入、输出数据源<center></center></center></p>
+<p><strong>Spark Streaming的基本原理是将实时输入数据流以时间片（秒级）为单位进行拆分，然后经Spark引擎以类似批处理的方式处理每个时间片数据。</strong></p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/处理.png" alt="处理"></p>
+<p><center>图：Spark Streaming执行流程<center></center></center></p>
+<p><strong>Spark Streaming最主要的抽象是DStream（Discretized Stream，离散化数据流），表示连续不断的数据流。</strong>在内部实现上，Spark Streaming的输入数据按照时间片（如1秒）分成一段一段的DStream，每一段数据转换为Spark中的RDD，并且对DStream的操作都最终转变为对相应的RDD的操作。</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/Dsteam.png" alt="Dsteam"></p>
+<p><center>图：DStream操作示意图<center></center></center></p>
+<h2 id="Spark-Streaming-与-Storm的对比："><a href="#Spark-Streaming-与-Storm的对比：" class="headerlink" title="Spark Streaming 与 Storm的对比："></a>Spark Streaming 与 Storm的对比：</h2><ul>
+<li>Spark Streaming和Storm最大的区别在于，Spark Streaming无法实现毫秒级的流计算，而Storm可以实现毫秒级响应。</li>
+<li>Spark Streaming构建在Spark上，一方面是因为Spark的低延迟执行引擎（100ms+）可以用于实时计算，另一方面，相比于Storm，RDD数据集更容易做高效的容错处理。</li>
+<li>Spark Streaming采用的小批量处理的方式使得它可以同时兼容批量和实时数据处理的逻辑和算法，因此，方便了一些需要历史数据和实时数据联合分析的特定应用场合。</li>
+</ul>
+<h1 id="Samza技术原理"><a href="#Samza技术原理" class="headerlink" title="Samza技术原理"></a>Samza技术原理</h1><h2 id="基本概念：-1"><a href="#基本概念：-1" class="headerlink" title="基本概念："></a>基本概念：</h2><p>（1）作业：一个作业（Job）是对一组输入流进行处理转化成输出流的程序。</p>
+<p>（2）分区：</p>
+<ul>
+<li>Samza的流数据单位既不是Storm中的元组，也不是Spark Streaming中的DStream，而是一条条消息。</li>
+<li>Samza中的每个流都被分割成一个或多个分区，对于流里的每一个分区而言，都是一个有序的消息序列，后续到达的消息会根据一定规则被追加到其中一个分区里。</li>
+</ul>
+<p>（3）任务：</p>
+<ul>
+<li>一个作业会被进一步分割成多个任务（Task）来执行，其中，每个任务负责处理作业中的一个分区。</li>
+<li>分区之间没有定义顺序，从而允许每一个任务独立执行。</li>
+<li>YARN调度器负责把任务分发给各个机器，最终，一个工作中的多个任务会被分发到多个机器进行分布式并行处理。</li>
+</ul>
+<p>（4）数据流图：</p>
+<ul>
+<li>一个数据流图是由多个作业构成的，其中，图中的每个节点表示包含数据的流，每条边表示数据传输。</li>
+<li>多个作业串联起来就完成了流式的数据处理流程。</li>
+<li>由于采用了异步的消息订阅分发机制，不同任务之间可以独立运行。</li>
+</ul>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/数据流图.png" alt="数据流图"></p>
+<p><center>图：数据流图<center></center></center></p>
+<h2 id="Samza的系统架构："><a href="#Samza的系统架构：" class="headerlink" title="Samza的系统架构："></a>Samza的系统架构：</h2><p>Samza系统架构主要包括：</p>
+<ol>
+<li>流数据层（Kafka）</li>
+<li>执行层（YARN）</li>
+<li>处理层（Samza API）</li>
+</ol>
+<p>流处理层和执行层都被设计成可插拔的，开发人员可以使用其他框架来替代YARN和Kafka。</p>
+<p><img src="/2018/05/24/Storm（流计算）技术原理/类别.png" alt="类别"></p>
+<p><center>图：MapReduce批处理架构和Samza流处理架构对比<center></center></center></p>
+<h2 id="处理分析过程："><a href="#处理分析过程：" class="headerlink" title="处理分析过程："></a>处理分析过程：</h2><p><img src="/2018/05/24/Storm（流计算）技术原理/过程.png" alt="过程"></p>
+<p><center>图：处理分析过程图<center></center></center></p>
+<p>处理分析过程如下：</p>
+<ol>
+<li>Samza客户端需要执行一个Samza作业时，它会向YARN的ResouceManager提交作业请求。</li>
+<li>ResouceManager通过与NodeManager沟通为该作业分配容器（包含了CPU、内存等资源）来运行Samza ApplicationMaster。</li>
+<li>Samza ApplicationMaster进一步向ResourceManager申请运行任务的容器。</li>
+<li>获得容器后，Samza ApplicationMaster与容器所在的NodeManager沟通，启动该容器，并在其中运行Samza Task Runner。</li>
+<li>Samza Task Runner负责执行具体的Samza任务，完成流数据处理分析。</li>
+</ol>
+<h1 id="Storm、Spark-Streaming和Samza的应用场景"><a href="#Storm、Spark-Streaming和Samza的应用场景" class="headerlink" title="Storm、Spark Streaming和Samza的应用场景"></a>Storm、Spark Streaming和Samza的应用场景</h1><p>从<strong>编程的灵活性来讲，Storm是比较理想的选择</strong>，它使用Apache Thrift，可以用任何编程语言来编写拓扑结构（Topology）。</p>
+<p>当需要在一个集群中把流计算和图计算、机器学习、SQL查询分析等进行结合时，可以选择<strong>Spark Streaming</strong>，因为，在Spark上可以统一部署Spark SQL，Spark Streaming、MLlib，GraphX等组件，<strong>提供便捷的一体化编程模型</strong>。</p>
+<p>当有<strong>大量的状态需要处理时，</strong>比如每个分区都有数十亿个元组，则可以<strong>选择Samza</strong>。当应用场景需要毫秒级响应时，可以选择Storm和Samza，因为Spark Streaming无法实现毫秒级的流计算。</p>
+<hr>
+<blockquote>
+<p>以上内容为听华为大数据培训课程和大学MOOC上厦门大学 林子雨的《大数据技术原理与应用》课程而整理的笔记。</p>
+<p><strong><a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">大数据技术原理与应用</a></strong>： <a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">https://www.icourse163.org/course/XMU-1002335004</a> </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/" title="Storm（流计算）技术原理">https://cshihong.github.io/2018/05/24/Storm（流计算）技术原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+            <a href="/tags/Storm/" rel="tag"># Storm</a>
+          
+            <a href="/tags/流计算/" rel="tag"># 流计算</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/22/Impala技术原理/" rel="next" title="Impala技术原理">
+                <i class="fa fa-chevron-left"></i> Impala技术原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/25/Spark技术原理/" rel="prev" title="Spark技术原理">
+                Spark技术原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#流计算概述"><span class="nav-number">1.</span> <span class="nav-text">流计算概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是流数据："><span class="nav-number">1.1.</span> <span class="nav-text">什么是流数据：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#批量计算和实时计算："><span class="nav-number">1.2.</span> <span class="nav-text">批量计算和实时计算：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流计算的概念："><span class="nav-number">1.3.</span> <span class="nav-text">流计算的概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Streaming定义："><span class="nav-number">1.4.</span> <span class="nav-text">Streaming定义：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流计算与Hadoop"><span class="nav-number">1.5.</span> <span class="nav-text">流计算与Hadoop:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Streaming在FusionInsight中的位置："><span class="nav-number">1.6.</span> <span class="nav-text">Streaming在FusionInsight中的位置：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流计算框架："><span class="nav-number">1.7.</span> <span class="nav-text">流计算框架：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流计算的应用："><span class="nav-number">1.8.</span> <span class="nav-text">流计算的应用：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流计算处理流程"><span class="nav-number">2.</span> <span class="nav-text">流计算处理流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述："><span class="nav-number">2.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据实时采集："><span class="nav-number">2.2.</span> <span class="nav-text">数据实时采集：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据实时计算："><span class="nav-number">2.3.</span> <span class="nav-text">数据实时计算：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实时查询服务："><span class="nav-number">2.4.</span> <span class="nav-text">实时查询服务：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#开源流计算框架Storm"><span class="nav-number">3.</span> <span class="nav-text">开源流计算框架Storm</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm简介："><span class="nav-number">3.1.</span> <span class="nav-text">Storm简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm的特点："><span class="nav-number">3.2.</span> <span class="nav-text">Storm的特点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统架构："><span class="nav-number">3.3.</span> <span class="nav-text">系统架构：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念："><span class="nav-number">3.3.1.</span> <span class="nav-text">基本概念：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Topology介绍："><span class="nav-number">3.3.2.</span> <span class="nav-text">Topology介绍：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Worker介绍："><span class="nav-number">3.3.3.</span> <span class="nav-text">Worker介绍：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Task介绍："><span class="nav-number">3.3.4.</span> <span class="nav-text">Task介绍：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#消息分发策略（Stream-Groupings）："><span class="nav-number">3.3.5.</span> <span class="nav-text">消息分发策略（Stream Groupings）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm框架设计："><span class="nav-number">3.4.</span> <span class="nav-text">Storm框架设计：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm和Hadoop架构组件功能对应关系："><span class="nav-number">3.5.</span> <span class="nav-text">Storm和Hadoop架构组件功能对应关系：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storm工作流程："><span class="nav-number">3.6.</span> <span class="nav-text">Storm工作流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Streaming提供的接口："><span class="nav-number">3.7.</span> <span class="nav-text">Streaming提供的接口：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Streaming的关键特性介绍"><span class="nav-number">4.</span> <span class="nav-text">Streaming的关键特性介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Nimbus-HA："><span class="nav-number">4.1.</span> <span class="nav-text">Nimbus HA：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容灾能力："><span class="nav-number">4.2.</span> <span class="nav-text">容灾能力：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息可靠性："><span class="nav-number">4.3.</span> <span class="nav-text">消息可靠性：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ACK机制："><span class="nav-number">4.4.</span> <span class="nav-text">ACK机制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Streaming与其他组件："><span class="nav-number">4.5.</span> <span class="nav-text">Streaming与其他组件：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark-Streaming"><span class="nav-number">5.</span> <span class="nav-text">Spark Streaming</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark-Streaming设计："><span class="nav-number">5.1.</span> <span class="nav-text">Spark Streaming设计：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark-Streaming-与-Storm的对比："><span class="nav-number">5.2.</span> <span class="nav-text">Spark Streaming 与 Storm的对比：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Samza技术原理"><span class="nav-number">6.</span> <span class="nav-text">Samza技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本概念：-1"><span class="nav-number">6.1.</span> <span class="nav-text">基本概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Samza的系统架构："><span class="nav-number">6.2.</span> <span class="nav-text">Samza的系统架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理分析过程："><span class="nav-number">6.3.</span> <span class="nav-text">处理分析过程：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Storm、Spark-Streaming和Samza的应用场景"><span class="nav-number">7.</span> <span class="nav-text">Storm、Spark Streaming和Samza的应用场景</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/05/24/Storm（流计算）技术原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

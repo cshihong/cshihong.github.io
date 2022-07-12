@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="流量监管和流量整形概述流量监管和流量整形通过监督进入网络的流量速率，用来限制流量及其资源的使用，保证更好的为用户提供服务。 如果报文的发送速率大于接收速率，或者下游设备的接口速率小于上游设备的接口速率，就会引起网络拥塞。如果不限制用户发送的业务流量，大量用户不断突发的业务数据会使网络更加拥挤。为了使有限的网络资源能够更好地发挥效用，更好地为更多的用户服务，必须对用户的业务流量加以限制。 流量监管和">
+<meta name="keywords" content="路由基础,QoS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="流量监管和流量整形">
+<meta property="og:url" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="流量监管和流量整形概述流量监管和流量整形通过监督进入网络的流量速率，用来限制流量及其资源的使用，保证更好的为用户提供服务。 如果报文的发送速率大于接收速率，或者下游设备的接口速率小于上游设备的接口速率，就会引起网络拥塞。如果不限制用户发送的业务流量，大量用户不断突发的业务数据会使网络更加拥挤。为了使有限的网络资源能够更好地发挥效用，更好地为更多的用户服务，必须对用户的业务流量加以限制。 流量监管和">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/单色双桶.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/双宿双桶示意图.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/流量监管原理.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/单速单通.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/配置拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/流策略应用记录.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/流策略状态.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/队列模板.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/接口队列应用状况.png">
+<meta property="og:updated_time" content="2019-08-25T01:52:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="流量监管和流量整形">
+<meta name="twitter:description" content="流量监管和流量整形概述流量监管和流量整形通过监督进入网络的流量速率，用来限制流量及其资源的使用，保证更好的为用户提供服务。 如果报文的发送速率大于接收速率，或者下游设备的接口速率小于上游设备的接口速率，就会引起网络拥塞。如果不限制用户发送的业务流量，大量用户不断突发的业务数据会使网络更加拥挤。为了使有限的网络资源能够更好地发挥效用，更好地为更多的用户服务，必须对用户的业务流量加以限制。 流量监管和">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/02/07/流量监管和流量整形/单色双桶.gif">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/02/07/流量监管和流量整形/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>流量监管和流量整形 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/02/07/流量监管和流量整形/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">流量监管和流量整形
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-02-07 20:59:17" itemprop="dateCreated datePublished" datetime="2018-02-07T20:59:17+08:00">2018-02-07</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:52:10" itemprop="dateModified" datetime="2019-08-25T09:52:10+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,310</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 20</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="流量监管和流量整形概述"><a href="#流量监管和流量整形概述" class="headerlink" title="流量监管和流量整形概述"></a>流量监管和流量整形概述</h1><p>流量监管和流量整形通过监督进入网络的流量速率，用来限制流量及其资源的使用，保证更好的为用户提供服务。</p>
+<p>如果报文的发送速率大于接收速率，或者下游设备的接口速率小于上游设备的接口速率，就会引起网络拥塞。如果不限制用户发送的业务流量，大量用户不断突发的业务数据会使网络更加拥挤。为了使有限的网络资源能够更好地发挥效用，更好地为更多的用户服务，必须对用户的业务流量加以限制。</p>
+<p>流量监管和流量整形就是一种通过对流量规格的监督，来限制流量及其资源使用的流控策略。</p>
+<h2 id="流量监管："><a href="#流量监管：" class="headerlink" title="流量监管："></a>流量监管：</h2><p>流量监管TP（Traffic Policing）就是对流量进行控制，通过监督进入网络的流量速率，对超出部分的流量进行“惩罚”，使进入的流量被限制在一个合理的范围之内，从而保护网络资源和用户的利益。</p>
+<h2 id="流量整形："><a href="#流量整形：" class="headerlink" title="流量整形："></a>流量整形：</h2><p>流量整形TS（Traffic Shaping）是一种主动调整流量输出速率的措施。当下游设备的入接口速率小于上游设备的出接口速率或发生突发流量时，下游设备入接口处可能出现流量拥塞的情况，此时用户可以通过在上游设备的接口出方向配置流量整形，将上游不规整的流量进行削峰填谷，输出一条比较平整的流量，从而解决下游设备的拥塞问题。</p>
+<p>流量整形与流量监管的主要区别在于，流量整形对原本要被丢弃的报文进行缓存，当令牌桶有足够的令牌时，再均匀的向外发送这些被缓存的报文。流量整形与流量监管的另一区别是，整形可能会增加延迟，而监管几乎不引入额外的延迟。</p>
+<h2 id="监管和整形的区别："><a href="#监管和整形的区别：" class="headerlink" title="监管和整形的区别："></a>监管和整形的区别：</h2><ol>
+<li><p>应用方式：</p>
+<p>监管可以同时应用在接口的出入方向。</p>
+<p>整形值能用在接口的出方向。</p>
+</li>
+<li><p>监管可以实现报文的重标记。</p>
+<p>整形不支持报文的重标记。</p>
+</li>
+<li><p>监管针对超出的流量采用直接丢弃的方式。</p>
+<p>整形针对超出的流量不直接丢弃，而是放入缓存（shaping queue（默认使用WFQ队列机制））中并等待后续发送，如果缓存占满后执行Tail-Drop，丢弃方式可以更改为wred.</p>
+</li>
+<li><p>监管比较适合用于对延时要求较高的业务，例如：语音。但是会带来数据的重传。</p>
+<p>整形比较适合用于对可靠性要求较高的业务，但是不适合对延时要求较高的业务，因为缓存的数据会造成延时的增大。</p>
+</li>
+<li><p>流量监管：Car(Committed Access Rate)约定访问速度、CB policing、Line rate</p>
+<p>流量整形：GenericTraffic Shaping（通用流量整形，简称GTS、FRTS、DTS、CB Shapping、物理接口总速率限制，简称LR</p>
+</li>
+</ol>
+<h1 id="令牌桶技术"><a href="#令牌桶技术" class="headerlink" title="令牌桶技术"></a>令牌桶技术</h1><p>令牌桶可以看作是一个存放一定数量令牌的容器。系统按设定的速度向桶中放置令牌，当桶中令牌满时，多出的令牌溢出，桶中令牌不再增加。</p>
+<p>在使用令牌桶对流量进行评估时，是以令牌桶中的令牌数量是否足够满足报文的转发为依据的。如果桶中存在足够的令牌可以用来转发报文，称流量遵守或符合约定值，否则称为流量超标或不符合约定值。</p>
+<p>关于令牌桶处理报文的方式，RFC中定义了两种标记算法：</p>
+<ul>
+<li>单速率三色标记（single rate three color marker，srTCM，或称为单速双桶算法）算法，主要关注报文尺寸的突发。</li>
+<li>双速率三色标记（two rate three color marker，trTCM，或称为双速双桶算法）算法，主要关注报文速率的突发。</li>
+</ul>
+<p>两种算法的评估结果都是为报文打上红、黄、绿三种颜色的标记，所以称为“三色标记”。QoS会根据报文的颜色做相应的处理，两种算法都可以工作于色盲模式和色敏模式下。以下以色盲模式为例对标记算法进行详细介绍。</p>
+<h2 id="单速双桶："><a href="#单速双桶：" class="headerlink" title="单速双桶："></a>单速双桶：</h2><p>单速双桶采用RFC2697的单速三色标记器srTCM（A Single Rate Three Color Marker）算法对流量进行测评，根据评估结果为报文打颜色标记，即绿色、黄色和红色。</p>
+<p><img src="/2018/02/07/流量监管和流量整形/单色双桶.gif" alt="单色双桶"></p>
+<p><center>图：单速双桶示意图<center></center></center></p>
+<p>如上图所示：为方便描述将两个令牌桶称为C桶和E桶，用Tc和Te表示桶中的令牌数量。单速双桶有3个参数：</p>
+<ul>
+<li>CIR(Committed Information Rate)：承诺信息速率，表示向C桶中投放令牌的速率，即C桶允许传输或转发报文的平均速率；</li>
+<li>CBS(Committed Burst Size)：承诺突发尺寸，表示C桶的容量，即C桶瞬间能够通过的承诺突发流量；</li>
+<li>EBS（Excess Burst Size）：超额突发尺寸，表示E桶的容量，即E桶瞬间能够通过的超出突发流量。</li>
+</ul>
+<p>系统按照CIR速率向桶中投放令牌：</p>
+<ul>
+<li>若Tc&lt;CBS，Tc增加；</li>
+<li>若Tc=CBS，Te&lt;EBS，Te增加；</li>
+<li>若Tc=CBS，Te=EBS，则都不增加。</li>
+</ul>
+<p>对于到达的报文，用B表示报文的大小：</p>
+<ul>
+<li>若B≤Tc，报文被标记为绿色，且Tc减少B；</li>
+<li>若Tc&lt;B≤Te，报文被标记为黄色，且Te减少B；</li>
+<li>若Tc&lt;B并且Te&lt;B，报文被标记为红色，且Tc和Te都不减少。</li>
+</ul>
+<h2 id="双速双桶："><a href="#双速双桶：" class="headerlink" title="双速双桶："></a>双速双桶：</h2><p>双速双桶采用RFC2698的双速三色标记器trTCM（A Two Rate Three Color Marker）算法对流量进行测评，根据评估结果为报文打颜色标记，即绿色、黄色和红色。</p>
+<p><img src="/2018/02/07/流量监管和流量整形/双宿双桶示意图.gif" alt="双宿双桶示意图"></p>
+<p><center>图：双速双桶示意图<center></center></center></p>
+<p>如上图所示，为方便描述将两个令牌桶称为P桶和C桶，用Tp和Tc表示桶中的令牌数量。双速双桶有4个参数：</p>
+<ul>
+<li>PIR（Peak information rate）：峰值信息速率，表示向P桶中投放令牌的速率，即P桶允许传输或转发报文的峰值速率，PIR大于CIR；</li>
+<li>CIR：承诺信息速率，表示向C桶中投放令牌的速率，即C桶允许传输或转发报文的平均速率；</li>
+<li>PBS（Peak Burst Size）：峰值突发尺寸，表示P桶的容量，即P桶瞬间能够通过的峰值突发流量；</li>
+<li>CBS：承诺突发尺寸，表示C桶的容量，即C桶瞬间能够通过的承诺突发流量。</li>
+</ul>
+<p>系统按照PIR速率向P桶中投放令牌，按照CIR速率向C桶中投放令牌：</p>
+<ul>
+<li>当Tp&lt;PBS时，P桶中令牌数增加，否则不增加。</li>
+<li>当Tc&lt;CBS时，C桶中令牌数增加，否则不增加。</li>
+</ul>
+<p>对于到达的报文，用B表示报文的大小：</p>
+<ul>
+<li>若Tp&lt;B，报文被标记为红色；</li>
+<li>若Tc&lt;B≤Tp，报文被标记为黄色，且Tp减少B；</li>
+<li>若B≤Tp并且B≤Tc，报文被标记为绿色，且Tp和Tc都减少B。</li>
+</ul>
+<h2 id="色敏模式："><a href="#色敏模式：" class="headerlink" title="色敏模式："></a>色敏模式：</h2><p>色敏模式下，如果到达的报文本身已经被标记为红、黄、或者绿等颜色，令牌桶对流量的评估会参考报文已标记颜色，即报文本身已携带颜色会影响令牌桶的评估结果，评估机制简单的来说遵循以下原则：</p>
+<ul>
+<li>如果报文已被标记为绿色，则令牌桶的评估机制与色盲模式保持一致。</li>
+<li>如果报文已被标记为黄色，则令牌桶根据报文长度和令牌数的大小，为符合流量规定的报文标记为黄色，为不符合的报文标记为红色。</li>
+<li>如果报文已被标记为红色，则令牌桶直接将到达报文标记为红色。</li>
+</ul>
+<h1 id="流量监管"><a href="#流量监管" class="headerlink" title="流量监管"></a>流量监管</h1><p>流量监管就是对流量进行控制，通过监督进入网络的流量速率，对超出部分的流量进行“惩罚”，使进入的流量被限制在一个合理的范围之内，从而保护网络资源和企业网用户的利益。</p>
+<h2 id="流量监管的原理："><a href="#流量监管的原理：" class="headerlink" title="流量监管的原理："></a>流量监管的原理：</h2><p><img src="/2018/02/07/流量监管和流量整形/流量监管原理.png" alt="流量监管原理"></p>
+<p><center>图：流量监管组件图<center></center></center></p>
+<p>流量监管由三部分组成：</p>
+<ul>
+<li><p>Meter：通过令牌桶机制对网络流量进行度量，向Marker输出度量结果。</p>
+</li>
+<li><p>Marker：根据Meter的度量结果对报文进行染色，报文会被染成green、yellow、red三种颜色。</p>
+</li>
+<li><p>Action：根据Marker对报文的染色结果，对报文进行一些动作，动作包括：</p>
+<ul>
+<li>pass：对测量结果为“符合”的报文继续转发。</li>
+<li>remark + pass：修改报文内部优先级后再转发。</li>
+<li>discard：对测量结果为“不符合”的报文进行丢弃。</li>
+</ul>
+<p>默认情况下，green报文、yellow报文进行转发，red报文丢弃。</p>
+</li>
+</ul>
+<p>经过流量监管，如果某流量速率超过标准，设备可以选择降低报文优先级再进行转发或者直接丢弃。默认情况下，此类报文被丢弃。</p>
+<h1 id="流量整形"><a href="#流量整形" class="headerlink" title="流量整形"></a>流量整形</h1><p>流量整形是一种主动调整流量输出速率的措施，其作用是限制流量与突发，使这类报文以比较均匀的速率向外发送。流量整形通常使用缓冲区和令牌桶来完成，当报文的发送速度过快时，首先在缓冲区进行缓存，在令牌桶的控制下，再均匀地发送这些被缓冲的报文。</p>
+<p>当下游设备的接口速率小于上游设备的接口速率或发生突发流量，在下游设备接口处可能出现流量拥塞的情况，此时用户可以通过在上游设备的接口出方向配置流量整形，将上游不规整的流量进行削峰填谷，输出一条比较平整的流量，从而解决下游设备的拥塞问题。</p>
+<h2 id="处理流程："><a href="#处理流程：" class="headerlink" title="处理流程："></a>处理流程：</h2><p>流量整形是一种应用于接口、子接口或队列的流量控制技术，可以对从接口上经过的所有报文或某类报文进行速率限制。</p>
+<p>下面以接口或子接口下采用单速单桶技术的基于流的队列整形为例介绍流量整形的处理流程，其处理流程如下图所示：</p>
+<p><img src="/2018/02/07/流量监管和流量整形/单速单通.gif" alt="单速单通"></p>
+<p><center>图：流量整形处理流程<center></center></center></p>
+<p>具体处理流程如下：</p>
+<ol>
+<li>当报文到来的时候，首先对报文进行分类，使报文进入不同的队列。</li>
+<li>若报文进入的队列没有配置队列整形功能，则直接发送该队列的报文；否则，进入下一步处理。</li>
+<li>按用户设定的队列整形速率向令牌桶中放置令牌：<ul>
+<li>如果令牌桶中有足够的令牌可以用来发送报文，则报文直接被发送，在报文被发送的同时，令牌做相应的减少。</li>
+<li>如果令牌桶中没有足够的令牌，则将报文放入缓存队列，如果报文放入缓存队列时，缓存队列已满，则丢弃报文。</li>
+</ul>
+</li>
+<li>缓存队列中有报文的时候，系统按一定的周期从缓存队列中取出报文进行发送，每次发送都会与令牌桶中的令牌数作比较，直到令牌桶中的令牌数减少到缓存队列中的报文不能再发送或缓存队列中的报文全部发送完毕为止。</li>
+</ol>
+<p>队列整形后，如果该接口和子接口同时配置了接口整形，则系统还要逐级按照子接口整形速率、接口整形速率对报文流进行速率控制。其处理流程与队列整形相似，但不需要步骤1和步骤2.</p>
+<h2 id="自适应流量整形："><a href="#自适应流量整形：" class="headerlink" title="自适应流量整形："></a>自适应流量整形：</h2><p>流量整形主要是为了解决下游设备的接口速率小于上游设备的接口速率，从而导致下游设备接口入方向丢包的问题。但有些场景下，下游设备的接口速率是不确定的，上游设备无法确定应该把整形参数设置为多少。此时可以配置自适应模板来实现自适应流量整形，通过在上游设备和下游设备间开启NQA检测，根据NQA检测到的下游设备丢包率动态调整整形参数。</p>
+<p>自适应模板规定了：</p>
+<ul>
+<li>NQA测试例：通过此测试例检测下游设备接口入方向丢包率，根据检测结果调整整形参数。</li>
+<li>整形速率范围：上游设备接口出方向的整形速率上下限，整形速率在此范围内动态调整。</li>
+<li>整形速率调整步长：动态调整整形速率时，每次调整的速率大小。</li>
+<li>丢包率范围：下游设备接口入方向允许的丢包率范围。当丢包率在此范围之内时，不调整整形速率；当丢包率过大，减小上游设备整形速率；当丢包率过小，且上游设备发生拥塞，增大上游设备整形速率。</li>
+<li>整形速率增大的时间间隔：当丢包率在阈值附近频繁变化时，就需要频繁调整整形速率，用户可以通过设置此参数，限制增大整形速率的时间间隔，避免频繁更新。</li>
+</ul>
+<p>系统根据NQA检测结果中的丢包率等调整整形速率： </p>
+<table>
+<thead>
+<tr>
+<th>触发条件（必须同时满足所有条件）</th>
+<th>动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NQA检测到丢包率大于自适应模板配置的丢包率上限</td>
+<td>减小整形速率</td>
+</tr>
+<tr>
+<td>NQA检测到丢包率小于自适应模板配置的丢包率下限。      上游发送端接口拥塞。      距离上次增大整形速率的时间间隔超过自适应模板配置的速率增大时间间隔</td>
+<td>增大整形速率</td>
+</tr>
+<tr>
+<td>NQA检测到丢包率小于自适应模板配置的丢包率下限上游发送端接口不拥塞</td>
+<td>保持当前整形速率</td>
+</tr>
+<tr>
+<td>丢包率在自适应模板配置的丢包率范围内</td>
+<td>保持当前整形速率</td>
+</tr>
+<tr>
+<td>检测失败</td>
+<td>自适应模板配置的整形速率上限</td>
+</tr>
+</tbody>
+</table>
+<h1 id="流量整形与流量监管配置"><a href="#流量整形与流量监管配置" class="headerlink" title="流量整形与流量监管配置"></a>流量整形与流量监管配置</h1><p>##常用命令行：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">bandwidth</span><br><span class="line"><span class="comment">//配置基于MQC实现流量监管的承诺信息速率占接口带宽的百分比基值。</span></span><br><span class="line">car</span><br><span class="line"><span class="comment">//在流行为中创建流量监管动作。</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">  cir:承诺信息速率，即保证能够通过的平均速率。</span></span><br><span class="line"><span class="comment">  pct:指定承诺信息速率占接口带宽的百分比。</span></span><br><span class="line"><span class="comment">  pir:峰值信息速率，即能够通过的最大速率。</span></span><br><span class="line"><span class="comment">  share:指定对流做共享CAR，使绑定了同一流行为的流分</span></span><br><span class="line"><span class="comment">类中的所有的规则共享CAR参数。</span></span><br><span class="line"><span class="comment">  cbs:指定承诺突发尺寸，即瞬间能够通过的承诺突发流量。</span></span><br><span class="line"><span class="comment">  pbs:指定峰值突发尺寸，即瞬间能够通过的峰值突发流量。</span></span><br><span class="line"><span class="comment">  mode:HQoS的父策略行为，指定流量监管采取的颜色模</span></span><br><span class="line"><span class="comment">式，如果不是HQoS的父策略行为，指定该参数无效。</span></span><br><span class="line"><span class="comment">  color-blind:指定色盲模式。这种模式下，子策略行为</span></span><br><span class="line"><span class="comment">对报文的着色不影响本次流量监管的动作。</span></span><br><span class="line"><span class="comment">  color-aware:指定色敏模式。这种模式下，本次流量监</span></span><br><span class="line"><span class="comment">管动作考虑子策略行为对报文的着色。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">display qos adaptation-profile</span><br><span class="line"><span class="comment">//查看已配置的自适应模板信息。</span></span><br><span class="line">gts</span><br><span class="line"><span class="comment">//流行为中创建流量整形动作。</span></span><br><span class="line">gts adaptation-profile</span><br><span class="line"><span class="comment">//在流行为中绑定自适应模板。</span></span><br><span class="line">port-schedule high</span><br><span class="line"><span class="comment">//配置接口的优先级为高。</span></span><br><span class="line">qos adaptation-profile</span><br><span class="line"><span class="comment">//创建自适应模板，并进入自适应模板视图。</span></span><br><span class="line">qos car</span><br><span class="line"><span class="comment">//配置流量监管。</span></span><br><span class="line">qos gts</span><br><span class="line"><span class="comment">//对接口配置流量整形。</span></span><br><span class="line">qos gts adaptation-profile</span><br><span class="line"><span class="comment">//在接口下应用自适应模板。</span></span><br><span class="line">qos lr</span><br><span class="line"><span class="comment">//配置物理接口发送报文的速率占接口带宽的百分比。</span></span><br><span class="line">qos overhead layer &#123; link | physics &#125;</span><br><span class="line"><span class="comment">//配置在流量监管或流量整形时报文长度的计算方式。</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">  layer:指定流量监管或流量整形计算报文长度时是否包括</span></span><br><span class="line"><span class="comment">报文的物理层或链路层补偿信息。</span></span><br><span class="line"><span class="comment">   link:指定流量监管或流量整形计算报文长度时仅包括报</span></span><br><span class="line"><span class="comment">文的链路层补偿信息。</span></span><br><span class="line"><span class="comment">   physics：指定流量监管或流量整形计算报文长度时包括</span></span><br><span class="line"><span class="comment">报文的物理层和链路层的补偿信息。此为缺省配置。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="built_in">queue</span> gts</span><br><span class="line"><span class="comment">//配置各队列的流量整形。</span></span><br><span class="line">qos-profile</span><br><span class="line"><span class="comment">//创建QoS模板并进入QoS模板视图，</span></span><br><span class="line">rate-adjust increase interval</span><br><span class="line"><span class="comment">//配置自适应模板中整形速率增大的时间间隔。</span></span><br><span class="line"><span class="comment">//缺省情况下，整形速率增大的时间间隔为30秒。</span></span><br><span class="line">rate-adjust loss</span><br><span class="line"><span class="comment">//配置自适应模板的丢包率范围。</span></span><br><span class="line"><span class="comment">//缺省情况下，丢包率范围为10%～20%</span></span><br><span class="line">rate-adjust step</span><br><span class="line"><span class="comment">//配置自适应模板的整形速率调整步长。</span></span><br><span class="line"><span class="comment">//缺省情况下，整形速率调整步长为64kbit/s。</span></span><br><span class="line">rate-range</span><br><span class="line"><span class="comment">//配置自适应模板的整形速率范围。</span></span><br><span class="line">track nqa</span><br><span class="line"><span class="comment">//为自适应模板绑定NQA测试例。</span></span><br></pre></td></tr></table></figure>
+<h2 id="流量监管和流量整形配置示例："><a href="#流量监管和流量整形配置示例：" class="headerlink" title="流量监管和流量整形配置示例："></a>流量监管和流量整形配置示例：</h2><p>实验拓扑如下：</p>
+<p><img src="/2018/02/07/流量监管和流量整形/配置拓扑.png" alt="配置拓扑"></p>
+<p><center>图：流量监管和流量整形配置实验拓扑<center></center></center></p>
+<h3 id="实验要求："><a href="#实验要求：" class="headerlink" title="实验要求："></a>实验要求：</h3><p>如上图：VLAN10属于数据业务，VLAN20为语音业务，VLAN30为视频业务。在AR1上配置流量监管和流量整形，完成对不同的业务有不同的要求。</p>
+<h3 id="配置文件："><a href="#配置文件：" class="headerlink" title="配置文件："></a>配置文件：</h3><p>AR1：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line">&lt;AR1&gt;dis cur</span><br><span class="line">#</span><br><span class="line"> sysname AR1</span><br><span class="line">#</span><br><span class="line">vlan batch <span class="number">10</span> <span class="number">20</span> <span class="number">30</span></span><br><span class="line">#</span><br><span class="line">acl number <span class="number">2000</span>  </span><br><span class="line"> rule <span class="number">5</span> permit source <span class="number">192.168</span><span class="number">.0</span><span class="number">.0</span> <span class="number">0.0</span><span class="number">.255</span><span class="number">.255</span></span><br><span class="line">  <span class="comment">//用来匹配内网网段，做easy IP。</span></span><br><span class="line">#</span><br><span class="line">qos <span class="built_in">queue</span>-profile qp</span><br><span class="line">  <span class="comment">//基于队列的流量整形</span></span><br><span class="line">  <span class="built_in">queue</span> <span class="number">2</span> gts cir <span class="number">2000</span> cbs <span class="number">50000</span></span><br><span class="line">  <span class="built_in">queue</span> <span class="number">5</span> gts cir <span class="number">4000</span> cbs <span class="number">10000</span></span><br><span class="line">  <span class="built_in">queue</span> <span class="number">6</span> gts cir <span class="number">256</span> cbs <span class="number">6400</span></span><br><span class="line">  schedule wfq <span class="number">0</span> to <span class="number">5</span> pq <span class="number">6</span> to <span class="number">7</span></span><br><span class="line">#</span><br><span class="line"><span class="comment">//流分类，匹配vlan-id</span></span><br><span class="line">traffic classifier video <span class="keyword">operator</span> <span class="keyword">or</span></span><br><span class="line"> <span class="keyword">if</span>-match vlan-id <span class="number">30</span></span><br><span class="line">traffic classifier date <span class="keyword">operator</span> <span class="keyword">or</span></span><br><span class="line"> <span class="keyword">if</span>-match vlan-id <span class="number">10</span></span><br><span class="line">traffic classifier voice <span class="keyword">operator</span> <span class="keyword">or</span></span><br><span class="line"> <span class="keyword">if</span>-match vlan-id <span class="number">20</span></span><br><span class="line">#</span><br><span class="line"><span class="comment">//流行为，对于流量监管，配置合理的速率。</span></span><br><span class="line"><span class="comment">//对于流量整形，对于匹配到的流标记规定的802.1q优先级</span></span><br><span class="line">traffic behavior video</span><br><span class="line"> car cir <span class="number">4000</span> cbs <span class="number">752000</span> pbs <span class="number">1252000</span> green pass yellow pass red discard</span><br><span class="line"> statistic enable</span><br><span class="line"> <span class="comment">//使能接口的流量统计功能。</span></span><br><span class="line"> remark <span class="number">8021</span>p <span class="number">5</span></span><br><span class="line"><span class="comment">//标记优先级为5</span></span><br><span class="line">traffic behavior date</span><br><span class="line"> car cir <span class="number">2000</span> cbs <span class="number">376000</span> pbs <span class="number">626000</span> green pass yellow pass red discard</span><br><span class="line"> statistic enable</span><br><span class="line"> remark <span class="number">8021</span>p <span class="number">2</span></span><br><span class="line">traffic behavior voice</span><br><span class="line"> car cir <span class="number">256</span> cbs <span class="number">48128</span> pbs <span class="number">80128</span> green pass yellow pass red discard</span><br><span class="line"> statistic enable</span><br><span class="line"> remark <span class="number">8021</span>p <span class="number">6</span></span><br><span class="line">#</span><br><span class="line"> <span class="comment">//流策略，绑定对应的流分类与流行为</span></span><br><span class="line">traffic policy video</span><br><span class="line"> classifier video behavior video</span><br><span class="line">traffic policy date</span><br><span class="line"> classifier date behavior date</span><br><span class="line">traffic policy voice</span><br><span class="line"> classifier voice behavior voice</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ip address <span class="number">12.1</span><span class="number">.1</span><span class="number">.1</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> qos <span class="built_in">queue</span>-profile qp</span><br><span class="line"> <span class="comment">//在接口应用队列模板</span></span><br><span class="line"> qos gts cir <span class="number">8000</span> cbs <span class="number">200000</span></span><br><span class="line">  <span class="comment">//将端口速率限制在8000kbit/s.</span></span><br><span class="line"> nat outbound <span class="number">2000</span></span><br><span class="line">  <span class="comment">//做nat，easy ip</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> trust <span class="number">8021</span>p</span><br><span class="line"> <span class="comment">//接口信任802.1q优先级</span></span><br><span class="line"> qos car inbound cir <span class="number">10000</span> cbs <span class="number">1880000</span> pbs </span><br><span class="line"> <span class="number">3130000</span> green pass yellow pass red discard</span><br><span class="line"> <span class="comment">//配置入口的速率限制在10000kbit/s.</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1.10</span></span><br><span class="line"> dot1q termination vid <span class="number">10</span></span><br><span class="line">   <span class="comment">//配置子接口Dot1q终结的单层VLAN ID。</span></span><br><span class="line"> ip address <span class="number">192.168</span><span class="number">.10</span><span class="number">.254</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> traffic-policy date inbound</span><br><span class="line"> <span class="comment">//应用流策略</span></span><br><span class="line"> arp broadcast enable</span><br><span class="line"> <span class="comment">//使能终结子接口的ARP广播功能。</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1.20</span></span><br><span class="line"> dot1q termination vid <span class="number">20</span></span><br><span class="line"> ip address <span class="number">192.168</span><span class="number">.20</span><span class="number">.254</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> traffic-policy voice inbound</span><br><span class="line"> arp broadcast enable</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1.30</span></span><br><span class="line"> dot1q termination vid <span class="number">30</span></span><br><span class="line"> ip address <span class="number">192.168</span><span class="number">.30</span><span class="number">.254</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> traffic-policy video inbound</span><br><span class="line"> arp broadcast enable</span><br><span class="line">#</span><br><span class="line">ip route-<span class="keyword">static</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span> <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span> <span class="number">12.1</span><span class="number">.1</span><span class="number">.2</span></span><br><span class="line">   <span class="comment">//出外网的默认路由</span></span><br><span class="line">#</span><br><span class="line"><span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<p>AR2：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[AR2]dis current-configuration </span><br><span class="line">#</span><br><span class="line"> sysname AR2</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ip address <span class="number">12.1</span><span class="number">.1</span><span class="number">.2</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line">#</span><br><span class="line"><span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<p>SW：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&lt;SW&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW</span><br><span class="line">#</span><br><span class="line">vlan batch <span class="number">10</span> <span class="number">20</span> <span class="number">30</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">2</span> to <span class="number">4094</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> port link-type access</span><br><span class="line"> port <span class="keyword">default</span> vlan <span class="number">10</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> port link-type access</span><br><span class="line"> port <span class="keyword">default</span> vlan <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">4</span></span><br><span class="line"> port link-type access</span><br><span class="line"> port <span class="keyword">default</span> vlan <span class="number">30</span></span><br><span class="line">#</span><br><span class="line"><span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置结果："><a href="#配置结果：" class="headerlink" title="配置结果："></a>配置结果：</h3><hr>
+<p><img src="/2018/02/07/流量监管和流量整形/流策略应用记录.png" alt="流策略应用记录"></p>
+<h2 id="图：流策略应用记录"><a href="#图：流策略应用记录" class="headerlink" title="图：流策略应用记录"></a><center>图：流策略应用记录<center></center></center></h2><p><img src="/2018/02/07/流量监管和流量整形/流策略状态.png" alt="流策略状态"></p>
+<h2 id="图：流策略状态"><a href="#图：流策略状态" class="headerlink" title="图：流策略状态"></a><center>图：流策略状态<center></center></center></h2><p><img src="/2018/02/07/流量监管和流量整形/队列模板.png" alt="队列模板"></p>
+<h2 id="图：队列模板情况"><a href="#图：队列模板情况" class="headerlink" title="图：队列模板情况"></a><center>图：队列模板情况<center></center></center></h2><p><img src="/2018/02/07/流量监管和流量整形/接口队列应用状况.png" alt="接口队列应用状况"></p>
+<h2 id="图：接口应用队列模板情况统计"><a href="#图：接口应用队列模板情况统计" class="headerlink" title="图：接口应用队列模板情况统计"></a><center>图：接口应用队列模板情况统计<center></center></center></h2><hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/02/07/流量监管和流量整形/" title="流量监管和流量整形">https://cshihong.github.io/2018/02/07/流量监管和流量整形/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/路由基础/" rel="tag"># 路由基础</a>
+          
+            <a href="/tags/QoS/" rel="tag"># QoS</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/06/拥塞管理与拥塞避免/" rel="next" title="拥塞管理与拥塞避免">
+                <i class="fa fa-chevron-left"></i> 拥塞管理与拥塞避免
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/12/IP组播基础/" rel="prev" title="IP组播基础">
+                IP组播基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#流量监管和流量整形概述"><span class="nav-number">1.</span> <span class="nav-text">流量监管和流量整形概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流量监管："><span class="nav-number">1.1.</span> <span class="nav-text">流量监管：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流量整形："><span class="nav-number">1.2.</span> <span class="nav-text">流量整形：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#监管和整形的区别："><span class="nav-number">1.3.</span> <span class="nav-text">监管和整形的区别：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#令牌桶技术"><span class="nav-number">2.</span> <span class="nav-text">令牌桶技术</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#单速双桶："><span class="nav-number">2.1.</span> <span class="nav-text">单速双桶：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#双速双桶："><span class="nav-number">2.2.</span> <span class="nav-text">双速双桶：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#色敏模式："><span class="nav-number">2.3.</span> <span class="nav-text">色敏模式：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流量监管"><span class="nav-number">3.</span> <span class="nav-text">流量监管</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流量监管的原理："><span class="nav-number">3.1.</span> <span class="nav-text">流量监管的原理：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流量整形"><span class="nav-number">4.</span> <span class="nav-text">流量整形</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#处理流程："><span class="nav-number">4.1.</span> <span class="nav-text">处理流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自适应流量整形："><span class="nav-number">4.2.</span> <span class="nav-text">自适应流量整形：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#流量整形与流量监管配置"><span class="nav-number">5.</span> <span class="nav-text">流量整形与流量监管配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#流量监管和流量整形配置示例："><span class="nav-number">5.1.</span> <span class="nav-text">流量监管和流量整形配置示例：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实验要求："><span class="nav-number">5.1.1.</span> <span class="nav-text">实验要求：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置文件："><span class="nav-number">5.1.2.</span> <span class="nav-text">配置文件：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置结果："><span class="nav-number">5.1.3.</span> <span class="nav-text">配置结果：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：流策略应用记录"><span class="nav-number">5.2.</span> <span class="nav-text">图：流策略应用记录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：流策略状态"><span class="nav-number">5.3.</span> <span class="nav-text">图：流策略状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：队列模板情况"><span class="nav-number">5.4.</span> <span class="nav-text">图：队列模板情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：接口应用队列模板情况统计"><span class="nav-number">5.5.</span> <span class="nav-text">图：接口应用队列模板情况统计</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/02/07/流量监管和流量整形/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

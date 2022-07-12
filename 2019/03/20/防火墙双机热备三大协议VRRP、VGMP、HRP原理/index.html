@@ -1,0 +1,2228 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="防火墙双机热备技术双机热备概述：为什么需要要双机热备？  解决单点故障，实现业务的平滑过渡（会话表需要同步的）  双机热备的两种部署方式：  主备方式 负载分担分时。    防火墙双机热备产生的原因，详细内容可参考：防火墙双机热备技术   三大协议框架： VRRP——虚拟路由冗余协议 VGMP——VRRP组管理协议（华为私有） HRP——–华为冗余协议（华为私有）  VRRP协议基本原理 VRRP">
+<meta name="keywords" content="防火墙,双机热备">
+<meta property="og:type" content="article">
+<meta property="og:title" content="防火墙双机热备三大协议（VRRP&#x2F;VGMP&#x2F;HRP）原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="防火墙双机热备技术双机热备概述：为什么需要要双机热备？  解决单点故障，实现业务的平滑过渡（会话表需要同步的）  双机热备的两种部署方式：  主备方式 负载分担分时。    防火墙双机热备产生的原因，详细内容可参考：防火墙双机热备技术   三大协议框架： VRRP——虚拟路由冗余协议 VGMP——VRRP组管理协议（华为私有） HRP——–华为冗余协议（华为私有）  VRRP协议基本原理 VRRP">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/vrrpv2报文抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/VGMP报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/VGMP状态机.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/ip-link.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/hrp管理报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/Hrp同步报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/HRP报文.png">
+<meta property="og:updated_time" content="2019-08-25T01:45:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="防火墙双机热备三大协议（VRRP&#x2F;VGMP&#x2F;HRP）原理">
+<meta name="twitter:description" content="防火墙双机热备技术双机热备概述：为什么需要要双机热备？  解决单点故障，实现业务的平滑过渡（会话表需要同步的）  双机热备的两种部署方式：  主备方式 负载分担分时。    防火墙双机热备产生的原因，详细内容可参考：防火墙双机热备技术   三大协议框架： VRRP——虚拟路由冗余协议 VGMP——VRRP组管理协议（华为私有） HRP——–华为冗余协议（华为私有）  VRRP协议基本原理 VRRP">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/vrrpv2报文抓包.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>防火墙双机热备三大协议（VRRP/VGMP/HRP）原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">防火墙双机热备三大协议（VRRP/VGMP/HRP）原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-20 14:06:54" itemprop="dateCreated datePublished" datetime="2019-03-20T14:06:54+08:00">2019-03-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:45:28" itemprop="dateModified" datetime="2019-08-25T09:45:28+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 4,003</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 15</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="防火墙双机热备技术"><a href="#防火墙双机热备技术" class="headerlink" title="防火墙双机热备技术"></a>防火墙双机热备技术</h1><h2 id="双机热备概述："><a href="#双机热备概述：" class="headerlink" title="双机热备概述："></a>双机热备概述：</h2><p><strong>为什么需要要双机热备？</strong></p>
+<blockquote>
+<p>解决单点故障，实现业务的平滑过渡（会话表需要同步的）</p>
+</blockquote>
+<p><strong>双机热备的两种部署方式：</strong></p>
+<ol>
+<li>主备方式</li>
+<li>负载分担分时。</li>
+</ol>
+<hr>
+<blockquote>
+<p>防火墙双机热备产生的原因，详细内容可参考：<strong><a href="https://cshihong.github.io/2018/04/27/%E9%98%B2%E7%81%AB%E5%A2%99%E5%8F%8C%E6%9C%BA%E7%83%AD%E5%A4%87%E6%8A%80%E6%9C%AF/">防火墙双机热备技术</a></strong></p>
+</blockquote>
+<hr>
+<h2 id="三大协议框架："><a href="#三大协议框架：" class="headerlink" title="三大协议框架："></a>三大协议框架：</h2><ul>
+<li>VRRP——虚拟路由冗余协议</li>
+<li>VGMP——VRRP组管理协议（华为私有）</li>
+<li>HRP——–华为冗余协议（华为私有）</li>
+</ul>
+<h1 id="VRRP协议基本原理"><a href="#VRRP协议基本原理" class="headerlink" title="VRRP协议基本原理"></a>VRRP协议基本原理</h1><blockquote>
+<p>VRRP协议的详细内容可参考：<strong><a href="https://cshihong.github.io/2017/12/18/%E8%99%9A%E6%8B%9F%E8%B7%AF%E7%94%B1%E5%86%97%E4%BD%99%E5%8D%8F%E8%AE%AE-VRRP/">虚拟路由冗余协议（VRRP）</a></strong></p>
+</blockquote>
+<hr>
+<h2 id="VRRP的基础知识点："><a href="#VRRP的基础知识点：" class="headerlink" title="VRRP的基础知识点："></a>VRRP的基础知识点：</h2><ul>
+<li>VRRP角色：  master， backup</li>
+<li><strong>发送Hello包时间间隔 1s，超时等待 3s。目的地址（组播）：224.0.0.18</strong></li>
+<li><strong>基于IP协议，协议号为112.</strong></li>
+<li><strong>选举参数：优先级越大越优，默认优先级100.范围 0-255. 如果优先级相同，IP地址大者优先。</strong></li>
+</ul>
+<p><img src="/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/vrrpv2报文抓包.png" alt="vrrpv2报文抓包"><br>​                            图：VRRPv2报文抓包示例</p>
+<h2 id="VRRP状态："><a href="#VRRP状态：" class="headerlink" title="VRRP状态："></a>VRRP状态：</h2><p>VRRP备份组有三种状态：<strong>Initialize</strong>、<strong>Master</strong>和<strong>Backup</strong>。</p>
+<ul>
+<li><strong>Initialize</strong>：初始化状态。当设备的VRRP备份组状态为<strong>Initialize</strong>时，该VRRP备份组处于不可用状态。</li>
+<li><strong>Master</strong>：活动状态。VRRP备份组状态为Master的设备被称为Master设备。Master设备拥有VRRP备份组的虚拟IP地址和虚拟MAC地址。Master设备收到目的IP地址是虚拟IP地址的ARP请求时，会响应这个ARP请求。</li>
+<li><strong>Backup</strong>：备份状态。VRRP备份组状态为Backup的设备被称为Backup设备。Backup设备不会响应目的IP地址为虚拟IP地址的ARP请求。</li>
+</ul>
+<h2 id="VRRP建立过程："><a href="#VRRP建立过程：" class="headerlink" title="VRRP建立过程："></a><strong>VRRP建立过程：</strong></h2><ol>
+<li>初始状态—–备份</li>
+<li>根据优先级和IP地址，选择MASTER和BACKUP(超时定时器）</li>
+<li>成为MASTER设备发送免费ARP，刷新交换机的MAC地址表，起到引流的作用</li>
+<li>当主机发送ARP请求的时候，只有MASTER设备才能回应ARP-REPLY</li>
+</ol>
+<h2 id="VRRP备份组的切换过程："><a href="#VRRP备份组的切换过程：" class="headerlink" title="VRRP备份组的切换过程："></a>VRRP备份组的切换过程：</h2><ol>
+<li><p>接口或者整机发现故障，BACKUP设备等待死亡时间</p>
+</li>
+<li><p>BACKUP设备成为MASTER以后，发送免费ARP刷新交换机MAC地址表。</p>
+</li>
+<li><p>PC ARP请求，只有MASTERT设备给回应</p>
+</li>
+</ol>
+<h2 id="VRRP的故障恢复："><a href="#VRRP的故障恢复：" class="headerlink" title="VRRP的故障恢复："></a>VRRP的故障恢复：</h2><blockquote>
+<p>抢占过程，默认开启抢占</p>
+</blockquote>
+<h2 id="VRRP缺点："><a href="#VRRP缺点：" class="headerlink" title="VRRP缺点："></a>VRRP缺点：</h2><p>只能针对单独一个VRPP备份组。</p>
+<h2 id="在双机热备防火墙中的问题："><a href="#在双机热备防火墙中的问题：" class="headerlink" title="在双机热备防火墙中的问题："></a>在双机热备防火墙中的问题：</h2><blockquote>
+<p><strong>出现状态切换不一致的，导致业务中断。</strong></p>
+</blockquote>
+<p>解决方案：VGMP</p>
+<h1 id="VGMP协议基本原理"><a href="#VGMP协议基本原理" class="headerlink" title="VGMP协议基本原理"></a>VGMP协议基本原理</h1><h2 id="VGMP简介："><a href="#VGMP简介：" class="headerlink" title="VGMP简介："></a>VGMP简介：</h2><p>VGMP（VRRP Group Management Protocol）协议是华为公司的私有协议。VGMP协议中定义了VGMP组，FW基于VGMP组实现设备主备状态管理。</p>
+<h2 id="为什么有VGMP？"><a href="#为什么有VGMP？" class="headerlink" title="为什么有VGMP？"></a>为什么有VGMP？</h2><blockquote>
+<p>解决VRRP备份组切换不一致性的问题</p>
+</blockquote>
+<h2 id="VGMP报文："><a href="#VGMP报文：" class="headerlink" title="VGMP报文："></a>VGMP报文：</h2><p><img src="/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/VGMP报文.png" alt="VGMP报文"></p>
+<center>图：VGMP报文</center>
+
+<p>对标准VRRP修改头部</p>
+<ul>
+<li><p>Type = 1 标准VRRP     Type=2 </p>
+</li>
+<li><p>Vir R ID===等于对应的组号，如果VGMP =0</p>
+</li>
+<li><p>删除优先级字段，增加Type2字段</p>
+</li>
+<li><p>Type2= 1 ———–心跳探测报文（验证心跳线接口UP DOWN的问题）<br>   ​    5————HRP一致性检查（策略）<br>   ​    2————看VGMP的vtype字段<br>   ​                        HRP心跳报文（Hello）    VGMP报文     HRP数据报文</p>
+</li>
+<li><p>VGMP:  vPriority 优先级</p>
+</li>
+</ul>
+<p><strong>VGMP优先级：</strong> </p>
+<ul>
+<li>中低端<br> Active设备优优先级为65001    Standby设备优先级为65000</li>
+<li>高端：<br>VGMP组初始优先级=45000 + 1000 <em> LPU板上的插卡个数 + 2 </em> SPU板上的CPU个数</li>
+</ul>
+<blockquote>
+<p>USG6000，NGFW Module的初始优先级都为45000.</p>
+</blockquote>
+<h2 id="VGMP状态机"><a href="#VGMP状态机" class="headerlink" title="VGMP状态机:"></a>VGMP状态机:</h2><blockquote>
+<p>VGMP的状态有:initialize  stanby  active  A-to-S   S-to-A </p>
+</blockquote>
+<p><img src="/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/VGMP状态机.png" alt="VGMP状态机"></p>
+<p><center>图：VGMP状态机<center></center></center></p>
+<p>启用双机热备功能后，各VGMP组进入Initialize（初始化）状态。</p>
+<ol>
+<li>启用Active组后，Active组的状态由Initialize切换成Active。</li>
+<li>启用Standby组后，Standby组的状态由Initialize切换成Standby。 </li>
+<li>本端VGMP组监控的接口故障时，状态由Active切换成A to S，并发送VGMP请求报文给对端设备的VGMP组。</li>
+<li>本端VGMP组收到对端的VGMP请求报文，发现自身优先级高，则将状态由Standby切换成Acitve，并发送VGMP确认报文给对端设备的VGMP组。</li>
+<li>本端VGMP组收到对端的VGMP确认报文，确认本端需要进行状态切换，则本端的VGMP组状态由A to S切换成Standby。</li>
+<li>对端VGMP组确认本端的VGMP组不需要进行状态切换或连续三次没有回应本端的VGMP请报文，则本端的VGMP组状态由A to S切换成Active。</li>
+<li>7) 本端VGMP组监控的接口故障恢复后，如果本端VGMP组优先级高于对端且配置了抢占功能，则本端VGMP组状态由Standby切换成S to A，并向对端发送VGMP请求报文。</li>
+<li>本端VGMP组收到对端的VGMP请求报文，发现对端优先级高，则将状态由Active切换成Standby，并发送VGMP确认报文给对端设备的VGMP组。</li>
+<li>本端VGMP组收到对端的VGMP确认报文，确认本端需要进行状态切换，则本端的VGMP组状态由S to A切换成Active，完成抢占过程。</li>
+<li>对端VGMP组确认本端的VGMP组不需要进行状态切换或连续三次没有回应本端的VGMP请报文，则本端的VGMP组状态由S to A切换成Standby。</li>
+</ol>
+<h2 id="VGMP工作原理："><a href="#VGMP工作原理：" class="headerlink" title="VGMP工作原理："></a>VGMP工作原理：</h2><p>主备模式</p>
+<ol>
+<li><p>指定设备谁是Active，谁是standby（自己决定）</p>
+</li>
+<li><p>将VGMP组内所有VRRP备份组状态为指定的Active standby(VRRP备份组状态一致性）</p>
+</li>
+<li><p>Active设备发送免费ARP，刷新交换机MAC地址表（引导流量）</p>
+</li>
+<li><p>周期性发送HRP心跳报文（周期1S  死亡3S）———-监控Active和Standby状态</p>
+</li>
+</ol>
+<h2 id="VGMP状态切换："><a href="#VGMP状态切换：" class="headerlink" title="VGMP状态切换："></a>VGMP状态切换：</h2><p><strong>A. 接口或者链路发生故障</strong></p>
+<blockquote>
+<p>过程：<br>原Active方<br>接口故障——VRRP备份组变成init———–VGMP感知，优先级65001-2=64999———发送VGMP请求报文（携带变化以后的优先级64999）——状态从Active变成 A to S               收到VGMP确认以后——–状态变成Standby，组成所有成员除了故障的都变成Standby</p>
+</blockquote>
+<blockquote>
+<p>原Standby方<br>收到VGMP请求报文———-对比优先级——–自己高优先级，切换为Active——–VGMP组内所有的VRRP备份组状态切换为Active—–发送免费ARP刷新交换机MAC地址表———–回应一个VGMP确认</p>
+</blockquote>
+<h4 id="接口故障时VGMP管理组优先级如何计算？"><a href="#接口故障时VGMP管理组优先级如何计算？" class="headerlink" title="接口故障时VGMP管理组优先级如何计算？"></a>接口故障时VGMP管理组优先级如何计算？</h4><ul>
+<li><p>如果接口上配置了VRRP备份组，该接口故障时，VGMP管理组优先级降低2 * 接口上VRRP备份组数量。</p>
+</li>
+<li><p>如果使用<strong>hrp track interface</strong>命令配置VGMP管理组监控物理接口状态，每一个物理接口故障时，VGMP管理组优先级降低2。</p>
+</li>
+<li><p>如果使用<strong>hrp track interface</strong>命令配置VGMP管理组监控Eth-Trunk或IP-Trunk接口状态时，缺省情况下，Trunk接口的部分成员接口故障，VGMP管理组的优先级降低 2 <em> 故障成员接口个数。Trunk接口的所有成员接口故障，优先级降低 2 </em> （1 + 成员接口个数）。</p>
+<p>使用<strong>undo hrp track trunk-member enable</strong>命令取消双机热备模块对Eth-Trunk或IP-Trunk成员接口状态的监控后，部分成员接口故障时，优先级不会降低。所有成员接口故障时，优先级降低值为2 * 故障Trunk接口个数。</p>
+</li>
+<li><p>如果接口上配置了VRRP备份组，同时又使用<strong>hrp track interface</strong>命令配置VGMP管理组监控接口的状态，当接口故障时，VGMP管理组优先级降低值会叠加计算。例如，接口GigabitEthernet 1/0/1上配置了2个VRRP备份组，同时又配置了<strong>hrp track interface GigabitEthernet 1/0/1</strong>，当GigabitEthernet 1/0/1故障时，VGMP管理组优先级降低6。</p>
+</li>
+<li><p>如果使用<strong>hrp track vlan</strong>监控VLAN状态，加入该VLAN的接口故障时，VGMP管理组优先级降低2。</p>
+</li>
+</ul>
+<p><strong>B. 整机或者心跳线发现故障</strong></p>
+<blockquote>
+<p>整机故障————-主DOWN了，备的成为主</p>
+<p>心跳线故障———–会出现双主（双活）</p>
+<p>收不到HRP心跳报文（<strong>V100中是3次，3s。 V500版本中是5次，5s</strong> ）————切换———组内所有VRRP备份组都变成Active———发送免费ARP，刷新MAC地址表</p>
+</blockquote>
+<p><strong>C. 故障恢复, 抢占功能开启</strong> </p>
+<blockquote>
+<p> 接口恢复——状态变成Standby———-VGMP优先级64999+2 =65001 ———等待抢占延迟时间到(默认60S）—-发送VGMP请———-状态S-to-A状态         收到确认以后变成S-to-A变成Active —-组内所有VRRP备份变成Active—发送免费ARP刷新交换机MAC地址表</p>
+<p> 收到VGMP请求报文———-对比优先级——–自己低优先级，切换为Standby——-组内所有VRRP备份组切换为Standby—-发送VGMP确认</p>
+</blockquote>
+<h2 id="VGMP故障检测："><a href="#VGMP故障检测：" class="headerlink" title="VGMP故障检测："></a>VGMP故障检测：</h2><blockquote>
+<p>分类：直连和非直连</p>
+</blockquote>
+<p><strong>针对直连故障</strong></p>
+<blockquote>
+<p>A. 检测VRRP备份组状态<br>适用场景：防火墙业务接口工作在三层，上下接交换机（二层）</p>
+<p>B. 检测三层接口的状态<br>适用场景： 防火墙业务接口工作在三层，上下接路由器<br>int  xxxx<br>hrp track xxxx </p>
+<p>C  检测VLAN接口状态<br>适用场景：防火墙业务接口工作在二层，上下接交换机（或者上下接路由器）<br>vlan xxx<br>hrp track XXXX</p>
+</blockquote>
+<p><strong>非直连故障</strong></p>
+<blockquote>
+<p>IP-LINK</p>
+<p>BFD</p>
+</blockquote>
+<h4 id="IP-link："><a href="#IP-link：" class="headerlink" title="IP-link："></a>IP-link：</h4><p>IP-Link是指FW通过向指定的目的IP周期性地发送探测报文并等待应答，来判断链路是否发生故障。</p>
+<p>FW发送探测报文后，在三个探测周期（默认为15s）内未收到响应报文，则认为当前链路发生故障，IP-Link的状态变为Down。随后，FW会进行IP-Link Down相关的后续操作，例如双机热备主备切换等。</p>
+<p>当链路从故障中恢复，FW能连续地收到3个响应报文，则认为链路故障已经消除，IP-Link的状态变为Up。也就是说，链路故障恢复后，IP-Link的状态并不会立即变为Up，而是要等三个探测周期（默认为15s）才会变为Up。</p>
+<p><img src="/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/ip-link.png" alt="ip-link"><br>图：IP-link状态，默认发送时间间隔5s。</p>
+<h4 id="主备切换的时间多长？"><a href="#主备切换的时间多长？" class="headerlink" title="主备切换的时间多长？"></a>主备切换的时间多长？</h4><p>主备切换的时间与其触发条件有关。</p>
+<ul>
+<li>如果由接口或链路故障触发主备切换，切换时间为毫秒级。</li>
+<li>如果由整机故障触发切换，切换时间为（V500版本）5个心跳报文的发送间隔。V100中3个心跳报文时间。</li>
+</ul>
+<h2 id="VGMP引导流量方式："><a href="#VGMP引导流量方式：" class="headerlink" title="VGMP引导流量方式："></a>VGMP引导流量方式：</h2><ul>
+<li><p>虚拟IP引流<br>适用场景：防火墙业务接口工作在三层，上下接交换机（二层）</p>
+</li>
+<li><p>OSPF COST引流<br>适用场景： 防火墙业务接口工作在三层，上下接路由器</p>
+</li>
+<li><p>VLAN禁用和启动引流<br>  适用场景：防火墙业务接口工作在二层，上下接交换机（或者上下接路由器）</p>
+</li>
+<li><p>动态路由引流<br>适用场景： 防火墙业务接口工作在三层，上下接路由器</p>
+</li>
+</ul>
+<h1 id="HRP协议基本原理"><a href="#HRP协议基本原理" class="headerlink" title="HRP协议基本原理"></a>HRP协议基本原理</h1><h2 id="为什么会有HRP："><a href="#为什么会有HRP：" class="headerlink" title="为什么会有HRP："></a>为什么会有HRP：</h2><p>HRP实现备份会话表等状态信息和关键的配置。</p>
+<h2 id="HRP报文："><a href="#HRP报文：" class="headerlink" title="HRP报文："></a>HRP报文：</h2><p>HRP报文实际上是一种VGMP报文，承载在VGMP报文的Data区域。当然也存在两种封装方式。</p>
+<p>管理面HRP报文两种封装：<br><img src="/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/hrp管理报文.png" alt="hrp管理报文"></p>
+<p>管理面HRP报文中会携带以下信息：指定自动备份还是批量备份、指定是发送还是应答、备份的数据类型。</p>
+<p>转发面HRP同步报文（实时备份报文）也有两种封装：</p>
+<p><img src="/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/Hrp同步报文.png" alt="Hrp同步报文"></p>
+<h2 id="HRP报文封装："><a href="#HRP报文封装：" class="headerlink" title="HRP报文封装："></a>HRP报文封装：</h2><p><img src="/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/HRP报文.png" alt="HRP报文"></p>
+<p>封装VRRP，组播224.0.0.18 ——-不需要受安全策略监控</p>
+<p>封装UDP， 单播 ——-需要受安全策略监控</p>
+<p>配置心跳线的时候需要考虑加不加remote。</p>
+<h2 id="HRP备份方式："><a href="#HRP备份方式：" class="headerlink" title="HRP备份方式："></a>HRP备份方式：</h2><ul>
+<li>自动备份  —-默认方式</li>
+<li>手动备份—–批量方式 （<strong>hrp sync config</strong> 手动触发批量备份）</li>
+<li>快速备份 —– 针对负载分担</li>
+</ul>
+<h2 id="备份通道状态："><a href="#备份通道状态：" class="headerlink" title="备份通道状态："></a><strong>备份通道状态：</strong></h2><p>当设备两边均配置心跳口后，防火墙会判断心跳接口的物理与协议状态。心跳链路一共存在五种状态：</p>
+<ol>
+<li>running：正常运行。    —–能够发送报文</li>
+<li>ready：正常运行。次接口为备用备份通道，当前未使用。 -</li>
+<li>peerdown：本段正常，但是收不到对端的心跳报文。 </li>
+<li>invalid：未指定心跳接口的IP地址，心跳口工作在二层。 </li>
+<li>down：心跳接口的物理状态与协议状态都为DOWN。 </li>
+</ol>
+<blockquote>
+<p>当有多根心跳线时，哪个接口先配置的心跳线，即哪个接口的状态先成为ready，当两端心跳线通信时，先成为ready的接口就会成为running</p>
+<p>当本端running接口down时，第二成为ready的接口会代替down的接口成为本端设备的running口。</p>
+<p>继承顺序按照成为ready的时间，没有比较优先级等。只看时间戳。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>当两端的心跳线有多根时，如果两端的running口不是一根链路，也可以正常通信。</p>
+</blockquote>
+<p><strong>防火墙备份通道选择：</strong></p>
+<ul>
+<li>防火墙通过VGMP链路探测报文检测通道的质量，只要本段发送的探测报文对应可以收到并回应，那么就认为本段该心跳接口可通，与对端配置顺序无关。</li>
+<li>当本段心跳接口发生故障时，那么本段将立刻切换到第一个处于ready状态的心跳接口。此动作与对端无关。</li>
+</ul>
+<h2 id="心跳线："><a href="#心跳线：" class="headerlink" title="心跳线："></a>心跳线：</h2><p>双机热备组网中，心跳线是两台FW交互消息了解对端状态以及备份配置命令和各种表项的通道。心跳线两端的接口通常被称之为“心跳接口”。</p>
+<p>心跳线主要传递如下消息：</p>
+<ul>
+<li>心跳报文（Hello报文）：两台FW通过定期（<strong>默认周期为1秒</strong>）互相发送心跳报文检测对端设备是否存活。</li>
+<li>VGMP报文：了解对端设备的VGMP组的状态，确定本端和对端设备当前状态是否稳定，是否要进行故障切换。</li>
+<li>配置和表项备份报文：用于两台FW同步配置命令和状态信息。</li>
+<li>心跳链路探测报文：用于检测对端设备的心跳口能否正常接收本端设备的报文，确定是否有心跳接口可以使用。</li>
+<li>配置一致性检查报文：用于检测两台FW的关键配置是否一致，如安全策略、NAT等。</li>
+</ul>
+<h1 id="主备备份和负载分担工作原理"><a href="#主备备份和负载分担工作原理" class="headerlink" title="主备备份和负载分担工作原理"></a>主备备份和负载分担工作原理</h1><p>FW支持主备备份和负载分担模式两种运行模式。</p>
+<h2 id="主备备份："><a href="#主备备份：" class="headerlink" title="主备备份："></a>主备备份：</h2><p>主备备份指正常情况下仅由主用设备处理业务，备用设备空闲；当主用设备接口、链路或整机故障时，备用设备切换为主用设备，接替主用设备处理业务。</p>
+<blockquote>
+<p>流量由单台设备处理，相较于负载分担模式，路由规划和故障定位相对简单。</p>
+</blockquote>
+<h2 id="负载分担："><a href="#负载分担：" class="headerlink" title="负载分担："></a>负载分担：</h2><p>所谓负载分担，也可以称为“互为主备”，即两台设备同时处理业务。当其中一台设备发生故障时，另一台设备会立即承担其业务，保证原来需要通过这台设备转发的业务不中断。</p>
+<p>防火墙缺省提供两个VGMP管理组：Active组和Standby组。主备备份时只有个VGMP管理组在工作。负载分担时两个VGMP管理组同时工作，工作原理完全相同。</p>
+<blockquote>
+<p>相较于主备备份模式，组网方案和配置相对复杂。</p>
+<p>负载分担组网中使用入侵防御、反病毒等内容安全检测功能时，可能会因为流量来回路径不一致导致内容安全功能失效。</p>
+<p>负载分担组网中配置NAT时，需要额外的配置来防止两台设备NAT资源分配冲突。</p>
+<p>负载分担模式组网中流量由两台设备共同处理，可以比主备备份模式或镜像模式组网承担更大的峰值流量。</p>
+<p>负载分担模式组网中设备发生故障时，只有一半的业务需要切换，故障切换的速度更快。</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/" title="防火墙双机热备三大协议（VRRP/VGMP/HRP）原理">https://cshihong.github.io/2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/防火墙/" rel="tag"># 防火墙</a>
+          
+            <a href="/tags/双机热备/" rel="tag"># 双机热备</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/18/动态规划例题/" rel="next" title="动态规划例题">
+                <i class="fa fa-chevron-left"></i> 动态规划例题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/25/防火墙双机热备各种场景备配置示例/" rel="prev" title="防火墙双机热备各种场景备配置示例">
+                防火墙双机热备各种场景备配置示例 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#防火墙双机热备技术"><span class="nav-number">1.</span> <span class="nav-text">防火墙双机热备技术</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#双机热备概述："><span class="nav-number">1.1.</span> <span class="nav-text">双机热备概述：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三大协议框架："><span class="nav-number">1.2.</span> <span class="nav-text">三大协议框架：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VRRP协议基本原理"><span class="nav-number">2.</span> <span class="nav-text">VRRP协议基本原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VRRP的基础知识点："><span class="nav-number">2.1.</span> <span class="nav-text">VRRP的基础知识点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VRRP状态："><span class="nav-number">2.2.</span> <span class="nav-text">VRRP状态：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VRRP建立过程："><span class="nav-number">2.3.</span> <span class="nav-text">VRRP建立过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VRRP备份组的切换过程："><span class="nav-number">2.4.</span> <span class="nav-text">VRRP备份组的切换过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VRRP的故障恢复："><span class="nav-number">2.5.</span> <span class="nav-text">VRRP的故障恢复：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VRRP缺点："><span class="nav-number">2.6.</span> <span class="nav-text">VRRP缺点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在双机热备防火墙中的问题："><span class="nav-number">2.7.</span> <span class="nav-text">在双机热备防火墙中的问题：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VGMP协议基本原理"><span class="nav-number">3.</span> <span class="nav-text">VGMP协议基本原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VGMP简介："><span class="nav-number">3.1.</span> <span class="nav-text">VGMP简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么有VGMP？"><span class="nav-number">3.2.</span> <span class="nav-text">为什么有VGMP？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VGMP报文："><span class="nav-number">3.3.</span> <span class="nav-text">VGMP报文：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VGMP状态机"><span class="nav-number">3.4.</span> <span class="nav-text">VGMP状态机:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VGMP工作原理："><span class="nav-number">3.5.</span> <span class="nav-text">VGMP工作原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VGMP状态切换："><span class="nav-number">3.6.</span> <span class="nav-text">VGMP状态切换：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#接口故障时VGMP管理组优先级如何计算？"><span class="nav-number">3.6.0.1.</span> <span class="nav-text">接口故障时VGMP管理组优先级如何计算？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VGMP故障检测："><span class="nav-number">3.7.</span> <span class="nav-text">VGMP故障检测：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#IP-link："><span class="nav-number">3.7.0.1.</span> <span class="nav-text">IP-link：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#主备切换的时间多长？"><span class="nav-number">3.7.0.2.</span> <span class="nav-text">主备切换的时间多长？</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#VGMP引导流量方式："><span class="nav-number">3.8.</span> <span class="nav-text">VGMP引导流量方式：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HRP协议基本原理"><span class="nav-number">4.</span> <span class="nav-text">HRP协议基本原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么会有HRP："><span class="nav-number">4.1.</span> <span class="nav-text">为什么会有HRP：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HRP报文："><span class="nav-number">4.2.</span> <span class="nav-text">HRP报文：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HRP报文封装："><span class="nav-number">4.3.</span> <span class="nav-text">HRP报文封装：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HRP备份方式："><span class="nav-number">4.4.</span> <span class="nav-text">HRP备份方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#备份通道状态："><span class="nav-number">4.5.</span> <span class="nav-text">备份通道状态：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#心跳线："><span class="nav-number">4.6.</span> <span class="nav-text">心跳线：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#主备备份和负载分担工作原理"><span class="nav-number">5.</span> <span class="nav-text">主备备份和负载分担工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#主备备份："><span class="nav-number">5.1.</span> <span class="nav-text">主备备份：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#负载分担："><span class="nav-number">5.2.</span> <span class="nav-text">负载分担：</span></a></li></ol></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/03/20/防火墙双机热备三大协议VRRP、VGMP、HRP原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="CSRF攻击简介关键处理中引入的安全隐患：Web应用中，用户登录后执行的操作中有些处理一旦完成就无法撤销。比如用户使用信用卡支付、从用户的银行账号转账、发送邮件、更改密码或邮箱地址等都是关键处理的典型案例。 关键处理中如果存在安全隐患，就会产生名为跨站请求伪造（Cross-Site Request Forgeries，简称CSRF）的漏洞。 CSRF介绍：在执行关键处理前，需要确认该请求是否确实由">
+<meta name="keywords" content="Web安全,CSRF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSRF攻击学习笔记">
+<meta property="og:url" content="https://cshihong.github.io/2019/09/18/CSRF攻击学习笔记/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="CSRF攻击简介关键处理中引入的安全隐患：Web应用中，用户登录后执行的操作中有些处理一旦完成就无法撤销。比如用户使用信用卡支付、从用户的银行账号转账、发送邮件、更改密码或邮箱地址等都是关键处理的典型案例。 关键处理中如果存在安全隐患，就会产生名为跨站请求伪造（Cross-Site Request Forgeries，简称CSRF）的漏洞。 CSRF介绍：在执行关键处理前，需要确认该请求是否确实由">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-10-20T02:17:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CSRF攻击学习笔记">
+<meta name="twitter:description" content="CSRF攻击简介关键处理中引入的安全隐患：Web应用中，用户登录后执行的操作中有些处理一旦完成就无法撤销。比如用户使用信用卡支付、从用户的银行账号转账、发送邮件、更改密码或邮箱地址等都是关键处理的典型案例。 关键处理中如果存在安全隐患，就会产生名为跨站请求伪造（Cross-Site Request Forgeries，简称CSRF）的漏洞。 CSRF介绍：在执行关键处理前，需要确认该请求是否确实由">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/09/18/CSRF攻击学习笔记/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>CSRF攻击学习笔记 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/09/18/CSRF攻击学习笔记/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">CSRF攻击学习笔记
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-09-18 15:51:19" itemprop="dateCreated datePublished" datetime="2019-09-18T15:51:19+08:00">2019-09-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-10-20 10:17:08" itemprop="dateModified" datetime="2019-10-20T10:17:08+08:00">2019-10-20</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Web安全/" itemprop="url" rel="index"><span itemprop="name">Web安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 3,107</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 12</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="CSRF攻击简介"><a href="#CSRF攻击简介" class="headerlink" title="CSRF攻击简介"></a>CSRF攻击简介</h1><h2 id="关键处理中引入的安全隐患："><a href="#关键处理中引入的安全隐患：" class="headerlink" title="关键处理中引入的安全隐患："></a>关键处理中引入的安全隐患：</h2><p>Web应用中，用户登录后执行的操作中有些处理一旦完成就无法撤销。比如用户使用<strong>信用卡支付、从用户的银行账号转账、发送邮件、更改密码或邮箱地址</strong>等都是关键处理的典型案例。</p>
+<p>关键处理中如果存在安全隐患，就会产生名为<strong>跨站请求伪造（Cross-Site Request Forgeries，简称CSRF）</strong>的漏洞。</p>
+<h2 id="CSRF介绍："><a href="#CSRF介绍：" class="headerlink" title="CSRF介绍："></a>CSRF介绍：</h2><p>在执行关键处理前，需要确认该请求<strong>是否确实由用户自愿发起</strong>。如果忽略了这个步骤，就可能出现很大的问题，比如用户只是流量恶意网站，浏览器就擅自执行关键处理等。</p>
+<p>引发上述问题的安全隐患为称为跨站请求伪造（CSRF）漏洞，而针对CSRF漏洞进行的攻击就是CSRF攻击。</p>
+<p>Web应用存在CSRF漏洞时就可能会遭受如下攻击：</p>
+<ul>
+<li>使用用户的账号购物</li>
+<li>删除用户账号</li>
+<li>使用用户的账号发布帖子</li>
+<li>更改用户密码或邮箱地址等。</li>
+</ul>
+<p><strong>CSRF</strong>漏洞造成的影响仅限于应用的关键处理被恶意使用，而像用户的个人信息等就无法通过CSRF攻击窃取。</p>
+<p>因此，为了预防CSRF漏洞，就需要在<strong>执行关键处理前确认请求确实是由用户自愿发起的。</strong> </p>
+<h2 id="CSRF漏洞总览："><a href="#CSRF漏洞总览：" class="headerlink" title="CSRF漏洞总览："></a>CSRF漏洞总览：</h2><p><strong>产生地点：</strong> 以下任一网站上执行关键处理的页面。</p>
+<ul>
+<li>仅使用Cookie进行会话管理的网站。</li>
+<li>仅依靠HTTP认证、SSL客户端证书、手机的移动ID来识别用户的网站。</li>
+</ul>
+<p><strong>影响范围：</strong> </p>
+<ul>
+<li>存在CSRF漏洞的页面。</li>
+</ul>
+<p><strong>影响类型：</strong> </p>
+<ul>
+<li>以受害用户的权限执行关键处理。如购买商品、发布帖子、更改密码等。</li>
+</ul>
+<p><strong>影响程度：</strong> </p>
+<ul>
+<li>中~大</li>
+</ul>
+<p><strong>用户参与程度:</strong></p>
+<ul>
+<li>需要–&gt;点击恶意链接、浏览恶意网站等。</li>
+</ul>
+<p><strong>对策概要：</strong></p>
+<ul>
+<li>执行关键处理前，确认是正规用户发起的请求。</li>
+</ul>
+<h2 id="两种典型的CSRF攻击模式："><a href="#两种典型的CSRF攻击模式：" class="headerlink" title="两种典型的CSRF攻击模式："></a>两种典型的CSRF攻击模式：</h2><p>CSRF漏洞实施的两种典型的攻击模式。</p>
+<ol>
+<li><strong>输入–执行</strong> 这种简单模式的攻击。</li>
+<li><strong>中途包含确认页面</strong>时的攻击。</li>
+</ol>
+<p><strong>输入–执行攻击模式：</strong></p>
+<ol>
+<li>用户登录网站。</li>
+<li>攻击者设下圈套。</li>
+<li>受害人浏览恶意网站而出发圈套。</li>
+<li>攻击者使用恶意网站中的JavaScript，使受害人的浏览器向攻击对象网站发送将密码为攻击者指定的密码的POST请求。</li>
+<li>密码被更改。</li>
+</ol>
+<p><strong>存在确认页面的CSRF攻击：</strong></p>
+<ul>
+<li>Hidden参数</li>
+<li>使用会话变量</li>
+</ul>
+<p>根据同源策略，从iframe的外层（恶意网页）无法读取到内层（攻击对象）的内容，因此，<strong>CSRF攻击虽然能够以正规用户的权限恶意使用攻击对象网站中的关键处理，却无法获取网页中显示的内容。</strong></p>
+<p>但是，在使用CSRF攻击成功更改用户密码后，攻击者就知道了更改后的密码，从而也就能够登陆应用来窃取被害人的信息了。</p>
+<blockquote>
+<p>修改密码的三个条件</p>
+<ol>
+<li>使用POST方法请求</li>
+<li>保持登录状态。</li>
+<li>使用POST参数中的pwd指定新密码</li>
+</ol>
+</blockquote>
+<h2 id="CSRF攻击与XSS攻击对比："><a href="#CSRF攻击与XSS攻击对比：" class="headerlink" title="CSRF攻击与XSS攻击对比："></a>CSRF攻击与XSS攻击对比：</h2><ul>
+<li>XSS：利用用户对站点的信任</li>
+<li>CSRF：利用站点对已经身份认证用户的信任</li>
+</ul>
+<p>CSRF是指<strong>恶意使用用户对服务器正常请求中的请求处理，恶意使用的内容仅限于服务器端提供的操作。</strong></p>
+<p>而XSS<strong>，在用户请求服务器中包含的脚本被原封不动的以响应的形式返回，随后该恶意脚本在用户的浏览器中被执行。由于攻击者能够在用户的浏览器上执行自己准备的HTML或JavaScript，因此只要是浏览器能做到的事情都可以被用作攻击手段。</strong>攻击者甚至还能够通过JavaScript恶意使用服务器端的功能。</p>
+<h1 id="CSRF攻击安全解决方案"><a href="#CSRF攻击安全解决方案" class="headerlink" title="CSRF攻击安全解决方案"></a>CSRF攻击安全解决方案</h1><h2 id="对策分析："><a href="#对策分析：" class="headerlink" title="对策分析："></a>对策分析：</h2><p>防御CSRF的关键为确认<strong>关键处理的请求确实是由正规用户自愿发送的</strong>。因此，作为CSRF的防范策略，需要执行以下两点：</p>
+<ol>
+<li>筛选出需要防范CSRF攻击的页面</li>
+<li>使代码有能力辨认是否是正规用户的自愿请求。</li>
+</ol>
+<h3 id="筛选出需要防范CSRF攻击的页面："><a href="#筛选出需要防范CSRF攻击的页面：" class="headerlink" title="筛选出需要防范CSRF攻击的页面："></a><strong>筛选出需要防范CSRF攻击的页面：</strong></h3><p>并非所有的页面都需要实施CSRF防御策略<strong>，事实上无需防范CSRF的页面居多</strong>。通常情况下，Web应用的入口并非只有一处，通过搜索引擎、社交书签、其他链接等方式都能进入Web应用中的各种页面。比如EC（电子商务）网站一般就非常欢迎通过外部链接进入到它的商品展示页面。而这像这种页面就不需要实施CSRF对策。</p>
+<p>而另一方面，<strong>EC网站中的购买商品、更改密码或确认个人信息等页面，就不能够任意由其他网站随意执行。这样的页面就应当实施CSRF防范策略。</strong></p>
+<h3 id="确认是正规用户自愿发送的请求："><a href="#确认是正规用户自愿发送的请求：" class="headerlink" title="确认是正规用户自愿发送的请求："></a>确认是正规用户自愿发送的请求：</h3><p>判断请求是否为正规用户自愿发送的实现方法，一般有如下3类：</p>
+<ul>
+<li><p><strong>嵌入机密信息（令牌）</strong></p>
+<p>如果访问需要防范CSRF的页面（登录页面、订单确认页面等）时需要<strong>提供第三方无法得知的机密信息</strong>的话，那么即使出现非正规用户自愿发送的请求，应用端也能够通过判断得知请求是否合法。<strong>用于此目的的机密信息被称为令牌（Token）</strong>。会话ID就是一种既简单又安全的令牌实现方法。</p>
+<p>接收令牌的请求（接受关键处理的请求）<strong>必须为POST方法</strong>。因为使用GET方法发送机密信息的话，令牌信息就可能通过Referer泄露出去。</p>
+</li>
+<li><p><strong>再次输入密码</strong> </p>
+<p>让用户在此输入密码，也是用来确认请求是否是由用户自愿发起的一种方法。除了用来防范CSRF攻击，在此输入密码也可以被用于其他目的。</p>
+<ul>
+<li>在用户确认下订单之前，再次向用户确认购买意向。</li>
+<li>能够确认此事在电脑前操作的确实是用户本人。</li>
+</ul>
+<p><strong>要求确认密码的页面都应该是在最后的执行页面</strong>。如果仅在途中的某个页面就行密码确认，根据代码实现方法还是可能会存在CSRF漏洞，<strong>所以要求输入密码的实际非常重要。</strong></p>
+</li>
+<li><p><strong>检验Referer</strong></p>
+<p>在执行关键处理的页面确认Referer，也是CSRF的一种防范策略。正规请求中Referer的值应该为执行页面的上一个页面（输入页面或者确认页面等）的URL，这一点一定要得到确认。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">session_start();</span><br><span class="line"><span class="keyword">if</span>(preg_match(<span class="string">'#\Ahttp://www.baidu.com'</span>, @$_SERVER[<span class="string">'HTTP_REFERER'</span>]) != <span class="number">1</span>)&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">'REFERER检查失败'</span>)；</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span>(session_id() !== $_POST[<span class="string">'token'</span>])&#123;</span><br><span class="line">    <span class="keyword">die</span>(<span class="string">'请从正规页面进行操作'</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="CSRF防范策略比较："><a href="#CSRF防范策略比较：" class="headerlink" title="CSRF防范策略比较："></a>CSRF防范策略比较：</h2><table>
+<thead>
+<tr>
+<th></th>
+<th>嵌入令牌</th>
+<th>再次输入密码</th>
+<th>确认Referer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>开发耗时</td>
+<td>中</td>
+<td>中</td>
+<td>小</td>
+</tr>
+<tr>
+<td>对用户的影响</td>
+<td>无</td>
+<td>增加了输入密码的麻烦</td>
+<td>关闭了Referer的用户无法正常使用</td>
+</tr>
+<tr>
+<td>能否用于手机网站</td>
+<td>可</td>
+<td>可</td>
+<td>不可</td>
+</tr>
+<tr>
+<td>建议使用的地方</td>
+<td>最基本的防御策略，所有情况下均可使用</td>
+<td>需要防范他人伪装或者确认需要很强的页面</td>
+<td>用户能够限定用户环境的既有应用的CSRF防范策略。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="CSRF的辅助性对策："><a href="#CSRF的辅助性对策：" class="headerlink" title="CSRF的辅助性对策："></a>CSRF的辅助性对策：</h2><p><strong>执行完关键处理后，建议向用户注册的邮箱发送有关键处理内容的通知邮件。</strong></p>
+<p>发送通知邮件虽然不能防范CSRF攻击，但是在万一遭受了CSRF攻击的情况下能在第一时间让用户知情，从而将损害降到最低。</p>
+<p>另外，除了CSRF攻击之外，在攻击者通过XSS攻击伪装成用户操作关键处理时，发送通知邮件也能使用户尽早发现。</p>
+<p><strong>但是，由于邮件是未经加密的明文传输，因此，最好不要在邮件中添加重要信息，而只是通知用户有人恶意执行了关键处理如果用户想要了解详情的话，可以登录Web应用查看购买历史或者发送历史等内容。</strong></p>
+<h2 id="CSRF对策总结："><a href="#CSRF对策总结：" class="headerlink" title="CSRF对策总结："></a>CSRF对策总结：</h2><p>CSRF漏洞的根本防范策略如下：</p>
+<ol>
+<li>筛选需要防范CSRF的页面</li>
+<li>确认是正规用户自愿发起的请求。</li>
+</ol>
+<p>其中，确认是正规用户自愿发起的请求的方法有以下三种。</p>
+<ol>
+<li>嵌入机密信息（令牌）</li>
+<li>再次输入密码</li>
+<li>检验Referer</li>
+</ol>
+<p>另外，作为CSRF漏洞的辅助性对策，可以执行以下操作。</p>
+<ol>
+<li>执行完关键处理后，向用户注册的邮箱发送通知邮件。</li>
+</ol>
+<h2 id="自动化扫描程序的检测方法："><a href="#自动化扫描程序的检测方法：" class="headerlink" title="自动化扫描程序的检测方法："></a>自动化扫描程序的检测方法：</h2><ul>
+<li>在请求和响应过程中检查是否存在Anti_CSRF token</li>
+<li>检查服务器是否验证Anti-CSRF token</li>
+<li>检查token字符串是否可编辑和伪装</li>
+<li>检查Referer头字段是否可以伪装</li>
+</ul>
+<h1 id="DVWA的CSRF漏洞"><a href="#DVWA的CSRF漏洞" class="headerlink" title="DVWA的CSRF漏洞"></a>DVWA的CSRF漏洞</h1><h2 id="安全级别是Low的情况："><a href="#安全级别是Low的情况：" class="headerlink" title="安全级别是Low的情况："></a>安全级别是Low的情况：</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>( <span class="keyword">isset</span>( $_GET[ <span class="string">'Change'</span> ] ) ) &#123;</span><br><span class="line">    <span class="comment">// Get input</span></span><br><span class="line">    $pass_new  = $_GET[ <span class="string">'password_new'</span> ];</span><br><span class="line">    $pass_conf = $_GET[ <span class="string">'password_conf'</span> ];</span><br><span class="line">    <span class="comment">// Do the passwords match?</span></span><br><span class="line">    <span class="keyword">if</span>( $pass_new == $pass_conf ) &#123;</span><br><span class="line">        <span class="comment">// They do!</span></span><br><span class="line">        <span class="comment">// Update the database</span></span><br><span class="line">        <span class="comment">// Feedback for the user</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Issue with passwords matching</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>原理：在安全级别为low的情况下，CSRF更改密码时，可以直接进行提交密码进行改密。没有安全控制。</p>
+<p>攻击：可以通过在恶意站点上做超链接，引诱用户点击，从而直接更改密码。</p>
+<h2 id="安全级别是Medium的情况："><a href="#安全级别是Medium的情况：" class="headerlink" title="安全级别是Medium的情况："></a>安全级别是Medium的情况：</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>( <span class="keyword">isset</span>( $_GET[ <span class="string">'Change'</span> ] ) ) &#123;</span><br><span class="line">    <span class="comment">// Checks to see where the request came from</span></span><br><span class="line">    <span class="keyword">if</span>( stripos( $_SERVER[ <span class="string">'HTTP_REFERER'</span> ] ,$_SERVER[ <span class="string">'SERVER_NAME'</span> ]) !== <span class="keyword">false</span> ) &#123;</span><br><span class="line">        <span class="comment">// Get input</span></span><br><span class="line">        $pass_new  = $_GET[ <span class="string">'password_new'</span> ];</span><br><span class="line">        $pass_conf = $_GET[ <span class="string">'password_conf'</span> ];</span><br><span class="line">        <span class="comment">// Do the passwords match?</span></span><br><span class="line">        <span class="keyword">if</span>( $pass_new == $pass_conf ) &#123;</span><br><span class="line">            <span class="comment">// They do!</span></span><br><span class="line">            <span class="comment">// Update the database</span></span><br><span class="line">            <span class="comment">// Feedback for the user</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// Issue with passwords matching</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Didn't come from a trusted source</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>原理：在安全级别为Medium的情况下，主要通过<code>stripos( $_SERVER[ &#39;HTTP_REFERER&#39; ] ,$_SERVER[ &#39;SERVER_NAME&#39; ]) !== false</code> 验证了Referer字段，从检查是否来自本网站的更改密码的请求。</p>
+<p>攻击：可以将恶意站点上恶意链接中的html页面名字改为包含合法站点域名字符串的文件名，从而让通过Referer字段的检查。</p>
+<h2 id="安全级别为High的情况："><a href="#安全级别为High的情况：" class="headerlink" title="安全级别为High的情况："></a>安全级别为High的情况：</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">if</span>( <span class="keyword">isset</span>( $_GET[ <span class="string">'Change'</span> ] ) ) &#123;</span><br><span class="line">    <span class="comment">// Check Anti-CSRF token</span></span><br><span class="line">    checkToken( $_REQUEST[ <span class="string">'user_token'</span> ], $_SESSION[ <span class="string">'session_token'</span> ], <span class="string">'index.php'</span> );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Get input</span></span><br><span class="line">    $pass_new  = $_GET[ <span class="string">'password_new'</span> ];</span><br><span class="line">    $pass_conf = $_GET[ <span class="string">'password_conf'</span> ];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Do the passwords match?</span></span><br><span class="line">    <span class="keyword">if</span>( $pass_new == $pass_conf ) &#123;</span><br><span class="line">        <span class="comment">// They do!</span></span><br><span class="line">        <span class="comment">// Update the database</span></span><br><span class="line">        <span class="comment">// Feedback for the user</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Issue with passwords matching</span></span><br><span class="line">    &#125;</span><br><span class="line"><span class="comment">// Generate Anti-CSRF token</span></span><br><span class="line">generateSessionToken();</span><br><span class="line"></span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>原理：通过服务器给客户端生成一个token，在更改密码时，还需要提交token字段，token可以可以使服务器发给客户端的一个随机数。那样恶意站点就不能知道token从而无法实现绕过用户直接更改密码。</p>
+<p>攻击：但是如果合法网站上存在XSS漏洞，那么可以首先利用XSS漏洞，获取用户的Token，然后携带用户的Token去更改密码。从而达到攻击的效果。</p>
+<h2 id="安全级别为Impossible的情况："><a href="#安全级别为Impossible的情况：" class="headerlink" title="安全级别为Impossible的情况："></a>安全级别为Impossible的情况：</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>( <span class="keyword">isset</span>( $_GET[ <span class="string">'Change'</span> ] ) ) &#123;</span><br><span class="line">    <span class="comment">// Check Anti-CSRF token</span></span><br><span class="line">    checkToken( $_REQUEST[ <span class="string">'user_token'</span> ], $_SESSION[ <span class="string">'session_token'</span> ], <span class="string">'index.php'</span> );</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Get input</span></span><br><span class="line">    $pass_curr = $_GET[ <span class="string">'password_current'</span> ];</span><br><span class="line">    $pass_new  = $_GET[ <span class="string">'password_new'</span> ];</span><br><span class="line">    $pass_conf = $_GET[ <span class="string">'password_conf'</span> ];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Sanitise current password input</span></span><br><span class="line">    <span class="comment">// Check that the current password is correct</span></span><br><span class="line">    <span class="comment">// Do both new passwords match and does the current password match the user?</span></span><br><span class="line">    <span class="keyword">if</span>( ( $pass_new == $pass_conf ) &amp;&amp; ( $data-&gt;rowCount() == <span class="number">1</span> ) ) &#123;</span><br><span class="line">        <span class="comment">// It does!</span></span><br><span class="line">        <span class="comment">// Update database with new password</span></span><br><span class="line">        <span class="comment">// Feedback for the user</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// Issue with passwords matching</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Generate Anti-CSRF token</span></span><br><span class="line">generateSessionToken();</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+<p>原理：在这情况下，除了验证token，还需要用户输入旧密码，那么第三方恶意站点（非法用户）肯定无法知道旧密码，再加上token，基本杜绝了CSRF漏洞的攻击。</p>
+<hr>
+<blockquote>
+<p>学习过程中，笔记的整理与资料的记录。</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/09/18/CSRF攻击学习笔记/" title="CSRF攻击学习笔记">https://cshihong.github.io/2019/09/18/CSRF攻击学习笔记/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Web安全/" rel="tag"># Web安全</a>
+          
+            <a href="/tags/CSRF/" rel="tag"># CSRF</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/17/SQL注入学习笔记/" rel="next" title="SQL注入学习笔记">
+                <i class="fa fa-chevron-left"></i> SQL注入学习笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/09/21/重定向相关的安全隐患/" rel="prev" title="重定向相关的安全隐患">
+                重定向相关的安全隐患 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#CSRF攻击简介"><span class="nav-number">1.</span> <span class="nav-text">CSRF攻击简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#关键处理中引入的安全隐患："><span class="nav-number">1.1.</span> <span class="nav-text">关键处理中引入的安全隐患：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSRF介绍："><span class="nav-number">1.2.</span> <span class="nav-text">CSRF介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSRF漏洞总览："><span class="nav-number">1.3.</span> <span class="nav-text">CSRF漏洞总览：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#两种典型的CSRF攻击模式："><span class="nav-number">1.4.</span> <span class="nav-text">两种典型的CSRF攻击模式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSRF攻击与XSS攻击对比："><span class="nav-number">1.5.</span> <span class="nav-text">CSRF攻击与XSS攻击对比：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CSRF攻击安全解决方案"><span class="nav-number">2.</span> <span class="nav-text">CSRF攻击安全解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#对策分析："><span class="nav-number">2.1.</span> <span class="nav-text">对策分析：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#筛选出需要防范CSRF攻击的页面："><span class="nav-number">2.1.1.</span> <span class="nav-text">筛选出需要防范CSRF攻击的页面：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#确认是正规用户自愿发送的请求："><span class="nav-number">2.1.2.</span> <span class="nav-text">确认是正规用户自愿发送的请求：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSRF防范策略比较："><span class="nav-number">2.2.</span> <span class="nav-text">CSRF防范策略比较：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSRF的辅助性对策："><span class="nav-number">2.3.</span> <span class="nav-text">CSRF的辅助性对策：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CSRF对策总结："><span class="nav-number">2.4.</span> <span class="nav-text">CSRF对策总结：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自动化扫描程序的检测方法："><span class="nav-number">2.5.</span> <span class="nav-text">自动化扫描程序的检测方法：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DVWA的CSRF漏洞"><span class="nav-number">3.</span> <span class="nav-text">DVWA的CSRF漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安全级别是Low的情况："><span class="nav-number">3.1.</span> <span class="nav-text">安全级别是Low的情况：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全级别是Medium的情况："><span class="nav-number">3.2.</span> <span class="nav-text">安全级别是Medium的情况：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全级别为High的情况："><span class="nav-number">3.3.</span> <span class="nav-text">安全级别为High的情况：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全级别为Impossible的情况："><span class="nav-number">3.4.</span> <span class="nav-text">安全级别为Impossible的情况：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/09/18/CSRF攻击学习笔记/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

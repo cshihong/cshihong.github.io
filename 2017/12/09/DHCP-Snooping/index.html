@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="DHCP Snooping简介DHCP Snooping是DHCP（Dynamic Host Configuration Protocol）的一种安全特性，用于保证DHCP客户端从合法的DHCP服务器获取IP地址，并记录DHCP客户端IP地址与MAC地址等参数的对应关系，防止网络上针对DHCP攻击。 目前DHCP协议（RFC2131）在应用的过程中遇到很多安全方面的问题，网络中存在一些针对DHCP">
+<meta name="keywords" content="交换基础,DHCP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DHCP Snooping">
+<meta property="og:url" content="https://cshihong.github.io/2017/12/09/DHCP-Snooping/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="DHCP Snooping简介DHCP Snooping是DHCP（Dynamic Host Configuration Protocol）的一种安全特性，用于保证DHCP客户端从合法的DHCP服务器获取IP地址，并记录DHCP客户端IP地址与MAC地址等参数的对应关系，防止网络上针对DHCP攻击。 目前DHCP协议（RFC2131）在应用的过程中遇到很多安全方面的问题，网络中存在一些针对DHCP">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP-Snooping/LDRA工作流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP-Snooping/DHCP%20Snooping.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP-Snooping/DHCP.png">
+<meta property="og:updated_time" content="2019-08-25T01:54:04.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DHCP Snooping">
+<meta name="twitter:description" content="DHCP Snooping简介DHCP Snooping是DHCP（Dynamic Host Configuration Protocol）的一种安全特性，用于保证DHCP客户端从合法的DHCP服务器获取IP地址，并记录DHCP客户端IP地址与MAC地址等参数的对应关系，防止网络上针对DHCP攻击。 目前DHCP协议（RFC2131）在应用的过程中遇到很多安全方面的问题，网络中存在一些针对DHCP">
+<meta name="twitter:image" content="https://cshihong.github.io/2017/12/09/DHCP-Snooping/LDRA工作流程.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2017/12/09/DHCP-Snooping/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DHCP Snooping | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2017/12/09/DHCP-Snooping/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">DHCP Snooping
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-12-09 20:43:28" itemprop="dateCreated datePublished" datetime="2017-12-09T20:43:28+08:00">2017-12-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:54:04" itemprop="dateModified" datetime="2019-08-25T09:54:04+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 4,802</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 18</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="DHCP-Snooping简介"><a href="#DHCP-Snooping简介" class="headerlink" title="DHCP Snooping简介"></a>DHCP Snooping简介</h1><p>DHCP Snooping是DHCP（Dynamic Host Configuration Protocol）的一种安全特性，用于保证DHCP客户端从合法的DHCP服务器获取IP地址，并记录DHCP客户端IP地址与MAC地址等参数的对应关系，防止网络上针对DHCP攻击。</p>
+<p>目前DHCP协议（RFC2131）在应用的过程中遇到很多安全方面的问题，网络中存在一些针对DHCP的攻击，如<strong>DHCP Server仿冒者攻击、DHCP Server的拒绝服务攻击、仿冒DHCP报文攻击等。</strong> </p>
+<p>为了保证网络通信业务的安全性，可引入DHCP Snooping技术，在DHCP Client和DHCP Server之间建立一道防火墙，以抵御网络中针对DHCP的各种攻击。</p>
+<h2 id="受益："><a href="#受益：" class="headerlink" title="受益："></a>受益：</h2><ul>
+<li>设备具有防御网络上DHCP攻击的能力，增强了设备的可靠性，保障通信网络的正常运行。 </li>
+<li>为用户提供更安全的网络环境，更稳定的网络服务。 </li>
+</ul>
+<h1 id="DHCP-Snooping原理描述"><a href="#DHCP-Snooping原理描述" class="headerlink" title="DHCP Snooping原理描述"></a>DHCP Snooping原理描述</h1><h2 id="基本原理："><a href="#基本原理：" class="headerlink" title="基本原理："></a>基本原理：</h2><h3 id="信任功能："><a href="#信任功能：" class="headerlink" title="信任功能："></a>信任功能：</h3><p>DHCP Snooping的信任功能，能够保证客户端从合法的服务器获取IP（Internet Protocol）地址。</p>
+<p>网络中如果存在私自架设的DHCP Server仿冒者，则可能导致DHCP客户端获取错误的IP地址和网络配置参数，无法正常通信。DHCP Snooping信任功能可以控制DHCP服务器应答报文的来源，以防止网络中可能存在的DHCP Server仿冒者为DHCP客户端分配IP地址及其他配置信息。</p>
+<ul>
+<li>信任接口正常接收DHCP服务器响应的DHCP ACK、DHCP NAK和DHCP Offer报文。</li>
+<li>非信任接口在接收到DHCP服务器响应的DHCP ACK、DHCP NAK和DHCP Offer报文后，丢弃该报文。</li>
+</ul>
+<blockquote>
+<p>管理员在部署网络时，一般将与合法DHCP服务器直接或间接连接的接口设置为信任接口，其他接口设置为非信任接口，从而保证DHCP客户端只能从合法的DHCP服务器获取IP地址，私自架设的DHCP<br>Server仿冒者无法为DHCP客户端分配IP地址。</p>
+</blockquote>
+<h3 id="分析功能："><a href="#分析功能：" class="headerlink" title="分析功能："></a>分析功能：</h3><p>开启DHCP Snooping功能后，设备能够通过分析DHCP的报文交互过程，生成DHCP Snooping绑定表，绑定表项包括客户端的<strong>MAC地址、获取到的IP地址、与DHCP客户端连接的接口及该接口所属的VLAN（Virtual Local Area Network）</strong>等信息。</p>
+<p>DHCP Snooping绑定表根据DHCP租期进行老化或根据用户释放IP地址时发出的DHCP Release报文自动删除对应表项。</p>
+<p>出于安全性的考虑，管理员需要记录用户上网时所用的IP地址，确认用户申请的IP地址和用户使用的主机的MAC地址的对应关系。在设备通过DHCP Snooping功能生成绑定表后，管理员可以方便的记录DHCP用户申请的IP地址与所用主机的MAC地址之间的对应关系。</p>
+<p>由于DHCP Snooping绑定表记录了DHCP客户端IP地址与MAC地址等参数的对应关系，故通过对报文与DHCP Snooping绑定表进行匹配检查，能够有效防范非法用户的攻击。</p>
+<p>为了保证设备在生成DHCP Snooping绑定表时能够获取到用户MAC等参数，DHCP Snooping功能需应用于二层网络中的接入设备或第一个DHCP Relay上。</p>
+<h2 id="DHCP-Snooping支持的Option82功能："><a href="#DHCP-Snooping支持的Option82功能：" class="headerlink" title="DHCP Snooping支持的Option82功能："></a>DHCP Snooping支持的Option82功能：</h2><h3 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h3><p>在传统的DHCP动态分配IP地址过程中，DHCP Server不能够根据DHCP请求报文感知到用户的具体物理位置，以致同一VLAN的用户得到的IP地址所拥有的权限是完全相同的。由于网络管理者不能对同一VLAN中特定的用户进行有效的控制，即不能够控制客户端对网络资源的访问，这将给网络的安全控制提出了严峻的挑战。</p>
+<p>RFC 3046定义了DHCP Relay Agent Information Option（Option 82），该选项记录了DHCP Client的位置信息。DHCP Snooping设备或DHCP Relay通过在DHCP请求报文中添加Option82选项，将DHCP Client的精确物理位置信息传递给DHCP Server，从而使得DHCP Server能够为主机分配合适的IP地址和其他配置信息，实现对客户端的安全控制。</p>
+<p>Option82包含两个常用子选项Circuit ID和Remote ID。其中Circuit ID子选项主要用来标识客户端所在的VLAN、接口等信息，Remote ID子选项主要用来标识客户端接入的设备，一般为设备的MAC地址。</p>
+<p>设备作为DHCP Relay时，使能或未使能DHCP Snooping功能都可支持Option82选项功能，但若设备在二层网络作为接入设备，则必须使能DHCP Snooping功能方可支持Option82功能。</p>
+<p>Option82选项仅记录了DHCP用户的精确物理位置信息并通过DHCP请求报文中将该信息发送给DHCP Server。而如果需要对不同的用户部署不同的地址分配或安全策略，则需DHCP Server支持Option82功能并在其上已配置了IP地址分配或安全策略。</p>
+<p>Option82选项携带的用户位置信息与DHCP Snooping绑定表记录的用户参数是两个相互独立的概念，没有任何关联。Option82选项携带的用户位置信息是在DHCP用户申请IP地址时（此时用户还未分配到IP地址），由设备添加到DHCP请求报文中。DHCP Snooping绑定表是在设备收到DHCP Server回应的DHCP Ack报文时（此时已为用户分配了IP地址），设备根据DHCP Ack报文信息自动生成。</p>
+<h3 id="实现："><a href="#实现：" class="headerlink" title="实现："></a>实现：</h3><ul>
+<li>Insert方式：当设备收到DHCP请求报文时，若该报文中没有Option82选项，则插入Option82选项；若该报文中含有Option82选项，则判断Option82选项中是否包含remote-id，如果包含，则保持Option82选项不变，如果不包含，则插入remote-id。</li>
+<li>Rebuild方式：当设备收到DHCP请求报文时，若该报文中没有Option82选项，则插入Option82选项；若该报文中含有Option82选项，则删除该Option82选项并插入管理员自己在设备上配置的Option82选项。</li>
+</ul>
+<p>对于Insert和Rebuild两种方式，当设备接收到DHCP服务器的响应报文时，处理方式一致。</p>
+<ul>
+<li>DHCP响应报文中有Option82选项：<ul>
+<li>如果设备收到的DHCP请求报文中没有Option82选项，则设备将删除DHCP响应报文中的Option82选项，之后转发给DHCP Client。</li>
+<li>如果设备收到的DHCP请求报文中有Option82选项，则设备将DHCP响应报文中的Option82选项格式还原为DHCP请求报文中的Option82选项，之后转发给DHCP Client。</li>
+</ul>
+</li>
+<li>DHCP响应报文不含有Option82选项：直接转发。</li>
+</ul>
+<h2 id="DHCPv6-Snooping支持的LDRA功能："><a href="#DHCPv6-Snooping支持的LDRA功能：" class="headerlink" title="DHCPv6 Snooping支持的LDRA功能："></a>DHCPv6 Snooping支持的LDRA功能：</h2><h3 id="概述：-1"><a href="#概述：-1" class="headerlink" title="概述："></a>概述：</h3><p>RFC 6221定义了轻量级DHCPv6中继代理LDRA（Lightweight DHCPv6 Relay Agent），它是一种在DHCPv6交互报文中插入中继代理选项信息以标示用户位置的规范。</p>
+<p>类似于DHCPv4网络中使用的Option82选项，在DHCPv6网络中可以使用LDRA获取用户详细的位置信息。LDRA一般部署在靠近用户的接入设备上。</p>
+<h3 id="实现：-1"><a href="#实现：-1" class="headerlink" title="实现："></a>实现：</h3><p>LDRA工作流程与DHCPv6中继工作流程相似。当接收到用户的DHCPv6请求报文时，部署LDRA功能的设备即会构建Relay-Forward报文并在其中封装用户的位置信息（如用户与设备连接的接口信息等）然后转发给DHCPv6  Server，从而使得DHCPv6 Server能够获取到DHCPv6 Client的物理位置信息进而为用户部署诸如IP地址分配、QoS、接入控制等策略。</p>
+<h3 id="LDRA工作过程："><a href="#LDRA工作过程：" class="headerlink" title="LDRA工作过程："></a>LDRA工作过程：</h3><p><img src="/2017/12/09/DHCP-Snooping/LDRA工作流程.png" alt="LDRA工作流程"></p>
+<p><center>图：LDRA工作流程图<center></center></center></p>
+<ol>
+<li>DHCPv6客户端向LDRA设备发送DHCPv6报文。</li>
+<li>LDRA设备收到客户端的DHCPv6报文后，将其封装在Relay-Forward报文的中继消息选项中，同时将用户的位置信息封装在Relay-Forward报文中的interface-id或remote-id中，之后将Relay-Forward报文发送给DHCPv6服务器。</li>
+<li>DHCPv6服务器从Relay-Forward报文中解析出DHCPv6客户端的请求以及用户位置信息，之后根据用户位置信息为DHCPv6客户端选取IPv6地址和其他配置参数，构造应答消息，将应答消息封装在Relay-Reply报文中，并发送给LDRA设备。</li>
+<li>LDRA设备从Relay-Reply报文中解析出DHCPv6服务器的应答，转发给DHCPv6客户端。DHCPv6客户端根据应答报文获取到DHCPv6服务器地址，后续从该服务器获取IPv6地址和其他网络配置参数。</li>
+</ol>
+<h2 id="DHCPv6-Snooping支持的Option18与Option37功能："><a href="#DHCPv6-Snooping支持的Option18与Option37功能：" class="headerlink" title="DHCPv6 Snooping支持的Option18与Option37功能："></a>DHCPv6 Snooping支持的Option18与Option37功能：</h2><p>Option18与Option37选项功能类似于Option82。Option82用于插入DHCPv4报文中，而对于DHCPv6报文则需插入Option18与Option37选项用于记录DHCPv6 Client的位置信息。</p>
+<p>设备必须使能DHCPv6 snooping功能方可支持Option18与Option37选项功能。</p>
+<h1 id="DHCP-攻击："><a href="#DHCP-攻击：" class="headerlink" title="DHCP 攻击："></a>DHCP 攻击：</h1><h2 id="DHCP-Server仿冒者攻击："><a href="#DHCP-Server仿冒者攻击：" class="headerlink" title="DHCP Server仿冒者攻击："></a>DHCP Server仿冒者攻击：</h2><h3 id="攻击原理："><a href="#攻击原理：" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>由于DHCP Server和DHCP Client之间没有认证机制，所以如果在网络上随意添加一台DHCP服务器，它就可以为客户端分配IP地址以及其他网络参数。如果该DHCP服务器为用户分配错误的IP地址和其他网络参数，将会对网络造成非常大的危害。</p>
+<h3 id="解决方法："><a href="#解决方法：" class="headerlink" title="解决方法："></a>解决方法：</h3><p>为了防止DHCP Server仿冒者攻击，可配置设备接口的“信任（Trusted）/非信任（Untrusted）”工作模式。</p>
+<p>将与合法DHCP服务器直接或间接连接的接口设置为信任接口，其他接口设置为非信任接口。此后，从“非信（Untrusted）”接口上收到的DHCP回应报文将被直接丢弃，这样可以有效防止DHCP Server仿冒者的攻击。</p>
+<h3 id="配置防止DHCP-Server仿冒者攻击："><a href="#配置防止DHCP-Server仿冒者攻击：" class="headerlink" title="配置防止DHCP Server仿冒者攻击："></a>配置防止DHCP Server仿冒者攻击：</h3><p>在使能DHCP Snooping功能并配置了接口的信任状态之后，设备将能够保证客户端从合法的服务器获取IP地址，这将能够有效的防止DHCP Server仿冒者攻击。但是此时却不能够定位DHCP Server仿冒者的位置，使得网络中仍然存在着安全隐患。</p>
+<p>通过配置DHCP Server探测功能，DHCP Snooping设备将会检查并在日志中记录所有DHCP回应报文中携带的DHCP Server地址与接口等信息，此后网络管理员可根据日志来判定网络中是否存在伪DHCP Server进而对网络进行维护。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dhcp server detect<span class="comment">//使能DHCP Server探测功能。</span></span><br></pre></td></tr></table></figure>
+<h2 id="仿冒DHCP报文攻击："><a href="#仿冒DHCP报文攻击：" class="headerlink" title="仿冒DHCP报文攻击："></a>仿冒DHCP报文攻击：</h2><h3 id="攻击原理：-1"><a href="#攻击原理：-1" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>已获取到IP地址的合法用户通过向服务器发送DHCP Request或DHCP Release报文用以续租或释放IP地址。如果攻击者冒充合法用户不断向DHCP Server发送DHCP  Request报文来续租IP地址，会导致这些到期的IP地址无法正常回收，以致一些合法用户不能获得IP地址；而若攻击者仿冒合法用户的DHCP Release报文发往DHCP Server，将会导致用户异常下线。</p>
+<h3 id="解决方法：-1"><a href="#解决方法：-1" class="headerlink" title="解决方法："></a>解决方法：</h3><p>为了有效的防止仿冒DHCP报文攻击，可利用DHCP Snooping绑定表的功能。设备通过将DHCP Request续租报文和DHCP Release报文与绑定表进行匹配操作能够有效的判别报文是否合法（主要是检查报文中的VLAN、IP、MAC、接口信息是否匹配动态绑定表），若匹配成功则转发该报文，匹配不成功则丢弃。</p>
+<h3 id="配置防止仿冒DHCP报文攻击："><a href="#配置防止仿冒DHCP报文攻击：" class="headerlink" title="配置防止仿冒DHCP报文攻击："></a>配置防止仿冒DHCP报文攻击：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dhcp snooping check user-bind enable</span><br><span class="line"><span class="comment">//使能对DHCP报文进行绑定表匹配检查的功能。</span></span><br></pre></td></tr></table></figure>
+<h2 id="DHCP-Server服务拒绝攻击："><a href="#DHCP-Server服务拒绝攻击：" class="headerlink" title="DHCP Server服务拒绝攻击："></a>DHCP Server服务拒绝攻击：</h2><h3 id="攻击原理：-2"><a href="#攻击原理：-2" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>若设备接口interface1下存在大量攻击者恶意申请IP地址，会导致DHCP Server中IP地址快速耗尽而不能为其他合法用户提供IP地址分配服务。</p>
+<p>另一方面，DHCP Server通常仅根据DHCP Request报文中的CHADDR（Client Hardware Address）字段来确认客户端的MAC地址。如果某一攻击者通过不断改变CHADDR字段向DHCP Server申请IP地址，同样将会导致DHCP Server上的地址池被耗尽，从而无法为其他正常用户提供IP地址。</p>
+<h3 id="解决方法：-2"><a href="#解决方法：-2" class="headerlink" title="解决方法："></a>解决方法：</h3><p>为了抑制大量DHCP用户恶意申请IP地址，在使能设备的DHCP Snooping功能后，可配置设备或接口允许接入的最大DHCP用户数，当接入的用户数达到该值时，则不再允许任何用户通过此设备或接口成功申请到IP地址。 </p>
+<p>而对通过改变DHCP Request报文中的CHADDR字段方式的攻击，可使能设备检测DHCP Request报文帧头MAC与DHCP数据区中CHADDR字段是否一致功能，此后设备将检查上送的DHCP Request报文中的帧头MAC地址是否与CHADDR值相等，相等则转发，否则丢弃。</p>
+<h3 id="配置防止DHCP-Server服务拒绝攻击"><a href="#配置防止DHCP-Server服务拒绝攻击" class="headerlink" title="配置防止DHCP Server服务拒绝攻击:"></a>配置防止DHCP Server服务拒绝攻击:</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">dhcp snooping max-user-number <span class="number">10</span></span><br><span class="line"><span class="comment">// 配置接口允许学习的DHCP Snooping绑定表项的最大个数。 </span></span><br><span class="line">dhcp snooping check mac-address enable</span><br><span class="line"><span class="comment">//能检测DHCP Request报文帧头MAC与DHCP数据区中CHADDR字段是否一致功能。 </span></span><br><span class="line">dhcp snooping alarm threshold <span class="number">100</span></span><br><span class="line"><span class="comment">//配置全局DHCP Snooping丢弃报文数量的告警阈值。 </span></span><br><span class="line">dhcp snooping alarm mac-address threshold <span class="number">100</span></span><br><span class="line"><span class="comment">//配置帧头MAC地址与DHCP数据区中CHADDR字段不匹配而被丢弃的DHCP报文的告警阈值。</span></span><br></pre></td></tr></table></figure>
+<h1 id="配置命令行："><a href="#配置命令行：" class="headerlink" title="配置命令行："></a>配置命令行：</h1><ul>
+<li><p>使能DHCP Snooping功能的顺序是先使能全局下的DHCP Snooping功能，再使能接口或VLAN下的DHCP Snooping功能。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dhcp snooping enable [ipv4 | ipv6]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>为使DHCP客户端能通过合法的DHCP服务器获取IP地址，需将与管理员信任的DHCP服务器直接或间接连接的设备接口设置为信任接口，其他接口设置为非信任接口。从而保证DHCP客户端只能从合法的DHCP服务器获取IP地址，私自架设的DHCP Server仿冒者无法为DHCP客户端分配IP地址。</p>
+</li>
+<li><p>在连接用户的接口或VLAN下使能DHCP Snooping功能之后，需将连接DHCP服务器的接口配置为“信任”模式，两者同时生效设备即能够生成DHCP Snooping动态绑定表。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dhcp snooping trusted </span><br><span class="line"><span class="comment">//配置接口为“信任”接口。</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在移动应用场景中，若某一用户由接口A上线后，然后切换到接口B，这时为了让用户能够上线，需要使能DHCP Snooping用户位置迁移功能。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dhcp snooping user-transfer enable </span><br><span class="line"><span class="comment">//使能DHCP Snooping用户位置迁移功能。</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置ARP与DHCP Snooping的联动功能</p>
+<p>DHCP Snooping设备在收到DHCP用户发出的DHCP Release报文时将会删除该用户对应的绑定表项，但若用户发生了异常下线而无法发出DHCP Release报文时，DHCP Snooping设备将不能够及时的删除该DHCP用户对应的绑定表。</p>
+<p>使能ARP与DHCP Snooping的联动功能，如果DHCP Snooping表项中的IP地址对应的ARP表项达到老化时间，则DHCP Snooping设备会对该IP地址进行ARP探测，如果在规定的探测次数内探测不到用户，设备将删除用户对应的ARP表项。之后，设备将会再次按规定的探测次数对该IP地址进行ARP探测，如果最后仍不能够探测到用户，则设备将会删除该用户对应的绑定表项。</p>
+<p>只有设备作为DHCP Relay时，才支持ARP与DHCP Snooping的联动功能。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">arp dhcp-Snooping-detect enable </span><br><span class="line"><span class="comment">//使能ARP与DHCP Snooping的联动功能。</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置丢弃Giaddr字段非0的DHCP报文</p>
+<p>DHCP报文中的GIADDR（Gateway Ip Address）字段记录了DHCP报文经过的第一个DHCP Relay的IP地址，当客户端发出DHCP请求时，如果服务器和客户端不在同一个网段，那么第一个DHCP Relay在将DHCP请求报文转发给DHCP服务器时，会把自己的IP地址填入此字段，DHCP服务器会根据此字段来判断出客户端所在的网段地址，从而选择合适的地址池，为客户端分配该网段的IP地址。</p>
+<p>在为了保证设备在生成DHCP Snooping绑定表时能够获取到用户MAC等参数，DHCP Snooping功能需应用于二层网络中的接入设备或第一个DHCP Relay上。故DHCP Snooping设备接收到的DHCP报文中GIADDR字段必然为零，若不为零则该报文为非法报文，设备需丢弃此类报文。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dhcp snooping check dhcp-giaddr enable</span><br><span class="line"><span class="comment">//使能检测DHCP Request报文中GIADDR字段是否非零的功能。</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>去使能接口DHCP Snooping功能</p>
+<p>若使能了某一VLAN的DHCP Snooping功能，则VLAN内所有的接口均使能了DHCP Snooping功能。此时如果需要去使能一特定接口的DHCP Snooping功能，可使用命令<strong>dhcp snooping disable</strong>去使能特定接口的DHCP<br>Snooping功能。此后该接口下的用户将能正常上线，但是并不会生成DHCP动态绑定表。</p>
+</li>
+</ul>
+<h2 id="配置DHCP-Snooping的攻击防范功能："><a href="#配置DHCP-Snooping的攻击防范功能：" class="headerlink" title="配置DHCP Snooping的攻击防范功能："></a>配置DHCP Snooping的攻击防范功能：</h2><p>如下图，在SW1上配置DHCP Snooping的一些功能，防范DHCP的各种攻击.</p>
+<ol>
+<li>使能DHCP Snooping功能。</li>
+<li>配置接口的信任状态，以保证客户端从合法的服务器获取IP地址。</li>
+<li>使能ARP与DHCP Snooping的联动功能，保证DHCP用户在异常下线时实时更新绑定表。</li>
+<li>使能对DHCP报文进行绑定表匹配检查的功能，防止仿冒DHCP报文攻击。</li>
+<li>配置允许接入的最大用户数以及使能检测DHCP Request报文帧头MAC与DHCP数据区中CHADDR字段是否一致功能，防止DHCP Server服务拒绝攻击。</li>
+<li>配置丢弃报文告警和报文限速告警功能。</li>
+</ol>
+<p><img src="/2017/12/09/DHCP-Snooping/DHCP Snooping.png" alt="DHCP Snooping"></p>
+<p><center>图：DHCP Snooping攻击防范<center></center></center></p>
+<h3 id="配置文件："><a href="#配置文件：" class="headerlink" title="配置文件："></a>配置文件：</h3><p>AR1:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;DHCP&gt;display  current-configuration </span><br><span class="line"> sysname DHCP</span><br><span class="line">#</span><br><span class="line">dhcp enable</span><br><span class="line">#</span><br><span class="line">dhcp snooping enable</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ip address <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> dhcp select interface  <span class="comment">//开启接口DHCP功能</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p>SW1：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">&lt;SW&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW</span><br><span class="line">#</span><br><span class="line">dhcp enable</span><br><span class="line">#</span><br><span class="line">dhcp snooping enable</span><br><span class="line">#</span><br><span class="line">arp dhcp-snooping-detect enable </span><br><span class="line"><span class="comment">//使能ARP与DHCP Snooping的联动功能。</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> dhcp snooping trusted </span><br><span class="line"> <span class="comment">//配置上联口为信任端口</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> dhcp snooping sticky-mac</span><br><span class="line"> dhcp snooping enable</span><br><span class="line"> dhcp snooping check dhcp-giaddr enable</span><br><span class="line"> <span class="comment">//使能检测DHCP报文中GIADDR字段是否非零的功能。</span></span><br><span class="line"> dhcp snooping check dhcp-request enable</span><br><span class="line"> dhcp snooping alarm dhcp-request enable</span><br><span class="line"><span class="comment">// 使能DHCP Snooping告警功能。</span></span><br><span class="line"> dhcp snooping alarm dhcp-request threshold <span class="number">100</span></span><br><span class="line">  <span class="comment">//配置DHCP Snooping丢弃报文数量的告警阈值。</span></span><br><span class="line"> dhcp snooping check dhcp-chaddr enable</span><br><span class="line"> dhcp snooping alarm dhcp-chaddr enable</span><br><span class="line"> dhcp snooping alarm dhcp-chaddr threshold <span class="number">100</span></span><br><span class="line"> dhcp snooping check dhcp-rate enable</span><br><span class="line"> dhcp snooping alarm dhcp-rate enable</span><br><span class="line"> dhcp snooping alarm dhcp-rate threshold <span class="number">100</span></span><br><span class="line"> dhcp snooping alarm dhcp-reply enable</span><br><span class="line"> dhcp snooping alarm dhcp-reply threshold <span class="number">100</span></span><br><span class="line"> dhcp snooping max-user-number <span class="number">100</span></span><br><span class="line">  <span class="comment">//配置接口允许学习的DHCP Snooping绑定表项的最大个数</span></span><br><span class="line"> dhcp option82 insert enable</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> dhcp option82 insert enable </span><br><span class="line"> <span class="comment">//配置在DHCP报文中添加的Option82选项的格式。</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p>SW2,3:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> dhcp snooping trusted</span><br><span class="line"> dhcp option82 insert enable</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> dhcp option82 insert enable</span><br><span class="line"> dhcp option82 format common</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> dhcp option82 rebuild enable</span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p><img src="/2017/12/09/DHCP-Snooping/DHCP.png" alt="DHCP"></p>
+<p><center>图：SW1中DHCP Snooping状态<center></center></center></p>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2017/12/09/DHCP-Snooping/" title="DHCP Snooping">https://cshihong.github.io/2017/12/09/DHCP-Snooping/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/交换基础/" rel="tag"># 交换基础</a>
+          
+            <a href="/tags/DHCP/" rel="tag"># DHCP</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/09/DHCP/" rel="next" title="DHCP">
+                <i class="fa fa-chevron-left"></i> DHCP
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/18/虚拟路由冗余协议-VRRP/" rel="prev" title="虚拟路由冗余协议(VRRP)">
+                虚拟路由冗余协议(VRRP) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCP-Snooping简介"><span class="nav-number">1.</span> <span class="nav-text">DHCP Snooping简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#受益："><span class="nav-number">1.1.</span> <span class="nav-text">受益：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCP-Snooping原理描述"><span class="nav-number">2.</span> <span class="nav-text">DHCP Snooping原理描述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本原理："><span class="nav-number">2.1.</span> <span class="nav-text">基本原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#信任功能："><span class="nav-number">2.1.1.</span> <span class="nav-text">信任功能：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分析功能："><span class="nav-number">2.1.2.</span> <span class="nav-text">分析功能：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP-Snooping支持的Option82功能："><span class="nav-number">2.2.</span> <span class="nav-text">DHCP Snooping支持的Option82功能：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述："><span class="nav-number">2.2.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现："><span class="nav-number">2.2.2.</span> <span class="nav-text">实现：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCPv6-Snooping支持的LDRA功能："><span class="nav-number">2.3.</span> <span class="nav-text">DHCPv6 Snooping支持的LDRA功能：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述：-1"><span class="nav-number">2.3.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现：-1"><span class="nav-number">2.3.2.</span> <span class="nav-text">实现：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDRA工作过程："><span class="nav-number">2.3.3.</span> <span class="nav-text">LDRA工作过程：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCPv6-Snooping支持的Option18与Option37功能："><span class="nav-number">2.4.</span> <span class="nav-text">DHCPv6 Snooping支持的Option18与Option37功能：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCP-攻击："><span class="nav-number">3.</span> <span class="nav-text">DHCP 攻击：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP-Server仿冒者攻击："><span class="nav-number">3.1.</span> <span class="nav-text">DHCP Server仿冒者攻击：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理："><span class="nav-number">3.1.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方法："><span class="nav-number">3.1.2.</span> <span class="nav-text">解决方法：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置防止DHCP-Server仿冒者攻击："><span class="nav-number">3.1.3.</span> <span class="nav-text">配置防止DHCP Server仿冒者攻击：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#仿冒DHCP报文攻击："><span class="nav-number">3.2.</span> <span class="nav-text">仿冒DHCP报文攻击：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-1"><span class="nav-number">3.2.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方法：-1"><span class="nav-number">3.2.2.</span> <span class="nav-text">解决方法：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置防止仿冒DHCP报文攻击："><span class="nav-number">3.2.3.</span> <span class="nav-text">配置防止仿冒DHCP报文攻击：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP-Server服务拒绝攻击："><span class="nav-number">3.3.</span> <span class="nav-text">DHCP Server服务拒绝攻击：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-2"><span class="nav-number">3.3.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方法：-2"><span class="nav-number">3.3.2.</span> <span class="nav-text">解决方法：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置防止DHCP-Server服务拒绝攻击"><span class="nav-number">3.3.3.</span> <span class="nav-text">配置防止DHCP Server服务拒绝攻击:</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置命令行："><span class="nav-number">4.</span> <span class="nav-text">配置命令行：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置DHCP-Snooping的攻击防范功能："><span class="nav-number">4.1.</span> <span class="nav-text">配置DHCP Snooping的攻击防范功能：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置文件："><span class="nav-number">4.1.1.</span> <span class="nav-text">配置文件：</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2017/12/09/DHCP-Snooping/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

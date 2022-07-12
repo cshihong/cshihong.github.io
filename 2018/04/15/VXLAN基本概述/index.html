@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="VXLAN简介定义：RFC7348定义了VLAN扩展方案VXLAN（Virtual eXtensible Local Area Network，虚拟扩展局域网）。VXLAN采用MAC in UDP（User Datagram Protocol）封装方式，是NVO3（NetworkVirtualization over Layer 3）中的一种网络虚拟化技术。 起源：随着网络技术的发展，云计算凭借其">
+<meta name="keywords" content="交换基础,VLAN,VXLAN,数据中心">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VXLAN基本概述">
+<meta property="og:url" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="VXLAN简介定义：RFC7348定义了VLAN扩展方案VXLAN（Virtual eXtensible Local Area Network，虚拟扩展局域网）。VXLAN采用MAC in UDP（User Datagram Protocol）封装方式，是NVO3（NetworkVirtualization over Layer 3）中的一种网络虚拟化技术。 起源：随着网络技术的发展，云计算凭借其">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/虚拟化.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/传统.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/VXLAN.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/挑战.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/云.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/VXLAN架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/VXLAN组网逻辑架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/V.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/表.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/VXLAN报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/封装.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/通信.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/转发.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/拓扑图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/接口.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/协议配置.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/组网应用.png">
+<meta property="og:updated_time" content="2019-08-25T01:47:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="VXLAN基本概述">
+<meta name="twitter:description" content="VXLAN简介定义：RFC7348定义了VLAN扩展方案VXLAN（Virtual eXtensible Local Area Network，虚拟扩展局域网）。VXLAN采用MAC in UDP（User Datagram Protocol）封装方式，是NVO3（NetworkVirtualization over Layer 3）中的一种网络虚拟化技术。 起源：随着网络技术的发展，云计算凭借其">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/04/15/VXLAN基本概述/虚拟化.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/04/15/VXLAN基本概述/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>VXLAN基本概述 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/04/15/VXLAN基本概述/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">VXLAN基本概述
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-15 21:36:24" itemprop="dateCreated datePublished" datetime="2018-04-15T21:36:24+08:00">2018-04-15</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:47:28" itemprop="dateModified" datetime="2019-08-25T09:47:28+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,955</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 22</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="VXLAN简介"><a href="#VXLAN简介" class="headerlink" title="VXLAN简介"></a>VXLAN简介</h1><h2 id="定义："><a href="#定义：" class="headerlink" title="定义："></a>定义：</h2><p>RFC7348定义了VLAN扩展方案VXLAN（Virtual eXtensible Local Area Network，虚拟扩展局域网）。VXLAN采用MAC in UDP（User Datagram Protocol）封装方式，是NVO3（Network<br>Virtualization over Layer 3）中的一种网络虚拟化技术。</p>
+<h2 id="起源："><a href="#起源：" class="headerlink" title="起源："></a>起源：</h2><p>随着网络技术的发展，云计算凭借其在系统利用率高、人力/管理成本低、灵活性/可扩展性强等方面表现出的优势，已经成为目前企业IT建设的新趋势。而服务器虚拟化作为云计算的核心技术之一，得到了越来越多的应用。</p>
+<p>服务器虚拟化技术的广泛部署，极大地增加了数据中心的计算密度；同时，为了实现业务的灵活变更，虚拟机VM（Virtual<br>Machine）需要能够在网络中不受限迁移，这给传统的“二层+三层”数据中心网络带来了新的挑战。</p>
+<ul>
+<li><p>虚拟机规模受网络设备表项规格的限制</p>
+<p>在传统二层网络环境下，数据报文是通过查询MAC地址表进行二层转发。服务器虚拟化后，VM的数量比原有的物理机发生了数量级的增长，伴随而来的便是VM网卡MAC地址数量的空前增加。而接入侧二层设备的MAC地址表规格较小，无法满足快速增长的VM数量。</p>
+</li>
+<li><p>网络隔离能力有限</p>
+<p>VLAN作为当前主流的网络隔离技术，在标准定义中只有12比特，因此可用的VLAN数量仅4096个。对于公有云或其它大型虚拟化云计算服务这种动辄上万甚至更多租户的场景而言，VLAN的隔离能力无法满足。</p>
+</li>
+</ul>
+<ul>
+<li><p>虚拟机迁移范围受限</p>
+<p>由于服务器资源等问题（如CPU过高，内存不够等），虚拟机迁移已经成为了一个常态性业务。</p>
+<p>虚拟机迁移是指将虚拟机从一个物理机迁移到另一个物理机。为了保证虚拟机迁移过程中业务不中断，则需要保证虚拟机的IP地址、MAC地址等参数保持不变，这就要求虚拟机迁移必须发生在一个二层网络中。而传统的二层网络，将虚拟机迁移限制在了一个较小的局部范围内。</p>
+</li>
+</ul>
+<ul>
+<li><p>针对虚拟机规模受设备表项规格限制</p>
+<p>VXLAN将管理员规划的同一区域内的VM发出的原始报文封装成新的UDP报文，并使用物理网络的IP和MAC地址作为外层头，这样报文对网络中的其他设备只表现为封装后的参数。因此，极大降低了大二层网络对MAC地址规格的需求。</p>
+</li>
+<li><p>针对网络隔离能力限制</p>
+<p>VXLAN引入了类似VLAN ID的用户标识，称为VXLAN网络标识VNI（VXLAN Network Identifier），由24比特组成，支持多达16M的VXLAN段，有效得解决了云计算中海量租户隔离的问题。</p>
+</li>
+<li><p>针对虚拟机迁移范围受限</p>
+<p>VXLAN将VM发出的原始报文进行封装后通过VXLAN隧道进行传输，隧道两端的VM不需感知传输网络的物理架构。这样，对于具有同一网段IP地址的VM而言，即使其物理位置不在同一个二层网络中，但从逻辑上看，相当于处于同一个二层域。即VXLAN技术在三层网络之上，构建出了一个虚拟的大二层网络，只要虚拟机路由可达，就可以将其规划到同一个大二层网络中。这就解决了虚拟机迁移范围受限问题。</p>
+</li>
+</ul>
+<h1 id="传统数据中心网络所面临的挑战"><a href="#传统数据中心网络所面临的挑战" class="headerlink" title="传统数据中心网络所面临的挑战"></a>传统数据中心网络所面临的挑战</h1><h2 id="数据中心的基本概念及特点："><a href="#数据中心的基本概念及特点：" class="headerlink" title="数据中心的基本概念及特点："></a>数据中心的基本概念及特点：</h2><ul>
+<li>数据中心（Data Center）是一套完整、复杂的集合系统，它不仅包括计算机系统和其它与之配套的设备（例如通信和存储系统），还包含数据通信系统、环境控制设备、监控设备以及各种安全装置。</li>
+<li>数据中心通常是指在一个物理空间内实现信息集中处理、存储、传输、交换、管理的场所。</li>
+<li>服务器、网络设备、存储设备等通常都是数据中心的关键设备。</li>
+<li>设备运行所需要的环境因素，如供电系统、制冷系统、机柜系统、消防系统、监控系统等通常都被认为是关键物理基础设施。</li>
+<li>互联网数据中心（Internet Data Center，IDC）是互联网中数据存储和处理的中心，是互联网中数据交互最为集中的地方。</li>
+<li>数据中心的四大焦点：可靠、灵活、绿色、高效。</li>
+</ul>
+<h2 id="传统数据中心网络结构："><a href="#传统数据中心网络结构：" class="headerlink" title="传统数据中心网络结构："></a>传统数据中心网络结构：</h2><ul>
+<li>传统网络模型在很长一段时间内，支撑了各种类型的数据中心。</li>
+<li>按照功能模块划分，传统数据中心可分为核心区、外网服务器区、内网服务器区、互联网服务器区、数据中心管理区、数据交换&amp;测试服务器区、数据存储功能区、数据容灾功能区等。</li>
+<li>在服务器区，再根据不同的应用类型划分不同的层次，例如，数据库层、应用服务器层、WEB服务器层等。</li>
+<li><strong>传统数据中心的网络结构是按照经典的三层架构</strong>（接入、汇聚、核心）进行部署的。</li>
+</ul>
+<h2 id="计算节点低延迟需求："><a href="#计算节点低延迟需求：" class="headerlink" title="计算节点低延迟需求："></a>计算节点低延迟需求：</h2><ol>
+<li>流量 需要经过多层交换机转发。</li>
+<li>大量虚拟你相互访问需求。</li>
+<li>东西向流量延迟较大。</li>
+</ol>
+<ul>
+<li>同一物理服务器部署大量虚拟机，造成流量并发量大增。</li>
+<li>数据流量模型也从传统的南北向流量转变为东西向流量。</li>
+<li>网络中存在大量多对一、多对多的东西向流量。</li>
+<li>对接入层和汇聚层设备的处理能力提出了更高的要求。</li>
+</ul>
+<h2 id="虚拟化应用大量应用："><a href="#虚拟化应用大量应用：" class="headerlink" title="虚拟化应用大量应用："></a>虚拟化应用大量应用：</h2><p>###虚拟化应用大量部署：</p>
+<p><img src="/2018/04/15/VXLAN基本概述/虚拟化.png" alt="虚拟化"></p>
+<p><center>图：虚拟化技术<center></center></center></p>
+<ul>
+<li>传统的数据中心内，服务器主要用于对外提供服务，不同业务区域之间可通过划分为不同的安全分区或VLAN进行隔离。</li>
+<li>一个分区通常集中了该业务所需的计算、网络及存储资源，不同的分区之间或者禁止互访，或者经由三层网络进行互访，<strong>数据中心的网络流量大部分集中于南北向。</strong>在这种设计下，不同分区间计算资源无法共享，资源利用率低下的问题越来越突出。</li>
+<li>通过虚拟化技术、云计算管理技术等，将各个分区间的资源进行池化，实现数据中心资源的有效利用。</li>
+<li>随着这些新技术的兴起和应用，新的业务需求如虚拟机迁移、数据同步、数据备份、协同计算等在数据中心内开始实现部署，数据中心内部东西向流量开始大幅度增加。</li>
+<li>虚拟机动态迁移技术在实际应用中很常见，比如需要对一台服务器进行升级和维护时，可以通过VM迁移技术将这台服务器上的VM先迁移到另一台服务器上，其间所提供的服务不中断，然后等服务器升级和维护结束后再将VM迁移回来即可。</li>
+<li>虚拟机动态迁移技术还可以充分利用计算资源，比如某公司的网购平台在某段时间内在某片区域提供促销活动，其间业务量大大增加，这样可以将其他业务量小的区域内的VM动态迁移过来，这样不会中断其他区域服务的情况下，集中利用资源，活动结束后再将VM调整回原先的区域。</li>
+</ul>
+<h3 id="传统三层架构下虚拟机动态迁移带来的问题："><a href="#传统三层架构下虚拟机动态迁移带来的问题：" class="headerlink" title="传统三层架构下虚拟机动态迁移带来的问题："></a>传统三层架构下虚拟机动态迁移带来的问题：</h3><p><img src="/2018/04/15/VXLAN基本概述/传统.png" alt="传统"></p>
+<ul>
+<li>虚拟机动态迁移，就是在保证虚拟机上服务正常运行的同时，将一个虚拟机系统从一个物理服务器移动到另一个物理服务器的过程。</li>
+<li>该过程对于最终用户来说是无感知的，从而使得管理员能够在不影响用户正常使用的情况下，灵活调配服务器资源，或者对物理服务器进行维修和升级。</li>
+<li>一旦服务器跨二层网络迁移，就需要变更IP地址，那么原来这台服务器所承载的业务就会中断，而且牵一发动全身，其他相关的服务器也要变更相应的配置，影响巨<br>大。</li>
+</ul>
+<h3 id="当前的一些解决方案：拓扑简化思想"><a href="#当前的一些解决方案：拓扑简化思想" class="headerlink" title="当前的一些解决方案：拓扑简化思想"></a>当前的一些解决方案：拓扑简化思想</h3><p><img src="/2018/04/15/VXLAN基本概述/拓扑.png" alt="拓扑"></p>
+<ul>
+<li>为了打破这种跨三层网络限制，实现虚拟机的大范围甚至跨地域的动态迁移，就要求把VM迁移可能涉及的所有服务器都纳入到同一个二层网络中，这样才能实现VM大范围的无障碍迁移。</li>
+<li>在汇聚核心层部署CSS，在接入层部署istack，可实现简化拓扑结构的目的。</li>
+<li>设备无需使能STP等二层环路保护机制，更有效地提高了链路资源利用率。</li>
+<li>但设备性能问题并没有得到根本解决。</li>
+<li>该解决方案比较适于在一个数据中心内部进行VM迁移操作。</li>
+</ul>
+<p>该解决方案存在的问题：</p>
+<ol>
+<li>MAC地址数量陡增，接入设备压力较大。</li>
+<li>多租户隔离环境中设备VLAN资源紧张。</li>
+<li>二层网络范围过大，影响网络通信效率。</li>
+<li>传统解决方案适用于DC内部大二层互联应用。</li>
+<li>STP或CSS+iStack传统二层技术不适合构建大规模二层网络。</li>
+<li>通过VXLAN可以构建大二层网络，链路带宽利用率高。</li>
+</ol>
+<h3 id="多数据中心大二层互联-VXLAN："><a href="#多数据中心大二层互联-VXLAN：" class="headerlink" title="多数据中心大二层互联-VXLAN："></a>多数据中心大二层互联-VXLAN：</h3><p><img src="/2018/04/15/VXLAN基本概述/VXLAN.png" alt="VXLAN"></p>
+<ul>
+<li>早期的虚拟机管理及迁移依附于物理网络，因此数据中心内部东西向流量主要是二层流量。</li>
+<li>为扩大二层物理网络的规模，提高链路利用率，出现了TRILL、SPB等大二层网络技术。</li>
+<li>随着虚拟化数据中心规模的不断扩大，以及云化管理的不断深入，物理网络的种种限制越来越不能满足虚拟化的要求，由此提出了VXLAN、NVGRE等Overlay技术。</li>
+<li>在Overlay方案中，物理网络的东西向流量类型逐渐由二层向三层转变，通过增加封装，将网络拓扑由物理二层变为逻辑二层，同时提供了逻辑二层的划分管理，更好地满足了多租户的需求。</li>
+<li>VXLAN、NVGRE等Overlay技术都是通过将MAC封装在IP之上，实现对物理网络的屏蔽，解决了物理网络VLAN数量限制、接入交换机MAC表资源有限等问题，同时通过提供统一的逻辑网络管理工具，更方便地实现了虚拟机在进行迁移时网络策略跟随的问题，大大降低了虚拟化对网络的依赖，成为了目前网络虚拟化的主要发展方向。</li>
+</ul>
+<h2 id="网络和业务维护自动化需求："><a href="#网络和业务维护自动化需求：" class="headerlink" title="网络和业务维护自动化需求："></a>网络和业务维护自动化需求：</h2><p>业务快速创新、自动发放需求.</p>
+<p><img src="/2018/04/15/VXLAN基本概述/挑战.png" alt="挑战"></p>
+<p><center>图：传统DC与云DC的对比<center></center></center></p>
+<p>云数据中心的网络解决方案：</p>
+<p><img src="/2018/04/15/VXLAN基本概述/云.png" alt="云"></p>
+<p><center>图：云数据中心的网络解决方案<center></center></center></p>
+<ul>
+<li><strong>VXLAN技术主要解决多租户环境下的二层互联问题。</strong></li>
+<li>VXLAN通过隧道技术在不改变三层网络拓扑的前提下构建跨数据中心的逻辑二层网络拓扑。</li>
+<li>VXLAN技术有效解决了vlan数量的限制问题。</li>
+<li>VXLAN技术对二层网络做了优化不会造成广播风暴等问题。</li>
+<li>SDN技术主要是简化网络的部署、运维、调整等。</li>
+</ul>
+<h1 id="VXLAN基本原理"><a href="#VXLAN基本原理" class="headerlink" title="VXLAN基本原理"></a>VXLAN基本原理</h1><h2 id="VXLAN部署的典型网络架构："><a href="#VXLAN部署的典型网络架构：" class="headerlink" title="VXLAN部署的典型网络架构："></a>VXLAN部署的典型网络架构：</h2><p><img src="/2018/04/15/VXLAN基本概述/VXLAN架构.png" alt="VXLAN架构"></p>
+<p><center>图：VXLAN部署的典型网络架构<center></center></center></p>
+<ul>
+<li>VXLAN/NVGRE/STT是三种典型的NVO3技术。</li>
+<li>是通过<strong>MAC In IP技术</strong>在IP网络之上构建逻辑二层网络。</li>
+<li>同一租户的VM彼此可以二层通信、跨三层物理网络进行迁移。</li>
+<li>相比传统L2 VPN等Overlay技术，NVO3的CE侧是虚拟或物理主机，而不是网络站点。</li>
+<li>此外主机具有可移动性。</li>
+<li>目前，一般是IT厂商主导，通过服务器的Hypervisor来构建Overlay网络。</li>
+</ul>
+<h2 id="VXLAN组网逻辑架构："><a href="#VXLAN组网逻辑架构：" class="headerlink" title="VXLAN组网逻辑架构："></a>VXLAN组网逻辑架构：</h2><p><img src="/2018/04/15/VXLAN基本概述/VXLAN组网逻辑架构.png" alt="VXLAN组网逻辑架构"></p>
+<p><center>图：VXLAN组网逻辑架构<center></center></center></p>
+<p>VXLAN（Virtual eXtensible Local Area Network，RFC7348）是IETF NVO3（Network Virtualization over Layer 3）定义的NVO3标准技术之一，采用MAC in UDP封装方式，将二层报文用三层协议进行封装，可对二层网络在三层范围进行扩展，同时支持24bits的VNI ID（16M租户能力），满足数据中心大二层VM迁移和多租户的需求。</p>
+<p>在VXLAN NVO3网络模型中，部署在VXLAN网络边缘的设备称为VXLAN <strong>NVE（Network Virtualization Edge，网络虚拟边缘）</strong>，主要负责VLAN网络与VXLAN网络间的封装和解封装。经过NVE封装转换后，NVE间就可基于L3基础网络建立Overlay二<br>层虚拟化网络。</p>
+<p><strong>VXLAN技术特点：</strong></p>
+<ul>
+<li>位置无关性：业务可在任意位置灵活部署，缓解了服务器虚拟化后相关的网络扩展问题。</li>
+<li>可扩展性：在传统网络架构上规划新的Overlay网络，部署方便，同时避免了大二层的广播风暴问题，可扩展性极强。</li>
+<li>部署简单：由高可靠SDN Controller完成控制面的配置和管理，避免了大规模的分布式部署，同时集中部署模式可加速网络和安全基础架构的配置，提高可扩展性。</li>
+<li>适合云业务：可实现千万级别的租户间隔离，有力地支持了云业务的大规模部署。</li>
+<li>技术优势：VXLAN利用了现有通用的UDP进行传输，成熟性极高。</li>
+</ul>
+<h2 id="VXLAN网关："><a href="#VXLAN网关：" class="headerlink" title="VXLAN网关："></a>VXLAN网关：</h2><p><img src="/2018/04/15/VXLAN基本概述/V.png" alt="V"></p>
+<p><center>图：VXLAN网关结构图<center></center></center></p>
+<p>NVE:目前有软件NVE（一般安装在服务器上；例如OVS）和硬件NVE（一般集成在交换机上，例如CE6850）。由于软件NVE是在原设备中安装一个软件包，硬件NVE是在原设备中增加一个硬件模块，而原设备多数是VLAN的二层设备，所以，NVE又是VXLAN的二层网关，主要实现VXLAN与VLAN、MAC等的二层映射。</p>
+<p>VXLAN网关：</p>
+<ul>
+<li>与VXLAN NVE类似，是地位更高一些的另一个VXLAN角色，即VXLAN三层网关，简称VXLAN GW，主要实现VXLAN报文头与IP报文头的映射。</li>
+<li>不管二层VXLAN网关还是三层VXLAN网关，都是主要实现了VXLAN网络和非VXLAN网络之间的连接。</li>
+</ul>
+<hr>
+<ul>
+<li>NVE是服务器虚拟化层的一个功能模块，虚拟机通过虚拟化软件直接建立VTEP隧道。</li>
+<li>NVE也可以是一台支持VXLAN的接入交换机集中为多租户提供VXLAN网关服务。</li>
+<li>VXLAN网关可以实现不同VXLAN下租户间通信，也能实现VXLAN用户与非VXLAN用户间通信，这和VLANIF接口的功能是类似的。</li>
+</ul>
+<h2 id="NVO3标准术语："><a href="#NVO3标准术语：" class="headerlink" title="NVO3标准术语："></a>NVO3标准术语：</h2><table>
+<thead>
+<tr>
+<th>VN</th>
+<th>虚拟网络</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>VNI</td>
+<td>虚拟网络实例（Virtual Network Instance），可以为L2或L3网络，一个租户可以对应一个或多个VNI。</td>
+</tr>
+<tr>
+<td>VNID</td>
+<td>虚拟网络ID（Virtual Network Identifier），标识一个虚拟网络。</td>
+</tr>
+<tr>
+<td>VNE</td>
+<td>虚拟网络边缘（Virtual Network Edge），可以位于物理网络边缘设备，也可以位于Hypervisor，可以是二层转发或三层转发。</td>
+</tr>
+<tr>
+<td>VN Context</td>
+<td>该字段位于Overlay封装头部，用于Egress NVE设备确定VNI。</td>
+</tr>
+<tr>
+<td>OVS</td>
+<td>运行在物理服务器内的虚拟化软件，为服务的VN提供共享计算资源、内存、存储，而且Hypervisor内经常内嵌Virtual Switch。</td>
+</tr>
+<tr>
+<td>Tenant End System</td>
+<td>租户终端系统，可以是物理服务器也可以是VM。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="业界其他技术实现-NVO3技术背景："><a href="#业界其他技术实现-NVO3技术背景：" class="headerlink" title="业界其他技术实现-NVO3技术背景："></a>业界其他技术实现-NVO3技术背景：</h2><p><img src="/2018/04/15/VXLAN基本概述/表.png" alt="表"></p>
+<ul>
+<li>VXLAN/NVGRE/STT是NVO3三种典型技术，总体是通过MAC In IP技术来构建Over在IP网络之上的二层网络，使同一个租户的VM彼此可以二层通信、跨三层物理网络进行迁移。相比传统L2 VPN等Overlay技术，NVO3的CE侧是虚拟或物理Host，而不是网络Site，另外Host具有移动性。目前，一般是IT厂商主导，通过服务器内Hypervisor来构建Overlay网络。</li>
+<li>NVGRE主要支持者是Microsoft。与VXLAN不同的是，NVGRE没有采用标准传输协议（TCP/IP），而是借助通用路由封装协议（GRE）。NVGRE使用GRE头部的低24bit位作为租户网络标识符。</li>
+<li>VXLAN（Virtual Extensible LAN）虚拟可扩展局域网，是一种Overlay的网络技术，使用MAC in UDP的方法进行封装。后文会详细介绍VXLAN技术。</li>
+<li>STT（Stateless Transport Tunneling）是一种MAC Over Ip的协议，和VXLAN、NVGRE类似，都是把二层的帧封装在一个Ip报文的payload中，在Ip报文的payload中，除了虚拟网络的二层包以外，还要把构造的一个TCP头和一个STT头加在最前面。</li>
+</ul>
+<h2 id="VXLAN报文封装："><a href="#VXLAN报文封装：" class="headerlink" title="VXLAN报文封装："></a>VXLAN报文封装：</h2><ol>
+<li>VXLAN是IETF定义的NVO3（Network Virtualization over Layer3）标准技术之一。</li>
+<li>采用Mac in UDP封装方式将二层报文用三层协议进行封装。</li>
+<li>支持24bits的VNI iD，满足数据中心大二层VM迁移和多租户需求。</li>
+</ol>
+<p><img src="/2018/04/15/VXLAN基本概述/VXLAN报文.png" alt="VXLAN报文"></p>
+<p><center>图：VXLAN报文格式<center></center></center></p>
+<p>VXLAN header（VXLAN头封装）：</p>
+<ul>
+<li>VXLAN Flags：标记位，8比特，取值为00001000。</li>
+<li>VNI：VXLAN网络标识，用于区分VXLAN段，由24比特组成，支持多达<strong>16M</strong>的租户。一个租户可以有一个或多个VNI，不同VNI的租户之间不能直接进行二层相互通信。</li>
+<li>Reserved：保留未用，分别由24比特和8比特组成，设置为0。</li>
+</ul>
+<p>Outer UDP header（外层UDP头封装）：</p>
+<ul>
+<li>DestPort：目的UDP端口号，设置为4789。</li>
+<li>Source Port：源UDP端口号，根据内层以太报文头通过哈希算法计算后的值。</li>
+</ul>
+<p>Outer IP header（外层IP头封装）：</p>
+<ul>
+<li>IP SA：源IP地址，VXLAN隧道源端VTEP的IP地址。</li>
+<li>IP DA：目的IP地址，VXLAN隧道目的端VTEP的IP地址。</li>
+</ul>
+<p>Outer Ethernet header（外层Ethernet头封装）：</p>
+<ul>
+<li>MAC DA：目的MAC地址，为到达目的VTEP的路径上，下一跳设备的MAC地址。</li>
+<li>MAC SA：源MAC地址，发送报文的源端VTEP的MAC地址。</li>
+<li>802.1Q Tag：可选字段，该字段为报文中携带的VLAN Tag。</li>
+<li>Ethernet Type：以太报文类型，IP协议报文中该字段取值为0x0800。</li>
+</ul>
+<h2 id="VXLAN数据封装过程："><a href="#VXLAN数据封装过程：" class="headerlink" title="VXLAN数据封装过程："></a>VXLAN数据封装过程：</h2><p><img src="/2018/04/15/VXLAN基本概述/封装.png" alt="封装"></p>
+<p><center>图：VXLAN数据封装过程<center></center></center></p>
+<h2 id="VXLAN通信流程："><a href="#VXLAN通信流程：" class="headerlink" title="VXLAN通信流程："></a>VXLAN通信流程：</h2><p><img src="/2018/04/15/VXLAN基本概述/通信.png" alt="通信"></p>
+<p><center>图：VXLAN通信流程<center></center></center></p>
+<ol>
+<li>vSwitch为虚拟机工具Hypervisor层中集成的虚拟交换机。</li>
+<li>VTEP是在虚拟机所属服务器的Hypervisor中的vSwitch间进行建立的。</li>
+<li>控制器为可选组件。</li>
+<li><strong>VTEP—Virtual Tunnel End Point 虚拟隧道端点，</strong>即VXLAN隧道的入口和出口。在这里VM流量经过vSwtich交换后会导入到VXLAN隧道里，入口是VTEP。</li>
+<li>VNI— Virtual Network Instance 虚拟网络实例，一个VNI就是一个虚拟网络，一个VNI用一个VNI ID标识。例子里VM1和VM2在同一个虚拟网络里，VNI ID为1。</li>
+<li>VM1地址为IP1，VM3地址为IP3，IP1与IP3为同一子网。</li>
+<li>ARP协议交互过程：<ol>
+<li>VM1先发送ARP报文，请求VM3的MAC地址。</li>
+<li>ARP报文通过OpenFlow报文封装发给AC，AC上使能ARP代理。</li>
+<li>AC通过IP3找到MAC3，响应ARP报文，SIP为IP3，SMAC为MAC3。</li>
+<li>vSwtich将ARP响应报文发给VM1。</li>
+</ol>
+</li>
+</ol>
+<p><img src="/2018/04/15/VXLAN基本概述/转发.png" alt="转发"></p>
+<p><center>图:报文转发过程<center></center></center></p>
+<p>报文转发过程：</p>
+<ol>
+<li>VM1发送数据报文，SIP为IP1，DIP为IP3，SMAC为MAC1，DMAC为MAC3。</li>
+<li>VXLAN封装，内层SIP为IP1，DIP为IP3，外层SIP为VTEP1 IP，外层DIP为VTEP2 IP。</li>
+<li>解封装VXLAN头部，发往VM3。</li>
+</ol>
+<h1 id="VXLAN基本配置"><a href="#VXLAN基本配置" class="headerlink" title="VXLAN基本配置"></a>VXLAN基本配置</h1><h2 id="基于SDN的VXLAN基本组网："><a href="#基于SDN的VXLAN基本组网：" class="headerlink" title="基于SDN的VXLAN基本组网："></a>基于SDN的VXLAN基本组网：</h2><p><img src="/2018/04/15/VXLAN基本概述/拓扑图.png" alt="拓扑图"></p>
+<p><center>图：拓扑图<center></center></center></p>
+<h3 id="接口配置："><a href="#接口配置：" class="headerlink" title="接口配置："></a>接口配置：</h3><p><img src="/2018/04/15/VXLAN基本概述/接口.png" alt="接口"></p>
+<p><center>图：基于SDN的VLXAN基本组网-接口配置<center></center></center></p>
+<h3 id="协议配置："><a href="#协议配置：" class="headerlink" title="协议配置："></a>协议配置：</h3><p><img src="/2018/04/15/VXLAN基本概述/协议配置.png" alt="协议配置"></p>
+<p><center>图：基于SDN的VLXAN基本组网-协议配置<center></center></center></p>
+<p>1.配置控制器和转发器建立OpenFlow通信通道:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//SNC上配置：</span></span><br><span class="line"></span><br><span class="line">openflow listening-ip <span class="number">5.5</span><span class="number">.5</span><span class="number">.5</span> </span><br><span class="line"><span class="comment">//配置SDN控制器侦听地址</span></span><br><span class="line">  fp-id <span class="number">1</span> <span class="comment">//配置转发器ID</span></span><br><span class="line">  type huawei-<span class="keyword">default</span></span><br><span class="line">  <span class="comment">//配置转发器的设备类，其中huawei-default表示转发器是华为设备；</span></span><br><span class="line">  <span class="comment">//ovs-default表示转发器是OVS（openvswitch）设备</span></span><br><span class="line">version <span class="keyword">default</span> <span class="comment">//配置转发器的版本是default</span></span><br><span class="line">role <span class="keyword">default</span> <span class="comment">//配置转发器的角色是default</span></span><br><span class="line">openflow controller <span class="comment">//配置控制器与转发器之间的通信通道，采用OpenFlow连</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">//接并进入OpenFlow视图</span></span><br><span class="line">peer-address <span class="number">1.1</span><span class="number">.1</span><span class="number">.1</span> </span><br><span class="line">  <span class="comment">//指定转发器FP1的Loopback1地址</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">//FP1配置</span></span><br><span class="line">controller-ip <span class="number">5.5</span><span class="number">.5</span><span class="number">.5</span> </span><br><span class="line">  <span class="comment">//指定控制器的Loopback地址，并进入Controller视图</span></span><br><span class="line">openflow agent</span><br><span class="line"><span class="comment">//配置转发器与控制器之间的通信通道采用OpenFlow连接</span></span><br><span class="line"><span class="comment">//并进入OpenFlow Agent视图</span></span><br><span class="line">transport-address <span class="number">1.1</span><span class="number">.1</span><span class="number">.1</span> </span><br><span class="line"><span class="comment">//配置OpenFlow连接的本端地址</span></span><br></pre></td></tr></table></figure>
+<p>2.配置业务接入点实现区分业务流量:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//在控制器上配置FP1</span></span><br><span class="line"><span class="keyword">switch</span> fp <span class="number">1</span> <span class="comment">//进入fp1视图下，1是fp的ID，这里假设fp id是1。</span></span><br><span class="line">bridge-domain <span class="number">10</span> </span><br><span class="line">  <span class="comment">//创建广播域BD，可以看成是一个虚拟交换机。</span></span><br><span class="line">interface vserviceif <span class="number">1</span>:<span class="number">1</span> </span><br><span class="line">  <span class="comment">//创建vServiceIf接口，并进入vServiceIf接口视图，</span></span><br><span class="line">  <span class="comment">//vServiceIF接口是一个逻辑的VXLAN接口。用于和bridge-domain关联，将流量引入到广播域。</span></span><br><span class="line">binding interface GE0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line">  <span class="comment">//为vService接口绑定物理接口。</span></span><br><span class="line">interface vserviceif <span class="number">1</span>:<span class="number">1.1</span> mode l2 </span><br><span class="line"><span class="comment">//创建vServiceif接口子接口，并进入子接口视图。</span></span><br><span class="line"><span class="comment">//子接口作用是为了匹配带VLAN的报文，进而报文进入桥域。</span></span><br><span class="line">encapsulation dot1q vid <span class="number">10</span> </span><br><span class="line">  <span class="comment">//配置二层vServiceIf子接口的流封装类型，允许接</span></span><br><span class="line"><span class="comment">//口接收携带一层VLAN Tag是10的报文。</span></span><br><span class="line">rewrite pop single</span><br><span class="line"><span class="comment">//配置二层vServiceIf子接口的流动作是pop，对接收的报文进行剥除VLAN Tag操作。</span></span><br><span class="line"><span class="comment">//这样可以实现不同VLAN的租户在相同VXLAN下可以互访。</span></span><br></pre></td></tr></table></figure>
+<p>3.配置VXLAN隧道转发业务流量:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//在控制器上配置FP1</span></span><br><span class="line">bridge-domain <span class="number">10</span></span><br><span class="line">  <span class="comment">//创建VXLAN网络标识VNI并关联广播域BD，将VNI以1:1方式映射到BD，</span></span><br><span class="line">  <span class="comment">//通过BD转发流量。此命令相当于将VXLAN隧道和bridgedomain（虚拟交换机）关联起来。</span></span><br><span class="line">VXLAN vni <span class="number">10</span></span><br><span class="line">interface nve <span class="number">1</span>:<span class="number">1</span> </span><br><span class="line">  <span class="comment">//创建NVE接口，并进入NVE接口视图。</span></span><br><span class="line">source <span class="number">1.1</span><span class="number">.1</span><span class="number">.1</span> </span><br><span class="line">  <span class="comment">//配置源端VTEP的IP地址。</span></span><br><span class="line">vni <span class="number">10</span> head-end peer-<span class="built_in">list</span> <span class="number">3.3</span><span class="number">.3</span><span class="number">.3</span> </span><br><span class="line">  <span class="comment">//配置头端复制列表。通过头端复制列表，源端NVE接口将收到的</span></span><br><span class="line">  <span class="comment">//BUM（Broadcast&amp;Unknown-unicast&amp;Multicast）报文，根据</span></span><br><span class="line">VTEP列表进行复制并发送给属于同一个VNI的所有VTEP。</span><br></pre></td></tr></table></figure>
+<h3 id="VXLAN组网应用（UNICA、联通公有云、上海电影公有云）："><a href="#VXLAN组网应用（UNICA、联通公有云、上海电影公有云）：" class="headerlink" title="VXLAN组网应用（UNICA、联通公有云、上海电影公有云）："></a>VXLAN组网应用（UNICA、联通公有云、上海电影公有云）：</h3><p><img src="/2018/04/15/VXLAN基本概述/组网应用.png" alt="组网应用"></p>
+<ul>
+<li><p>业务呈现层：</p>
+<p>面向运营商、企业、租户、RSP的Portal。</p>
+<p>提供业务灵活定制化界面。</p>
+</li>
+<li><p>协同层：</p>
+<p>标准、开放的OpenStack架构，并兼容多厂商。</p>
+<p> 实现存储、计算和网络资源的协同。</p>
+</li>
+<li><p>网络控制层：</p>
+<p>网络控制平台由NetMatrix和SNC组成，完成网络建模和网络实例化。</p>
+<p>北向支持开放API接口，实现业务快速定制和自动发放。</p>
+<p>南向支持OpenFlow/Netconf等接口，实现统一管理和控制物理和虚拟网络。</p>
+</li>
+<li><p>基础网络层：</p>
+<p>物理网络和虚拟网络统一规划和设计的Overlay网络。</p>
+<p>基于硬件的VXLAN网关提高业务性能。</p>
+<p>支持对传统VLAN网络的兼容。</p>
+</li>
+</ul>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/04/15/VXLAN基本概述/" title="VXLAN基本概述">https://cshihong.github.io/2018/04/15/VXLAN基本概述/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/交换基础/" rel="tag"># 交换基础</a>
+          
+            <a href="/tags/VLAN/" rel="tag"># VLAN</a>
+          
+            <a href="/tags/VXLAN/" rel="tag"># VXLAN</a>
+          
+            <a href="/tags/数据中心/" rel="tag"># 数据中心</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/13/Vmware虚拟化概念原理/" rel="next" title="Vmware虚拟化概念原理">
+                <i class="fa fa-chevron-left"></i> Vmware虚拟化概念原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/16/NFV基本概述/" rel="prev" title="NFV基本概述">
+                NFV基本概述 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#VXLAN简介"><span class="nav-number">1.</span> <span class="nav-text">VXLAN简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#定义："><span class="nav-number">1.1.</span> <span class="nav-text">定义：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#起源："><span class="nav-number">1.2.</span> <span class="nav-text">起源：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#传统数据中心网络所面临的挑战"><span class="nav-number">2.</span> <span class="nav-text">传统数据中心网络所面临的挑战</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据中心的基本概念及特点："><span class="nav-number">2.1.</span> <span class="nav-text">数据中心的基本概念及特点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传统数据中心网络结构："><span class="nav-number">2.2.</span> <span class="nav-text">传统数据中心网络结构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计算节点低延迟需求："><span class="nav-number">2.3.</span> <span class="nav-text">计算节点低延迟需求：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟化应用大量应用："><span class="nav-number">2.4.</span> <span class="nav-text">虚拟化应用大量应用：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#传统三层架构下虚拟机动态迁移带来的问题："><span class="nav-number">2.4.1.</span> <span class="nav-text">传统三层架构下虚拟机动态迁移带来的问题：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#当前的一些解决方案：拓扑简化思想"><span class="nav-number">2.4.2.</span> <span class="nav-text">当前的一些解决方案：拓扑简化思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多数据中心大二层互联-VXLAN："><span class="nav-number">2.4.3.</span> <span class="nav-text">多数据中心大二层互联-VXLAN：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#网络和业务维护自动化需求："><span class="nav-number">2.5.</span> <span class="nav-text">网络和业务维护自动化需求：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VXLAN基本原理"><span class="nav-number">3.</span> <span class="nav-text">VXLAN基本原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VXLAN部署的典型网络架构："><span class="nav-number">3.1.</span> <span class="nav-text">VXLAN部署的典型网络架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VXLAN组网逻辑架构："><span class="nav-number">3.2.</span> <span class="nav-text">VXLAN组网逻辑架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VXLAN网关："><span class="nav-number">3.3.</span> <span class="nav-text">VXLAN网关：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NVO3标准术语："><span class="nav-number">3.4.</span> <span class="nav-text">NVO3标准术语：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#业界其他技术实现-NVO3技术背景："><span class="nav-number">3.5.</span> <span class="nav-text">业界其他技术实现-NVO3技术背景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VXLAN报文封装："><span class="nav-number">3.6.</span> <span class="nav-text">VXLAN报文封装：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VXLAN数据封装过程："><span class="nav-number">3.7.</span> <span class="nav-text">VXLAN数据封装过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VXLAN通信流程："><span class="nav-number">3.8.</span> <span class="nav-text">VXLAN通信流程：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VXLAN基本配置"><span class="nav-number">4.</span> <span class="nav-text">VXLAN基本配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基于SDN的VXLAN基本组网："><span class="nav-number">4.1.</span> <span class="nav-text">基于SDN的VXLAN基本组网：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#接口配置："><span class="nav-number">4.1.1.</span> <span class="nav-text">接口配置：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#协议配置："><span class="nav-number">4.1.2.</span> <span class="nav-text">协议配置：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VXLAN组网应用（UNICA、联通公有云、上海电影公有云）："><span class="nav-number">4.1.3.</span> <span class="nav-text">VXLAN组网应用（UNICA、联通公有云、上海电影公有云）：</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/04/15/VXLAN基本概述/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

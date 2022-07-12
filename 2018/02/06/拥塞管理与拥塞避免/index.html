@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="拥塞管理与拥塞避免概述拥塞避免通过指定报文丢弃策略来解除网络过载，拥塞管理通过指定报文调度次序来确保高优先级业务优先被处理。 传统网络所面临的服务质量问题主要由拥塞引起，拥塞是指由于网络资源不足而造成速率下降、引入额外延时的一种现象。拥塞会造成报文的传输时延、吞吐率低及资源的大量耗费。而在IP分组交换及多业务并存的复杂环境下，拥塞又极为常见。 拥塞避免和拥塞管理就是解决网络拥塞的两种流控方式。 拥">
+<meta name="keywords" content="路由基础,QoS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="拥塞管理与拥塞避免">
+<meta property="og:url" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="拥塞管理与拥塞避免概述拥塞避免通过指定报文丢弃策略来解除网络过载，拥塞管理通过指定报文调度次序来确保高优先级业务优先被处理。 传统网络所面临的服务质量问题主要由拥塞引起，拥塞是指由于网络资源不足而造成速率下降、引入额外延时的一种现象。拥塞会造成报文的传输时延、吞吐率低及资源的大量耗费。而在IP分组交换及多业务并存的复杂环境下，拥塞又极为常见。 拥塞避免和拥塞管理就是解决网络拥塞的两种流控方式。 拥">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/尾丢弃.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/RED.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/PQ.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/WRR.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/DRR.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/WFQ.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/PQ+WRR.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/PQ.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/PQ+WFQ.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/CBQ.png">
+<meta property="og:updated_time" content="2019-08-25T01:52:20.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="拥塞管理与拥塞避免">
+<meta name="twitter:description" content="拥塞管理与拥塞避免概述拥塞避免通过指定报文丢弃策略来解除网络过载，拥塞管理通过指定报文调度次序来确保高优先级业务优先被处理。 传统网络所面临的服务质量问题主要由拥塞引起，拥塞是指由于网络资源不足而造成速率下降、引入额外延时的一种现象。拥塞会造成报文的传输时延、吞吐率低及资源的大量耗费。而在IP分组交换及多业务并存的复杂环境下，拥塞又极为常见。 拥塞避免和拥塞管理就是解决网络拥塞的两种流控方式。 拥">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/尾丢弃.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>拥塞管理与拥塞避免 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">拥塞管理与拥塞避免
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-02-06 20:17:17" itemprop="dateCreated datePublished" datetime="2018-02-06T20:17:17+08:00">2018-02-06</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:52:20" itemprop="dateModified" datetime="2019-08-25T09:52:20+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 8,637</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 31</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="拥塞管理与拥塞避免概述"><a href="#拥塞管理与拥塞避免概述" class="headerlink" title="拥塞管理与拥塞避免概述"></a>拥塞管理与拥塞避免概述</h1><p>拥塞避免通过指定报文丢弃策略来解除网络过载，拥塞管理通过指定报文调度次序来确保高优先级业务优先被处理。</p>
+<p>传统网络所面临的服务质量问题主要由拥塞引起，拥塞是指由于网络资源不足而造成速率下降、引入额外延时的一种现象。拥塞会造成报文的传输时延、吞吐率低及资源的大量耗费。而在IP分组交换及多业务并存的复杂环境下，拥塞又极为常见。</p>
+<p>拥塞避免和拥塞管理就是解决网络拥塞的两种流控方式。</p>
+<h2 id="拥塞避免："><a href="#拥塞避免：" class="headerlink" title="拥塞避免："></a>拥塞避免：</h2><p>拥塞避免是指通过监视网络资源（如队列或内存缓冲区）的使用情况，在拥塞发生或有加剧趋势时主动丢弃报文，通过调整网络的流量来解除网络过载的一种流量控制机制。</p>
+<p>设备支持以下拥塞避免功能：</p>
+<ul>
+<li><p>尾部丢弃</p>
+<p>传统的丢弃策略采用尾部丢弃的方法，同等对待所有报文，不对报文进行服务等级的区分。在拥塞发生时，队列尾部的数据报文将被丢弃，直到拥塞解除。</p>
+<p>这种丢弃策略会引起TCP全局同步现象。所谓TCP全局同步现象，是指当多个队列同时丢弃多个TCP连接报文时，将造成一些TCP连接同时进入拥塞避免和慢启动状态，降低流量以解除拥塞；而后这些TCP连接又会在某个时刻同时出现流量高峰。如此反复，使网络流量忽大忽小，影响链路利用率。</p>
+</li>
+<li><p>WRED</p>
+<p>加权随机先期检测WRED（Weighted Random Early Detection）基于丢弃参数随机丢弃报文。考虑到高优先级报文的利益并使其被丢弃的概率相对较小，WRED可以为不同业务的报文指定不同的丢弃策略。此外，通过随机丢弃报文，让多个TCP连接不同时降低发送速度，避免了TCP全局同步现象。</p>
+<p>WRED技术为每个队列的长度都设定了阈值上下限，并规定：</p>
+<ul>
+<li>当队列的长度小于阈值下限时，不丢弃报文。</li>
+<li>当队列的长度大于阈值上限时，丢弃所有新收到的报文。</li>
+<li>当队列的长度在阈值下限和阈值上限之间时，开始随机丢弃新收到的报文。方法是为每个新收到的报文赋予一个随机数，并用该随机数与当前队列的丢弃概率比较，如果大于丢弃概率则报文被丢弃。队列越长，报文被丢弃的概率越高。</li>
+</ul>
+</li>
+</ul>
+<h2 id="拥塞管理："><a href="#拥塞管理：" class="headerlink" title="拥塞管理："></a>拥塞管理：</h2><p>拥塞管理是指在网络间歇性出现拥塞，时延敏感业务要求得到比其它业务更高质量的QoS服务时，通过调整报文的调度次序来满足时延敏感业务高QoS服务的一种流量控制机制。</p>
+<ul>
+<li><p>PQ调度</p>
+<p>PQ（Priority Queuing）调度，就是严格按照队列优先级的高低顺序进行调度。只有高优先级队列中的报文全部调度完毕后，低优先级队列才有调度机会。</p>
+<p>采用PQ调度方式，将延迟敏感的关键业务放入高优先级队列，将非关键业务放入低优先级队列，从而确保关键业务被优先发送。</p>
+<p>PQ调度的缺点是：拥塞发生时，如果较高优先级队列中长时间有分组存在，那么低优先级队列中的报文就会得不到调度机会。</p>
+</li>
+<li><p>WRR调度</p>
+<p>WRR（Weighted Round Robin）调度即加权轮询调度。WRR在队列之间进行轮流调度，保证每个队列都得到一定的服务时间。</p>
+<p>以端口有8个输出队列为例，WRR可为每个队列配置一个加权值（依次为w7、w6、w5、w4、w3、w2、w1、w0），加权值表示获取资源的比重。例如：一个100M的端口，配置它的WRR队列调度算法的加权值为50、50、30、30、10、10、10、10（依次对应w7、w6、w5、w4、w3、w2、w1、w0），这样可以保证最低优先级队列至少获得5Mbit/s带宽，避免了采用PQ调度时低优先级队列中的报文可能长时间得不到服务的缺点。</p>
+<p>WRR还有一个优点是，虽然多个队列的调度是轮询进行的，但对每个队列不是固定地分配服务时间片:如果某个队列为空，那么马上换到下一个队列调度，这样带宽资源可以得到充分的利用。</p>
+<ul>
+<li>WRR调度按照报文个数进行调度，而用户一般关心的是带宽。当每个队列的平均报文长度相等或已知时，通过配置WRR权重，用户能够获得想要的带宽；但是，当队列的平均报文长度变化时，用户就不能通过配置WRR权重获取想要的带宽。</li>
+<li>低延时需求业务（如语音）得不到及时调度。</li>
+</ul>
+</li>
+<li><p>DRR调度</p>
+<p>DRR（Deficit Round Robin）调度实现原理与WRR调度基本相同。</p>
+<p>DRR与WRR的区别是：WRR调度是按照报文个数进行调度，而DRR是按照报文长度进行调度。如果报文长度超过了队列的调度能力，DRR调度允许出现负权重，以保证长报文也能够得到调度。但下次轮循调度时该队列将不会被调度，直到权重为正，该队列才会参与DRR调度。</p>
+<p>DRR调度避免了采用PQ调度时低优先级队列中的报文可能长时间得不到服务的缺点，也避免了各队列报文长度不等或变化较大时，WRR调度不能按配置比例分配带宽资源的缺点。</p>
+<p>但是，DRR调度也具有低延时需求业务（如语音）得不到及时调度的缺点。</p>
+</li>
+<li><p>WFQ调度</p>
+<p>公平队列FQ（Fair Queue）的目的是尽可能公平地分享网络资源，使所有流的延迟和抖动达到最优，让不同队列获得公平的调度机会。WFQ（Weighted Fair Queue）调度即加权公平队列调度，在FQ的基础上增加了优先权方面的考虑，使高优先权的报文获得优先调度的机会多于低优先权的报文。</p>
+<p>WFQ能够按流的“会话”信息（协议类型、源和目的TCP或UDP端口号、源和目的IP地址、ToS域中的优先级位等）自动进行流分类，并且尽可能多地提供队列，以将每个流均匀地放入不同队列中，从而在总体上均衡各个流的延迟。在出队的时候，WFQ按流的优先级（precedence）来分配每个流应占有出口的带宽。优先级的数值越小，所得的带宽越少。优先级的数值越大，所得的带宽越多。</p>
+</li>
+<li><p>PQ+WRR/PQ+DRR/PQ+WFQ调度</p>
+<p>PQ调度和WRR/DRR/WFQ调度各有优缺点。单纯采用PQ调度时，低优先级队列中的报文可能长期得不到调度，而单纯采用WRR/DRR/WFQ调度时低延时需求业务得不到优先调度，“PQ+WRR/PQ+DRR/PQ+WFQ”调度方式则将两种调度方式结合起来，不仅能发挥两种调度的优势，而且能克服两种调度各自的缺点。</p>
+<p>用户可以借助“PQ+WRR/PQ+DRR/PQ+WFQ调度”调度方式，将重要的协议报文和有低延时需求的业务报文放入PQ队列中进行调度，并为该队列分配指定带宽；而将其他报文按各自的优先级放入采用WRR/DRR/WFQ调度的各队列中，按照权值对各队列进行循环调度。</p>
+</li>
+<li><p>CBQ调度</p>
+<p>基于类的加权公平队列CBQ（Class-based Queueing）是对WFQ功能的扩展，为用户提供了定义类的支持。CBQ首先根据IP优先级或者DSCP优先级、输入接口、IP报文的五元组等规则来对报文进行分类，然后让不同类别的报文进入不同的队列。对于不匹配任何类别的报文，送入系统定义的缺省类。</p>
+<ul>
+<li><p>EF队列：满足低时延业务</p>
+<p>EF队列是具有高优先级的队列，一个或多个类的报文可以被设定进入EF队列，不同类别的报文可设定占用不同的带宽。</p>
+<p>设备除了提供普通的EF队列，还支持一种特殊的EF队列—LLQ队列，时延更低。这为对时延敏感的应用（如VoIP业务）提供了良好的服务质量保证。</p>
+<p>由于EF队列中的报文一般是语音报文（VoIP），采用的是UDP报文，所以没有必要采用WRED的丢弃策略，采用尾丢弃策略即可。</p>
+</li>
+<li><p>AF队列：满足需要带宽保证的关键数据业务</p>
+<p>每个AF队列分别对应一类报文，用户可以设定每类报文占用的带宽。在系统调度报文出队的时候，按用户为各类报文设定的带宽将报文出队发送，可以实现各个类的队列的公平调度。当接口有剩余带宽时，AF队列按照权重分享剩余带宽。同时，在接口拥塞的时候，仍然能保证各类报文得到用户设定的最小带宽。</p>
+<p>对于AF队列，当队列的长度达到队列的最大长度时，缺省采用尾丢弃的策略，但用户还可以选择用WRED丢弃策略。</p>
+</li>
+<li><p>BE队列：满足不需要严格QoS保证的尽力发送业务</p>
+<p>当报文不匹配用户设定的所有类别时，报文被送入系统定义的缺省类。虽然允许为缺省类配置AF队列，并配置带宽，但是更多的情况是为缺省类配置BE队列。BE队列使用WFQ调度，使所有进入缺省类的报文进行基于流的队列调度。</p>
+<p>对于BE队列，当队列的长度达到队列的最大长度时，缺省采用尾丢弃的策略，但用户还可以选择用WRED丢弃策略。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="拥塞避免原理描述"><a href="#拥塞避免原理描述" class="headerlink" title="拥塞避免原理描述"></a>拥塞避免原理描述</h1><p>拥塞避免（Congestion Avoidance）是指通过监视网络资源（如队列或内存缓冲区）的使用情况，在拥塞发生或有加剧的趋势时主动丢弃报文，通过调整网络的流量来解除网络过载的一种流控机制。</p>
+<p>拥塞避免常用的两种丢弃报文方式为：尾部丢包策略和WRED。</p>
+<ul>
+<li><p>传统的尾部丢包策略</p>
+<p>传统的丢包策略采用尾部丢弃（Tail-Drop）的方法。当队列的长度达到最大值后，所有新入队列的报文（缓存在队列尾部）都将被丢弃。</p>
+<p>这种丢弃策略会引发TCP全局同步现象，导致TCP连接始终无法建立。所谓TCP全局同步现象如图，三种颜色表示三条TCP连接，当同时丢弃多个TCP连接的报文时，将造成多个TCP连接同时进入拥塞避免和慢启动状态而导致流量降低，之后又会在某个时间同时出现流量高峰，如此反复，使网络流量忽大忽小。</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/尾丢弃.png" alt="尾丢弃"></p>
+<p><center>图：尾部丢包示意图<center></center></center></p>
+</li>
+<li><p>WRED</p>
+<p>为避免TCP全局同步现象，出现了RED（Random Early Detection）技术。RED通过随机地丢弃数据报文，让多个TCP连接不同时降低发送速度，从而避免了TCP的全局同步现象。使TCP速率及网络流量都趋于稳定。</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/RED.png" alt="RED"></p>
+<p><center>图：WRED丢包示意图<center></center></center></p>
+</li>
+</ul>
+<h1 id="拥塞管理原理描述"><a href="#拥塞管理原理描述" class="headerlink" title="拥塞管理原理描述"></a>拥塞管理原理描述</h1><p>随着生活质量的提高，网络业务种类繁多，人们对网络质量的要求也越来越高，有限的带宽与超负荷的网络需求产生冲突，造成网络中时常会出现延迟、信号丢失等情况，这些都是由于拥塞产生的。当网络间歇性的出现拥塞，且时延敏感业务要求得到比非时延敏感业务更高质量的QoS服务时，需要进行拥塞管理；如果配置拥塞管理后仍然出现拥塞，则需要增加带宽。拥塞管理一般采用队列技术，使用不同的调度算法来发送队列中的报文流。</p>
+<p>根据排队和调度策略的不同，WAN接口和二层VE接口上的拥塞管理技术分为PQ、WFQ和PQ+WFQ，设备其余LAN接口上的拥塞管理技术分为PQ、DRR、PQ+DRR、WRR、PQ+WRR。</p>
+<p>设备上，每个接口出方向都拥有4个或8个队列，以队列索引号进行标识，队列索引号分别为0、1、2、3或0、1、2、3、4、5、6、7。设备根据本地优先级和队列之间的映射关系，自动将分类后的报文流送入各队列，然后按照各种队列调度机制进行调度。下面以每个接口8个队列对各种调度方式进行说明。</p>
+<h2 id="PQ调度："><a href="#PQ调度：" class="headerlink" title="PQ调度："></a>PQ调度：</h2><p>PQ调度，针对于关键业务类型应用设计，PQ调度算法维护一个优先级递减的队列系列并且只有当更高优先级的所有队列为空时才服务低优先级的队列。这样，将关键业务的分组放入较高优先级的队列，将非关键业务（如E-Mail）的分组放入较低优先级的队列，可以保证关键业务的分组被优先传送，非关键业务的分组在处理关键业务数据的空闲间隙被传送。</p>
+<p>PQ调度过程如下图：</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/PQ.gif" alt="PQ"></p>
+<p><center>图：PQ调度过程示意图<center></center></center></p>
+<p>如上图Queue7比Queue6具有更高的优先权，Queue6比Queue5具有更高的优先权，依次类推。只要链路能够传输分组，Queue7尽可能快地被服务。只有当Queue7为空，调度器才考虑Queue6。当Queue6有分组等待传输且Queue7为空时，Queue6以链路速率接受类似地服务。当Queue7和Queue6为空时，Queue5以链路速率接收服务，以此类推。</p>
+<p>PQ调度算法对低时延业务非常有用。假定数据流X在每一个节点都被映射到最高优先级队列，那么当数据流X的分组到达时，则分组将得到优先服务。</p>
+<p>然而PQ调度机制会使低优先级队列中的报文得不到调度机会。例如，如果映射到Queue7的数据流在一段时间内以100%的输出链路速率到达，调度器将从不为Queue6及以下的队列服务。</p>
+<p>为了避免队列饥饿，上游设备需要精心规定数据流的业务特性，以确保映射到Queue7的业务流不超出输出链路容量的一定比例，这样Queue7会经常为空，低优先级队列中的报文才能得到调度机会。</p>
+<h2 id="WRR调度："><a href="#WRR调度：" class="headerlink" title="WRR调度："></a>WRR调度：</h2><p>加权循环调度WRR（Weight Round Robin）在循环调度RR（Round Robin）的基础上演变而来，在队列之间进行轮流调度，根据每个队列的权重来调度各队列中的报文流。实际上，RR调度相当于权值为1的WRR调度。</p>
+<p>WRR队列示意图如下图所示：</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/WRR.gif" alt="WRR"></p>
+<p><center>图：WRR调度示意图<center></center></center></p>
+<p>在进行WRR调度时，设备根据每个队列的权值进行轮循调度。调度一轮权值减一，权值减到零的队列不参加调度，当所有队列的权限减到0时，开始下一轮的调度。例如，用户根据需要为接口上8个队列指定的权值分别为4、2、5、3、6、4、2和1。</p>
+<p>各队列中的报文流被调度的次数与该队列的权值成正比，权值越大被调度的次数相对越多。由于WRR调度的以报文为单位，因此每个队列没有固定的带宽，同等调度机会下大尺寸报文获得的实际带宽要大于小尺寸报文获得的带宽。</p>
+<p>WRR调度避免了采用PQ调度时低优先级队列中的报文可能长时间得不到服务的缺点。WRR队列还有一个优点是，虽然多个队列的调度是轮询进行的，但对每个队列不是固定地分配服务时间片——如果某个队列为空，那么马上换到下一个队列调度，这样带宽资源可以得到充分的利用。但WRR调度无法使低延时需求业务得到及时调度。</p>
+<h2 id="DRR调度"><a href="#DRR调度" class="headerlink" title="DRR调度:"></a>DRR调度:</h2><p>DRR（Deficit Round Robin）调度同样也是RR的扩展，相对于WRR来言，解决了WRR只关心报文，同等调度机会下大尺寸报文获得的实际带宽要大于小尺寸报文获得的带宽的问题，在调度过程中考虑包长的因素以达到调度的速率公平性。</p>
+<p>DRR调度中，Deficit表示队列的带宽赤字，初始值为0。每次调度前，系统按权重为各队列分配带宽，计算Deficit值，如果队列的Deficit值大于0，则参与此轮调度，发送一个报文，并根据所发送报文的长度计算调度后Deficit值，作为下一轮调度的依据；如果队列的Deficit值小于0，则不参与此轮调度，当前Deficit值作为下一轮调度的依据。</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/DRR.gif" alt="DRR"></p>
+<p><center>图：DRR调度示意图<center></center></center></p>
+<p>假设用户配置各队列权重为40、30、20、10、40、30、20、10（依次对应Q7、Q6、Q5、Q4、Q3、Q2、Q1、Q0），调度时，队列Q7、Q6、Q5、Q4、Q3、Q2、Q1、Q0依次能够获取20%、15%、10%、5%、20%、15%、10%、5%的带宽。下面以Q7、Q6为例，简要描述DRR队列调度的实现过程（假设Q7队列获取400byte/s的带宽，Q6队列获取300byte/s的带宽）。</p>
+<ul>
+<li><p>第1轮调度</p>
+<p>Deficit[7][1] = 0+400 = 400，Deficit[6][1] = 0+300 = 300，从Q7队列取出一个900byte的报文发送，从Q6队列取出一个400byte的报文发送；发送后，Deficit[7][1] = 400–900 =–500，Deficit[6][1] = 300–400 =–100。</p>
+</li>
+<li><p>第2轮调度</p>
+<p>Deficit[7][2] = -500+400 = -100，Deficit[6][2] = -100+300 = 200，Q7队列Deficit值小于0，此轮不参与调度，从Q6队列取出一个300byte的报文发送；发送后，Deficit[6][2] = 200–300 =–100。</p>
+</li>
+<li><p>第3轮调度</p>
+<p>Deficit[7][3] = -100+400 = 300，Deficit[6][3] = -100+300 = 200，从Q7队列取出一个600byte的报文发送，从Q6队列取出一个500byte的报文发送；发送后，Deficit[7][3] = 300–600 =–300，Deficit[6][3] = 200–500 =–300。</p>
+<p>如此循环调度，最终Q7、Q6队列获取的带宽将分别占总带宽的20%、15%，因此，用户能够通过设置权重获取想要的带宽。</p>
+</li>
+</ul>
+<p>但DRR调度仍然没有解决WRR调度中低延时需求业务得不到及时调度的问题。</p>
+<h2 id="WFQ调度："><a href="#WFQ调度：" class="headerlink" title="WFQ调度："></a>WFQ调度：</h2><p>公平队列FQ（Fair Queuing）的目的是尽可能公平地分享网络资源，使所有流的延迟和抖动达到最优：</p>
+<ul>
+<li>不同的队列获得公平的调度机会，从总体上均衡各个流的延迟。</li>
+<li>短报文和长报文获得公平的调度：如果不同队列间同时存在多个长报文和短报文等待发送，让短报文优先获得调度，从而在总体上减少各个流的报文间的抖动。</li>
+</ul>
+<p>与FQ相比，WFQ（Weighted Fair Queue）在计算报文调度次序时增加了优先权方面的考虑。从统计上，WFQ使高优先权的报文获得优先调度的机会多于低优先权的报文。</p>
+<p>WFQ调度在报文入队列之前，先对流量进行分类，有两种分类方式：</p>
+<ul>
+<li><p>按流的“会话”信息分类：</p>
+<p>根据报文的协议类型、源和目的TCP或UDP端口号、源和目的IP地址、ToS域中的优先级位等自动进行流分类，并且尽可能多地提供队列，以将每个流均匀地放入不同队列中，从而在总体上均衡各个流的延迟。在出队的时候，WFQ按流的优先级（precedence）来分配每个流应占有带宽。优先级的数值越小，所得的带宽越少。优先级的数值越大，所得的带宽越多。这种方式只有CBQ的default-class支持。</p>
+</li>
+<li><p>按优先级分类：</p>
+<p>通过优先级映射把流量标记为本地优先级，每个本地优先级对应一个队列号。每个接口预分配8个队列，报文根据队列号进入队列。默认情况，队列的WFQ权重相同，流量平均分配接口带宽。用户可以通过配置修改权重，高优先权和低优先权按权重比例分配带宽。</p>
+</li>
+</ul>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/WFQ.gif" alt="WFQ"></p>
+<p><center>图：WFQ调度示意图<center></center></center></p>
+<h2 id="PQ-WRR调度："><a href="#PQ-WRR调度：" class="headerlink" title="PQ+WRR调度："></a>PQ+WRR调度：</h2><p>PQ调度和WRR调度各有优缺点，为了克服单纯采用PQ调度或WRR调度时的缺点，PQ+WRR调度以发挥两种调度的各自优势，不仅可以通过WRR调度可以让低优先级队列中的报文也能及时获得带宽，而且可以通过PQ调度可以保证了低延时需求的业务能优先得到调度。</p>
+<p>在设备上，用户可以配置队列的WRR参数，根据配置将接口上的8个队列分为两组，一组（例如Queue7、Queue6、Queue5）采用PQ调度，另一组（例如Queue4、Queue3、Queue2、Queue1和Queue0队列）采用WRR调度。设备上只有LAN侧接口支持PQ+WRR调度。</p>
+<p>PQ+WRR调度示意图如下：</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/PQ+WRR.gif" alt="PQ+WRR"></p>
+<p><center>图：PQ+WRR混合调度示意图<center></center></center></p>
+<p>在调度时，设备首先按照PQ方式调度Queue7、Queue6、Queue5队列中的报文流，只有这些队列中的报文流全部调度完毕后，才开始以WRR方式循环调度其他队列中的报文流。Queue4、Queue3、Queue2、Queue1和Queue0队列包含自己的权值。重要的协议报文和有低延时需求的业务报文应放入采用PQ调度的队列中，得到优先调度的机会，其余报文放入以WRR方式调度的各队列中。</p>
+<h2 id="PQ-DRR调度："><a href="#PQ-DRR调度：" class="headerlink" title="PQ+DRR调度："></a>PQ+DRR调度：</h2><p>与PQ+WRR相似，其集合了PQ调度和DRR调度各有优缺点。单纯采用PQ调度时，低优先级队列中的报文流长期得不到带宽，而单纯采用DRR调度时低延时需求业务（如语音）得不到优先调度，如果将两种调度方式结合起来形成PQ+DRR调度，不仅能发挥两种调度的优势，而且能克服两种调度各自的缺点。</p>
+<p>设备接口上的8个队列被分为两组，用户可以指定其中的某几组队列进行PQ调度，其他队列进行DRR调度。</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/PQ.png" alt="PQ"></p>
+<p><center>图：PQ+DRR调度示意图<center></center></center></p>
+<p>如上图，在调度时，设备首先按照PQ方式优先调度Queue7、Queue6和Queue5队列中的报文流，只有这些队列中的报文流全部调度完毕后，才开始以DRR方式调度Queue4、Queue3、Queue2、Queue1和Queue0队列中的报文流。其中，Queue4、Queue3、Queue2、Queue1和Queue0队列包含自己的权值。</p>
+<p>重要的协议报文以及有低延时需求的业务报文应放入需要进行PQ调度的队列中，得到优先调度的机会，其他报文放入以DRR方式调度的各队列中。</p>
+<h2 id="PQ-WFQ调度："><a href="#PQ-WFQ调度：" class="headerlink" title="PQ+WFQ调度："></a>PQ+WFQ调度：</h2><p>与PQ+WRR相似，其集合了PQ调度和WFQ调度各有优缺点。单纯采用PQ调度时，低优先级队列中的报文流长期得不到带宽，而单纯采用WFQ调度时低延时需求业务（如语音）得不到优先调度，如果将两种调度方式结合起来形成PQ+WFQ调度，不仅能发挥两种调度的优势，而且能克服两种调度各自的缺点。</p>
+<p>设备接口上的8个队列被分为两组，用户可以指定其中的某几组队列进行PQ调度，其他队列进行WFQ调度。V200R008C30及以前版本，只有WAN侧接口支持PQ+WFQ调度。V200R008C50及以后版本，WAN侧接口和二层VE接口支持PQ+WFQ调度。</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/PQ+WFQ.png" alt="PQ+WFQ"></p>
+<p><center>图：PQ+WFQ调度示意图<center></center></center></p>
+<p>如上图,在调度时，设备首先按照PQ方式优先调度Queue7、Queue6和Queue5队列中的报文流，只有这些队列中的报文流全部调度完毕后，才开始以WFQ方式调度Queue4、Queue3、Queue2、Queue1和Queue0队列中的报文流。其中，Queue4、Queue3、Queue2、Queue1和Queue0队列包含自己的权值。</p>
+<p>重要的协议报文以及有低延时需求的业务报文应放入需要进行PQ调度的队列中，得到优先调度的机会，其他报文放入以WFQ方式调度的各队列中。</p>
+<h2 id="CBQ调度："><a href="#CBQ调度：" class="headerlink" title="CBQ调度："></a>CBQ调度：</h2><p>CBQ（Class-based Queueing）基于类的加权公平队列是对WFQ功能的扩展，为用户提供了定义类的支持。CBQ首先根据IP优先级或者DSCP优先级、输入接口、IP报文的五元组等规则来对报文进行分类，然后让不同类别的报文进入不同的队列。对于不匹配任何类别的报文，送入系统定义的缺省类。</p>
+<p><img src="/2018/02/06/拥塞管理与拥塞避免/CBQ.png" alt="CBQ"></p>
+<p><center>图：CBQ调度示意图<center></center></center></p>
+<p>CBQ提供三类队列：</p>
+<ol>
+<li>EF队列：满足低时延业务</li>
+<li>AF队列：满足需要带宽保证的关键数据业务BE队列：满足不需要</li>
+<li>严格QoS保证的尽力发送业务</li>
+</ol>
+<ul>
+<li><p>确保转发队列（AF）：可以保证在网络发送的业务流量没有超过最小可确保带宽的情况下，此队列中报文的丢失概率非常低。确保转发适用于流量较大，且需要被保证的业务。 </p>
+</li>
+<li><p>加速转发队列（EF）：匹配规则的报文进入EF队列后，进行绝对优先级调度，仅当EF队列中的报文调度完毕后，才会调度其他队列中的报文。而且当AF或BE队列有空闲带宽时，EF队列可以对空闲带宽进行占用。加速转发适用于需要保证低延时、低丢弃概率、确保带宽、且占用带宽不是很大的业务，例如语音报文。</p>
+<p>设备除了提供普通的EF队列，还支持一种特殊的EF队列—LLQ队列。LLQ队列较EF队列而言，时延更低。</p>
+</li>
+<li><p>尽力而为队列（BE）：与系统定义的缺省类<strong>default-class</strong>关联使用，未进入AF队列和EF队列的剩余报文进入BE队列。BE队列使用WFQ算法调度，队列数越多，带宽被分享的越公平，但是占用的队列资源相对也多。WFQ调度的BE队列适用于那些对时延和丢包无特殊要求的业务，例如普通上网业务。 </p>
+</li>
+</ul>
+<h2 id="思科和华为WFQ的对比："><a href="#思科和华为WFQ的对比：" class="headerlink" title="思科和华为WFQ的对比："></a>思科和华为WFQ的对比：</h2><h3 id="Cisco-WFQ-4096子队列-："><a href="#Cisco-WFQ-4096子队列-：" class="headerlink" title="Cisco WFQ(4096子队列)："></a>Cisco WFQ(4096子队列)：</h3><ol>
+<li><p>入队方式:基于流（通过6元组做Hash）。</p>
+</li>
+<li><p>调度方式：FT=finish time， FT=packert length/(IPP+1)</p>
+<p>cisco优化后的公式：weight=32284/(IP优先级+1)。</p>
+</li>
+<li><p>丢弃方式：CDT（8）和HQO（总队列长度）（10）。</p>
+</li>
+</ol>
+<h3 id="HUAWEI-WFQ："><a href="#HUAWEI-WFQ：" class="headerlink" title="HUAWEI WFQ："></a>HUAWEI WFQ：</h3><ol>
+<li><p>入队方式：基于流，只用于CBQ中的default-class。</p>
+<p>​                    基于类,用于接口下配置。</p>
+</li>
+<li><p>调度方式：基于类的调度，为每一个自队列都分配一个权重，从而计算子队列的带宽。</p>
+<p>​      基于流的调度机制见上面WFQ部分的介绍。</p>
+</li>
+<li><p>丢弃方式：Tail-drop。</p>
+<p>​                      WRED。</p>
+</li>
+</ol>
+<h2 id="各种队列调度技术的优缺点："><a href="#各种队列调度技术的优缺点：" class="headerlink" title="各种队列调度技术的优缺点："></a>各种队列调度技术的优缺点：</h2><table>
+<thead>
+<tr>
+<th>队列技术</th>
+<th>调度的时延/抖动（在速率低的时候明显，速度绝对高的时候可忽略）</th>
+<th>公平性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FIFO</td>
+<td>差</td>
+<td>无</td>
+</tr>
+<tr>
+<td>RR</td>
+<td>差</td>
+<td>依赖包长</td>
+</tr>
+<tr>
+<td>WRR</td>
+<td>差</td>
+<td>依赖包长</td>
+</tr>
+<tr>
+<td>PQ</td>
+<td>高优先级队列的时延控制非常好</td>
+<td>无</td>
+</tr>
+<tr>
+<td>CQ</td>
+<td>配置字节数小的时候，带宽分配不准确，当  配置字节数大的时候，时延抖动比较大差</td>
+<td>一般</td>
+</tr>
+<tr>
+<td>WFQ</td>
+<td>时延控制较好，抖动小</td>
+<td>好</td>
+</tr>
+</tbody>
+</table>
+<p><strong>（一）FIFO：</strong></p>
+<p>优点：</p>
+<ol>
+<li>简单。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>没有公平性，不同的流之间不互相隔离，当某一个流的带宽太大的时候会占用其他流的带宽，并且造成其他流的时延增加。</li>
+<li>当拥塞发生的时候，FIFO对一部分报文进行丢弃。TCP的连接发现有丢包后，会降低传输的速度，来主动的避免拥塞，但是UDP是非连接的，不降低发送速率。导致FIFO中TCP和UDP的报文不平衡，TCP的流量太低。</li>
+<li>一条流的突发流量可能占用全部buffer，将其他的流量全都阻断。</li>
+</ol>
+<p><strong>（二）RR：</strong></p>
+<p>优点：</p>
+<ol>
+<li>隔离了不同的流，实现了队列之间对带宽的平等利用。</li>
+<li>剩余带宽能够被其他队列平均分配。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>无法设置队列占用带宽的权重；</li>
+<li>当不同队列中的报文长度不一的时候，调度不准确；</li>
+<li>当调度速率低的时候，时延和抖动的问题比较突出，比如一个包到达一个空队列，而这个队列刚刚被调度完毕，则这个包要等到其他全部的队列调度完才能取得出接口的机会，这样会导致抖动比较大，但是如果调度速度非常高，则这种时延可以忽略，RR在高速路由器内部有很多应用。</li>
+</ol>
+<p><strong>（三）WRR：</strong></p>
+<p>优点：</p>
+<ol>
+<li>能够按照权重来分配带宽，某个队列的剩余带宽能够为其他队列公平占用，低优先级的队列同样能够得到调度，不存在饥饿的问题。</li>
+<li>实现简单、复杂度低。</li>
+<li>适合diffserv聚合后的端口。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>与RR调度算法一致，在报文长度不一致的时候，调度不准确。</li>
+<li>在调度速率低的时候报文的时延控制的不好，时延抖动无法预期。</li>
+</ol>
+<p><strong>（四）PQ</strong></p>
+<p>优点：</p>
+<ol>
+<li>高优先级队列的时延控制非常好。</li>
+<li>实现简单，能够区分多种业务。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>无法做到带宽的合理分配，高优先级的流量比较大的时候，导致低优先级的“饿死（starvation）”。</li>
+<li>高优先级的时延得到保证的代价是牺牲低优先级的时延。</li>
+<li>如果高优先级传送TCP流量，低优先级传送UDP流量，则TCP增加传送速率，导致UDP流量无法得到足够的带宽。</li>
+</ol>
+<p><strong>（五）CQ</strong></p>
+<p>优点：</p>
+<ol>
+<li>按照比例来分配带宽，当某个队列的流量小的时候，其他队列能等比的占用带宽。</li>
+<li>实现简单。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>当配置字节数小的时候，带宽分配不准确，当配置字节数大的时候，时延抖动比较大。</li>
+</ol>
+<p><strong>（六）WFQ</strong></p>
+<p>优点：</p>
+<ol>
+<li>按照字节粒度进行调度，调度公平。</li>
+<li>能区分业务，分配权重。</li>
+<li>时延控制的好，抖动小。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>实现复杂。</li>
+</ol>
+<h1 id="配置命令行"><a href="#配置命令行" class="headerlink" title="配置命令行"></a>配置命令行</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">display drop-profile</span><br><span class="line"><span class="comment">//查看WRED丢弃模板的配置信息。</span></span><br><span class="line">display qos <span class="built_in">queue</span> statistics</span><br><span class="line"><span class="comment">//查看接口上基于队列的流量统计信息。</span></span><br><span class="line">display qos <span class="built_in">queue</span>-profile</span><br><span class="line"><span class="comment">//查看已配置的队列模板信息。</span></span><br><span class="line">dscp discard-percentage</span><br><span class="line"><span class="comment">//配置基于DSCP优先级的WRED模板参数，包括丢弃上下门限百分比和最大丢弃概率。</span></span><br><span class="line"><span class="comment">//缺省情况下，WRED模板的丢弃下限百分比为30</span></span><br><span class="line"><span class="comment">//丢弃上限百分比为100，最大丢弃概率值为10。</span></span><br><span class="line">ip-precedence discard-percentage</span><br><span class="line"><span class="comment">//配置基于IP优先级的WRED模板参数，包括丢弃上下限百分比和最大丢弃概率。</span></span><br><span class="line">drop-profile</span><br><span class="line"><span class="comment">//在系统视图下，创建丢弃模板并进入丢弃模板视图</span></span><br><span class="line"><span class="comment">//在流行为中为AF队列或使用WFQ方式调度的BE队列绑定丢弃模板。</span></span><br><span class="line">qos <span class="built_in">queue</span>-profile</span><br><span class="line"><span class="comment">//在接口下应用队列模板。</span></span><br><span class="line"><span class="comment">//创建队列模板并进入队列模板视图</span></span><br><span class="line"><span class="built_in">queue</span> af bandwidth </span><br><span class="line"><span class="comment">//配置对匹配一定规则的某一类报文进行确保转发</span></span><br><span class="line"><span class="comment">//（Assured-forwarding），并配置可确保的最小带宽。</span></span><br><span class="line"><span class="built_in">queue</span> drop-profile</span><br><span class="line"><span class="comment">//在队列模板中为指定队列绑定丢弃模板。</span></span><br><span class="line"><span class="built_in">queue</span> ef </span><br><span class="line"><span class="comment">//配置对匹配一定规则的某一类报文进行加速转发</span></span><br><span class="line"><span class="comment">//（Expedited-forwarding），并配置最大允许带宽。</span></span><br><span class="line"><span class="comment">//cbs:指定承诺突发尺寸，即瞬间能够通过的承诺突发流量。</span></span><br><span class="line"><span class="comment">//pct:指定可确保的最大带宽占接口可用带宽的百分比。</span></span><br><span class="line"><span class="built_in">queue</span> length</span><br><span class="line"><span class="comment">//在队列模板中配置各队列的长度。</span></span><br><span class="line"><span class="built_in">queue</span>-length</span><br><span class="line"><span class="comment">//在流行为中配置队列的最大长度。</span></span><br><span class="line"><span class="built_in">queue</span> llq</span><br><span class="line"><span class="comment">//配置对匹配一定规则的某一类报文进行低延时转发，并配置允许的最大带宽。</span></span><br><span class="line"><span class="built_in">queue</span> weight</span><br><span class="line"><span class="comment">//用来在队列模板中配置队列的权重。</span></span><br><span class="line"><span class="built_in">queue</span> wfq</span><br><span class="line"><span class="comment">//用来配置缺省类报文进入使用WFQ方式调度的BE队列，并配置队列的总数。</span></span><br><span class="line"><span class="comment">//缺省情况下，系统未配置缺省类报文进入使用WFQ方式调度的BE队列。</span></span><br><span class="line">reset qos <span class="built_in">queue</span> statistics</span><br><span class="line"><span class="comment">//清除接口上基于队列的流量统计信息。</span></span><br><span class="line">schedule</span><br><span class="line"><span class="comment">//在队列模板中配置各队列之间的调度关系。</span></span><br><span class="line">wred &#123; dscp | ip-precedence &#125;</span><br><span class="line"><span class="comment">//用来指定当前WRED丢弃模板基于DSCP优先级或IP优先级进行丢弃。</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//配置拥塞管理和拥塞避免示例：</span></span><br><span class="line">drop-profile data                             #                                  </span><br><span class="line">wred dscp</span><br><span class="line">  dscp af31 low-limit <span class="number">40</span> high-limit <span class="number">60</span> discard-percentage <span class="number">40</span>                      </span><br><span class="line">  dscp af32 low-limit <span class="number">50</span> high-limit <span class="number">70</span> discard-percentage <span class="number">30</span>                      </span><br><span class="line">#                                                                               </span><br><span class="line">drop-profile video                                       </span><br><span class="line">wred dscp</span><br><span class="line">  dscp af43 low-limit <span class="number">60</span> high-limit <span class="number">80</span> discard-percentage <span class="number">20</span>                      </span><br><span class="line">#                                                                               </span><br><span class="line">qos <span class="built_in">queue</span>-profile <span class="built_in">queue</span>-profile1                                                </span><br><span class="line">  <span class="built_in">queue</span> <span class="number">3</span> drop-profile data                                                     </span><br><span class="line">  <span class="built_in">queue</span> <span class="number">4</span> drop-profile video                                                    </span><br><span class="line">  schedule wfq <span class="number">3</span> to <span class="number">4</span> pq <span class="number">5</span>                                                      </span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/" title="拥塞管理与拥塞避免">https://cshihong.github.io/2018/02/06/拥塞管理与拥塞避免/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/路由基础/" rel="tag"># 路由基础</a>
+          
+            <a href="/tags/QoS/" rel="tag"># QoS</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/05/QoS概述/" rel="next" title="QoS概述">
+                <i class="fa fa-chevron-left"></i> QoS概述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/07/流量监管和流量整形/" rel="prev" title="流量监管和流量整形">
+                流量监管和流量整形 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#拥塞管理与拥塞避免概述"><span class="nav-number">1.</span> <span class="nav-text">拥塞管理与拥塞避免概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#拥塞避免："><span class="nav-number">1.1.</span> <span class="nav-text">拥塞避免：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#拥塞管理："><span class="nav-number">1.2.</span> <span class="nav-text">拥塞管理：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拥塞避免原理描述"><span class="nav-number">2.</span> <span class="nav-text">拥塞避免原理描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#拥塞管理原理描述"><span class="nav-number">3.</span> <span class="nav-text">拥塞管理原理描述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PQ调度："><span class="nav-number">3.1.</span> <span class="nav-text">PQ调度：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WRR调度："><span class="nav-number">3.2.</span> <span class="nav-text">WRR调度：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DRR调度"><span class="nav-number">3.3.</span> <span class="nav-text">DRR调度:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WFQ调度："><span class="nav-number">3.4.</span> <span class="nav-text">WFQ调度：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PQ-WRR调度："><span class="nav-number">3.5.</span> <span class="nav-text">PQ+WRR调度：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PQ-DRR调度："><span class="nav-number">3.6.</span> <span class="nav-text">PQ+DRR调度：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PQ-WFQ调度："><span class="nav-number">3.7.</span> <span class="nav-text">PQ+WFQ调度：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CBQ调度："><span class="nav-number">3.8.</span> <span class="nav-text">CBQ调度：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#思科和华为WFQ的对比："><span class="nav-number">3.9.</span> <span class="nav-text">思科和华为WFQ的对比：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Cisco-WFQ-4096子队列-："><span class="nav-number">3.9.1.</span> <span class="nav-text">Cisco WFQ(4096子队列)：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HUAWEI-WFQ："><span class="nav-number">3.9.2.</span> <span class="nav-text">HUAWEI WFQ：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#各种队列调度技术的优缺点："><span class="nav-number">3.10.</span> <span class="nav-text">各种队列调度技术的优缺点：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置命令行"><span class="nav-number">4.</span> <span class="nav-text">配置命令行</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/02/06/拥塞管理与拥塞避免/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

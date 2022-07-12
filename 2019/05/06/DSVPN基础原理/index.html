@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="GRE over IPSec的缺陷GRE over IPSec的缺陷： 图：企业典型的Hub-Spoke组网（配置DSVNP之前）  如上图，如果一个公司又很多分支站点，采用GRE over IPSec的话会存在如下缺点：  IPSec隧道集中在Hub点，所有流量都穿越Hub点。 所有流量通过总部封装和解封装时，会引入额外的网络延时。 每增加一个新的Sopke点，Hub点都必须被配置。 若Spok">
+<meta name="keywords" content="IPSec VPN,VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DSVPN基础原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="GRE over IPSec的缺陷GRE over IPSec的缺陷： 图：企业典型的Hub-Spoke组网（配置DSVNP之前）  如上图，如果一个公司又很多分支站点，采用GRE over IPSec的话会存在如下缺点：  IPSec隧道集中在Hub点，所有流量都穿越Hub点。 所有流量通过总部封装和解封装时，会引入额外的网络延时。 每增加一个新的Sopke点，Hub点都必须被配置。 若Spok">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/配置之前.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/配置之后.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/DSVPN.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/注册.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/normal.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/shortcut.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/nhrp交互.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/封装.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/注册报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/注册回应.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/通信.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/nhrp_request.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/nhrp_reply.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/shortcut1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/shortcut2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/nhrp专题.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/hub端路由表.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/Spoke2状态.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/shortcut路由表.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/shortcut%20nhrp.png">
+<meta property="og:updated_time" content="2019-05-07T09:50:16.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DSVPN基础原理">
+<meta name="twitter:description" content="GRE over IPSec的缺陷GRE over IPSec的缺陷： 图：企业典型的Hub-Spoke组网（配置DSVNP之前）  如上图，如果一个公司又很多分支站点，采用GRE over IPSec的话会存在如下缺点：  IPSec隧道集中在Hub点，所有流量都穿越Hub点。 所有流量通过总部封装和解封装时，会引入额外的网络延时。 每增加一个新的Sopke点，Hub点都必须被配置。 若Spok">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/05/06/DSVPN基础原理/配置之前.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/05/06/DSVPN基础原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DSVPN基础原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/05/06/DSVPN基础原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">DSVPN基础原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-06 16:48:24" itemprop="dateCreated datePublished" datetime="2019-05-06T16:48:24+08:00">2019-05-06</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-05-07 17:50:16" itemprop="dateModified" datetime="2019-05-07T17:50:16+08:00">2019-05-07</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 6,058</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 24</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="GRE-over-IPSec的缺陷"><a href="#GRE-over-IPSec的缺陷" class="headerlink" title="GRE over IPSec的缺陷"></a>GRE over IPSec的缺陷</h1><h2 id="GRE-over-IPSec的缺陷："><a href="#GRE-over-IPSec的缺陷：" class="headerlink" title="GRE over IPSec的缺陷："></a>GRE over IPSec的缺陷：</h2><p><img src="/2019/05/06/DSVPN基础原理/配置之前.png" alt="配置之前"></p>
+<center>图：企业典型的Hub-Spoke组网（配置DSVNP之前）</center>
+
+<p>如上图，如果一个公司又很多分支站点，采用GRE over IPSec的话会存在如下缺点：</p>
+<ul>
+<li>IPSec隧道集中在Hub点，所有流量都穿越Hub点。</li>
+<li>所有流量通过总部封装和解封装时，会引入额外的网络延时。</li>
+<li>每增加一个新的Sopke点，Hub点都必须被配置。</li>
+<li>若Spoke点的公网地址是动态变化的，部署点到点的GRE会存在问题。</li>
+</ul>
+<h1 id="DSVPN原理介绍"><a href="#DSVPN原理介绍" class="headerlink" title="DSVPN原理介绍"></a>DSVPN原理介绍</h1><h2 id="DSVNP简介："><a href="#DSVNP简介：" class="headerlink" title="DSVNP简介："></a>DSVNP简介：</h2><p>动态智能VPN（Dynamic Smart Virtual Private Network），简称DSVPN，是一种在Hub-Spoke组网方式下为公网地址动态变化的分支之间建立VPN隧道的解决方案。</p>
+<blockquote>
+<p><strong>DSVPN是华为私有协议。</strong></p>
+</blockquote>
+<h3 id="DSVNP的目的："><a href="#DSVNP的目的：" class="headerlink" title="DSVNP的目的："></a>DSVNP的目的：</h3><p><strong>为什么需要DSVPN？</strong> </p>
+<blockquote>
+<p>因为GRE OVER IPSEC缺点比较多<br>A. 流量都需要经过HUB<br>B. 增加分部都需要配置<br>C. 分部非固定IP地址 </p>
+</blockquote>
+<p>DSVPN解决方案，它通过将下一跳解析协议NHRP（Next Hop Resolution Protocol）和mGRE（multipoint Generic Routing Encapsulation）技术与IPSec相结合解决了GRE over IPSec的缺陷：</p>
+<ul>
+<li>DSVPN通过NHRP协议动态收集、维护和发布各节点的公网地址等信息，解决了源分支无法获取目的分支公网地址的问题，从而可在分支与分支之间建立动态VPN隧道，实现分支与分支间的直接通信，进而减轻总部的负担、避免网络延时。</li>
+<li>DSVPN借助mGRE技术，使VPN隧道能够传输组播报文和广播报文，并且一个Tunnel接口可与多个对端建立VPN隧道，减少了配置VPN隧道的工作量；在新增分支或分支公网地址发生变化时，也能自动维护总部与分支之间的隧道关系，而不用调整总部的隧道配置，使得网络维护变得更智能化。</li>
+</ul>
+<p><img src="/2019/05/06/DSVPN基础原理/配置之后.png" alt="配置之后"></p>
+<center>图：企业Hub-spoke组网（配置DSVPN之后）</center>
+
+<h3 id="使用DSVPN的优点："><a href="#使用DSVPN的优点：" class="headerlink" title="使用DSVPN的优点："></a>使用DSVPN的优点：</h3><ul>
+<li><p>降低VPN网络构建成本</p>
+<p>DSVPN可以实现分支和总部以及分支之间的动态全连接，分支不需要单独购买静态的公网地址，节省企业开支。</p>
+</li>
+<li><p>简化总部Hub和分支Spoke配置</p>
+<p>总部Hub和分支Spoke上配置的Tunnel接口从多个点对点GRE隧道接口变更为一个mGRE隧道接口。当为DSVPN网络添加新的分支Spoke时，企业网络管理员不需要更改总部Hub或任何当前分支Spoke上的配置，只需在新的分支Spoke进行配置，之后新的分支Spoke自动向总部Hub进行动态注册。</p>
+</li>
+<li><p>降低分支间数据传输时延</p>
+<p>由于分支间可以动态构建隧道，业务数据可以直接转发，不用再经过总部，减少了数据转发的延迟，提升了转发性能和效率。</p>
+</li>
+</ul>
+<h2 id="DSVPN基本概念："><a href="#DSVPN基本概念：" class="headerlink" title="DSVPN基本概念："></a>DSVPN基本概念：</h2><p>DSVPN典型网络架构：</p>
+<p><img src="/2019/05/06/DSVPN基础原理/DSVPN.png" alt="DSVPN"></p>
+<center>图：DSVNP典型网络架构</center>
+
+<p>企业通过总部Hub端与多个分支Spoke相连，Hub端使用静态公网地址，Spoke可以使用动态的公网地址。在该网络中，当源Spoke需要向目的Spoke发送数据报文时，源Spoke将通过与Hub之间的静态mGRE隧道交换NHRP协议获取目的Spoke的公网地址，并与目的Spoke建立动态的mGRE隧道。隧道建立完成后，Spoke与Spoke之间的数据报文将通过该动态mGRE隧道直接发送给对方，不载经过总部Hub中转。</p>
+<h3 id="DSVPN节点："><a href="#DSVPN节点：" class="headerlink" title="DSVPN节点："></a>DSVPN节点：</h3><p>DSVPN节点为部署DSVPN的设备，包括Spoke和Hub两种形态。</p>
+<ul>
+<li><p><strong>Spoke</strong></p>
+<p>Spoke通常是企业分支的网关设备。一般情况下，Spoke使用动态的公网地址。</p>
+</li>
+<li><p><strong>Hub</strong></p>
+<p>Hub通常是企业总部的网关设备，接收Spoke向其注册的信息。DSVPN网络中，Hub既可使用固定的公网地址，也可使用域名。</p>
+</li>
+</ul>
+<h3 id="DSVPN框架："><a href="#DSVPN框架：" class="headerlink" title="DSVPN框架："></a>DSVPN框架：</h3><p>MGRE  ——–多点GRE<br>MGRE隧道分类： </p>
+<ul>
+<li><p>静态隧道 —–   spoke—hub </p>
+</li>
+<li><p>动态隧道——  spoke —spoke </p>
+</li>
+</ul>
+<h3 id="mGRE、mGRE隧道接口和mGRE隧道："><a href="#mGRE、mGRE隧道接口和mGRE隧道：" class="headerlink" title="mGRE、mGRE隧道接口和mGRE隧道："></a>mGRE、mGRE隧道接口和mGRE隧道：</h3><p>mGRE是在GRE（Generic Routing Encapsulation）基础上发展而来的一种点到多点GRE技术。它将传统GRE隧道点到点（P2P）类型的Tunnel接口扩展成了点到多点（P2MP）类型的mGRE隧道接口。通过改变接口类型，Hub或Spoke上只需要配置一个Tunnel接口便可与多个对端建立隧道，从而减少了配置GRE隧道的工作量。</p>
+<p>mGRE隧道接口包含：</p>
+<ul>
+<li>隧道源地址：GRE封装后的报文源地址。</li>
+<li>隧道目的地址：GREP封装后的报文目的地址。mGRE隧道的目的地址不能手工指定，该地址需要来自NHRP协议。</li>
+<li>隧道接口IP地址。</li>
+</ul>
+<blockquote>
+<p>mGRE隧道接口不支持GRE隧道的Keepalive检测。</p>
+</blockquote>
+<p>采用mGRE隧道接口建立起来的GRE隧道称为mGRE隧道。mGRE隧道分为静态mGRE隧道和动态mGRE隧道两种：</p>
+<ul>
+<li>静态mGRE隧道建立于分支Spoke与总部Hub之间，静态mGRE隧道永久存在。</li>
+<li>动态mGRE隧道建立于各分支Spoke之间，动态mGRE隧道在一定周期内没有流量转发将自动拆除。</li>
+</ul>
+<h2 id="NHRP协议和NHRP映射表："><a href="#NHRP协议和NHRP映射表：" class="headerlink" title="NHRP协议和NHRP映射表："></a>NHRP协议和NHRP映射表：</h2><p>NHRP（Next Hop REsolution Protocol）即下一跳地址解析协议。</p>
+<blockquote>
+<p>1.为什么需要NHRP？<br>NHRP解决非直连穿越互联网映射<br>解决非固定IP地址</p>
+<p>2.NHRP是什么？<br>NHRP映射 TUNNLE到公网IP地址  </p>
+</blockquote>
+<h3 id="基本原理："><a href="#基本原理：" class="headerlink" title="基本原理："></a><strong>基本原理：</strong></h3><p>源Spoke（隧道发起方）以到目的Spoke（隧道响应方）路由的下一跳地址为索引，向目的Spoke发送NHRP地址解析请求，目的Spoke收到该地址请求后将向源Spoke返回其公网地址。源Spoke获取到目的Spoke的公网地址后，两者之间将建立动态的mGRE隧道。</p>
+<h3 id="主要功能："><a href="#主要功能：" class="headerlink" title="主要功能："></a>主要功能：</h3><ul>
+<li>解决非点到点直连网络跨互联网映射问题。</li>
+<li>在DSVNP网络中，源Spoke利用NHRP协议获取对端Spoke的公网地址，类似于IP-MAC或IP-DHCI号的对应关系。</li>
+<li>解决动态IP问题。</li>
+</ul>
+<h3 id="NHRP协议映射表："><a href="#NHRP协议映射表：" class="headerlink" title="NHRP协议映射表："></a>NHRP协议映射表：</h3><blockquote>
+<p>NHRP映射方式：<br>静态映射<br>spoke—-hub </p>
+<p>动态映射<br>hub-spoke</p>
+</blockquote>
+<p>NHRP映射表是有关Tunnel地址和公网地址的映射关系表。</p>
+<p>按照生成方式的不同，NHRP映射表分为静态表项和动态表项两种：</p>
+<ul>
+<li><p>静态表项：由网络管理员手工配置。</p>
+<p>例如：Spoke要与Hub建立静态mGRE隧道，管理员就需要在Spoke上手工配置Hub的Tunnel地址和公网地址。</p>
+</li>
+<li><p>动态表项：它是由NHRP协议动态生成的表项。</p>
+<p>例如，Hub通过NHRP注册报文提取各Spoke的Tunnel地址和公网地址而生成的NHRP映射表；各Spoke通过NHRP解析报文提取对端Spoke的Tunnel地址/子网地址和公网地址而生成的NHRP映射表。</p>
+</li>
+</ul>
+<h2 id="DSVPN基本原理："><a href="#DSVPN基本原理：" class="headerlink" title="DSVPN基本原理："></a>DSVPN基本原理：</h2><p>DSVPN实现分支之间直接通信的关键是在分支之间建立隧道。DSVPN利用mGRE结合NHRP来建立分支之间的隧道。</p>
+<p>mGRE与NHRP结合建立隧道的基本原理是：当设备转发一个IP报文时，根据路由表将IP报文传给下一跳的出接口mGRE隧道接口，mGRE在NHRP映射表中查找获取下一跳地址映射的对端公网地址。然后mGRE封装IP报文，加上新IP头，目的地址就是对端的公网地址，这样IP报文就能发向隧道对端，隧道即可建立。</p>
+<p>可见，NHRP映射表和路由表是mGRE与NHRP结合建立隧道的重要依据。如果一端分支有对端分支Tunnel地址/子网地址与公网地址的NHRP映射、有到对端分支的路由，那么分支间就可建立mGRE隧道。而DSVPN网络开始时，分支Spoke只有一个静态配置的NHRP映射表（Hub的Tunnel地址与公网地址的映射），也只有到总部Hub的路由。因此，分支间无法直接建立隧道，只能先借助Hub学习到彼此的路由、生成彼此Tunnel地址/子网地址与公网地址的NHRP映射。这一过程主要分为如下三个环节：</p>
+<ol>
+<li><p>建立Spoke与Hub之间的mGRE隧道</p>
+<p>这一环节的目的是打通分支到分支报文转发的通道，使得一端分支的报文可以借助Hub转发到另一端分支。</p>
+<p>DSVPN在Spoke与Hub之间建立的mGRE隧道是一种静态隧道，无论Spoke与Hub间是否有流量经过，该隧道一直存在。</p>
+</li>
+<li><p>分支间路由学习</p>
+<p>这一环节的目的是生成一端分支到另一端分支的路由。</p>
+</li>
+<li><p>建立Spoke与Spoke之间的mGRE隧道</p>
+<p>这一环节的目的是建立用于分支间直接通信的通道。当一个分支向另一个分支转发数据报文时，如果源Spoke找不到目的Spoke的公网地址，则会触发DSVPN建立Spoke与Spoke之间的mGRE隧道。</p>
+<p>Spoke与Spoke之间建立的mGRE隧道是一种动态隧道，当Spoke与Spoke间有流量通过时，隧道自动保活；当一定周期内没有流量经过时，隧道自动拆除。</p>
+</li>
+</ol>
+<p>Spoke与Spoke之间的mGRE隧道建成后，分支间的数据报文即可通过该隧道直接转发，不再经过Hub中转。</p>
+<h3 id="建立Spoke与Hub之间的mGRE隧道过程："><a href="#建立Spoke与Hub之间的mGRE隧道过程：" class="headerlink" title="建立Spoke与Hub之间的mGRE隧道过程："></a>建立Spoke与Hub之间的mGRE隧道过程：</h3><p>DSVPN网络开始时，总部Hub的NHRP映射表是空表，分支Spoke有一个静态配置的NHRP映射表（Hub的Tunnel地址与公网地址的映射），分支Spoke和总部Hub有到彼此的路由。要建立Spoke与Hub之间的mGRE隧道，总部要生成各分支Tunnel地址/子网地址与公网地址的NHRP映射表，这主要通过分支Spoke向总部Hub进行NHRP注册来实现，其过程如下图所示。</p>
+<p><img src="/2019/05/06/DSVPN基础原理/注册.png" alt="注册"></p>
+<center>图：Spoke到Hub的mGRE隧道建立过程</center>
+
+<ol>
+<li><p><strong>Spoke向Hub注册请求</strong></p>
+<p>管理员在Spoke上手工配置Hub的Tunnel地址和公网地址以后，Spoke将定时向Hub发送NHRP注册请求报文，该报文中包含Spoke的Tunnel地址和公网地址。</p>
+</li>
+<li><p><strong>Hub向Spoke注册应答</strong></p>
+<p>Hub从NHRP注册请求报文中提取Spoke的Tunnel地址和公网地址，并生成NHRP映射表，进而建立两者之间的mGRE隧道。</p>
+</li>
+</ol>
+<p>Spoke定时向Hub发送注册消息，这样就使Hub的NHRP映射表在老化时间到来前重新计时，确保分支与总部一直能够维持隧道关系。</p>
+<h3 id="分支间路由学习："><a href="#分支间路由学习：" class="headerlink" title="分支间路由学习："></a>分支间路由学习：</h3><p>DSVPN支持两种分支间路由学习方式：</p>
+<ul>
+<li><p><strong>分支间相互学习路由（非shortcut方式，也叫Normal方式）</strong> 明细路由</p>
+<p>采用这种方式时，源分支到目的分支子网的路由下一跳为目的分支的Tunnel地址，每个分支需要学习到所有对端的路由数据。这种情况下，Spoke会消耗大量的CPU和内存资源，对其路由表容量和性能有较高的要求。而实际应用中，Spoke的性能往往较低，能存放的路由数量有限。因此，这种路由学习方式只<strong>适用于网络节点较少、路由信息量小的中小型网络。</strong></p>
+</li>
+<li><p><strong>分支路由汇聚到总部（shortcut方式）</strong> 汇总路由</p>
+<p>采用这种方式时，源分支到目的分支子网的路由下一跳为总部的Tunnel地址，Spoke只需存放到Hub的路由。由于Spoke减少了自身的路由数量，所以该路由学习方式<strong>适用于那些网络规模大、分支较多的大型网络。</strong></p>
+</li>
+</ul>
+<h3 id="建立Spoke与Spoke之间的mGRE隧道："><a href="#建立Spoke与Spoke之间的mGRE隧道：" class="headerlink" title="建立Spoke与Spoke之间的mGRE隧道："></a>建立Spoke与Spoke之间的mGRE隧道：</h3><p>经过上述两个环节后，各分支已经有到对端分支的路由，但还没有对端分支的Tunnel地址/子网地址与公网地址的NHRP映射表。要建立Spoke与Spoke之间的mGRE隧道，就要借助NHRP协议和学习到的路由来生成NHRP映射表。不同的路由学习方式，分支学习到的路由不同，NHRP映射表的生成过程也不同：</p>
+<ul>
+<li><strong>非shortcut方式下/Normal方式</strong>，源Spoke可以学习到目的Spoke的Tunnel地址。因此，<strong>源Spoke可以直接根据目的Spoke的Tunnel地址来查找目的Spoke的公网地址</strong>，生成目的Spoke的Tunnel地址与公网地址的NHRP映射表。</li>
+<li><strong>shortcut方式下</strong>，所有Spoke的路由下一跳全部都是Hub的Tunnel地址，源Spoke无法学习到目的Spoke的Tunnel地址。因此，<strong>源Spoke只能根据报文的目的地址来查找目的Spoke的公网地址</strong>，生成目的Spoke的子网地址与公网地址的NHRP映射表。</li>
+</ul>
+<p><strong>Spoke与Spoke之间的mGRE隧道建立过程（Normal方式\非shortcut方式）：</strong></p>
+<p><img src="/2019/05/06/DSVPN基础原理/normal.png" alt="normal"></p>
+<center>图：Spoke与Spoke之间的mGRE隧道建立过程（Normal方式）</center>
+
+<p>当Spoke1下的用户首次访问Spoke2下的用户时，将触发Spoke1与Spoke2之间建立动态mGRE隧道，隧道建立过程如下:</p>
+<ol>
+<li>Spoke1收到其下用户发往Spoke2的数据报文后：<ul>
+<li>根据报文目的地址（192.168.2.0）在路由表中找到下一跳10.1.1.2（Spoke2的Tunnel地址），但在NHRP映射表中没有查找10.1.1.2对应的公网地址，就默认将该数据报文直接转发给Hub。</li>
+<li>构建并向Hub发送NHRP地址解析请求报文，请求10.1.1.2对应的公网地址。</li>
+</ul>
+</li>
+<li>Hub收到Spoke1发送的数据报文和NHRP地址解析请求报文后，将报文通过Hub与Spoke2间的mGRE隧道转发给Spoke2。</li>
+<li>Spoke2收到NHRP地址解析请求报文后：<ul>
+<li>从NHRP地址解析请求报文中提取Spoke1的Tunnel地址和公网地址，并将该信息更新到自己的NHRP映射表中。</li>
+<li>构建并向Spoke1发送NHRP地址解析应答报文（携带Spoke2的Tunnel地址10.1.1.2和公网地址2.2.2.2）。</li>
+</ul>
+</li>
+<li>Spoke1收到NHRP地址解析应答报文后，从应答报文中提取Spoke2的Tunnel地址和公网地址，更新到自己的NHRP映射表中，Spoke1与Spoke2之间的动态mGRE隧道随即建立。</li>
+</ol>
+<p>当Spoke1再次收到其下用户发送给Spoke2的数据报文时，Spoke1根据报文目的地址（192.168.2.0）在路由表中找到下一跳10.1.1.2，再根据10.1.1.2在NHRP映射表中找到公网地址2.2.2.2，即可按照公网地址2.2.2.2将此报文进行mGRE封装后直接发送给Spoke2，不再经过总部Hub。</p>
+<blockquote>
+<p>以上过程总结为三步：</p>
+<ol>
+<li>路由（明细路由）</li>
+<li>Spoke主动发起</li>
+<li>NHRP解析地址为10.1.1.2（Tunnel）</li>
+</ol>
+</blockquote>
+<p><strong>建立Spoke与Spoke之间的mGRE隧道（shortcut方式）：</strong></p>
+<p><img src="/2019/05/06/DSVPN基础原理/shortcut.png" alt="shortcut"></p>
+<center>图：Spoke与Spoke之间的mGRE隧道（shortcut方式）建立过程</center>
+
+<p>当Spoke1下的用户首次访问Spoke2下的用户时，将触发Spoke1与Spoke2之间建立动态mGRE隧道，隧道建立过程如下：</p>
+<ol>
+<li>Spoke1收到其下用户发往Spoke2下用户的数据报文后，根据报文目的地址（192.168.2.0）在路由表中找到下一跳10.1.1.3（Hub的Tunnel地址），并在NHRP映射表中找到10.1.1.3对应的公网地址3.3.3.3（Hub的公网地址），就将数据报文转发给Hub。</li>
+<li>Hub收到Spoke1转发的数据报文后：<ul>
+<li>将此报文通过Hub与Spoke2间的mGRE隧道转发给Spoke2。</li>
+<li>检查发现接收和发送数据报文的Tunnel接口属于同一个NHRP域，就构建并向Spoke1发送NHRP重定向报文（仅携带Hub的Tunnel地址和公网地址）。</li>
+</ul>
+</li>
+<li>Spoke1收到NHRP重定向报文后，构建并向Hub发送NHRP地址解析请求报文（携带Spoke1的Tunnel地址10.1.1.1和公网地址1.1.1.1，以及需要解析的数据报文的目的地址192.168.2.0）。</li>
+<li>Hub收到NHRP地址解析请求报文后转发给Spoke2处理。</li>
+<li>Spoke2收到NHRP地址解析请求报文后：<ul>
+<li>从NHRP地址解析请求中提取Spoke1的Tunnel地址和公网地址，并将该信息更新到自己的NHRP映射表中。</li>
+<li>构建并向Spoke1发送NHRP地址解析应答报文（携带Spoke2的子网地址192.168.2.0、Spoke2的Tunnel地址10.1.1.2和公网地址2.2.2.2）。</li>
+</ul>
+</li>
+<li>Spoke1收到NHRP地址解析应答报文后，从应答报文中提取Spoke2的子网地址和公网地址，更新到自己的NHRP映射表中，Spoke1与Spoke2之间的动态mGRE隧道随即建立。</li>
+</ol>
+<p>当Spoke1再次收到其下用户发送给Spoke2的数据报文时，Spoke1根据报文目的地址（192.168.2.0）查找NHRP映射表，找到Spoke2的公网地址2.2.2.2，即可根据公网地址2.2.2.2将此报文进行mGRE封装后直接发送给Spoke2，不再经过总部Hub。</p>
+<h2 id="DSVPN的IPSec安全封装："><a href="#DSVPN的IPSec安全封装：" class="headerlink" title="DSVPN的IPSec安全封装："></a>DSVPN的IPSec安全封装：</h2><p>当企业需要对总部和分支机构及分支机构间传输的数据近吸顶灯加密保护的时候，可以在部署DSVPN的同事绑定IPSec安全框架，实现分支间同时动态建立mGRE隧道和IPSec隧道。</p>
+<p>控制报文在DSVPN网络中经过IPSec加密的封装格式：</p>
+<blockquote>
+<p> <code>IP | IPSec | GRE | NHRP</code></p>
+</blockquote>
+<p>数据报文在DSVPN网络中经过IPSec加密的封装格式（传输模式）：</p>
+<blockquote>
+<p><code>IP | IPSec | GRE | IP | Payload</code> </p>
+</blockquote>
+<p>Sopke与Spoke间建立mGRE隧道并启用IPSec后的报文封装格式：</p>
+<p><img src="/2019/05/06/DSVPN基础原理/报文格式.png" alt="报文格式"></p>
+<p>相对于传统Hub-Spoke组网的IPSec技术，DSVPN与IPSec联合部署具有如下优势：</p>
+<ul>
+<li>传统IPSec技术使用ACL识别待加密的单播流量，需进行复杂的ACL定义，配置和维护困难。而DSVPN中只需将mGRE隧道接口与IPSec安全框架绑定，无需再定义复杂的ACL，网络部署更加简单。</li>
+<li>由于动态建立了分支间的IPSec隧道，分支Spoke间交互的IPSec数据不用通过总部Hub进行解密和加密操作，降低了数据传输时延。</li>
+</ul>
+<h1 id="DSVPN抓包分析"><a href="#DSVPN抓包分析" class="headerlink" title="DSVPN抓包分析"></a>DSVPN抓包分析</h1><h2 id="DSVPN-非Shortcut-normal模式抓包分析："><a href="#DSVPN-非Shortcut-normal模式抓包分析：" class="headerlink" title="DSVPN 非Shortcut/normal模式抓包分析："></a>DSVPN 非Shortcut/normal模式抓包分析：</h2><h3 id="Spoke的注册报文流程："><a href="#Spoke的注册报文流程：" class="headerlink" title="Spoke的注册报文流程："></a>Spoke的注册报文流程：</h3><h3 id=""><a href="#" class="headerlink" title=""></a><img src="/2019/05/06/DSVPN基础原理/nhrp交互.png" alt="nhrp交互"></h3><center>图：NHRP报文注册</center>
+
+<p>在Spoke端配置nhrp后，会主动向Hub端发送NHRP注册报文。报告自己的公网地址和隧道地址。Hub端收到后会给于回应。</p>
+<hr>
+<p><img src="/2019/05/06/DSVPN基础原理/封装.png" alt="封装"></p>
+<center>图：DSVPN下配置后的报文封装</center>
+
+<p>站点之间的通信报文都是通过GRE隧道来封装的。</p>
+<hr>
+<p><img src="/2019/05/06/DSVPN基础原理/注册报文.png" alt="注册报文"></p>
+<center>图：NHRP注册报文抓包示例</center>
+
+<p>spoke端会向hub端发送注册报文，通告自己的公网地址和隧道地址。用来建立mGRE隧道。</p>
+<hr>
+<p><img src="/2019/05/06/DSVPN基础原理/注册回应.png" alt="注册回应"></p>
+<center>图：Hub端给Spoke的注册响应报文</center>
+
+<p>在响应报文中的Responder中的Client Information entry中会携带Hub端的公网地址和隧道地址。</p>
+<h3 id="Spoke之间建立mGRE隧道通信过程报文交互："><a href="#Spoke之间建立mGRE隧道通信过程报文交互：" class="headerlink" title="Spoke之间建立mGRE隧道通信过程报文交互："></a>Spoke之间建立mGRE隧道通信过程报文交互：</h3><p><img src="/2019/05/06/DSVPN基础原理/通信.png" alt="通信"></p>
+<center>图：Spoke与Spoke之间通信流程</center>
+
+<ol>
+<li>当Spoke的一个站点的主机与另一个站点要通信时，首先会查找路由表，会找到下一跳地址为隧道接口172.16.1.1。</li>
+<li>因为此时没有172.16.1.1端的公网IP地址，会向Hub端发送NHRP_resquest报文，解析172.16.1.1的公网地址。</li>
+<li>然后Hub端会给于回应，返回172.16.1.1的公网地址。</li>
+<li>得到172.16.1.1的公网地址后，以后的通信，就可以直接发给对应的公网地址。</li>
+</ol>
+<hr>
+<p><img src="/2019/05/06/DSVPN基础原理/nhrp_request.png" alt="nhrp_request"></p>
+<center>图：NHRP Resolution Request报文抓包</center>
+
+<hr>
+<p><img src="/2019/05/06/DSVPN基础原理/nhrp_reply.png" alt="nhrp_reply"></p>
+<center>图：NHRP Resolution Reply报文抓包</center>
+
+<h2 id="DSVPN-Shortcut模式抓包分析："><a href="#DSVPN-Shortcut模式抓包分析：" class="headerlink" title="DSVPN Shortcut模式抓包分析："></a>DSVPN Shortcut模式抓包分析：</h2><p><img src="/2019/05/06/DSVPN基础原理/shortcut1.png" alt="shortcut1"></p>
+<p><img src="/2019/05/06/DSVPN基础原理/shortcut2.png" alt="shortcut2"></p>
+<center>图：Shortcut模式下的spoke站点互访流量</center>
+
+<h1 id="DSVNP应用场景"><a href="#DSVNP应用场景" class="headerlink" title="DSVNP应用场景"></a>DSVNP应用场景</h1><h2 id="DSVPN应用场景分析："><a href="#DSVPN应用场景分析：" class="headerlink" title="DSVPN应用场景分析："></a>DSVPN应用场景分析：</h2><ul>
+<li><p>基本场景</p>
+<p>适用于中小型企业网络，配置简单，易于挂尽力，但存在单点故障的隐患。</p>
+</li>
+<li><p>Hub主备备份场景</p>
+<p>DSVPN支持部署多台Hub设备，用以提高总部的可靠性。</p>
+</li>
+<li><p>Hub负载分担场景</p>
+<p>单台Hub设备受性能制约，其下所能连接的Spoke数量有限，当网络中Spoke节点较多时，总部需要部署多台Hub来提高总部的处理能力。</p>
+</li>
+<li><p>级联场景：</p>
+<p>适用于Spoke节点较多且分布较分散的大型企业网络，Hub（总部）设备处理性能要求较高，但也存在一定的单点故障隐患。</p>
+</li>
+</ul>
+<h1 id="DSVPN配置示例"><a href="#DSVPN配置示例" class="headerlink" title="DSVPN配置示例"></a>DSVPN配置示例</h1><h3 id="DSVPN-非Shortcut-normal模式-配置："><a href="#DSVPN-非Shortcut-normal模式-配置：" class="headerlink" title="DSVPN(非Shortcut/ normal模式)配置："></a>DSVPN(非Shortcut/ normal模式)配置：</h3><p>FW1 为 Hub，AR1 为 Spoke1，FW2 为 Spoke2，配置 DSVPN，使用 normal 模式建立 mGRE。</p>
+<p><img src="/2019/05/06/DSVPN基础原理/拓扑.png" alt="拓扑"></p>
+<center>图：DSVPN配置拓扑</center>
+
+<h3 id="DSVPN配置思路："><a href="#DSVPN配置思路：" class="headerlink" title="DSVPN配置思路："></a>DSVPN配置思路：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">第一步： 配置MGRE</span><br><span class="line">HUB</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Tunnel1</span></span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 172.16.1.10 255.255.255.0 </span></span><br><span class="line"><span class="class"> <span class="title">tunnel</span>-<span class="title">protocol</span> <span class="title">gre</span> <span class="title">p2mp</span></span></span><br><span class="line"><span class="class"> <span class="title">source</span> 202.100.1.10</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">Spoke</span> </span></span><br><span class="line">1:</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Tunnel0</span>/0/1</span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 172.16.1.1 255.255.255.0</span></span><br><span class="line"><span class="class"> <span class="title">tunnel</span>-<span class="title">protocol</span> <span class="title">gre</span> <span class="title">p2mp</span></span></span><br><span class="line"><span class="class"> <span class="title">source</span> 202.100.1.1</span></span><br><span class="line"><span class="class"></span></span><br><span class="line">2:</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Tunnel1</span></span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 172.16.1.2 255.255.255.0 </span></span><br><span class="line"><span class="class"> <span class="title">tunnel</span>-<span class="title">protocol</span> <span class="title">gre</span> <span class="title">p2mp</span></span></span><br><span class="line"><span class="class"> <span class="title">source</span> 202.100.1.11</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">第二步：配置<span class="title">NHRP</span></span></span><br><span class="line"><span class="class"><span class="title">HUB</span> <span class="title">Spoke</span> 统一<span class="title">network</span>-<span class="title">id</span></span></span><br><span class="line"><span class="class"> <span class="title">interface</span> <span class="title">Tunnel</span> 1 </span></span><br><span class="line"><span class="class">  <span class="title">nhrp</span> <span class="title">network</span>-<span class="title">id</span> 123 </span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">配置映射关系</span></span><br><span class="line"><span class="class"><span class="title">HUB</span> </span></span><br><span class="line"><span class="class"> <span class="title">interface</span> <span class="title">Tunnel</span> 1 </span></span><br><span class="line"><span class="class">  <span class="title">nhrp</span> <span class="title">entry</span> <span class="title">multicast</span> <span class="title">dynamic</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">Spoke</span> </span></span><br><span class="line"><span class="class"> <span class="title">interface</span> <span class="title">Tunnel</span> 1 </span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">entry</span> <span class="title">multicast</span> <span class="title">dynamic</span></span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">entry</span> 172.16.1.10 202.100.1.10 <span class="title">register</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">第三步：配置路由</span></span><br><span class="line"><span class="class">动态路由 <span class="title">OSPF</span></span></span><br><span class="line"><span class="class"><span class="title">ospf</span> 1 <span class="title">router</span>-<span class="title">id</span> 10.10.10.10 </span></span><br><span class="line"><span class="class"> <span class="title">area</span> 0.0.0.0 </span></span><br><span class="line"><span class="class">  <span class="title">network</span> 172.16.1.0 0.0.0.255 </span></span><br><span class="line"><span class="class">  <span class="title">network</span> 10.1.3.0 0.0.0.255 </span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">注意点：</span></span><br><span class="line"><span class="class">默认<span class="title">TUNNEL</span>运行<span class="title">OSPF</span>以后，默认网络类型为<span class="title">P2P</span>，需要改变网络类型</span></span><br><span class="line"><span class="class"><span class="title">interface</span> <span class="title">Tunnel1</span></span></span><br><span class="line"><span class="class"> <span class="title">ospf</span> <span class="title">network</span>-<span class="title">type</span> <span class="title">broadcast</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">同时调整<span class="title">OSPF</span>的优先级，确保<span class="title">HUB</span>就是<span class="title">DR</span></span></span><br><span class="line"><span class="class"><span class="title">interface</span> <span class="title">Tunnel1</span></span></span><br><span class="line"><span class="class"> <span class="title">ospf</span> <span class="title">dr</span>-<span class="title">priority</span> 0</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">第五步：<span class="title">DMVPN</span>完成，可以检查测试</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">第六步：配置<span class="title">IPSEC</span>  --------<span class="title">DSVPN</span>  <span class="title">OVER</span>  <span class="title">IPSEC</span></span></span><br><span class="line"><span class="class">阶段一：</span></span><br><span class="line"><span class="class"><span class="title">ike</span> <span class="title">proposal</span> 10</span></span><br><span class="line"><span class="class"> <span class="title">authentication</span>-<span class="title">algorithm</span> <span class="title">sha2</span>-256</span></span><br><span class="line"><span class="class"> <span class="title">integrity</span>-<span class="title">algorithm</span> <span class="title">hmac</span>-<span class="title">sha2</span>-256</span></span><br><span class="line"><span class="class">#</span></span><br><span class="line"><span class="class"><span class="title">ike</span> <span class="title">peer</span> <span class="title">dsvpn_peer</span> <span class="title">v2</span></span></span><br><span class="line"><span class="class"> <span class="title">pre</span>-<span class="title">shared</span>-<span class="title">key</span> <span class="title">simple</span> <span class="title">Huawei</span>@123</span></span><br><span class="line"><span class="class"> <span class="title">ike</span>-<span class="title">proposal</span> 10</span></span><br><span class="line"><span class="class">#                            </span></span><br><span class="line"><span class="class">阶段二：              </span></span><br><span class="line"><span class="class"><span class="title">ipsec</span> <span class="title">proposal</span> 10</span></span><br><span class="line"><span class="class"> <span class="title">esp</span> <span class="title">authentication</span>-<span class="title">algorithm</span> <span class="title">sha2</span>-256</span></span><br><span class="line"><span class="class">#</span></span><br><span class="line"><span class="class"><span class="title">ipsec</span> <span class="title">profile</span> <span class="title">ipsec_dsvpn</span></span></span><br><span class="line"><span class="class"> <span class="title">ike</span>-<span class="title">peer</span> <span class="title">dsvpn_peer</span></span></span><br><span class="line"><span class="class"> <span class="title">proposal</span> 10</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">interface</span> <span class="title">Tunnel1</span></span></span><br><span class="line"><span class="class"> <span class="title">ipsec</span> <span class="title">profile</span> <span class="title">ipsec_dsvpn</span></span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果是在防火墙配置，需要放行安全策略</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&gt; security-policy</span><br><span class="line">&gt;  rule name GRE</span><br><span class="line">&gt;   source-zone local</span><br><span class="line">&gt;   source-zone untrust</span><br><span class="line">&gt;   destination-zone local</span><br><span class="line">&gt;   destination-zone untrust</span><br><span class="line">&gt;   service gre</span><br><span class="line">&gt;   action permit</span><br><span class="line">&gt;  rule name OSPF</span><br><span class="line">&gt;   source-zone local</span><br><span class="line">&gt;   source-zone vpn</span><br><span class="line">&gt;   destination-zone local</span><br><span class="line">&gt;   destination-zone vpn</span><br><span class="line">&gt;   service OSPF</span><br><span class="line">&gt;   action permit</span><br><span class="line">&gt;  rule name VPN</span><br><span class="line">&gt;   source-zone trust</span><br><span class="line">&gt;   source-zone vpn</span><br><span class="line">&gt;   destination-zone trust</span><br><span class="line">&gt;   destination-zone vpn</span><br><span class="line">&gt;   action permit</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<blockquote>
+<p>如果配置IPSec后，需要放行的策略：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&gt; 安全策略</span><br><span class="line">&gt; security-policy</span><br><span class="line">&gt;  rule name GRE</span><br><span class="line">&gt;   source-zone local</span><br><span class="line">&gt;   source-zone untrust</span><br><span class="line">&gt;   source-zone vpn</span><br><span class="line">&gt;   destination-zone local</span><br><span class="line">&gt;   destination-zone untrust</span><br><span class="line">&gt;   destination-zone vpn</span><br><span class="line">&gt;   service gre</span><br><span class="line">&gt;   service ISAKMP</span><br><span class="line">&gt;   service esp</span><br><span class="line">&gt;   action permit </span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<hr>
+<p><strong>Hub端的完整配置示例：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">[Hub]dis current-configuration  </span><br><span class="line">[V200R003C00]</span><br><span class="line">#</span><br><span class="line"> sysname Hub</span><br><span class="line">#</span><br><span class="line">ipsec proposal <span class="number">10</span></span><br><span class="line">#</span><br><span class="line">ike proposal <span class="number">10</span></span><br><span class="line">#</span><br><span class="line">ike peer dsvpn_peer v2</span><br><span class="line"> pre-shared-key simple Huawei@<span class="number">123</span></span><br><span class="line"> ike-proposal <span class="number">10</span></span><br><span class="line">#</span><br><span class="line">ipsec profile ipsec_dsvpn</span><br><span class="line"> ike-peer dsvpn_peer</span><br><span class="line"> proposal <span class="number">10</span></span><br><span class="line">ipsec profile ipsec_q</span><br><span class="line">#</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GigabitEthernet0</span>/0/0</span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 202.100.1.10 255.255.255.0 </span></span><br><span class="line"><span class="class">#</span></span><br><span class="line"><span class="class"><span class="title">interface</span> <span class="title">GigabitEthernet0</span>/0/1</span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 10.1.3.10 255.255.255.0 </span></span><br><span class="line"><span class="class">#</span></span><br><span class="line"><span class="class"><span class="title">interface</span> <span class="title">Tunnel0</span>/0/0</span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 172.16.1.10 255.255.255.0 </span></span><br><span class="line"><span class="class"> <span class="title">tunnel</span>-<span class="title">protocol</span> <span class="title">gre</span> <span class="title">p2mp</span></span></span><br><span class="line"><span class="class"> <span class="title">source</span> 202.100.1.10</span></span><br><span class="line"><span class="class"> <span class="title">ospf</span> <span class="title">network</span>-<span class="title">type</span> <span class="title">broadcast</span></span></span><br><span class="line"><span class="class"> <span class="title">ipsec</span> <span class="title">profile</span> <span class="title">ipsec_dsvpn</span></span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">entry</span> <span class="title">multicast</span> <span class="title">dynamic</span></span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">network</span>-<span class="title">id</span> 123</span></span><br><span class="line"><span class="class">#</span></span><br><span class="line"><span class="class"><span class="title">ospf</span> 1 <span class="title">router</span>-<span class="title">id</span> 10.10.10.10 </span></span><br><span class="line"><span class="class"> <span class="title">area</span> 0.0.0.0 </span></span><br><span class="line"><span class="class">  <span class="title">network</span> 10.1.3.0 0.0.0.255 </span></span><br><span class="line"><span class="class">  <span class="title">network</span> 172.16.1.0 0.0.0.255</span></span><br></pre></td></tr></table></figure>
+<h3 id="检查测试："><a href="#检查测试：" class="headerlink" title="检查测试："></a>检查测试：</h3><p><img src="/2019/05/06/DSVPN基础原理/nhrp专题.png" alt="nhrp专题"></p>
+<center>图：Hub端的NHRP映射表</center>
+
+<hr>
+<p><img src="/2019/05/06/DSVPN基础原理/hub端路由表.png" alt="hub端路由表"></p>
+<center>图：Hub端的路由表</center>
+
+<hr>
+<p><img src="/2019/05/06/DSVPN基础原理/Spoke2状态.png" alt="Spoke2状态"></p>
+<center>图：Spoke2的NHRP映射表信息</center>
+
+<hr>
+<h2 id="当Spoke端配置成shortcut模式时："><a href="#当Spoke端配置成shortcut模式时：" class="headerlink" title="当Spoke端配置成shortcut模式时："></a>当Spoke端配置成shortcut模式时：</h2><h3 id="配置shortcut模式命令"><a href="#配置shortcut模式命令" class="headerlink" title="配置shortcut模式命令"></a>配置shortcut模式命令</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">Hub端：</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Tunnel0</span>/0/0</span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 172.16.1.10 255.255.255.0 </span></span><br><span class="line"><span class="class"> <span class="title">tunnel</span>-<span class="title">protocol</span> <span class="title">gre</span> <span class="title">p2mp</span></span></span><br><span class="line"><span class="class"> <span class="title">source</span> 202.100.1.10</span></span><br><span class="line"><span class="class"> <span class="title">ospf</span> <span class="title">network</span>-<span class="title">type</span> <span class="title">broadcast</span></span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">redirect</span>  //开启<span class="title">Hub</span>端重定向</span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">entry</span> <span class="title">multicast</span> <span class="title">dynamic</span></span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">network</span>-<span class="title">id</span> 123</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">Spoke</span>端：</span></span><br><span class="line"><span class="class"><span class="title">interface</span> <span class="title">Tunnel0</span>/0/0</span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 172.16.1.2 255.255.255.0 </span></span><br><span class="line"><span class="class"> <span class="title">tunnel</span>-<span class="title">protocol</span> <span class="title">gre</span> <span class="title">p2mp</span></span></span><br><span class="line"><span class="class"> <span class="title">source</span> <span class="title">GigabitEthernet0</span>/0/0</span></span><br><span class="line"><span class="class"> <span class="title">ospf</span> <span class="title">network</span>-<span class="title">type</span> <span class="title">broadcast</span></span></span><br><span class="line"><span class="class"> <span class="title">ospf</span> <span class="title">dr</span>-<span class="title">priority</span> 0</span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">shortcut</span> //<span class="title">Spoke</span>端配置为<span class="title">shortcut</span>模式</span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">entry</span> <span class="title">multicast</span> <span class="title">dynamic</span></span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">network</span>-<span class="title">id</span> 123</span></span><br><span class="line"><span class="class"> <span class="title">nhrp</span> <span class="title">entry</span> 172.16.1.10 202.100.1.10 <span class="title">register</span></span></span><br></pre></td></tr></table></figure>
+<p>与非shortcut模式的主要配置区别是：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nhrp redirect  <span class="comment">//开启Hub端重定向</span></span><br><span class="line">nhrp shortcut <span class="comment">//Spoke端配置为shortcut模式</span></span><br></pre></td></tr></table></figure>
+<h3 id="检查测试：-1"><a href="#检查测试：-1" class="headerlink" title="检查测试："></a>检查测试：</h3><p><img src="/2019/05/06/DSVPN基础原理/shortcut路由表.png" alt="shortcut路由表"></p>
+<center>图：Spoke2路由表(shortcut模式)</center>
+
+<blockquote>
+<p>shortcut模式的路由表目的地址直接是私网地址。而非shortcut模式目的地址是Tunnel地址</p>
+</blockquote>
+<hr>
+<p><img src="/2019/05/06/DSVPN基础原理/shortcut nhrp.png" alt="shortcut nhrp"></p>
+<center>图：Spoke2的Nhrp映射表(shortcut模式)</center>
+
+<blockquote>
+<p>normal<br>必须是明细路由<br>spoke可以主动发起<br><strong>得到NHRP映射关系是 tunnle-公网地址</strong></p>
+<p>shortcut<br>必须是汇总路由<br>spoke被动发起<br><strong>得到NHRP映射关系是 私网地址—-公网地址</strong></p>
+</blockquote>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档。</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/05/06/DSVPN基础原理/" title="DSVPN基础原理">https://cshihong.github.io/2019/05/06/DSVPN基础原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/IPSec-VPN/" rel="tag"># IPSec VPN</a>
+          
+            <a href="/tags/VPN/" rel="tag"># VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/19/GRE-over-IPSec技术原理/" rel="next" title="GRE over IPSec技术原理">
+                <i class="fa fa-chevron-left"></i> GRE over IPSec技术原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/07/Effient-VPN-EVPN-基础原理/" rel="prev" title="Effient VPN(EVPN)技术原理">
+                Effient VPN(EVPN)技术原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GRE-over-IPSec的缺陷"><span class="nav-number">1.</span> <span class="nav-text">GRE over IPSec的缺陷</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GRE-over-IPSec的缺陷："><span class="nav-number">1.1.</span> <span class="nav-text">GRE over IPSec的缺陷：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DSVPN原理介绍"><span class="nav-number">2.</span> <span class="nav-text">DSVPN原理介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DSVNP简介："><span class="nav-number">2.1.</span> <span class="nav-text">DSVNP简介：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DSVNP的目的："><span class="nav-number">2.1.1.</span> <span class="nav-text">DSVNP的目的：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用DSVPN的优点："><span class="nav-number">2.1.2.</span> <span class="nav-text">使用DSVPN的优点：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DSVPN基本概念："><span class="nav-number">2.2.</span> <span class="nav-text">DSVPN基本概念：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DSVPN节点："><span class="nav-number">2.2.1.</span> <span class="nav-text">DSVPN节点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DSVPN框架："><span class="nav-number">2.2.2.</span> <span class="nav-text">DSVPN框架：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mGRE、mGRE隧道接口和mGRE隧道："><span class="nav-number">2.2.3.</span> <span class="nav-text">mGRE、mGRE隧道接口和mGRE隧道：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NHRP协议和NHRP映射表："><span class="nav-number">2.3.</span> <span class="nav-text">NHRP协议和NHRP映射表：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本原理："><span class="nav-number">2.3.1.</span> <span class="nav-text">基本原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主要功能："><span class="nav-number">2.3.2.</span> <span class="nav-text">主要功能：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NHRP协议映射表："><span class="nav-number">2.3.3.</span> <span class="nav-text">NHRP协议映射表：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DSVPN基本原理："><span class="nav-number">2.4.</span> <span class="nav-text">DSVPN基本原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#建立Spoke与Hub之间的mGRE隧道过程："><span class="nav-number">2.4.1.</span> <span class="nav-text">建立Spoke与Hub之间的mGRE隧道过程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分支间路由学习："><span class="nav-number">2.4.2.</span> <span class="nav-text">分支间路由学习：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#建立Spoke与Spoke之间的mGRE隧道："><span class="nav-number">2.4.3.</span> <span class="nav-text">建立Spoke与Spoke之间的mGRE隧道：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DSVPN的IPSec安全封装："><span class="nav-number">2.5.</span> <span class="nav-text">DSVPN的IPSec安全封装：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DSVPN抓包分析"><span class="nav-number">3.</span> <span class="nav-text">DSVPN抓包分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DSVPN-非Shortcut-normal模式抓包分析："><span class="nav-number">3.1.</span> <span class="nav-text">DSVPN 非Shortcut/normal模式抓包分析：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Spoke的注册报文流程："><span class="nav-number">3.1.1.</span> <span class="nav-text">Spoke的注册报文流程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#null"><span class="nav-number">3.1.2.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Spoke之间建立mGRE隧道通信过程报文交互："><span class="nav-number">3.1.3.</span> <span class="nav-text">Spoke之间建立mGRE隧道通信过程报文交互：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DSVPN-Shortcut模式抓包分析："><span class="nav-number">3.2.</span> <span class="nav-text">DSVPN Shortcut模式抓包分析：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DSVNP应用场景"><span class="nav-number">4.</span> <span class="nav-text">DSVNP应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DSVPN应用场景分析："><span class="nav-number">4.1.</span> <span class="nav-text">DSVPN应用场景分析：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DSVPN配置示例"><span class="nav-number">5.</span> <span class="nav-text">DSVPN配置示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DSVPN-非Shortcut-normal模式-配置："><span class="nav-number">5.0.1.</span> <span class="nav-text">DSVPN(非Shortcut/ normal模式)配置：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DSVPN配置思路："><span class="nav-number">5.0.2.</span> <span class="nav-text">DSVPN配置思路：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检查测试："><span class="nav-number">5.0.3.</span> <span class="nav-text">检查测试：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#当Spoke端配置成shortcut模式时："><span class="nav-number">5.1.</span> <span class="nav-text">当Spoke端配置成shortcut模式时：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置shortcut模式命令"><span class="nav-number">5.1.1.</span> <span class="nav-text">配置shortcut模式命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检查测试：-1"><span class="nav-number">5.1.2.</span> <span class="nav-text">检查测试：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/05/06/DSVPN基础原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

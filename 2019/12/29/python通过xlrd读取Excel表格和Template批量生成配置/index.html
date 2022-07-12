@@ -1,0 +1,2006 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="当需要配置的网络设备很多的时候，不可能都通过手动去配置。此时则需要利用脚本来批量生成配置。从而既保证了配置的准确性，也提高了配置的效率。 可以利用python的xrld库来读取execl表格，利用String库的Template模板来配合批量生成配置。 Template模板替换：主要利用Template的substitute(config)方法进行替换。  substitute(mapping[,">
+<meta name="keywords" content="Python,网络自动化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python通过xlrd读取Excel表格和Template批量生成配置">
+<meta property="og:url" content="https://cshihong.github.io/2019/12/29/python通过xlrd读取Excel表格和Template批量生成配置/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="当需要配置的网络设备很多的时候，不可能都通过手动去配置。此时则需要利用脚本来批量生成配置。从而既保证了配置的准确性，也提高了配置的效率。 可以利用python的xrld库来读取execl表格，利用String库的Template模板来配合批量生成配置。 Template模板替换：主要利用Template的substitute(config)方法进行替换。  substitute(mapping[,">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2019-12-29T11:51:58.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="python通过xlrd读取Excel表格和Template批量生成配置">
+<meta name="twitter:description" content="当需要配置的网络设备很多的时候，不可能都通过手动去配置。此时则需要利用脚本来批量生成配置。从而既保证了配置的准确性，也提高了配置的效率。 可以利用python的xrld库来读取execl表格，利用String库的Template模板来配合批量生成配置。 Template模板替换：主要利用Template的substitute(config)方法进行替换。  substitute(mapping[,">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/12/29/python通过xlrd读取Excel表格和Template批量生成配置/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>python通过xlrd读取Excel表格和Template批量生成配置 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/12/29/python通过xlrd读取Excel表格和Template批量生成配置/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">python通过xlrd读取Excel表格和Template批量生成配置
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-12-29 18:30:24 / 修改时间：19:51:58" itemprop="dateCreated datePublished" datetime="2019-12-29T18:30:24+08:00">2019-12-29</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络自动化/" itemprop="url" rel="index"><span itemprop="name">网络自动化</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,773</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 33</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>当需要配置的网络设备很多的时候，不可能都通过手动去配置。此时则需要利用脚本来批量生成配置。从而既保证了配置的准确性，也提高了配置的效率。</p>
+<p>可以利用python的xrld库来读取execl表格，利用String库的Template模板来配合批量生成配置。</p>
+<h2 id="Template模板替换："><a href="#Template模板替换：" class="headerlink" title="Template模板替换："></a>Template模板替换：</h2><p>主要利用Template的substitute(config)方法进行替换。</p>
+<p> <code>substitute</code>(<em>mapping</em>[, kws]) </p>
+<p> 执行模板替换，返回一个新字符串。映射是任何类似于字典的对象，其键与模板中的占位符匹配。或者，可以提供关键字参数，其中关键字是占位符。当映射和kws都给定且存在重复时，kws中的占位符优先。 </p>
+<p> <code>safe_substitute</code>(<em>mapping</em>[, kws]) </p>
+<p>与substitute()类似，但如果映射和kws中缺少占位符，则不会引发KeyError异常，而原始占位符将完整地出现在结果字符串中。而且，与substitute()不同的是，\$的任何其他外观都将简单地返回\$，而不是引发ValueError。<br>当其他异常仍然可能发生时，这个方法被称为“安全”，因为它总是试图返回一个可用的字符串，而不是引发异常。在另一种意义上，safe_substitute()可能不是安全的，因为它将无声地忽略包含悬空的畸形模板</p>
+<p> substitute()和safe_substitute()的主要区别：</p>
+<ul>
+<li><p>substitute()：</p>
+<p>在没有匹配成功的参数是会引发异常。</p>
+</li>
+<li><p>safe_substitute()</p>
+<p>在没有匹配的时候会返回$，不会引发异常。</p>
+</li>
+</ul>
+<p>使用示例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">from</span> string <span class="keyword">import</span> Template</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>s = Template(<span class="string">'$who likes $what'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>s.substitute(who=<span class="string">'tim'</span>, what=<span class="string">'kung pao'</span>)</span><br><span class="line"><span class="string">'tim likes kung pao'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d = dict(who=<span class="string">'tim'</span>)</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>Template(<span class="string">'Give $who $100'</span>).substitute(d)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">...</span><br><span class="line">ValueError: Invalid placeholder <span class="keyword">in</span> string: line <span class="number">1</span>, col <span class="number">11</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>Template(<span class="string">'$who likes $what'</span>).substitute(d)</span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">...</span><br><span class="line">KeyError: <span class="string">'what'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>Template(<span class="string">'$who likes $what'</span>).safe_substitute(d)</span><br><span class="line"><span class="string">'tim likes $what'</span></span><br></pre></td></tr></table></figure>
+<h3 id="示例程序："><a href="#示例程序：" class="headerlink" title="示例程序："></a>示例程序：</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="keyword">from</span> string <span class="keyword">import</span> Formatter</span><br><span class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">import</span> time </span><br><span class="line"></span><br><span class="line"><span class="comment">#时间格式化</span></span><br><span class="line">d = datetime(<span class="number">2019</span>, <span class="number">12</span>, <span class="number">4</span>, <span class="number">21</span>, <span class="number">45</span>, <span class="number">58</span>)</span><br><span class="line">time = time.time()</span><br><span class="line">print(<span class="string">'&#123;:%Y-%m-%d %H:%M:%S&#125;'</span>.format(d))</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> string <span class="keyword">import</span> Template</span><br><span class="line"></span><br><span class="line"><span class="comment"># 替换示例</span></span><br><span class="line">s = Template(<span class="string">'$who likes $what'</span>)</span><br><span class="line">ss = s.substitute( who= <span class="string">'cao'</span>, what = <span class="string">'hui'</span>)</span><br><span class="line">print(ss)</span><br><span class="line"></span><br><span class="line">d = dict(who = <span class="string">'cao'</span>)</span><br><span class="line">s = Template(<span class="string">'Give $who $$100'</span>).substitute(d)</span><br><span class="line">print(s)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义配置模板，使用$name， 标识出要替换的变量</span></span><br><span class="line">tmpl = <span class="string">'''</span></span><br><span class="line"><span class="string">vlan $vlanID</span></span><br><span class="line"><span class="string">undo  stp global  enable  </span></span><br><span class="line"><span class="string">description dto_$SwitchName</span></span><br><span class="line"><span class="string">#</span></span><br><span class="line"><span class="string">interface Vlan $vlanID</span></span><br><span class="line"><span class="string">description dto_$SwitchName</span></span><br><span class="line"><span class="string">ip address  $ServerGWIP   255.255.255.0</span></span><br><span class="line"><span class="string">#</span></span><br><span class="line"><span class="string">#</span></span><br><span class="line"><span class="string">#</span></span><br><span class="line"><span class="string">interface   $SwitchPort</span></span><br><span class="line"><span class="string">description $SwitchName</span></span><br><span class="line"><span class="string">port link-mode bridge</span></span><br><span class="line"><span class="string">port link-type trunk</span></span><br><span class="line"><span class="string">undo port trunk permit vlan 1</span></span><br><span class="line"><span class="string">port trunk permit vlan $vlanID 4002 to 4003</span></span><br><span class="line"><span class="string">#</span></span><br><span class="line"><span class="string">'''</span></span><br><span class="line"></span><br><span class="line">templ = Template(tmpl)</span><br><span class="line"><span class="comment"># 要替换的变量配置</span></span><br><span class="line">config = &#123;</span><br><span class="line">        <span class="string">'vlanID'</span> : <span class="number">3101</span>,</span><br><span class="line">        <span class="string">'SwitchName'</span> : <span class="string">'sw1'</span>,</span><br><span class="line">        <span class="string">'ServerGWIP'</span> : <span class="string">'10.1.1.254'</span>,</span><br><span class="line">        <span class="string">'SwitchPort'</span> : <span class="string">'Ethernet1/2'</span>&#125;</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    cfg = templ.substitute(config)<span class="comment">#实现替换。</span></span><br><span class="line"><span class="keyword">except</span>  KeyError <span class="keyword">as</span> err:</span><br><span class="line">    print(<span class="string">'请检查要替换的关键字: %s'</span>  % err)</span><br><span class="line">print(cfg)</span><br></pre></td></tr></table></figure>
+<p>程序执行结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2019</span><span class="number">-12</span><span class="number">-04</span> <span class="number">21</span>:<span class="number">45</span>:<span class="number">58</span></span><br><span class="line">cao likes hui</span><br><span class="line">Give cao $<span class="number">100</span></span><br><span class="line"></span><br><span class="line">vlan <span class="number">3101</span></span><br><span class="line">undo  stp <span class="keyword">global</span>  enable  </span><br><span class="line">description dto_sw1</span><br><span class="line"><span class="comment">#</span></span><br><span class="line">interface Vlan <span class="number">3101</span></span><br><span class="line">description dto_sw1</span><br><span class="line">ip address  <span class="number">10.1</span><span class="number">.1</span><span class="number">.254</span>   <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line">interface   Ethernet1/<span class="number">2</span></span><br><span class="line">description sw1</span><br><span class="line">port link-mode bridge</span><br><span class="line">port link-type trunk</span><br><span class="line">undo port trunk permit vlan <span class="number">1</span></span><br><span class="line">port trunk permit vlan <span class="number">3101</span> <span class="number">4002</span> to <span class="number">4003</span></span><br><span class="line"><span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h2 id="xlrd库读取Execl表格："><a href="#xlrd库读取Execl表格：" class="headerlink" title="xlrd库读取Execl表格："></a>xlrd库读取Execl表格：</h2><p>利用如下简单操作，基本可以利用循环读取所需数据。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> xlrd</span><br><span class="line"></span><br><span class="line">xlwt.Workbook()</span><br><span class="line"></span><br><span class="line">excel_file = <span class="string">r'test.xlsx'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    file = xlrd.open_workbook(excel_file)</span><br><span class="line"><span class="keyword">except</span> Exception <span class="keyword">as</span> err:</span><br><span class="line">    print(err)</span><br><span class="line"><span class="comment">#获取表格sheet名字</span></span><br><span class="line">sheet = file.sheet_names()</span><br><span class="line">print(sheet)</span><br><span class="line"></span><br><span class="line"><span class="comment">#获取指定sheet表</span></span><br><span class="line">table = file.sheet_by_name(<span class="string">'sheet1'</span>)</span><br><span class="line"></span><br><span class="line">print(table.row(<span class="number">3</span>)) <span class="comment">#第三行</span></span><br><span class="line">print(table.col(<span class="number">5</span>, <span class="number">3</span>, <span class="number">9</span>)) <span class="comment">#第五列</span></span><br><span class="line">table.nrows <span class="comment">#行数</span></span><br><span class="line">table.ncols <span class="comment">#列数</span></span><br></pre></td></tr></table></figure>
+<h2 id="xlwt库写入Execl表格："><a href="#xlwt库写入Execl表格：" class="headerlink" title="xlwt库写入Execl表格："></a>xlwt库写入Execl表格：</h2><p>参考自：<a href="https://www.cnblogs.com/python-robot/p/9958352.html" target="_blank" rel="noopener">https://www.cnblogs.com/python-robot/p/9958352.html</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="comment">#https://www.cnblogs.com/python-robot/p/9958352.html</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> xlwt</span><br><span class="line"><span class="comment"># 创建一个workbook 设置编码</span></span><br><span class="line">workbook = xlwt.Workbook(encoding = <span class="string">'utf-8'</span>)</span><br><span class="line"><span class="comment"># 创建一个worksheet</span></span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Worksheet'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 写入excel</span></span><br><span class="line"><span class="comment"># 参数对应 行, 列, 值</span></span><br><span class="line">worksheet.write(<span class="number">1</span>,<span class="number">0</span>, label = <span class="string">'this is test'</span>)</span><br><span class="line"><span class="comment"># 保存</span></span><br><span class="line">workbook = xlwt.Workbook(encoding = <span class="string">'ascii'</span>)</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Worksheet'</span>)</span><br><span class="line">style = xlwt.XFStyle() <span class="comment"># 初始化样式</span></span><br><span class="line">font = xlwt.Font() <span class="comment"># 为样式创建字体</span></span><br><span class="line">font.name = <span class="string">'Times New Roman'</span> </span><br><span class="line">font.bold = <span class="keyword">True</span> <span class="comment"># 黑体</span></span><br><span class="line">font.underline = <span class="keyword">True</span> <span class="comment"># 下划线</span></span><br><span class="line">font.italic = <span class="keyword">True</span> <span class="comment"># 斜体字</span></span><br><span class="line">style.font = font <span class="comment"># 设定样式</span></span><br><span class="line">worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="string">'Unformatted value'</span>) <span class="comment"># 不带样式的写入</span></span><br><span class="line"></span><br><span class="line">worksheet.write(<span class="number">1</span>, <span class="number">0</span>, <span class="string">'Formatted value'</span>, style) <span class="comment"># 带样式的写入</span></span><br><span class="line"></span><br><span class="line">workbook.save(<span class="string">'formatting.xls'</span>) <span class="comment"># 保存文件</span></span><br><span class="line"></span><br><span class="line">workbook = xlwt.Workbook()</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Sheet'</span>)</span><br><span class="line">worksheet.write(<span class="number">0</span>, <span class="number">0</span>,<span class="string">'My Cell Contents'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置单元格宽度</span></span><br><span class="line">worksheet.col(<span class="number">0</span>).width = <span class="number">33333</span></span><br><span class="line">workbook.save(<span class="string">'cell_width.xls'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#输入一个日期到单元格:</span></span><br><span class="line"><span class="keyword">import</span> datetime</span><br><span class="line">workbook = xlwt.Workbook()</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Sheet'</span>)</span><br><span class="line">style = xlwt.XFStyle()</span><br><span class="line">style.num_format_str = <span class="string">'M/D/YY'</span> <span class="comment"># Other options: D-MMM-YY, D-MMM, MMM-YY, h:mm, h:mm:ss, h:mm, h:mm:ss, M/D/YY h:mm, mm:ss, [h]:mm:ss, mm:ss.0</span></span><br><span class="line">worksheet.write(<span class="number">0</span>, <span class="number">0</span>, datetime.datetime.now(), style)</span><br><span class="line">workbook.save(<span class="string">'Excel_Workbook.xls'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#向单元格添加一个公式:</span></span><br><span class="line">workbook = xlwt.Workbook()</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Sheet'</span>)</span><br><span class="line">worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="number">5</span>) <span class="comment"># Outputs 5</span></span><br><span class="line">worksheet.write(<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>) <span class="comment"># Outputs 2</span></span><br><span class="line">worksheet.write(<span class="number">1</span>, <span class="number">0</span>, xlwt.Formula(<span class="string">'A1*B1'</span>)) <span class="comment"># Should output "10" (A1[5] * A2[2])</span></span><br><span class="line">worksheet.write(<span class="number">1</span>, <span class="number">1</span>, xlwt.Formula(<span class="string">'SUM(A1,B1)'</span>)) <span class="comment"># Should output "7" (A1[5] + A2[2])</span></span><br><span class="line">workbook.save(<span class="string">'Excel_Workbook.xls'</span>)</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"><span class="comment">#向单元格添加一个超链接:</span></span><br><span class="line">workbook = xlwt.Workbook()</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Sheet'</span>)</span><br><span class="line">worksheet.write(<span class="number">0</span>, <span class="number">0</span>, xlwt.Formula(<span class="string">'HYPERLINK("http://www.google.com";"Google")'</span>)) <span class="comment"># Outputs the text "Google" linking to http://www.google.com</span></span><br><span class="line">workbook.save(<span class="string">'Excel_Workbook.xls'</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#和并行和列</span></span><br><span class="line">workbook = xlwt.Workbook()</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Sheet'</span>)</span><br><span class="line">worksheet.write_merge(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="string">'First Merge'</span>) <span class="comment"># Merges row 0's columns 0 through 3.</span></span><br><span class="line">font = xlwt.Font() <span class="comment"># Create Font</span></span><br><span class="line">font.bold = <span class="keyword">True</span> <span class="comment"># Set font to Bold</span></span><br><span class="line">style = xlwt.XFStyle() <span class="comment"># Create Style</span></span><br><span class="line">style.font = font <span class="comment"># Add Bold Font to Style</span></span><br><span class="line">worksheet.write_merge(<span class="number">1</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="number">3</span>, <span class="string">'Second Merge'</span>, style) <span class="comment"># Merges row 1 through 2's columns 0 through 3.</span></span><br><span class="line">workbook.save(<span class="string">'Excel_Workbook.xls'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#设置单元格内容的对其方式:</span></span><br><span class="line"></span><br><span class="line">workbook = xlwt.Workbook()</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Sheet'</span>)</span><br><span class="line">alignment = xlwt.Alignment() <span class="comment"># Create Alignment</span></span><br><span class="line">alignment.horz = xlwt.Alignment.HORZ_CENTER </span><br><span class="line">alignment.vert = xlwt.Alignment.VERT_CENTER FIED, VERT_DISTRIBUTED</span><br><span class="line">style = xlwt.XFStyle() <span class="comment"># Create Style</span></span><br><span class="line">style.alignment = alignment <span class="comment"># Add Alignment to Style</span></span><br><span class="line">worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="string">'Cell Contents'</span>, style)</span><br><span class="line">workbook.save(<span class="string">'Excel_Workbook.xls'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#为单元格议添加边框:</span></span><br><span class="line"><span class="keyword">import</span> xlwt</span><br><span class="line">workbook = xlwt.Workbook()</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Sheet'</span>)</span><br><span class="line">borders = xlwt.Borders() <span class="comment"># Create Borders</span></span><br><span class="line">borders.left = xlwt.Borders.DASHED </span><br><span class="line">  <span class="comment">#  DASHED虚线</span></span><br><span class="line">   <span class="comment"># NO_LINE没有</span></span><br><span class="line">    <span class="comment">#THIN实线</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">#为单元格设置背景色:</span></span><br><span class="line"></span><br><span class="line">workbook = xlwt.Workbook()</span><br><span class="line">worksheet = workbook.add_sheet(<span class="string">'My Sheet'</span>)</span><br><span class="line">pattern = xlwt.Pattern() <span class="comment"># Create the Pattern</span></span><br><span class="line">pattern.pattern = xlwt.Pattern.SOLID_PATTERN <span class="comment"># May be: NO_PATTERN, SOLID_PATTERN, or 0x00 through 0x12</span></span><br><span class="line">pattern.pattern_fore_colour = <span class="number">5</span> <span class="comment"># May be: 8 through 63. 0 = Black, 1 = White, 2 = Red, 3 = Green, 4 = Blue, 5 = Yellow, 6 = Magenta, 7 = Cyan, 16 = Maroon, 17 = Dark Green, 18 = Dark Blue, 19 = Dark Yellow , almost brown), 20 = Dark Magenta, 21 = Teal, 22 = Light Gray, 23 = Dark Gray, the list goes on...</span></span><br><span class="line">style = xlwt.XFStyle() <span class="comment"># Create the Pattern</span></span><br><span class="line">style.pattern = pattern <span class="comment"># Add Pattern to Style</span></span><br><span class="line">worksheet.write(<span class="number">0</span>, <span class="number">0</span>, <span class="string">'Cell Contents'</span>, style)</span><br><span class="line">workbook.save(<span class="string">'Excel_Workbook.xlsx'</span>)</span><br></pre></td></tr></table></figure>
+<h2 id="批量生成CRT或者Xshell会话（Session）文件："><a href="#批量生成CRT或者Xshell会话（Session）文件：" class="headerlink" title="批量生成CRT或者Xshell会话（Session）文件："></a>批量生成CRT或者Xshell会话（Session）文件：</h2><p>当需要管理的设备很多的时候，如果一个个网CRT或者Xshell中添加的话，很费时间。所以可以利用小程序批量生成session文件，在生成中，可以将账号，密码也填进去，从而生成的session登录设备的时候不需要输入用户名，密码。</p>
+<blockquote>
+<p>注意：该程序中调用的session模板，需要从CRT或者Xshell的会话路径中复制一个.ini或者.xsh文件，主要改变三行：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt; CRT .ini文件中需要改变</span><br><span class="line">&gt; S:<span class="string">"Username"</span>=$USERNAME</span><br><span class="line">&gt; S:<span class="string">"Password V2"</span>=$PASSWORD</span><br><span class="line">&gt; S:<span class="string">"Hostname"</span>=$DEV_IP</span><br><span class="line">&gt;     </span><br><span class="line">&gt; Xshell .xsh文件需要改变</span><br><span class="line">&gt; UserName=$USERNAME</span><br><span class="line">&gt; Password=$PASSWORD</span><br><span class="line">&gt; Host=$DEV_IP</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h3 id="替换示例小程序："><a href="#替换示例小程序：" class="headerlink" title="替换示例小程序："></a>替换示例小程序：</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string">Created on Wed Dec 25 09:33:05 2019</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">@author: cao</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">from</span> bs4 <span class="keyword">import</span> BeautifulSoup</span><br><span class="line"><span class="keyword">from</span> string <span class="keyword">import</span> Template</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">        </span><br><span class="line"><span class="comment"># 批量生成Xshell软件使用的session文件。</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_xshll_session</span><span class="params">(tmpl_path, all_dev, user, password)</span>:</span></span><br><span class="line">    tmpl = <span class="string">''</span></span><br><span class="line">    <span class="keyword">with</span> open(tmpl_path, <span class="string">'r'</span>,  encoding=<span class="string">'utf-16-le'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f.readlines():</span><br><span class="line">            tmpl += line</span><br><span class="line">        f.close() </span><br><span class="line">    tmpl = Template(tmpl)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">'./Xshell/Session/'</span>):</span><br><span class="line">        os.makedirs(<span class="string">'./Xshell/Session/'</span>)</span><br><span class="line">    <span class="keyword">for</span> dev_name <span class="keyword">in</span> all_dev:</span><br><span class="line">        dev_ip = all_dev[dev_name]</span><br><span class="line">        config = &#123;</span><br><span class="line">            <span class="string">'DEV_IP'</span> : dev_ip,</span><br><span class="line">            <span class="string">'USERNAME'</span> : user,</span><br><span class="line">            <span class="string">'PASSWORD'</span> : password&#125;</span><br><span class="line">        cfg = tmpl.safe_substitute(config)</span><br><span class="line">        cfg_path = <span class="string">'./Xshell/Session/'</span> + dev_name + <span class="string">'.xsh'</span></span><br><span class="line">        <span class="keyword">with</span> open(cfg_path, <span class="string">'w+'</span>, encoding=<span class="string">'utf-16-le'</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(cfg)</span><br><span class="line">            f.close()</span><br><span class="line">            print(<span class="string">'生成%s'</span> % dev_name + <span class="string">'.xsh文件成功!'</span>)</span><br><span class="line">            </span><br><span class="line"><span class="comment"># 批量生成CRT使用的session文件</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_crt_session</span><span class="params">(tmpl_path, all_dev, user, password)</span>:</span></span><br><span class="line">    tmpl = <span class="string">''</span></span><br><span class="line">    <span class="keyword">with</span> open(tmpl_path, <span class="string">'r'</span>,  encoding=<span class="string">'UTF-8-sig'</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="keyword">for</span> line <span class="keyword">in</span> f.readlines():</span><br><span class="line">            tmpl += line</span><br><span class="line">        f.close()  </span><br><span class="line">    tmpl = Template(tmpl)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(<span class="string">'./secureCRT/Session/'</span>):</span><br><span class="line">        os.makedirs(<span class="string">'./secureCRT/Session/'</span>)</span><br><span class="line">    <span class="keyword">for</span> dev_name <span class="keyword">in</span> all_dev:</span><br><span class="line">        dev_ip = all_dev[dev_name]</span><br><span class="line">        config = &#123;</span><br><span class="line">            <span class="string">'DEV_IP'</span> : dev_ip,</span><br><span class="line">            <span class="string">'USERNAME'</span> : user,</span><br><span class="line">            <span class="string">'PASSWORD'</span> : password&#125;</span><br><span class="line">        cfg = tmpl.safe_substitute(config)</span><br><span class="line">        cfg_path = <span class="string">'./secureCRT/Session/'</span> + dev_name + <span class="string">'.ini'</span></span><br><span class="line">        <span class="keyword">with</span> open(cfg_path, <span class="string">'w+'</span>, encoding=<span class="string">'utf-8-sig'</span>) <span class="keyword">as</span> f:</span><br><span class="line">            f.write(cfg)</span><br><span class="line">            f.close()</span><br><span class="line">            print(<span class="string">'生成%s'</span> % dev_name + <span class="string">'.xsh文件成功!'</span>)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment">#需要制定模板路径，ini或者xsh</span></span><br><span class="line">    tmpl_path = <span class="string">'crt_tmp.ini'</span><span class="comment">#</span></span><br><span class="line">    <span class="comment"># 设备名和IP数据来源地址。可以在/后面添加过滤，例如添加p3,生成的只有p3机房的seesion</span></span><br><span class="line">    url =<span class="string">''</span> <span class="comment">#设备名和IP来源。可以是Excel表格或者其他形式</span></span><br><span class="line">    user = <span class="string">'user'</span></span><br><span class="line">    <span class="comment"># 密码是对应软件生成的密文。</span></span><br><span class="line">    <span class="comment"># 如果是CRT，需要去ini文件中拷贝秘文， Xshell需要去xsh文件中拷贝秘文。</span></span><br><span class="line">    password = <span class="string">'password'</span> <span class="comment">#密码需要不是明文密码，需要在对应的软件生成的session文件中复制对应的密文密码。</span></span><br><span class="line">    all_dev = get_all_dev(url)</span><br><span class="line">    <span class="comment">#gen_xshll_session(tmpl_path, all_dev， user, password)</span></span><br><span class="line">    gen_crt_session(tmpl_path, all_dev, user, password)</span><br></pre></td></tr></table></figure>
+<p>通过上面的程序会生成衣设备名为文件名的.ini 或者.xsh文件。将这些文件复制到CRT的默认会话管理文件夹或者Xshell默认的会话管理路径。从新打开软件即可。从而可以利用软件的会话管理器，输入关键字进行搜索指定会话。快速定位需要管理的设备。</p>
+<h4 id="crt-tmp-ini模板文件示例："><a href="#crt-tmp-ini模板文件示例：" class="headerlink" title="crt_tmp.ini模板文件示例："></a>crt_tmp.ini模板文件示例：</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br></pre></td><td class="code"><pre><span class="line">S:"Username"=$USERNAME</span><br><span class="line">S:"Password"=</span><br><span class="line">S:"Password V2"=$PASSWORD</span><br><span class="line">S:"Login Script V2"=</span><br><span class="line">S:"Login Script V3"=</span><br><span class="line">D:"Session Password Saved"=00000001</span><br><span class="line">S:"Local Shell Command Pre-connect V2"=</span><br><span class="line">S:"Monitor Username"=</span><br><span class="line">S:"Monitor Password"=</span><br><span class="line">S:"Monitor Password V2"=</span><br><span class="line">B:"Normal Font v2"=00000060</span><br><span class="line"> eb ff ff ff 00 00 00 00 00 00 00 00 00 00 00 00 90 01 00 00 00 00 00 00 03 02 01 31 4c 00 75 00</span><br><span class="line"> 63 00 69 00 64 00 61 00 20 00 43 00 6f 00 6e 00 73 00 6f 00 6c 00 65 00 00 00 00 00 00 00 00 00</span><br><span class="line"> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 a0 00 00 00</span><br><span class="line">B:"Narrow Font v2"=00000060</span><br><span class="line"> f1 ff ff ff 00 00 00 00 00 00 00 00 00 00 00 00 90 01 00 00 00 00 00 01 00 00 00 01 4d 00 65 00</span><br><span class="line"> 6e 00 6c 00 6f 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line"> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 70 00 00 00</span><br><span class="line">D:"Use Narrow Font"=00000000</span><br><span class="line">S:"SCP Shell Password V2"=</span><br><span class="line">S:"PGP Upload Command V2"=</span><br><span class="line">S:"PGP Download Command V2"=</span><br><span class="line">D:"Is Session"=00000001</span><br><span class="line">S:"Protocol Name"=SSH2</span><br><span class="line">D:"Request pty"=00000001</span><br><span class="line">S:"Shell Command"=</span><br><span class="line">D:"Use Shell Command"=00000000</span><br><span class="line">D:"Force Close On Exit"=00000000</span><br><span class="line">D:"Forward X11"=00000000</span><br><span class="line">S:"XAuthority File"=</span><br><span class="line">S:"XServer Host"=127.0.0.1</span><br><span class="line">D:"XServer Port"=00001770</span><br><span class="line">D:"XServer Screen Number"=00000000</span><br><span class="line">D:"Enforce X11 Authentication"=00000001</span><br><span class="line">D:"Request Shell"=00000001</span><br><span class="line">D:"Max Packet Size"=00001000</span><br><span class="line">D:"Pad Password Packets"=00000001</span><br><span class="line">S:"Sftp Tab Local Directory V2"=C:\Users</span><br><span class="line">S:"Sftp Tab Remote Directory"=</span><br><span class="line">S:"Hostname"=$DEV_IP</span><br><span class="line">S:"Firewall Name"=None</span><br><span class="line">D:"Allow Connection Sharing"=00000000</span><br><span class="line">D:"Disable Initial SFTP Extensions"=00000000</span><br><span class="line">D:"[SSH2] Port"=00000016</span><br><span class="line">S:"Key Exchange Algorithms"=ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha256,diffie-hellman-group-exchange-sha1,gss-group1-sha1-toWM5Slw5Ew8Mqkay+al2g==,gss-gex-sha1-toWM5Slw5Ew8Mqkay+al2g==</span><br><span class="line">D:"Use Global Host Key Algorithms"=00000001</span><br><span class="line">S:"Host Key Algorithms"=ssh-rsa,ssh-ed25519,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,null,ssh-dss</span><br><span class="line">S:"Cipher List"=aes256-ctr,aes192-ctr,aes128-ctr,aes256-cbc,aes192-cbc,aes128-cbc,twofish-cbc,blowfish-cbc,3des-cbc,arcfour</span><br><span class="line">S:"MAC List"=hmac-sha2-512,hmac-sha2-256,hmac-sha1,hmac-sha1-96,hmac-md5,hmac-md5-96,umac-64@openssh.com</span><br><span class="line">S:"SSH2 Authentications V2"=password,publickey,keyboard-interactive,gssapi</span><br><span class="line">S:"Compression List"=none</span><br><span class="line">D:"Compression Level"=00000005</span><br><span class="line">D:"GEX Minimum Size"=00000800</span><br><span class="line">D:"GEX Preferred Size"=00000800</span><br><span class="line">D:"Use Global Public Key"=00000001</span><br><span class="line">S:"Identity Filename V2"=</span><br><span class="line">D:"Public Key Type"=00000000</span><br><span class="line">D:"Public Key Certificate Store"=00000000</span><br><span class="line">S:"PKCS11 Provider Dll"=</span><br><span class="line">S:"Public Key Certificate Serial Number"=</span><br><span class="line">S:"Public Key Certificate Issuer"=</span><br><span class="line">D:"Use Certificate As Raw Key"=00000001</span><br><span class="line">S:"GSSAPI Method"=auto-detect</span><br><span class="line">S:"GSSAPI Delegation"=full</span><br><span class="line">S:"GSSAPI SPN"=host@$(HOST)</span><br><span class="line">D:"SSH2 Common Config Version"=00000006</span><br><span class="line">D:"Enable Agent Forwarding"=00000002</span><br><span class="line">D:"Transport Write Buffer Size"=00000000</span><br><span class="line">D:"Transport Write Buffer Count"=00000000</span><br><span class="line">D:"Transport Receive Buffer Size"=00000000</span><br><span class="line">D:"Transport Receive Buffer Count"=00000000</span><br><span class="line">D:"Sftp Receive Window"=00000000</span><br><span class="line">D:"Sftp Maximum Packet"=00000000</span><br><span class="line">D:"Sftp Parallel Read Count"=00000000</span><br><span class="line">D:"Preferred SFTP Version"=00000000</span><br><span class="line">S:"Port Forward Filter"=allow,127.0.0.0/255.0.0.0,0 deny,0.0.0.0/0.0.0.0,0</span><br><span class="line">S:"Reverse Forward Filter"=allow,127.0.0.1,0 deny,0.0.0.0/0.0.0.0,0</span><br><span class="line">D:"Port Forward Receive Window"=00000000</span><br><span class="line">D:"Port Forward Max Packet"=00000000</span><br><span class="line">D:"Port Forward Buffer Count"=00000000</span><br><span class="line">D:"Port Forward Buffer Size"=00000000</span><br><span class="line">D:"Auth Prompts in Window"=00000000</span><br><span class="line">S:"Transfer Protocol Name"=None</span><br><span class="line">D:"ANSI Color"=00000000</span><br><span class="line">D:"Color Scheme Overrides Ansi Color"=00000000</span><br><span class="line">S:"Emulation"=VT100</span><br><span class="line">S:"Default SCS"=B</span><br><span class="line">D:"Use Global ANSI Colors"=00000001</span><br><span class="line">B:"ANSI Color RGB"=00000040</span><br><span class="line"> 00 00 00 00 a0 00 00 00 00 a0 00 00 a0 a0 00 00 00 00 a0 00 a0 00 a0 00 00 a0 a0 00 c0 c0 c0 00</span><br><span class="line"> 80 80 80 00 ff 00 00 00 00 ff 00 00 ff ff 00 00 00 00 ff 00 ff 00 ff 00 00 ff ff 00 ff ff ff 00</span><br><span class="line">D:"Keypad Mode"=00000000</span><br><span class="line">D:"Line Wrap"=00000001</span><br><span class="line">D:"Cursor Key Mode"=00000000</span><br><span class="line">D:"Newline Mode"=00000000</span><br><span class="line">D:"Enable 80-132 Column Switching"=00000001</span><br><span class="line">D:"Enable Cursor Key Mode Switching"=00000001</span><br><span class="line">D:"Enable Keypad Mode Switching"=00000001</span><br><span class="line">D:"Enable Line Wrap Mode Switching"=00000001</span><br><span class="line">D:"Enable Alternate Screen Switching"=00000001</span><br><span class="line">D:"WaitForStrings Ignores Color"=00000000</span><br><span class="line">D:"SGR Zero Resets ANSI Color"=00000001</span><br><span class="line">D:"SCO Line Wrap"=00000000</span><br><span class="line">D:"Display Tab"=00000000</span><br><span class="line">S:"Display Tab String"=</span><br><span class="line">B:"Window Placement"=0000002c</span><br><span class="line"> 2c 00 00 00 02 00 00 00 03 00 00 00 ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff f8 ff ff ff</span><br><span class="line"> f8 ff ff ff 76 05 00 00 41 03 00 00</span><br><span class="line">D:"Is Full Screen"=00000000</span><br><span class="line">D:"Rows"=00000018</span><br><span class="line">D:"Cols"=00000050</span><br><span class="line">D:"Scrollback"=0000c350</span><br><span class="line">D:"Resize Mode"=00000000</span><br><span class="line">D:"Sync View Rows"=00000001</span><br><span class="line">D:"Sync View Cols"=00000001</span><br><span class="line">D:"Horizontal Scrollbar"=00000002</span><br><span class="line">D:"Vertical Scrollbar"=00000002</span><br><span class="line">S:"Color Scheme"=绿/黑</span><br><span class="line">S:"Output Transformer Name"=UTF-8</span><br><span class="line">D:"Use Unicode Line Drawing"=00000001</span><br><span class="line">D:"Draw Lines Graphically"=00000001</span><br><span class="line">D:"Blinking Cursor"=00000001</span><br><span class="line">D:"Cursor Style"=00000000</span><br><span class="line">D:"Use Cursor Color"=00000000</span><br><span class="line">D:"Cursor Color"=00000000</span><br><span class="line">D:"Foreground"=00000000</span><br><span class="line">D:"Background"=00ffffff</span><br><span class="line">D:"Bold"=00000000</span><br><span class="line">D:"Map Delete"=00000000</span><br><span class="line">D:"Map Backspace"=00000000</span><br><span class="line">S:"Keymap Name"=Default</span><br><span class="line">S:"Keymap Filename V2"=</span><br><span class="line">D:"Use Alternate Keyboard"=00000000</span><br><span class="line">D:"Emacs Mode"=00000000</span><br><span class="line">D:"Emacs Mode 8 Bit"=00000000</span><br><span class="line">D:"Preserve Alt-Gr"=00000000</span><br><span class="line">D:"Jump Scroll"=00000001</span><br><span class="line">D:"Minimize Drawing While Jump Scrolling"=00000000</span><br><span class="line">D:"Audio Bell"=00000001</span><br><span class="line">D:"Visual Bell"=00000000</span><br><span class="line">D:"Scroll To Clear"=00000001</span><br><span class="line">D:"Close On Disconnect"=00000000</span><br><span class="line">D:"Clear On Disconnect"=00000000</span><br><span class="line">D:"Scroll To Bottom On Output"=00000001</span><br><span class="line">D:"Scroll To Bottom On Keypress"=00000001</span><br><span class="line">D:"CUA Copy Paste"=00000000</span><br><span class="line">D:"Use Terminal Type"=00000000</span><br><span class="line">S:"Terminal Type"=</span><br><span class="line">D:"Use Answerback"=00000000</span><br><span class="line">S:"Answerback"=</span><br><span class="line">D:"Use Position"=00000000</span><br><span class="line">D:"X Position"=00000000</span><br><span class="line">D:"X Position Relative Left"=00000001</span><br><span class="line">D:"Y Position"=00000000</span><br><span class="line">D:"Y Position Relative Top"=00000001</span><br><span class="line">D:"Local Echo"=00000000</span><br><span class="line">D:"Strip 8th Bit"=00000000</span><br><span class="line">D:"Shift Forces Local Mouse Operations"=00000001</span><br><span class="line">D:"Ignore Window Title Change Requests"=00000000</span><br><span class="line">D:"Copy Translates ANSI Line Drawing Characters"=00000000</span><br><span class="line">D:"Copy to clipboard as RTF and plain text"=00000000</span><br><span class="line">D:"Translate Incoming CR To CRLF"=00000000</span><br><span class="line">D:"Dumb Terminal Ignores CRLF"=00000000</span><br><span class="line">D:"Use Symbolic Names For Non-Printable Characters"=00000000</span><br><span class="line">D:"Show Chat Window"=00000002</span><br><span class="line">D:"User Button Bar"=00000002</span><br><span class="line">S:"User Button Bar Name"=Default</span><br><span class="line">S:"User Font Map V2"=</span><br><span class="line">S:"User Line Drawing Map V2"=</span><br><span class="line">D:"Hard Reset on ESC c"=00000000</span><br><span class="line">D:"Ignore Shift Out Sequence"=00000000</span><br><span class="line">D:"Use Title Bar"=00000000</span><br><span class="line">S:"Title Bar"=</span><br><span class="line">D:"Show Wyse Label Line"=00000000</span><br><span class="line">D:"Send Initial Carriage Return"=00000001</span><br><span class="line">D:"Use Login Script"=00000000</span><br><span class="line">D:"Use Script File"=00000000</span><br><span class="line">S:"Script Filename V2"=</span><br><span class="line">S:"Script Arguments"=</span><br><span class="line">S:"Upload Directory V2"=$&#123;VDS_USER_DATA_PATH&#125;</span><br><span class="line">S:"Download Directory V2"=$&#123;VDS_USER_DATA_PATH&#125;</span><br><span class="line">D:"XModem Send Packet Size"=00000000</span><br><span class="line">S:"ZModem Receive Command"=rz\r</span><br><span class="line">D:"Disable ZModem"=00000000</span><br><span class="line">D:"ZModem Uses 32 Bit CRC"=00000000</span><br><span class="line">D:"Force 1024 for ZModem"=00000000</span><br><span class="line">D:"ZModem Encodes DEL"=00000001</span><br><span class="line">D:"ZModem Force All Caps Filenames to Lower Case on Upload"=00000001</span><br><span class="line">D:"Send Zmodem Init When Upload Starts"=00000000</span><br><span class="line">S:"Log Filename V2"=</span><br><span class="line">S:"Custom Log Message Connect"=</span><br><span class="line">S:"Custom Log Message Disconnect"=</span><br><span class="line">S:"Custom Log Message Each Line"=</span><br><span class="line">D:"Log Only Custom"=00000000</span><br><span class="line">D:"Generate Unique Log File Name When File In Use"=00000001</span><br><span class="line">D:"Log Prompt"=00000000</span><br><span class="line">D:"Log Mode"=00000000</span><br><span class="line">D:"Start Log Upon Connect"=00000000</span><br><span class="line">D:"Raw Log"=00000000</span><br><span class="line">D:"Log Multiple Sessions"=00000000</span><br><span class="line">D:"New Log File At Midnight"=00000000</span><br><span class="line">D:"Trace Level"=00000000</span><br><span class="line">D:"Keyboard Char Send Delay"=00000000</span><br><span class="line">D:"Use Word Delimiter Chars"=00000000</span><br><span class="line">S:"Word Delimiter Chars"=</span><br><span class="line">D:"Idle Check"=00000001</span><br><span class="line">D:"Idle Timeout"=0000012c</span><br><span class="line">S:"Idle String"= </span><br><span class="line">D:"Idle NO-OP Check"=00000000</span><br><span class="line">D:"Idle NO-OP Timeout"=0000003c</span><br><span class="line">D:"AlwaysOnTop"=00000000</span><br><span class="line">D:"Line Send Delay"=00000005</span><br><span class="line">D:"Character Send Delay"=00000000</span><br><span class="line">D:"Wait For Prompt"=00000000</span><br><span class="line">S:"Wait For Prompt Text"=</span><br><span class="line">D:"Wait For Prompt Timeout"=00000000</span><br><span class="line">D:"Send Scroll Wheel Events To Remote"=00000000</span><br><span class="line">D:"Position Cursor on Left Click"=00000000</span><br><span class="line">D:"Highlight Reverse Video"=00000001</span><br><span class="line">D:"Highlight Bold"=00000000</span><br><span class="line">D:"Highlight Color"=00000000</span><br><span class="line">S:"Keyword Set"=&lt;无&gt;</span><br><span class="line">S:"Ident String"=</span><br><span class="line">D:"Eject Page Interval"=00000000</span><br><span class="line">S:"Monitor Listen Address"=0.0.0.0:22</span><br><span class="line">D:"Monitor Allow Remote Input"=00000000</span><br><span class="line">D:"Disable Resize"=00000002</span><br><span class="line">D:"Auto Reconnect"=00000002</span><br><span class="line">B:"Page Margins"=00000020</span><br><span class="line"> 00 00 00 00 00 00 f0 3f 00 00 00 00 00 00 f0 3f 00 00 00 00 00 00 f0 3f 00 00 00 00 00 00 f0 3f</span><br><span class="line">B:"Printer Font v2"=00000060</span><br><span class="line"> f3 ff ff ff 00 00 00 00 00 00 00 00 00 00 00 00 90 01 00 00 00 00 00 00 03 02 01 31 43 00 6f 00</span><br><span class="line"> 75 00 72 00 69 00 65 00 72 00 20 00 4e 00 65 00 77 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line"> 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 64 00 00 00</span><br><span class="line">D:"Page Orientation"=00000001</span><br><span class="line">D:"Paper Size"=00000001</span><br><span class="line">D:"Paper Source"=00000007</span><br><span class="line">S:"Printer Name"=</span><br><span class="line">D:"Disable Pass Through Printing"=00000000</span><br><span class="line">D:"Buffer Pass Through Printing"=00000000</span><br><span class="line">D:"Force Black On White"=00000000</span><br><span class="line">D:"Use Raw Mode"=00000000</span><br><span class="line">D:"Printer Baud Rate"=00009600</span><br><span class="line">D:"Printer Parity"=00000000</span><br><span class="line">D:"Printer Stop Bits"=00000000</span><br><span class="line">D:"Printer Data Bits"=00000008</span><br><span class="line">D:"Printer DSR Flow"=00000000</span><br><span class="line">D:"Printer DTR Flow Control"=00000001</span><br><span class="line">D:"Printer CTS Flow"=00000000</span><br><span class="line">D:"Printer RTS Flow Control"=00000001</span><br><span class="line">D:"Printer XON Flow"=00000000</span><br><span class="line">S:"Printer Port"=</span><br><span class="line">S:"Printer Name Of Pipe"=</span><br><span class="line">D:"Use Printer Port"=00000000</span><br><span class="line">D:"Use Global Print Settings"=00000001</span><br><span class="line">D:"Operating System"=00000000</span><br><span class="line">S:"Time Zone"=</span><br><span class="line">S:"Last Directory"=</span><br><span class="line">S:"Initial Local Directory V2"=</span><br><span class="line">S:"Default Download Directory V2"=</span><br><span class="line">D:"File System Case"=00000000</span><br><span class="line">S:"File Creation Mask"=</span><br><span class="line">D:"Disable Directory Tree Detection"=00000002</span><br><span class="line">D:"Verify Retrieve File Status"=00000002</span><br><span class="line">D:"Resolve Symbolic Links"=00000002</span><br><span class="line">B:"RemoteFrame Window Placement"=0000002c</span><br><span class="line"> 2c 00 00 00 00 00 00 00 01 00 00 00 00 00 00 00 00 00 00 00 fc ff ff ff fc ff ff ff 00 00 00 00</span><br><span class="line"> 00 00 00 00 00 00 00 00 00 00 00 00</span><br><span class="line">S:"Remote ExplorerFrame State"=1,-1,-1</span><br><span class="line">S:"Remote ListView State"=1,1,1,0,0</span><br><span class="line">S:"SecureFX Remote Tab State"=1,-1,-1</span><br><span class="line">D:"Restart Data Size"=00000000</span><br><span class="line">S:"Restart Datafile Path"=</span><br><span class="line">D:"Max Transfer Buffers"=00000004</span><br><span class="line">D:"Filenames Always Use UTF8"=00000000</span><br><span class="line">D:"Use Multiple SFTP Channels"=00000000</span><br><span class="line">D:"Suppress Stat On CWD"=00000000</span><br><span class="line">D:"Disable MLSX"=00000000</span><br><span class="line">D:"SecureFX Trace Level"=00000001</span><br><span class="line">D:"SecureFX Use Control Address For Data Connections"=00000001</span><br><span class="line">D:"Use PGP For All Transfers"=00000000</span><br><span class="line">D:"Disable Remote File System Watches"=00000000</span><br><span class="line">S:"Sftp Tab Local Directory"=C:\Users\cao\Documents</span><br><span class="line">D:"[SSH2] 端口"=00000016</span><br><span class="line">S:"Compatibility Mode V2"=Auto Detect</span><br><span class="line">S:"Identity Filename"=</span><br><span class="line">D:"Disable SFTP Extended Commands"=00000000</span><br><span class="line">S:"Keymap Filename"=</span><br><span class="line">S:"User Font Map"=</span><br><span class="line">S:"User Line Drawing Map"=</span><br><span class="line">S:"Script Filename"=</span><br><span class="line">S:"Upload Directory"=C:\Users\cao</span><br><span class="line">S:"Download Directory"=C:\Users\cao\Downloads</span><br><span class="line">D:"Start Tftp Server"=00000000</span><br><span class="line">S:"Log Filename"=</span><br><span class="line">D:"Highlighting Style"=00000000</span><br><span class="line">S:"Initial Local Directory"=</span><br><span class="line">S:"Default Download Directory"=</span><br><span class="line">S:"主机名"=</span><br><span class="line">S:"Keyboard Interactive Prompt"=assword</span><br><span class="line">S:"Public Key Certificate Username"=</span><br><span class="line">D:"Use Username From Certificate"=00000000</span><br><span class="line">D:"Certificate Username Location"=00000000</span><br><span class="line">D:"Packet Strings Always Use UTF8"=00000000</span><br><span class="line">D:"Enable Xterm-256color"=00000000</span><br><span class="line">D:"Ignore 80-132 Column Switching When Maximized or Full Screen"=00000000</span><br><span class="line">D:"Enable TN3270 Base Colors"=00000000</span><br><span class="line">D:"Raw EOL Mode"=00000000</span><br><span class="line">D:"Printer Quality"=fffffffd</span><br><span class="line">D:"Printer Color"=00000001</span><br><span class="line">D:"Printer Duplex"=00000001</span><br><span class="line">D:"Printer Media Type"=00000001</span><br><span class="line">D:"Use A Separate Transport For Every Connection"=00000000</span><br><span class="line">D:"Disable STAT For SFTP Directory Validation"=00000000</span><br><span class="line">D:"Use STAT For SFTP Directory Validation"=00000000</span><br><span class="line">D:"SecureFX Trace Level V2"=00000002</span><br><span class="line">D:"Synchronize App Trace Level"=00000001</span><br><span class="line">D:"Port"=00000017</span><br><span class="line">D:"Send SGA"=00000001</span><br><span class="line">D:"Send SGA All"=00000000</span><br><span class="line">D:"Will LFLOW"=00000001</span><br><span class="line">D:"Force Char Mode"=00000001</span><br><span class="line">D:"Enable NAWS"=00000001</span><br><span class="line">D:"Enable NTLM Authentication"=00000001</span><br><span class="line">D:"Telnet Disable SSL Certificate Verification"=00000000</span><br><span class="line">D:"Server Requires Bare CR"=00000000</span><br><span class="line">Z:"Port Forward Table V2"=00000000</span><br><span class="line">Z:"Reverse Forward Table V2"=00000000</span><br><span class="line">Z:"Keymap v3"=00000000</span><br><span class="line">Z:"MAC Log File Tags"=00000000</span><br><span class="line">Z:"Description"=00000000</span><br><span class="line">Z:"SecureFX Post Login User Commands"=00000000</span><br><span class="line">Z:"SecureFX Bookmarks"=00000000</span><br><span class="line">Z:"SCP Shell Prompts"=00000001</span><br><span class="line"> "? ",0,"\n"</span><br><span class="line">Z:"Sftp Drive Mappings"=00000001</span><br><span class="line"> </span><br><span class="line">Z:"Sftp User Mappings"=00000000</span><br><span class="line">Z:"Keymap v4"=00000000</span><br></pre></td></tr></table></figure>
+<h4 id="xshell-tmp-xsh模板文件示例："><a href="#xshell-tmp-xsh模板文件示例：" class="headerlink" title="xshell_tmp.xsh模板文件示例："></a>xshell_tmp.xsh模板文件示例：</h4><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[CONNECTION:PROXY]</span></span><br><span class="line"><span class="attr">Proxy</span>=</span><br><span class="line"><span class="attr">StartUp</span>=<span class="number">0</span></span><br><span class="line"><span class="section">[CONNECTION:SERIAL]</span></span><br><span class="line"><span class="attr">BaudRate</span>=<span class="number">6</span></span><br><span class="line"><span class="attr">StopBits</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">FlowCtrl</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Parity</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">DataBits</span>=<span class="number">3</span></span><br><span class="line"><span class="attr">ComPort</span>=<span class="number">0</span></span><br><span class="line"><span class="section">[SessionInfo]</span></span><br><span class="line"><span class="attr">Version</span>=<span class="number">6.0</span></span><br><span class="line"><span class="attr">Description</span>=Xshell session file</span><br><span class="line"><span class="section">[TRACE]</span></span><br><span class="line"><span class="attr">SockConn</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">SshLogin</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">SshTunneling</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">SshPacket</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">TelnetOptNego</span>=<span class="number">0</span></span><br><span class="line"><span class="section">[CONNECTION:SSH]</span></span><br><span class="line"><span class="attr">LaunchAuthAgent</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">KeyExchange</span>=</span><br><span class="line"><span class="attr">SSHCiphers</span>=aes128-ctr:<span class="number">1</span>,aes192-ctr:<span class="number">1</span>,aes256-ctr:<span class="number">1</span>,aes128-gcm@openssh.com:<span class="number">1</span>,aes256-gcm@openssh.com:<span class="number">1</span>,aes128-cbc:<span class="number">1</span>,aes192-cbc:<span class="number">1</span>,aes256-cbc:<span class="number">1</span>,<span class="number">3</span>des-cbc:<span class="number">1</span>,blowfish-cbc:<span class="number">1</span>,cast128-cbc:<span class="number">1</span>,arcfour:<span class="number">1</span>,rijndael128-cbc:<span class="number">1</span>,rijndael192-cbc:<span class="number">1</span>,rijndael256-cbc:<span class="number">1</span>,rijndael-cbc@lysator.liu.se:<span class="number">1</span>,arcfour128:<span class="number">1</span>,arcfour256:<span class="number">1</span></span><br><span class="line"><span class="attr">ForwardToXmanager</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">Compression</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">NoTerminal</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">UseAuthAgent</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">MAC</span>=</span><br><span class="line"><span class="attr">SSHMACs</span>=hmac-sha2-<span class="number">256</span>-etm@openssh.com:<span class="number">1</span>,hmac-sha2-<span class="number">512</span>-etm@openssh.com:<span class="number">1</span>,hmac-sha1-etm@openssh.com:<span class="number">1</span>,hmac-sha2-<span class="number">256</span>:<span class="number">1</span>,hmac-sha2-<span class="number">512</span>:<span class="number">1</span>,hmac-sha1:<span class="number">1</span>,hmac-sha1-<span class="number">96</span>:<span class="number">1</span>,hmac-md5:<span class="number">1</span>,hmac-md5-<span class="number">96</span>:<span class="number">1</span>,hmac-ripemd160:<span class="number">1</span>,hmac-ripemd160@openssh.com:<span class="number">1</span>,hmac-sha1-<span class="number">96</span>-etm@openssh.com:<span class="number">1</span>,hmac-md5-etm@openssh.com:<span class="number">1</span>,hmac-md5-<span class="number">96</span>-etm@openssh.com:<span class="number">1</span></span><br><span class="line"><span class="attr">InitRemoteDirectory</span>=</span><br><span class="line"><span class="attr">ForwardX11</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">VexMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Cipher</span>=</span><br><span class="line"><span class="attr">Display</span>=localhost:<span class="number">0.0</span></span><br><span class="line"><span class="attr">FwdReqCount</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">InitLocalDirectory</span>=</span><br><span class="line"><span class="attr">SSHKeyExchanges</span>=curve25519-sha256@libssh.org:<span class="number">1</span>,ecdh-sha2-nistp256:<span class="number">1</span>,ecdh-sha2-nistp384:<span class="number">1</span>,ecdh-sha2-nistp521:<span class="number">1</span>,diffie-hellman-group-exchange-sha256:<span class="number">1</span>,diffie-hellman-group-exchange-sha1:<span class="number">1</span>,diffie-hellman-group14-sha1:<span class="number">1</span>,diffie-hellman-group1-sha1:<span class="number">1</span></span><br><span class="line"><span class="attr">SaveHostKey</span>=<span class="number">0</span></span><br><span class="line"><span class="section">[BELL]</span></span><br><span class="line"><span class="attr">FilePath</span>=</span><br><span class="line"><span class="attr">RepeatTime</span>=<span class="number">3</span></span><br><span class="line"><span class="attr">FlashWindow</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">BellMode</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">IgnoreTime</span>=<span class="number">3</span></span><br><span class="line"><span class="section">[USERINTERFACE]</span></span><br><span class="line"><span class="attr">NoQuickButton</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">QuickCommand</span>=Default Quick Command Set</span><br><span class="line"><span class="section">[CONNECTION:FTP]</span></span><br><span class="line"><span class="attr">Passive</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">InitRemoteDirectory</span>=</span><br><span class="line"><span class="attr">InitLocalDirectory</span>=</span><br><span class="line"><span class="section">[TRANSFER]</span></span><br><span class="line"><span class="attr">FolderMethod</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">DropXferHandler</span>=<span class="number">2</span></span><br><span class="line"><span class="attr">XmodemUploadCmd</span>=rx</span><br><span class="line"><span class="attr">ZmodemUploadCmd</span>=rz -E</span><br><span class="line"><span class="attr">FolderPath</span>=</span><br><span class="line"><span class="attr">YmodemUploadCmd</span>=rb -E</span><br><span class="line"><span class="attr">AutoZmodem</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">SendFolderPath</span>=</span><br><span class="line"><span class="attr">DuplMethod</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">XYMODEM_1K</span>=<span class="number">0</span></span><br><span class="line"><span class="section">[CONNECTION]</span></span><br><span class="line"><span class="attr">Port</span>=<span class="number">22</span></span><br><span class="line"><span class="attr">Host</span>=<span class="variable">$DEV_IP</span></span><br><span class="line"><span class="attr">Protocol</span>=SSH</span><br><span class="line"><span class="attr">AutoReconnect</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">AutoReconnectLimit</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Description</span>=</span><br><span class="line"><span class="attr">AutoReconnectInterval</span>=<span class="number">30</span></span><br><span class="line"><span class="attr">FtpPort</span>=<span class="number">21</span></span><br><span class="line"><span class="attr">UseNaglesAlgorithm</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">IPV</span>=<span class="number">0</span></span><br><span class="line"><span class="section">[TERMINAL]</span></span><br><span class="line"><span class="attr">Rows</span>=<span class="number">24</span></span><br><span class="line"><span class="attr">CtrlAltIsAltGr</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">InitOriginMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">InitReverseMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">DisableBlinkingText</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">CodePage</span>=<span class="number">65001</span></span><br><span class="line"><span class="attr">InitAutoWrapMode</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">Cols</span>=<span class="number">80</span></span><br><span class="line"><span class="attr">InitEchoMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Type</span>=xterm</span><br><span class="line"><span class="attr">DisableAlternateScreen</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">CJKAmbiAsWide</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">ScrollBottomOnKeyPress</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">DisableTitleChange</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">ForceEraseOnDEL</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">InitInsertMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">ShiftForcesLocalUseOfMouse</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">FontLineCharacter</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">ScrollbackSize</span>=<span class="number">1024</span></span><br><span class="line"><span class="attr">InitCursorMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">FixedCols</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">BackspaceSends</span>=<span class="number">2</span></span><br><span class="line"><span class="attr">UseInitSize</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">UseLAltAsMeta</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">UseRAltAsMeta</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">AltKeyMapPath</span>=</span><br><span class="line"><span class="attr">DeleteSends</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">DisableTermPrinting</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">IgnoreResizeRequest</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">ScrollBottomOnTermOutput</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">FontPowerLine</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">ScrollErasedText</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">KeyMap</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">RecvLLAsCRLF</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">EraseWithBackgroundColor</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">InitNewlineMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">InitKeypadMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">TerminalNameForEcho</span>=Xshell</span><br><span class="line"><span class="section">[TERMINAL:WINDOW]</span></span><br><span class="line"><span class="attr">ColorScheme</span>=James Stytle</span><br><span class="line"><span class="attr">FontQuality</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">LineSpace</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">CursorColor</span>=<span class="number">65280</span></span><br><span class="line"><span class="attr">CursorBlinkInterval</span>=<span class="number">600</span></span><br><span class="line"><span class="attr">TabColorType</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">CursorAppearance</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">TabColorOther</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">FontSize</span>=<span class="number">16</span></span><br><span class="line"><span class="attr">AsianFontSize</span>=<span class="number">16</span></span><br><span class="line"><span class="attr">CursorBlink</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">BGImageFile</span>=</span><br><span class="line"><span class="attr">BoldMethod</span>=<span class="number">2</span></span><br><span class="line"><span class="attr">CursorTextColor</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">BGImagePos</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">AsianFont</span>=Consolas</span><br><span class="line"><span class="attr">FontFace</span>=Consolas</span><br><span class="line"><span class="attr">CharSpace</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">MarginBottom</span>=<span class="number">5</span></span><br><span class="line"><span class="attr">MarginLeft</span>=<span class="number">5</span></span><br><span class="line"><span class="attr">MarginTop</span>=<span class="number">5</span></span><br><span class="line"><span class="attr">MarginRight</span>=<span class="number">5</span></span><br><span class="line"><span class="section">[CONNECTION:TELNET]</span></span><br><span class="line"><span class="attr">XdispLoc</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">NegoMode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Display</span>=<span class="variable">$PCADDR</span>:<span class="number">0.0</span></span><br><span class="line"><span class="section">[HIGHLIGHT]</span></span><br><span class="line"><span class="attr">HighlightSet</span>=None</span><br><span class="line"><span class="section">[CONNECTION:AUTHENTICATION]</span></span><br><span class="line"><span class="attr">Pkcs11Pin</span>=</span><br><span class="line"><span class="attr">Library</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Passphrase</span>=</span><br><span class="line"><span class="attr">Pkcs11Middleware</span>=</span><br><span class="line"><span class="attr">Delegation</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">UseInitScript</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">TelnetLoginPrompt</span>=ogin:</span><br><span class="line"><span class="attr">Password</span>=<span class="variable">$PASSWORD</span></span><br><span class="line"><span class="attr">RloginPasswordPrompt</span>=assword:</span><br><span class="line"><span class="attr">UseExpectSend</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">TelnetPasswordPrompt</span>=assword:</span><br><span class="line"><span class="attr">ExpectSend_Count</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Method</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">ScriptPath</span>=</span><br><span class="line"><span class="attr">UserKey</span>=</span><br><span class="line"><span class="attr">UserName</span>=<span class="variable">$USERNAME</span></span><br><span class="line"><span class="section">[LOGGING]</span></span><br><span class="line"><span class="attr">FilePath</span>=%n_%Y-%m-%d_%t.log</span><br><span class="line"><span class="attr">Overwrite</span>=<span class="number">1</span></span><br><span class="line"><span class="attr">WriteFileTimestamp</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">TimestampFormat</span>=[%a] </span><br><span class="line"><span class="attr">TermCode</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">AutoStart</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">Prompt</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">WriteTermTimestamp</span>=<span class="number">0</span></span><br><span class="line"><span class="section">[ADVANCED]</span></span><br><span class="line"><span class="attr">WaitPrompt</span>=</span><br><span class="line"><span class="attr">PromptMax</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">SendLineDelayType</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">SendLineDelayInterval</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">SendCharDelayInterval</span>=<span class="number">0</span></span><br><span class="line"><span class="section">[CONNECTION:RLOGIN]</span></span><br><span class="line"><span class="attr">TermSpeed</span>=<span class="number">38400</span></span><br><span class="line"><span class="section">[CONNECTION:KEEPALIVE]</span></span><br><span class="line"><span class="attr">SendKeepAliveInterval</span>=<span class="number">60</span></span><br><span class="line"><span class="attr">KeepAliveInterval</span>=<span class="number">60</span></span><br><span class="line"><span class="attr">TCPKeepAlive</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">KeepAliveString</span>=</span><br><span class="line"><span class="attr">SendKeepAlive</span>=<span class="number">0</span></span><br><span class="line"><span class="attr">KeepAlive</span>=<span class="number">1</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考文档：</p>
+<p> <a href="https://github.com/python-excel/xlwt" target="_blank" rel="noopener">https://github.com/python-excel/xlwt</a> </p>
+<p> <a href="https://docs.python.org/2/library/string.html#template-strings" target="_blank" rel="noopener">https://docs.python.org/2/library/string.html#template-strings</a> </p>
+<p><a href="https://www.cnblogs.com/python-robot/p/9958352.html" target="_blank" rel="noopener">https://www.cnblogs.com/python-robot/p/9958352.html</a></p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/12/29/python通过xlrd读取Excel表格和Template批量生成配置/" title="python通过xlrd读取Excel表格和Template批量生成配置">https://cshihong.github.io/2019/12/29/python通过xlrd读取Excel表格和Template批量生成配置/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"># Python</a>
+          
+            <a href="/tags/网络自动化/" rel="tag"># 网络自动化</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/29/Netconf协议学习笔记/" rel="next" title="Netconf协议学习笔记">
+                <i class="fa fa-chevron-left"></i> Netconf协议学习笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/29/python通过nmap扫描在线设备并尝试AAA登录/" rel="prev" title="python通过nmap扫描在线设备并尝试AAA登录">
+                python通过nmap扫描在线设备并尝试AAA登录 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Template模板替换："><span class="nav-number">1.</span> <span class="nav-text">Template模板替换：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#示例程序："><span class="nav-number">1.1.</span> <span class="nav-text">示例程序：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xlrd库读取Execl表格："><span class="nav-number">2.</span> <span class="nav-text">xlrd库读取Execl表格：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xlwt库写入Execl表格："><span class="nav-number">3.</span> <span class="nav-text">xlwt库写入Execl表格：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#批量生成CRT或者Xshell会话（Session）文件："><span class="nav-number">4.</span> <span class="nav-text">批量生成CRT或者Xshell会话（Session）文件：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#替换示例小程序："><span class="nav-number">4.1.</span> <span class="nav-text">替换示例小程序：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#crt-tmp-ini模板文件示例："><span class="nav-number">4.1.1.</span> <span class="nav-text">crt_tmp.ini模板文件示例：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#xshell-tmp-xsh模板文件示例："><span class="nav-number">4.1.2.</span> <span class="nav-text">xshell_tmp.xsh模板文件示例：</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/12/29/python通过xlrd读取Excel表格和Template批量生成配置/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

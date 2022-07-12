@@ -1,0 +1,2120 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="AP技术介绍AP介绍：无线局域网络的架构主要分为：  基于控制器的AP架构（瘦AP，FitAP） 传统的独立AP架构（胖AP，Fat AP） 胖AP：   所谓的胖AP，典型的例子为无线路由器。无线路由器与纯AP不同，除无线接入功能外，一般具备WAN、LAN两个接口，多支持DHCP服务器、DNS和MAC地址克隆，以及VPN接入、防火墙等安全功能。 瘦AP： 瘦AP是“代表自身不能单独配置或者使用的">
+<meta name="keywords" content="WLAN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CAPWAP基础原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="AP技术介绍AP介绍：无线局域网络的架构主要分为：  基于控制器的AP架构（瘦AP，FitAP） 传统的独立AP架构（胖AP，Fat AP） 胖AP：   所谓的胖AP，典型的例子为无线路由器。无线路由器与纯AP不同，除无线接入功能外，一般具备WAN、LAN两个接口，多支持DHCP服务器、DNS和MAC地址克隆，以及VPN接入、防火墙等安全功能。 瘦AP： 瘦AP是“代表自身不能单独配置或者使用的">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/AP对比.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/参考.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/CAPWAP.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/瘦AP发现AC.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/总体视图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/DHCp.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/discovery.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/DTLS.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/join.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/image%20date.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/configure.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/date%20check.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/run.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/run控制.png">
+<meta property="og:updated_time" content="2018-04-25T13:32:52.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CAPWAP基础原理">
+<meta name="twitter:description" content="AP技术介绍AP介绍：无线局域网络的架构主要分为：  基于控制器的AP架构（瘦AP，FitAP） 传统的独立AP架构（胖AP，Fat AP） 胖AP：   所谓的胖AP，典型的例子为无线路由器。无线路由器与纯AP不同，除无线接入功能外，一般具备WAN、LAN两个接口，多支持DHCP服务器、DNS和MAC地址克隆，以及VPN接入、防火墙等安全功能。 瘦AP： 瘦AP是“代表自身不能单独配置或者使用的">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/AP对比.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>CAPWAP基础原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">CAPWAP基础原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-25 20:48:18 / 修改时间：21:32:52" itemprop="dateCreated datePublished" datetime="2018-04-25T20:48:18+08:00">2018-04-25</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/无线/" itemprop="url" rel="index"><span itemprop="name">无线</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 2,294</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 9</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="AP技术介绍"><a href="#AP技术介绍" class="headerlink" title="AP技术介绍"></a>AP技术介绍</h1><h2 id="AP介绍："><a href="#AP介绍：" class="headerlink" title="AP介绍："></a>AP介绍：</h2><p>无线局域网络的架构主要分为：</p>
+<ol>
+<li>基于控制器的AP架构（瘦AP，FitAP）</li>
+<li><p>传统的独立AP架构（胖AP，Fat AP）</p>
+<p><strong>胖AP：</strong></p>
+</li>
+</ol>
+<p>所谓的胖AP，典型的例子为无线路由器。无线路由器与纯AP不同，除无线接入功能外，一般具备WAN、LAN两个接口，多支持DHCP服务器、DNS和MAC地址克隆，以及VPN接入、防火墙等安全功能。</p>
+<p><strong>瘦AP：</strong></p>
+<p>瘦AP是“代表自身不能单独配置或者使用的无线AP产品，这种产品仅仅是一个WLAN系统的一部分，负责管理安装和操作”。</p>
+<ul>
+<li>对于可运营的WLAN，从组网的角度，为了实现WLAN网络的快速部署、网络设备的集中管理、精细化的用户管理，相比胖AP（自治性AP）方式，企业用户以及运营商更倾向于采用集中控制性WLAN组网（瘦AP+AC），从而实现WLAN系统、设备的可运维、可管理。</li>
+<li><strong>AC和瘦AP之间运行的协议一般为CAPWAP协议。</strong></li>
+</ul>
+<h2 id="胖AP与瘦AP比较："><a href="#胖AP与瘦AP比较：" class="headerlink" title="胖AP与瘦AP比较："></a>胖AP与瘦AP比较：</h2><p><img src="/2018/04/25/CAPWAP基础原理/AP对比.png" alt="AP对比"></p>
+<h1 id="CAPWAP隧道介绍"><a href="#CAPWAP隧道介绍" class="headerlink" title="CAPWAP隧道介绍"></a>CAPWAP隧道介绍</h1><h2 id="CAPWAP背景："><a href="#CAPWAP背景：" class="headerlink" title="CAPWAP背景："></a>CAPWAP背景：</h2><p>传统的WLAN体系结构已经无法满足大规模组网的需求，因此，IETF成立的CAPWAP（Control And Provisioning of Wireless Access Points 无线接入点的控制和配置协议）工作组，研究打过没WLAN的解决方案。以实现各个厂家控制器与AP间的互通。</p>
+<p><img src="/2018/04/25/CAPWAP基础原理/参考.png" alt="参考"></p>
+<p>CAPWAP的起源：</p>
+<p><img src="/2018/04/25/CAPWAP基础原理/CAPWAP.png" alt="CAPWAP"></p>
+<p>CAPWAP工作组对以上四种通信协议进行评测后，最终采用LWAPP协议作为基础进行扩展，使用DTLS安全技术，加入其他三种协议的有用特性，制定了CAPWAP协议。</p>
+<h2 id="CAPWAP介绍："><a href="#CAPWAP介绍：" class="headerlink" title="CAPWAP介绍："></a>CAPWAP介绍：</h2><p>CAPWAP（无线接入点控制和配置协议），用于无线终端接入点（AP）和无线网络控制器（AC）之间的通信交互，实现AC对其所关联的AP集中管理和控制。</p>
+<p>该协议包含的主要内容有：</p>
+<ol>
+<li>AP对AC的自动发现及AP和AC的状态机运行、维护。</li>
+<li>AC对AP进行管理，业务配置下发。</li>
+<li>STA数据封装CAPWAP隧道进行转发。</li>
+</ol>
+<h2 id="CAPWAP模式："><a href="#CAPWAP模式：" class="headerlink" title="CAPWAP模式："></a>CAPWAP模式：</h2><p>CAPWAP协议支持两种操作模式：SPlit MAC和Local MAC。</p>
+<p><strong>Split MAC模式：</strong></p>
+<ul>
+<li>在Split MAC模式下，所有二层的无线数据和管理帧都被CAPWAP协议封装，在AC和AP之间交互。</li>
+<li>从STA收到的无线帧，直接封装，转发给AC。</li>
+<li>在split MAC模式下，无线报文不经过报文转换，直接到达AC。</li>
+</ul>
+<p><strong>Local MAC模式：</strong></p>
+<p>本地转发模式允许数据帧可以用本地桥或者使用802.3的帧形式用隧道转发。二层无线管理帧在AP本地处理，然后再转发给AC。</p>
+<p>STA传送的无线帧在AP被封装成802.3数据帧。</p>
+<h2 id="CAPWAP报文格式："><a href="#CAPWAP报文格式：" class="headerlink" title="CAPWAP报文格式："></a>CAPWAP报文格式：</h2><p><img src="/2018/04/25/CAPWAP基础原理/报文.png" alt="报文"></p>
+<ol>
+<li><p>CAPWAP是基于UDP端口的应用层协议。</p>
+</li>
+<li><p>CAPWAP协议传输层运输两种类型的负载：</p>
+<p>数据消息，封装转发无线帧 。</p>
+<p>控制消息，管理AP和AC之间交换的管理消息 。</p>
+</li>
+<li><p>CAPWAP数据和控制报文基于不同的UDP端口发送：</p>
+<p>控制报文端口为UDP端口5246。</p>
+<p>数据报文端口为UDP端口5247。</p>
+</li>
+</ol>
+<h2 id="瘦AP发现AC："><a href="#瘦AP发现AC：" class="headerlink" title="瘦AP发现AC："></a>瘦AP发现AC：</h2><p><strong>瘦AP发现AC的流程：</strong></p>
+<p><img src="/2018/04/25/CAPWAP基础原理/瘦AP发现AC.png" alt="瘦AP发现AC"></p>
+<p><center>图：瘦AP发现AC的流程<center></center></center></p>
+<p>AP上电后，当存在预配置的AC IP列表时，则AP直接启动预配置静态发现流程并与指定的AC连接。</p>
+<p>如果未配置AC IP列表，则启动AP动态发现AC机制，执行DHCP/DNS/广播发现流程后与AC连接。</p>
+<p><strong>瘦AP发现AC的过程：</strong></p>
+<p><img src="/2018/04/25/CAPWAP基础原理/过程.png" alt="过程"></p>
+<p><center>图：瘦AP发现AC的过程<center></center></center></p>
+<ol>
+<li>AP启动以后会通过DHCP获取IP地址、DNS server、域名。</li>
+<li>AP发出L2广播的发现请求报文试图联系一个AC。</li>
+<li>如果长时间（30秒）没有响应,AP会启动L3发现。AP会从DHCP Server通过Option43获得AC的IP，或者通过Option15获得AC的域名，AP向该IP地址（域名）发送发现请求。</li>
+<li>接收到发现请求报文的AC会检查该AP是否有接入本机的权限，如果有则回应发现响应。</li>
+<li>AC和AP间建立CAPWAP隧道。</li>
+</ol>
+<h2 id="CAPWAP隧道建立："><a href="#CAPWAP隧道建立：" class="headerlink" title="CAPWAP隧道建立："></a>CAPWAP隧道建立：</h2><p><img src="/2018/04/25/CAPWAP基础原理/总体视图.png" alt="总体视图"></p>
+<p><center>图：CAPWAP隧道建立的总体过程<center></center></center></p>
+<p>CAPWAP隧道建立过程有：</p>
+<ul>
+<li>Discovery阶段</li>
+<li>DTLS协商阶段（可选）</li>
+<li>Join阶段</li>
+<li>Image data阶段（可选）</li>
+<li>configure</li>
+<li>Data check阶段</li>
+<li>Run（Data）阶段</li>
+<li>Run（Control）阶段</li>
+</ul>
+<h3 id="CAPWAP隧道建立-DHCP"><a href="#CAPWAP隧道建立-DHCP" class="headerlink" title="CAPWAP隧道建立-DHCP:"></a>CAPWAP隧道建立-DHCP:</h3><p><img src="/2018/04/25/CAPWAP基础原理/DHCp.png" alt="DHCp"></p>
+<p><center>图：DHCP的四步交互<center></center></center></p>
+<p>DHCP的四步交互：</p>
+<ol>
+<li>在没有预配置AC IP列表时，则启动AP动态AC发现机制。通过DHCP获取IP地址，并通过DHCP协议中的option返回AC地址列表。</li>
+<li>首先是AP发送discover广播报文，请求DHCP server响应，在DHCP服务器侦听到discover报文后，它会从没有租约的地址范围中，选择最前面的空置IP，连同其他TCP/IP设定，响应AP一个DHCP offer报文，该报文中会包含一个租约期限的信息。</li>
+<li>由于DHCP offer报文既可以是单播报文，也可以是广播报文，当AP端收到多台DHCP Server的响应时，只会挑选其中一个offer(通常是最先抵达的那个)，然后向网络中发送一个DHCP request广播报文，告诉所有的offer，并重新发送DHCP，DHCP server它将指定接收哪一台服务器提供的IP地址，同时，AP也会向网络发送一个ARP封包，查询网络上面有没有其他机器使用该IP地址，如果发现该IP已被占用，AP会发送出一个DHCP Decline封包给DHCP服务器，拒绝接收其DHCP discover 报文。</li>
+<li>当DHCP Server接收到AP的request报文之后，会向AP发送一个DHCP Ack响应，该报文中携带的信息包括了AP的IP地址，租约期限，网关信息，以及DNS server IP等，以此确定租约的正式生效，就此完成DHCP的四步交互工作。</li>
+</ol>
+<h3 id="CAPWAP隧道建立-Discovery："><a href="#CAPWAP隧道建立-Discovery：" class="headerlink" title="CAPWAP隧道建立-Discovery："></a>CAPWAP隧道建立-Discovery：</h3><p><img src="/2018/04/25/CAPWAP基础原理/discovery.png" alt="discovery"></p>
+<p><center>图：AC发现机制<center></center></center></p>
+<p>AC发现机制：</p>
+<ol>
+<li>AP使用AC发现机制来获知哪些AC是可用的，决定与最佳AC来建立CAPWAP的连接。（当然，AP的发现过程是可选的，如果在AP上已经静态配置了AC，那么就不需要完成AC的发现过程。）</li>
+<li>AP启动CAPWAP协议的发现机制，以单播或广播的形式发送发现请求报文试图关联AC，AC收到AP的discovery request以后，会发送一个单播discover response 给AP，AP可以通过discover response中所带的AC优先级或者AC上当前AP的个数等，确定与哪个AC建立会话。</li>
+</ol>
+<h3 id="CAPWAP隧道建立-DTLS（可选）："><a href="#CAPWAP隧道建立-DTLS（可选）：" class="headerlink" title="CAPWAP隧道建立-DTLS（可选）："></a>CAPWAP隧道建立-DTLS（可选）：</h3><p><img src="/2018/04/25/CAPWAP基础原理/DTLS.png" alt="DTLS"></p>
+<p><center>图；DTLS握手<center></center></center></p>
+<p>DTLS握手：</p>
+<ol>
+<li>AP根据此IP地址与AC协商，AP接收到响应消息后开始与AC建立CAPWAP隧道，这个阶段可以选择CAPWAP隧道是否采用DTLS加密传输UDP报文。</li>
+<li>DTLS: Datagram Transport Layer Security（数据报传输层安全协议）</li>
+</ol>
+<h3 id="CAPWAP隧道建立-join："><a href="#CAPWAP隧道建立-join：" class="headerlink" title="CAPWAP隧道建立-join："></a>CAPWAP隧道建立-join：</h3><p><img src="/2018/04/25/CAPWAP基础原理/join.png" alt="join"></p>
+<p><center>图：Join过程<center></center></center></p>
+<p>Join：</p>
+<ul>
+<li>在完成DTLS握手后，AC与AP开始建立控制通道，在建立控制的交互过程中，AC回应的Join response报文中会携带用户配置的升级版本号，握手报文间隔/超时时间，控制报文优先级等信息。AC会检查AP的当前版本，如果AP的版本无法与AC要求的相匹配时，AP和AC会进入Image Data状态做固件升级，以此来更新AP的版本，如果AP的版本符合要求，则进入configuration状态。</li>
+</ul>
+<h3 id="CAPWAP隧道建立-image-date（可选）："><a href="#CAPWAP隧道建立-image-date（可选）：" class="headerlink" title="CAPWAP隧道建立-image date（可选）："></a>CAPWAP隧道建立-image date（可选）：</h3><p><img src="/2018/04/25/CAPWAP基础原理/image date.png" alt="image date"></p>
+<p><center>图：image date<center></center></center></p>
+<p>image data：</p>
+<ol>
+<li>AP根据协商参数判断当前版本是否是最新版本，如果不是最新版本，则AP将在CAPWAP隧道上开始更新软件版本。</li>
+<li>AP在软件版本更新完成后重新启动，重复进行AC发现、建立CAPWAP隧道、加入过程。</li>
+</ol>
+<h3 id="CAPWAP隧道建立-configure："><a href="#CAPWAP隧道建立-configure：" class="headerlink" title="CAPWAP隧道建立-configure："></a>CAPWAP隧道建立-configure：</h3><p><img src="/2018/04/25/CAPWAP基础原理/configure.png" alt="configure"></p>
+<p><center>图：Configure过程<center></center></center></p>
+<p>Configuration：</p>
+<ul>
+<li>进入Configuration状态后是为了做AP的现有配置和AC设定配置的匹配检查，AP发送configuration request到AC，该信息中包含了现有AP的配置，当AP的当前配置与AC要求不符合时，AC会通过configuration response通知AP。</li>
+</ul>
+<h3 id="CAPWAP隧道建立-date-check："><a href="#CAPWAP隧道建立-date-check：" class="headerlink" title="CAPWAP隧道建立-date check："></a>CAPWAP隧道建立-date check：</h3><p><img src="/2018/04/25/CAPWAP基础原理/date check.png" alt="date check"></p>
+<p><center>图：date check过程<center></center></center></p>
+<p>Data Check ：</p>
+<ul>
+<li>当完成configuration后，AP发送change state event request信息，其中包含了radio，result，code等信息，当AC接收到change state event request后，开始回应change state event response 。</li>
+</ul>
+<p>至此完成data check 后，已经完成管理隧道建立的过程，开始进入run状态。</p>
+<h3 id="CAPWAP隧道维护-run（date）："><a href="#CAPWAP隧道维护-run（date）：" class="headerlink" title="CAPWAP隧道维护-run（date）："></a>CAPWAP隧道维护-run（date）：</h3><p><img src="/2018/04/25/CAPWAP基础原理/run.png" alt="run"></p>
+<p><center>图；Run数据过程<center></center></center></p>
+<p>Run：</p>
+<ol>
+<li>AP发送keepalive到AC，AC收到keepalive后表示数据隧道建立，AC回应keepalive，AP进入“normal”状态，开始正常工作。</li>
+</ol>
+<h3 id="CAPWAP隧道维护-run-control"><a href="#CAPWAP隧道维护-run-control" class="headerlink" title="CAPWAP隧道维护-run(control):"></a>CAPWAP隧道维护-run(control):</h3><p><img src="/2018/04/25/CAPWAP基础原理/run控制.png" alt="run控制"></p>
+<p><center>图：run（控制）过程<center></center></center></p>
+<p>管理隧道维护：</p>
+<ul>
+<li>AP进入run状态后，同时发送echo request报文给AC，宣布建立好CAPWAP管理隧道并启动echo发送定时器和隧道检测超时定时以检测管理隧道时候异常。</li>
+<li>当AC收到echo request报文后，同样进入run状态，并回应echo response报文给AP，启动隧道超时定时器。</li>
+<li>到AP收到echo response报文后，会重设检验隧道超时的定时器。</li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/04/25/CAPWAP基础原理/" title="CAPWAP基础原理">https://cshihong.github.io/2018/04/25/CAPWAP基础原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/WLAN/" rel="tag"># WLAN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/25/WLAN拓扑介绍/" rel="next" title="WLAN拓扑介绍">
+                <i class="fa fa-chevron-left"></i> WLAN拓扑介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/25/WLAN组网介绍/" rel="prev" title="WLAN组网介绍">
+                WLAN组网介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#AP技术介绍"><span class="nav-number">1.</span> <span class="nav-text">AP技术介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AP介绍："><span class="nav-number">1.1.</span> <span class="nav-text">AP介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#胖AP与瘦AP比较："><span class="nav-number">1.2.</span> <span class="nav-text">胖AP与瘦AP比较：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CAPWAP隧道介绍"><span class="nav-number">2.</span> <span class="nav-text">CAPWAP隧道介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CAPWAP背景："><span class="nav-number">2.1.</span> <span class="nav-text">CAPWAP背景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAPWAP介绍："><span class="nav-number">2.2.</span> <span class="nav-text">CAPWAP介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAPWAP模式："><span class="nav-number">2.3.</span> <span class="nav-text">CAPWAP模式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAPWAP报文格式："><span class="nav-number">2.4.</span> <span class="nav-text">CAPWAP报文格式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#瘦AP发现AC："><span class="nav-number">2.5.</span> <span class="nav-text">瘦AP发现AC：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAPWAP隧道建立："><span class="nav-number">2.6.</span> <span class="nav-text">CAPWAP隧道建立：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道建立-DHCP"><span class="nav-number">2.6.1.</span> <span class="nav-text">CAPWAP隧道建立-DHCP:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道建立-Discovery："><span class="nav-number">2.6.2.</span> <span class="nav-text">CAPWAP隧道建立-Discovery：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道建立-DTLS（可选）："><span class="nav-number">2.6.3.</span> <span class="nav-text">CAPWAP隧道建立-DTLS（可选）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道建立-join："><span class="nav-number">2.6.4.</span> <span class="nav-text">CAPWAP隧道建立-join：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道建立-image-date（可选）："><span class="nav-number">2.6.5.</span> <span class="nav-text">CAPWAP隧道建立-image date（可选）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道建立-configure："><span class="nav-number">2.6.6.</span> <span class="nav-text">CAPWAP隧道建立-configure：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道建立-date-check："><span class="nav-number">2.6.7.</span> <span class="nav-text">CAPWAP隧道建立-date check：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道维护-run（date）："><span class="nav-number">2.6.8.</span> <span class="nav-text">CAPWAP隧道维护-run（date）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAPWAP隧道维护-run-control"><span class="nav-number">2.6.9.</span> <span class="nav-text">CAPWAP隧道维护-run(control):</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/04/25/CAPWAP基础原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

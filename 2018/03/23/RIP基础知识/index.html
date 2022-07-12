@@ -1,0 +1,2270 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="RIP简介RIP是Routing Information Protocol（路由信息协议）的简称，它是一种较为简单的内部网关协议（Interior Gateway Protocol）。RIP是一种基于距离矢量（Distance-Vector）算法的协议，它使用跳数（Hop Count）作为度量来衡量到达目的网络的距离。RIP通过UDP报文进行路由信息的交换，使用的端口号为520。 RIP包括RIP">
+<meta name="keywords" content="路由基础,RIP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RIP基础知识">
+<meta property="og:url" content="https://cshihong.github.io/2018/03/23/RIP基础知识/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="RIP简介RIP是Routing Information Protocol（路由信息协议）的简称，它是一种较为简单的内部网关协议（Interior Gateway Protocol）。RIP是一种基于距离矢量（Distance-Vector）算法的协议，它使用跳数（Hop Count）作为度量来衡量到达目的网络的距离。RIP通过UDP报文进行路由信息的交换，使用的端口号为520。 RIP包括RIP">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/RIPv1报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/RIPv1抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/RIP工作过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/rip路由表形成过程.gif">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/RIPv2报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/RIPv2抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/按接口水平分割.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/按邻居.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/实验.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/ar1的路由吧.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/ar2的路由表.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/AR1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/ARv1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/AR.png">
+<meta property="og:updated_time" content="2019-08-25T01:50:32.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="RIP基础知识">
+<meta name="twitter:description" content="RIP简介RIP是Routing Information Protocol（路由信息协议）的简称，它是一种较为简单的内部网关协议（Interior Gateway Protocol）。RIP是一种基于距离矢量（Distance-Vector）算法的协议，它使用跳数（Hop Count）作为度量来衡量到达目的网络的距离。RIP通过UDP报文进行路由信息的交换，使用的端口号为520。 RIP包括RIP">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/03/23/RIP基础知识/RIPv1报文.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/03/23/RIP基础知识/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>RIP基础知识 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/03/23/RIP基础知识/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">RIP基础知识
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-03-23 22:45:46" itemprop="dateCreated datePublished" datetime="2018-03-23T22:45:46+08:00">2018-03-23</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:50:32" itemprop="dateModified" datetime="2019-08-25T09:50:32+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,530</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 21</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="RIP简介"><a href="#RIP简介" class="headerlink" title="RIP简介"></a>RIP简介</h1><p>RIP是Routing Information Protocol（路由信息协议）的简称，它是一种较为简单的内部网关协议（Interior Gateway Protocol）。RIP是一种基于距离矢量（Distance-Vector）算法的协议，它使用跳数（Hop Count）作为度量来衡量到达目的网络的距离。RIP通过UDP报文进行路由信息的交换，使用的端口号为520。</p>
+<p>RIP包括RIP-1和RIP-2两个版本，RIP-2对RIP-1进行了扩充，使其更具有优势。</p>
+<h1 id="RIP原理描述"><a href="#RIP原理描述" class="headerlink" title="RIP原理描述"></a>RIP原理描述</h1><h2 id="RIP基本原理："><a href="#RIP基本原理：" class="headerlink" title="RIP基本原理："></a>RIP基本原理：</h2><p>RIP是一种基于距离矢量（Distance-Vector）算法的协议，它使用跳数（Hop Count）作为度量值来衡量到达目的地址的距离。在RIP网络中，缺省情况下，设备到与它直接相连网络的跳数为0，通过一个设备可达的网络的跳数为1，其余依此类推。也就是说，度量值等于从本网络到达目的网络间的设备数量。为限制收敛时间，RIP规定度量值取0～15之间的整数，大于或等于16的跳数被定义为无穷大，即目的网络或主机不可达。由于这个限制，使得RIP不可能在大型网络中得到应用。 </p>
+<h3 id="RIPv1报文："><a href="#RIPv1报文：" class="headerlink" title="RIPv1报文："></a>RIPv1报文：</h3><p>RIP-1报文由头部（Header）和多个路由表项（Route Entries）部分组成。在一个RIP报文中，最多可以有25个路由表项。RIP是一个基于UDP协议的，并且RIP-1的数据包不能超过512字节。</p>
+<p><img src="/2018/03/23/RIP基础知识/RIPv1报文.png" alt="RIPv1报文"></p>
+<p><center>图：RIPv1报文格式<center></center></center></p>
+<p><strong>字段解释：</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Command</td>
+<td>8比特</td>
+<td>标识报文的类型：1：Request报文，向邻居请求全部或部分路由信息；2：Reponse报文，发送自己全部或部分路由信息，一个Response报文中最多包含25个路由表项。</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>8比特</td>
+<td>RIP的版本号：1：RIP-12：RIP-2</td>
+</tr>
+<tr>
+<td>Must be zero</td>
+<td>16/32比特</td>
+<td>必须为零字段。</td>
+</tr>
+<tr>
+<td>AFI（Address family identifier）</td>
+<td>16比特</td>
+<td>地址族标识，其值为2时表示IP协议。对于Request报文，此字段值为0。</td>
+</tr>
+<tr>
+<td>IP Address</td>
+<td>32比特</td>
+<td>该路由的目的IP地址，可以是自然网段的地址，也可以是子网地址或主机地址。</td>
+</tr>
+<tr>
+<td>Metric</td>
+<td>32比特</td>
+<td>路由的开销值。对于Request报文，此字段值为16。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>RIPv1报文抓包示例：</strong></p>
+<p><img src="/2018/03/23/RIP基础知识/RIPv1抓包.png" alt="RIPv1抓包"></p>
+<p><center>图：RIPv1报文抓包示例<center></center></center></p>
+<h3 id="RIPv1的特点："><a href="#RIPv1的特点：" class="headerlink" title="RIPv1的特点："></a>RIPv1的特点：</h3><ol>
+<li>有类别路由协议。</li>
+<li>广播更新。</li>
+<li>基于UDP，端口号520.</li>
+</ol>
+<p>RIP是一个基于UDP的路由协议，并且RIPv1的数据包不能超过512字节（RIP报文头部占用4个字节,而每个路由条目占用20个八位组字节。因此,RIP消息最大为4+(25*20)=504个字节,再加上8个字节的UDP头部,所以RIP数据报的大小(不含IP包的头部)最大可达512个字节。）。RIPv1的协议报文中没有携带掩码信息，所以RIPv1在发送和接收路由更新时会根据主类网段掩码和接口地址掩码来处理路由条目。因此RIPv1无法支持路由聚合，也不支持不连续子网。RIPv1的协议报文中没有验证字段，所以RIPv1也不支持验证。</p>
+<h3 id="RIP工作过程分析："><a href="#RIP工作过程分析：" class="headerlink" title="RIP工作过程分析："></a>RIP工作过程分析：</h3><p><img src="/2018/03/23/RIP基础知识/RIP工作过程.png" alt="RIP工作过程"></p>
+<p><center>图：RIP工作过程分析<center></center></center></p>
+<ol>
+<li>初始状态:路由器开启RIP进程，宣告相应接口，则设备就会从相关接口发送和接收RIP报文。</li>
+<li>构建路由表：路由器依据收到的RIP报文构建自己的路由表项</li>
+<li>维护路由表：路由器每隔30秒发送更新报文，同时接收相邻路由器发送的更新报文以维护路由表项。</li>
+<li>老化路由表项：路由器为将自己构建的路由表项启动180秒的定时器。180秒内，如果路由器收到更新报文，则重置自己的更新定时器和老化定时器。</li>
+<li>垃圾收集表项：如果180秒过后，路由器没有收到相应路由表项的更新，则启动时长为120秒的垃圾收集定时器，同时将该路由表项的度量置为16。</li>
+<li>删除路由表项：如果120秒之后，路由器仍然没有收到相应路由表项的更新，则路由器将该表项删除。</li>
+</ol>
+<h3 id="RIP路由表的形成："><a href="#RIP路由表的形成：" class="headerlink" title="RIP路由表的形成："></a>RIP路由表的形成：</h3><p>RIP启动时的初始路由表仅包含本设备的一些直连接口路由。通过相邻设备互相学习路由表项，才能实现各网段路由互通。</p>
+<p><img src="/2018/03/23/RIP基础知识/rip路由表形成过程.gif" alt="rip路由表形成过程"></p>
+<p><center>图：RIP路由表形成过程<center></center></center></p>
+<p>RIP路由表形成过程如上图所示:</p>
+<ul>
+<li>RIP协议启动之后，RouterA会向相邻的路由器广播一个Request报文。</li>
+<li>当RouterB从接口接收到RouterA发送的Request报文后，把自己的RIP路由表封装在Response报文内，然后向该接口对应的网络广播。</li>
+<li>RouterA根据RouterB发送的Response报文，形成自己的路由表。</li>
+</ul>
+<h3 id="RIPv1的发送和接收规则："><a href="#RIPv1的发送和接收规则：" class="headerlink" title="RIPv1的发送和接收规则："></a><strong>RIPv1的发送和接收规则：</strong></h3><h4 id="RIPv1的发送规则："><a href="#RIPv1的发送规则：" class="headerlink" title="RIPv1的发送规则："></a>RIPv1的发送规则：</h4><p>注意发送时没有子网掩码。</p>
+<p>将要发送的前缀路由和出接口网段匹配：</p>
+<ol>
+<li>如果不在同一主网，此为主网边界，将前缀自动汇总为有类网段发送前缀到出接口。</li>
+<li>如果在同一主网，检查发送的前缀是否为32位：<ol>
+<li>如果是，发送32位前缀到出接口。</li>
+<li>如果不是，检查前缀和出口掩码是否相同：<ol>
+<li>如果不同，抑制发送或者汇聚为主网络号。</li>
+<li>如果相同，没有边界，发送正确的前缀到出接口。</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="RIPv1接收规则："><a href="#RIPv1接收规则：" class="headerlink" title="RIPv1接收规则："></a>RIPv1接收规则：</h4><p>收到一个前缀后，如果发现是主网络号，直接放入路由表，掩码是8/16/24.</p>
+<p>如果不是主网络号，检查是否在同一主网：</p>
+<ol>
+<li>如果不在，生成有类路由，掩码按有类路由计算。</li>
+<li>如果在同一主网，用接口掩码去掩，然后检查该前缀是网络地址还是主机地址：<ol>
+<li>如果是网络地址，生成路由，掩码等于自己的接口掩码，放入路由表。</li>
+<li>如果不是网络地址，就默认是主机地址，生成32位路由，放入路由表。</li>
+</ol>
+</li>
+</ol>
+<h3 id="RIP的更新与维护："><a href="#RIP的更新与维护：" class="headerlink" title="RIP的更新与维护："></a>RIP的更新与维护：</h3><p>RIP协议在更新和维护路由信息时主要使用四个定时器： </p>
+<ul>
+<li>更新定时器（Update timer）：当此定时器超时时，立即发送更新报文。</li>
+<li>老化定时器（Age timer）：RIP设备如果在老化时间内没有收到邻居发来的路由更新报文，则认为该路由不可达。 </li>
+<li>垃圾收集定时器（Garbage-collect timer）：如果在垃圾收集时间内不可达路由没有收到来自同一邻居的更新，则该路由将被从RIP路由表中彻底删除。 </li>
+<li>抑制定时器（Suppress timer）：当RIP设备收到对端的路由更新，其cost为16，对应路由进入抑制状态，并启动抑制定时器。为了防止路由震荡，在抑制定时器超时之前，即使再收到对端路由cost小于16的更新，也不接受。当抑制定时器超时后，就重新允许接受对端发送的路由更新报文。 </li>
+</ul>
+<p><strong>RIP路由与定时器之间的关系：</strong></p>
+<ul>
+<li>RIP的更新信息发布是由更新定时器控制的，<strong>默认为每30秒</strong>发送一次。</li>
+<li>每一条路由表项对应两个定时器：老化定时器和垃圾收集定时器。当学到一条路由并添加到RIP路由表中时，老化定时器启动。如果老化定时器超时，设备仍没有收到邻居发来的更新报文，则把该路由的度量值置为16（表示路由不可达），并启动垃圾收集定时器。如果垃圾收集定时器超时，设备仍然没有收到更新报文，则在RIP路由表中删除该路由。 </li>
+</ul>
+<p>注意事项：</p>
+<ul>
+<li>如果设备不具有触发更新功能，一个路由表项最多需要300秒才能被删除（老化时间+垃圾收集时间）。</li>
+<li>如果存在触发更新，那么一个路由条目最多需要120秒才能被删除（即为垃圾收集时间）。</li>
+</ul>
+<h3 id="触发更新："><a href="#触发更新：" class="headerlink" title="触发更新："></a>触发更新：</h3><p>触发更新可以缩短网络收敛时间。在路由表项变化时立即向其他设备广播该信息，而不必等待定时更新。如果没有触发更新，缺省情况下，失效的路由条目会在路由表停留最多300秒（老化定时器+垃圾收集定时器）。</p>
+<h2 id="RIPv2的增强特性："><a href="#RIPv2的增强特性：" class="headerlink" title="RIPv2的增强特性："></a>RIPv2的增强特性：</h2><h3 id="RIPv2特点："><a href="#RIPv2特点：" class="headerlink" title="RIPv2特点："></a>RIPv2特点：</h3><ol>
+<li>无类别路由协议。</li>
+<li>组播更新，组播地址224.0.0.9</li>
+<li>基于UDP，端口号520.</li>
+<li>支持外部Tag。</li>
+<li>支持路由聚合和CIDR</li>
+<li>支持指定下一跳。</li>
+<li>支持认证。</li>
+</ol>
+<h3 id="RIPv2的报文："><a href="#RIPv2的报文：" class="headerlink" title="RIPv2的报文："></a>RIPv2的报文：</h3><p><img src="/2018/03/23/RIP基础知识/RIPv2报文.png" alt="RIPv2报文"></p>
+<p><center>图：RIPv2报文格式<center></center></center></p>
+<p><strong>字段解释：</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段名</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Command</td>
+<td>8比特</td>
+<td>标识报文的类型：1：Request报文，向邻居请求全部或部分路由信息；2：Reponse报文，发送自己全部或部分路由信息，一个Response报文中最多包含25个路由表项。</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>8比特</td>
+<td>RIP的版本号：1：RIP-12：RIP-2</td>
+</tr>
+<tr>
+<td>Must be zero</td>
+<td>16比特</td>
+<td>必须为零字段。</td>
+</tr>
+<tr>
+<td>AFI（Address Family Identifier）</td>
+<td>16比特</td>
+<td>地址族标识，其值为2时表示IP协议。对于Request报文，此字段值为0。</td>
+</tr>
+<tr>
+<td>Route Tag</td>
+<td>16比特</td>
+<td>外部路由标记。</td>
+</tr>
+<tr>
+<td>IP Address</td>
+<td>32比特</td>
+<td>该路由的目的IP地址，可以是自然网段的地址，也可以是子网地址或主机地址。</td>
+</tr>
+<tr>
+<td>Subnet Mask</td>
+<td>32比特</td>
+<td>目的地址的掩码。</td>
+</tr>
+<tr>
+<td>Next Hop</td>
+<td>32比特</td>
+<td>提供一个更好的下一跳地址。如果为0.0.0.0，则表示发布此路由的路由器地址就是最优下一跳地址。</td>
+</tr>
+<tr>
+<td>Metric</td>
+<td>32比特</td>
+<td>路由的开销值。对于Request报文，此字段为16。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>RIPv2报文抓包示例：</strong></p>
+<p><img src="/2018/03/23/RIP基础知识/RIPv2抓包.png" alt="RIPv2抓包"></p>
+<p><center>图：RIPv1报文抓包示例<center></center></center></p>
+<h3 id="RIPv1与RIPv2的比较："><a href="#RIPv1与RIPv2的比较：" class="headerlink" title="RIPv1与RIPv2的比较："></a>RIPv1与RIPv2的比较：</h3><ol>
+<li>RIPv1是有类路由协议，RIPv2是无类路由协议</li>
+<li>RIPv1不能支持VLSM，RIPv2可以支持VLSM</li>
+<li>RIPv1没有认证的功能，RIPv2可以支持认证，并且有明文和MD5两种认证</li>
+<li>RIPv1没有手工汇总的功能，RIPv2可以在关闭自动汇总的前提下，进行手工汇总</li>
+<li>RIPv1是广播更新，RIPv2是组播更新，</li>
+<li>RIPv1对路由没有标记的功能，RIPv2可以对路由打标记（tag），用于过滤和做策略</li>
+<li>RIPv1发送的updata最多可以携带25条路由条目，RIPv2在有认证的情况下最多只能携带24条路由</li>
+<li>RIPv1发送的updata包里面没有next-hop属性，RIPv2有next-hop属性，可以用与路由更新的重定</li>
+</ol>
+<h3 id="RIPv2路由聚合："><a href="#RIPv2路由聚合：" class="headerlink" title="RIPv2路由聚合："></a>RIPv2路由聚合：</h3><p>路由聚合的原理是，同一个自然网段内的不同子网的路由在向外（其它网段）发送时聚合成一个网段的路由发送。</p>
+<ul>
+<li>RIPv2支持路由聚合，因为RIPv2报文携带掩码位，所以支持子网划分。在RIPv2中进行路由聚合可提高大型网络的可扩展性和效率，缩减路由表。</li>
+<li>基于RIPv2进程的有类聚合即实现自动聚合。</li>
+<li>基于接口的聚合即实现手动聚合。</li>
+<li>如果被聚合路由携带了Tag，那么路由聚合发生之后，Tag信息将被清除。</li>
+</ul>
+<p>路由聚合有两种方式：</p>
+<ul>
+<li><p>基于RIP进程的有类聚合：</p>
+<p>聚合后的路由使用自然掩码的路由形式发布。比如，对于10.1.1.0/24（metric=2）和10.1.2.0/24（metric=3）这两条路由，会聚合成自然网段路由10.0.0.0/8（metric=2）。RIP–2聚合是按类聚合的，聚合得到最优的metric值。</p>
+</li>
+<li><p>基于接口的聚合：</p>
+<p>用户可以指定聚合地址。比如，对于10.1.1.0/24（metric=2）和10.1.2.0/24（metric=3）这两条路由，可以在指定接口上配置聚合路由10.1.0.0/16（metric=2）来代替原始路由。</p>
+</li>
+</ul>
+<h2 id="RIP的特性："><a href="#RIP的特性：" class="headerlink" title="RIP的特性："></a>RIP的特性：</h2><h3 id="水平分割："><a href="#水平分割：" class="headerlink" title="水平分割："></a>水平分割：</h3><p>水平分割（Split Horizon）的原理是，RIP从某个接口学到的路由，不会从该接口再发回给邻居路由器。这样不但减少了带宽消耗，还可以防止路由环路。 </p>
+<p>水平分割在不同网络中实现有所区别，分为按照接口和按照邻居进行水平分割。广播网、P2P和P2MP网络中是按照接口进行水平分割的，如下图所示：</p>
+<p><img src="/2018/03/23/RIP基础知识/按接口水平分割.png" alt="按接口水平分割"></p>
+<p><center>图：按照接口进行水平分割原理图 <center></center></center></p>
+<p>RouterA会向RouterB发送到网络10.0.0.0/8的路由信息，如果没有配置水平分割，RouterB会将从RouterA学习到的这条路由再发送回给RouterA。这样，RouterA可以学习到两条到达10.0.0.0/8网络的路由：跳数为0的直连路由；下一跳指向RouterB，且跳数为2的路由。</p>
+<p>但是在RouterA的RIP路由表中只有直连路由才是活跃的。当RouterA到网络10.0.0.0的路由变成不可达，并且RouterB还没有收到路由不可达的信息时，RouterB会继续向RouterA发送10.0.0.0/8可达的路由信息。即，RouterA会接受到错误的路由信息，认为可以通过RouterB到达10.0.0.0/8网络；而RouterB仍旧认为可以通过RouterA到达10.0.0.0/8网络，从而形成路由环路。配置水平分割后，RouterB将不会再把到网络10.0.0.0/8的路由发回给RouterA，由此避免了路由环路的产生。</p>
+<p>对于NBMA（Non-Broadcast Multiple Access）网络，由于一个接口上连接多个邻居，所以是按照邻居进行水平分割的。路由就会按照单播方式发送，同一接口上收到的路由可以按邻居进行区分。从某一接口的对端邻居处学习到路由，不会再通过该接口发送回去。 </p>
+<p><img src="/2018/03/23/RIP基础知识/按邻居.png" alt="按邻居"></p>
+<p><center>图：按照邻居进行水平分割原理图 <center></center></center></p>
+<p>在NBMA网络配置了水平分割之后，RouterA会将从RouterB学习到的172.16.0.0/16路由发送给RouterC，但是不会再发送回给RouterB。</p>
+<h3 id="毒性反转："><a href="#毒性反转：" class="headerlink" title="毒性反转："></a>毒性反转：</h3><p>毒性反转（Poison Reverse）的原理是，RIP从某个接口学到路由后，从原接口发回邻居路由器，并将该路由的开销设置为16（即指明该路由不可达）。利用这种方式，可以清除对方路由表中的无用路由。 </p>
+<p>配置毒性反转后，RouterB在接收到从RouterA发来的路由后，向RouterA发送一个这条路由不可达的消息（将该路由的开销设置为16），这样RouterA就不会再从RouterB学到这条可达路由，因此就可以避免路由环路的产生。 </p>
+<h3 id="水平分割和毒性逆转的区别："><a href="#水平分割和毒性逆转的区别：" class="headerlink" title="水平分割和毒性逆转的区别："></a>水平分割和毒性逆转的区别：</h3><p>水平分割和毒性逆转都是为了防止RIP中的路由环路而设计的，但是水平分割是不将收到路由条目再按“原路返回”来避免环路，而毒性逆转遵循“坏消息比没消息好”的原则，即将路由条目按“原路返回”，但是该路由条目被标记为不可达（度量值为16）。</p>
+<p>缺省情况下不使能毒性逆转。一般情况下，在华为设备中均使能水平分割（除NBMA网络外）而禁用毒性逆转。</p>
+<h3 id="多进程和多实例："><a href="#多进程和多实例：" class="headerlink" title="多进程和多实例："></a>多进程和多实例：</h3><p>RIP多进程允许为指定的RIP进程关联一组接口，从而保证该进程进行的所有协议操作都仅限于这一组接口。这样，就可以实现一台设备有多个RIP进程，不同RIP进程之间互不影响，它们之间的路由交互相当于不同路由协议之间的路由交互。</p>
+<p>RIP多实例是为每个VPN实例绑定一个RIP进程，从而实现VPN实例与指定进程下的所有接口相关联。</p>
+<h3 id="RIP与BFD联动："><a href="#RIP与BFD联动：" class="headerlink" title="RIP与BFD联动："></a>RIP与BFD联动：</h3><p>网络上的链路故障会导致路由器重新计算路由，因此缩短路由协议的收敛时间对于提高网络性能是非常重要的。加快故障感知速度并快速通告给路由协议是一种可行的方案。</p>
+<p>双向转发检测BFD（Bidirectional Forwarding Detection）是一种用于检测邻居路由器之间链路故障的检测机制，它通常与路由协议联动，通过快速感知链路故障并通告使得路由协议能够快速地重新收敛，从而减少由于拓扑变化导致的流量丢失。在RIP与BFD联动中，BFD可以快速检测到链路故障并通知RIP协议，从而加快RIP协议对于网络拓扑变化的响应。</p>
+<h2 id="RIP故障排除流程"><a href="#RIP故障排除流程" class="headerlink" title="RIP故障排除流程:"></a>RIP故障排除流程:</h2><ol>
+<li>检查接口是否在RIP中使能：使用display rip process-id interface 可以查看运行rip的接口；</li>
+<li>检查对方发送版本号和本地接口接收的版本号是否匹配：缺省情况下，接口只发送RIPv1报文，但可以接收RIPv1和RIPv2报文。当入接口与收到的RIP报文使用不同的版本号时，有可能造成RIP路由不能被正确的接收；</li>
+<li>检查在RIP中是否配置了策略，过滤掉收到的RIP路由：如果被路由策略过滤掉，则需修改路由策略；</li>
+<li>RIP使用的端口520是否被禁用；</li>
+<li>检查接口是否配置了undo rip input/output或者rip metricin设置度量值过大；</li>
+<li>检查接口是否配置了抑制接口；</li>
+<li>检查路由度量值是否大于16；</li>
+<li>检查链路两端是否配置了认证，认证的配置是否正确。</li>
+</ol>
+<h1 id="RIPv1和RIPv2的兼容性问题"><a href="#RIPv1和RIPv2的兼容性问题" class="headerlink" title="RIPv1和RIPv2的兼容性问题"></a>RIPv1和RIPv2的兼容性问题</h1><ol>
+<li>RIPv1和RIPv2默认互相不兼容。</li>
+<li>运行RIPv2的路由器默认只发送和接收v2的报文，不接收v1的报文。</li>
+<li>运行RIPv1的路由器可以接收v2的报文。</li>
+</ol>
+<h2 id="RIPv1和RIPv2兼容性实验验证："><a href="#RIPv1和RIPv2兼容性实验验证：" class="headerlink" title="RIPv1和RIPv2兼容性实验验证："></a>RIPv1和RIPv2兼容性实验验证：</h2><p><img src="/2018/03/23/RIP基础知识/实验.png" alt="实验"></p>
+<p><center>图：RIPv1与RIPv2版本兼容性实验<center></center></center></p>
+<p><strong>配置如下：</strong></p>
+<p>AR1：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> sysname AR1</span><br><span class="line">#</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GigabitEthernet0</span>/0/0</span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 10.1.1.1 255.255.255.252 </span></span><br><span class="line"><span class="class">#</span></span><br><span class="line"><span class="class"><span class="title">interface</span> <span class="title">LoopBack0</span></span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 1.1.1.1 255.255.255.255 </span></span><br><span class="line"><span class="class">#</span></span><br><span class="line"><span class="class"><span class="title">rip</span> 1</span></span><br><span class="line"><span class="class"> <span class="title">version</span> 2</span></span><br><span class="line"><span class="class"> <span class="title">network</span> 10.0.0.0</span></span><br><span class="line"><span class="class"> <span class="title">network</span> 1.0.0.0</span></span><br><span class="line"><span class="class">#</span></span><br></pre></td></tr></table></figure>
+<p>AR2：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;AR2&gt;dis current-configuration  </span><br><span class="line">#</span><br><span class="line"> sysname AR2</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ip address <span class="number">10.1</span><span class="number">.1</span><span class="number">.2</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.252</span> </span><br><span class="line">#</span><br><span class="line">interface LoopBack0</span><br><span class="line"> ip address <span class="number">2.2</span><span class="number">.2</span><span class="number">.2</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.255</span> </span><br><span class="line">#</span><br><span class="line">rip <span class="number">1</span></span><br><span class="line"> network <span class="number">10.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line"> network <span class="number">2.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p><strong>实验现象：</strong></p>
+<p><img src="/2018/03/23/RIP基础知识/ar1的路由吧.png" alt="ar1的路由吧"></p>
+<p><center>图：AR1的路由表<center></center></center></p>
+<p>在AR1上开启的位RIPv2版本，路由表中并未收到从AR2中RIPv1发来的路由更新。</p>
+<hr>
+<p><img src="/2018/03/23/RIP基础知识/ar2的路由表.png" alt="ar2的路由表"></p>
+<h2 id="图：在AR2上配置为RIPv1，收到了从AR1中发送的路由，1-1-1-1-32路由条目。"><a href="#图：在AR2上配置为RIPv1，收到了从AR1中发送的路由，1-1-1-1-32路由条目。" class="headerlink" title="图：在AR2上配置为RIPv1，收到了从AR1中发送的路由，1.1.1.1/32路由条目。"></a><center>图：在AR2上配置为RIPv1，收到了从AR1中发送的路由，1.1.1.1/32路由条目。</center></h2><p><img src="/2018/03/23/RIP基础知识/报文.png" alt="报文"></p>
+<p><center>图：抓包情况<center></center></center></p>
+<p><strong>实验结果：</strong></p>
+<p>v2版RIP，将只发送v2，接收v2。</p>
+<p>v1版本的RIP可以接收v2的报文。</p>
+<h2 id="当两边都是RIPv2时："><a href="#当两边都是RIPv2时：" class="headerlink" title="当两边都是RIPv2时："></a>当两边都是RIPv2时：</h2><p><img src="/2018/03/23/RIP基础知识/AR1.png" alt="AR1"></p>
+<p><center>图：当都是RIPv2时Ar1的路由表<center></center></center></p>
+<p>当两边都是v2时，AR1可以收到AR2发送的2.2.2.2/32这条路由条目，AR2也可以收到1.1.1.1/32.</p>
+<h2 id="当两边都是RIPv1时："><a href="#当两边都是RIPv1时：" class="headerlink" title="当两边都是RIPv1时："></a>当两边都是RIPv1时：</h2><p><img src="/2018/03/23/RIP基础知识/ARv1.png" alt="ARv1"></p>
+<h2 id="图：当两边都是v1版本时，AR1的路由表"><a href="#图：当两边都是v1版本时，AR1的路由表" class="headerlink" title="图：当两边都是v1版本时，AR1的路由表"></a><center>图：当两边都是v1版本时，AR1的路由表<center></center></center></h2><p><img src="/2018/03/23/RIP基础知识/AR.png" alt="AR"></p>
+<h2 id="图：当两边都是v1版本时，AR2的路由表"><a href="#图：当两边都是v1版本时，AR2的路由表" class="headerlink" title="图：当两边都是v1版本时，AR2的路由表"></a><center>图：当两边都是v1版本时，AR2的路由表<center></center></center></h2><p>两边都是v1时，收到对方的路由条目都是有类路由，1.0.0.0/8和2.0.0.0/8。而v2版本中，收到的都是无类路由，1.1.1.1/32和2.2.2.2/32.</p>
+<h1 id="RIP配置命令"><a href="#RIP配置命令" class="headerlink" title="RIP配置命令"></a>RIP配置命令</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">checkzero</span><br><span class="line"><span class="comment">//使能对RIP-1报文中的零域进行检查。</span></span><br><span class="line"><span class="comment">//RIP-1报文中的有些字段必须为零，称之为零域。RIP-1在接收报</span></span><br><span class="line"><span class="comment">//文时将对零域进行检查，零域的值不为零的RIP-1报文将不被处理。</span></span><br><span class="line"><span class="comment">//checkzero只对RIP-1报文有效。</span></span><br><span class="line">host-route</span><br><span class="line"><span class="comment">//允许32位主机路由加到路由表里。</span></span><br><span class="line">network network-address</span><br><span class="line"><span class="comment">//对指定网段接口使能RIP路由。</span></span><br><span class="line">peer ip-address</span><br><span class="line"><span class="comment">//指定RIP邻居的IP地址。配置此命令后，更新报文以单播形式发</span></span><br><span class="line"><span class="comment">//送到对端，而不采用正常的组播或广播的形式。</span></span><br><span class="line">preference <span class="number">100</span></span><br><span class="line"><span class="comment">//配置RIP路由的优先级</span></span><br><span class="line">rip authentication-mode</span><br><span class="line"><span class="comment">//配置RIP-2的认证方式及认证参数。</span></span><br><span class="line">rip bfd</span><br><span class="line"><span class="comment">//指定接口上配置动态BFD会话的参数值。</span></span><br><span class="line">rip input</span><br><span class="line"><span class="comment">//控制允许指定接口接收RIP报文。</span></span><br><span class="line">rip output</span><br><span class="line"><span class="comment">//允许接口发送RIP报文。</span></span><br><span class="line">rip metricin</span><br><span class="line"><span class="comment">//配置接口接收RIP报文时给路由增加的度量值。</span></span><br><span class="line">rip metricout</span><br><span class="line"><span class="comment">//配置接口发送RIP报文给路由增加的度量值。</span></span><br><span class="line"><span class="comment">//缺省情况下，接口发送RIP报文时给路由增加度量值为1。</span></span><br><span class="line">rip pkt-transmit</span><br><span class="line"><span class="comment">//指定接口上设置RIP发送更新报文的时间间隔和每次发送报文的数量。</span></span><br><span class="line"><span class="comment">//缺省情况下，RIP接口发送更新报文的时间间隔为200毫秒，每次发送的报文数量为50。 </span></span><br><span class="line">rip poison-reverse</span><br><span class="line"><span class="comment">//使能RIP的毒性反转功能。</span></span><br><span class="line">rip split-horizon</span><br><span class="line"><span class="comment">//使能RIP的水平分割功能。</span></span><br><span class="line"><span class="comment">//如果毒性反转和水平分割都配置了，简单的水平分割行为（从某</span></span><br><span class="line"><span class="comment">//接口学到的路由再从这个接口发布时将被抑制）会被毒性反转行为代替。</span></span><br><span class="line">rip summary-address</span><br><span class="line"><span class="comment">//配置RIP路由器发布一个聚合的本地IP地址。</span></span><br><span class="line">silent-<span class="class"><span class="keyword">interface</span></span></span><br><span class="line"><span class="class">  //来抑制接口，使其只接收报文，用来更新自己的路由表，而不发送<span class="title">RIP</span>报文。</span></span><br><span class="line">summary [ always ]</span><br><span class="line"><span class="comment">//使能RIP有类聚合,指定有类聚合被使能，不论水平分割功能是否配置。</span></span><br><span class="line">timers rip <span class="number">30</span></span><br><span class="line"><span class="comment">//调整定时器。</span></span><br><span class="line"><span class="comment">//缺省情况下，路由更新报文的发送间隔为30秒，路由老化时间为180秒，路由被从路由表中删除的时间为120秒。</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/03/23/RIP基础知识/" title="RIP基础知识">https://cshihong.github.io/2018/03/23/RIP基础知识/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/路由基础/" rel="tag"># 路由基础</a>
+          
+            <a href="/tags/RIP/" rel="tag"># RIP</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/15/蓝桥杯第八届省赛Java-B组/" rel="next" title="蓝桥杯第八届省赛Java-B组">
+                <i class="fa fa-chevron-left"></i> 蓝桥杯第八届省赛Java-B组
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/27/常见排序算法/" rel="prev" title="常见排序算法">
+                常见排序算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#RIP简介"><span class="nav-number">1.</span> <span class="nav-text">RIP简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RIP原理描述"><span class="nav-number">2.</span> <span class="nav-text">RIP原理描述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RIP基本原理："><span class="nav-number">2.1.</span> <span class="nav-text">RIP基本原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv1报文："><span class="nav-number">2.1.1.</span> <span class="nav-text">RIPv1报文：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv1的特点："><span class="nav-number">2.1.2.</span> <span class="nav-text">RIPv1的特点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIP工作过程分析："><span class="nav-number">2.1.3.</span> <span class="nav-text">RIP工作过程分析：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIP路由表的形成："><span class="nav-number">2.1.4.</span> <span class="nav-text">RIP路由表的形成：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv1的发送和接收规则："><span class="nav-number">2.1.5.</span> <span class="nav-text">RIPv1的发送和接收规则：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RIPv1的发送规则："><span class="nav-number">2.1.5.1.</span> <span class="nav-text">RIPv1的发送规则：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RIPv1接收规则："><span class="nav-number">2.1.5.2.</span> <span class="nav-text">RIPv1接收规则：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIP的更新与维护："><span class="nav-number">2.1.6.</span> <span class="nav-text">RIP的更新与维护：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#触发更新："><span class="nav-number">2.1.7.</span> <span class="nav-text">触发更新：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RIPv2的增强特性："><span class="nav-number">2.2.</span> <span class="nav-text">RIPv2的增强特性：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv2特点："><span class="nav-number">2.2.1.</span> <span class="nav-text">RIPv2特点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv2的报文："><span class="nav-number">2.2.2.</span> <span class="nav-text">RIPv2的报文：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv1与RIPv2的比较："><span class="nav-number">2.2.3.</span> <span class="nav-text">RIPv1与RIPv2的比较：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIPv2路由聚合："><span class="nav-number">2.2.4.</span> <span class="nav-text">RIPv2路由聚合：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RIP的特性："><span class="nav-number">2.3.</span> <span class="nav-text">RIP的特性：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#水平分割："><span class="nav-number">2.3.1.</span> <span class="nav-text">水平分割：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#毒性反转："><span class="nav-number">2.3.2.</span> <span class="nav-text">毒性反转：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#水平分割和毒性逆转的区别："><span class="nav-number">2.3.3.</span> <span class="nav-text">水平分割和毒性逆转的区别：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多进程和多实例："><span class="nav-number">2.3.4.</span> <span class="nav-text">多进程和多实例：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RIP与BFD联动："><span class="nav-number">2.3.5.</span> <span class="nav-text">RIP与BFD联动：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RIP故障排除流程"><span class="nav-number">2.4.</span> <span class="nav-text">RIP故障排除流程:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RIPv1和RIPv2的兼容性问题"><span class="nav-number">3.</span> <span class="nav-text">RIPv1和RIPv2的兼容性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RIPv1和RIPv2兼容性实验验证："><span class="nav-number">3.1.</span> <span class="nav-text">RIPv1和RIPv2兼容性实验验证：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：在AR2上配置为RIPv1，收到了从AR1中发送的路由，1-1-1-1-32路由条目。"><span class="nav-number">3.2.</span> <span class="nav-text">图：在AR2上配置为RIPv1，收到了从AR1中发送的路由，1.1.1.1/32路由条目。</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#当两边都是RIPv2时："><span class="nav-number">3.3.</span> <span class="nav-text">当两边都是RIPv2时：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#当两边都是RIPv1时："><span class="nav-number">3.4.</span> <span class="nav-text">当两边都是RIPv1时：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：当两边都是v1版本时，AR1的路由表"><span class="nav-number">3.5.</span> <span class="nav-text">图：当两边都是v1版本时，AR1的路由表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：当两边都是v1版本时，AR2的路由表"><span class="nav-number">3.6.</span> <span class="nav-text">图：当两边都是v1版本时，AR2的路由表</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RIP配置命令"><span class="nav-number">4.</span> <span class="nav-text">RIP配置命令</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/03/23/RIP基础知识/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

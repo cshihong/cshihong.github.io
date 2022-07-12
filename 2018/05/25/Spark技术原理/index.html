@@ -1,0 +1,2316 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Spark概述Spark简介：Spark最初由美国加州伯克利大学（UCBerkeley）的AMP实验室于2009年开发，是基于内存计算的大数据并行计算框架，可用于构建大型的、低延迟的数据分析应用程序。 2013年Spark加入Apache孵化器项目后发展迅猛，如今已成为Apache软件基金会最重要的三大分布式计算系统开源项目之一（Hadoop、Spark、Storm）。 Spark在2014年打破">
+<meta name="keywords" content="Hadoop,Spark">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spark技术原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/05/25/Spark技术原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="Spark概述Spark简介：Spark最初由美国加州伯克利大学（UCBerkeley）的AMP实验室于2009年开发，是基于内存计算的大数据并行计算框架，可用于构建大型的、低延迟的数据分析应用程序。 2013年Spark加入Apache孵化器项目后发展迅猛，如今已成为Apache软件基金会最重要的三大分布式计算系统开源项目之一（Hadoop、Spark、Storm）。 Spark在2014年打破">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/特点.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Spark与hadoop.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Sprak.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/时间.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/生态系统.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Spark组件.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Spark架构.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/架构设计.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/关系.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Spark运行流程图.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Spark%20on%20client.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/spark%20on%20clter.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/过程示例.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/依赖关系.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Stage划分.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/RDD运行过程.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/流程.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/图.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Spar%20Sql.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/支持.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/流数据.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/模型.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/模型示例.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/Spark%20Streaming.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/批处理.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/案例.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/saprk.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/部署.PNG">
+<meta property="og:updated_time" content="2019-11-15T14:38:30.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spark技术原理">
+<meta name="twitter:description" content="Spark概述Spark简介：Spark最初由美国加州伯克利大学（UCBerkeley）的AMP实验室于2009年开发，是基于内存计算的大数据并行计算框架，可用于构建大型的、低延迟的数据分析应用程序。 2013年Spark加入Apache孵化器项目后发展迅猛，如今已成为Apache软件基金会最重要的三大分布式计算系统开源项目之一（Hadoop、Spark、Storm）。 Spark在2014年打破">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/05/25/Spark技术原理/特点.PNG">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/05/25/Spark技术原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Spark技术原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/05/25/Spark技术原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Spark技术原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-25 07:08:30" itemprop="dateCreated datePublished" datetime="2018-05-25T07:08:30+08:00">2018-05-25</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-15 22:38:30" itemprop="dateModified" datetime="2019-11-15T22:38:30+08:00">2019-11-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,653</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 20</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Spark概述"><a href="#Spark概述" class="headerlink" title="Spark概述"></a>Spark概述</h1><h2 id="Spark简介："><a href="#Spark简介：" class="headerlink" title="Spark简介："></a>Spark简介：</h2><p>Spark最初由美国加州伯克利大学（UCBerkeley）的AMP实验室于2009年开发，是<strong>基于内存计算的大数据并行计算框架</strong>，可用于构建大型的、低延迟的数据分析应用程序。</p>
+<p>2013年Spark加入Apache孵化器项目后发展迅猛，如今已成为Apache软件基金会最重要的三大分布式计算系统开源项目之一（Hadoop、Spark、Storm）。</p>
+<p>Spark在2014年打破了Hadoop保持的基准排序纪录</p>
+<ul>
+<li>Spark/206个节点/23分钟/100TB数据</li>
+<li>Hadoop/2000个节点/72分钟/100TB数据</li>
+<li>Spark用十分之一的计算资源，获得了比Hadoop快3倍的速度。</li>
+</ul>
+<p>Spark具有如下几个主要特点：</p>
+<ul>
+<li>运行速度快：使用DAG执行引擎以支持循环数据流与内存计算。</li>
+<li>容易使用：支持使用Scala、Java、Python和R语言进行编程，可以通过Spark Shell进行交互式编程。</li>
+<li>通用性：Spark提供了完整而强大的技术栈，包括SQL查询、流式计算、机器学习和图算法组件。</li>
+<li>运行模式多样：可运行于独立的集群模式中，可运行于Hadoop中，也可运行于Amazon EC2等云环境中，并且可以访问HDFS、Cassandra、HBase、Hive等多种数据源。</li>
+</ul>
+<p><img src="/2018/05/25/Spark技术原理/特点.PNG" alt="特点"></p>
+<p><center>图：Spark的特点<center></center></center></p>
+<p>Spark如今已吸引了国内外各大公司的注意，如腾讯、淘宝、百度、亚马逊等公司均不同程度地使用了Spark来构建大数据分析应用，并应用到实际的生产环境中。</p>
+<p><img src="/2018/05/25/Spark技术原理/Spark与hadoop.PNG" alt="Spark与hadoop"></p>
+<p><center>图：谷歌应用趋势:Spark与Hadoop对比<center></center></center></p>
+<h2 id="Spark是什么？"><a href="#Spark是什么？" class="headerlink" title="Spark是什么？"></a>Spark是什么？</h2><ul>
+<li>Spark是一个基于内存的分布式批处理引擎。</li>
+<li>由AMP LAB贡献到Apache社区的开源项目，是AMP大数据栈的基础组件。</li>
+<li>Spark是一站式解决方案，集批处理、实时流计算、交互式查询、图计算与机器学习与一体。</li>
+</ul>
+<h2 id="Spark做什么？"><a href="#Spark做什么？" class="headerlink" title="Spark做什么？"></a>Spark做什么？</h2><ul>
+<li>数据处理（Data Processing）：可以用来快速处理数据，兼具容错性和可扩展性。</li>
+<li>迭代计算（Iterrative Computation）：支持迭代计算，有效应对多步数据处理逻辑。</li>
+<li>数据挖掘（Data Mining）：在还海量数据的基础上进程复杂的挖掘分析，可支持各种数据挖掘和机器学习算法。</li>
+</ul>
+<p>Spark适用场景：</p>
+<ul>
+<li>数据处理,ETL（抽取、转换、加载）</li>
+<li>机器学习。如：可用于自动判断淘宝买家的评论是好评还是差评。</li>
+<li>交互式分析：可用于查询Hive数据仓库。</li>
+<li>特别使用与迭代计算，数据重复利用场景。</li>
+<li>流计算：流处理可用于页面点击浏览分析，推荐系统，舆情分析等实时业务。</li>
+</ul>
+<blockquote>
+<p><strong>需要反复操作的次数越多，所需读取的数据量越大，收益越大。</strong></p>
+</blockquote>
+<h2 id="Scala简介："><a href="#Scala简介：" class="headerlink" title="Scala简介："></a>Scala简介：</h2><p>Scala是一门现代的多范式编程语言，运行于Java平台（JVM，Java 虚拟机），并兼容现有的Java程序。</p>
+<p> Scala的特性：</p>
+<ul>
+<li>Scala具备强大的并发性，支持函数式编程，可以更好地支持分布式系统。</li>
+<li>Scala语法简洁，能提供优雅的API </li>
+</ul>
+<p>Scala兼容Java，运行速度快，且能融合到Hadoop生态圈中。<br>Scala是Spark的主要编程语言，但Spark还支持Java、Python、R作为编程语言 Scala的优势是提供了REPL（Read-Eval-Print Loop，交互式解释器），提高程序开发效率。</p>
+<h2 id="Spark与Hadoop的对比："><a href="#Spark与Hadoop的对比：" class="headerlink" title="Spark与Hadoop的对比："></a>Spark与Hadoop的对比：</h2><p>对比Hadoop：</p>
+<ul>
+<li>性能上提升高于100倍。</li>
+<li>Spark的中间数据存放在内存中，对于迭代运算的效率更高，进行批处理时更高效。</li>
+<li>更低的延时。</li>
+<li>Spark提供更多的数据操作类型，编程模型比Hadoop更灵活，开发效率更高。</li>
+<li>更高的容错能力（血统机制）。</li>
+</ul>
+<p>Hadoop存在如下一些缺点：</p>
+<ul>
+<li>表达能力有限</li>
+<li>磁盘IO开销大</li>
+<li>延迟高<ul>
+<li>任务之间的衔接涉及IO开销</li>
+<li>在前一个任务执行完成之前，其他任务就无法开始，难以胜任复杂、多阶段的计算任务</li>
+</ul>
+</li>
+</ul>
+<p>Spark在借鉴Hadoop MapReduce优点的同时，很好地解决了MapReduce所面临的问题。</p>
+<p>相比于Hadoop MapReduce，Spark主要具有如下优点：</p>
+<ul>
+<li>Spark的计算模式也属于MapReduce，但不局限于Map和Reduce操作，还提供了多种数据集操作类型，编程模型比Hadoop MapReduce更灵活。</li>
+<li>Spark提供了内存计算，可将<strong>中间结果放到内存中</strong>，对于迭代运算效率更高 Spark基于DAG的任务调度执行机制，要优于Hadoop MapReduce的迭代执行机制。</li>
+</ul>
+<p><img src="/2018/05/25/Spark技术原理/Sprak.PNG" alt="Sprak"></p>
+<p><center>图：Hadoop与Spark的执行流程对比<center></center></center></p>
+<p>使用Hadoop进行迭代计算非常耗资源。Spark将数据载入内存后，之后的迭代计算都可以直接使用内存中的中间结果作运算，避免了从磁盘中频繁读取数据。</p>
+<p><img src="/2018/05/25/Spark技术原理/时间.PNG" alt="时间"></p>
+<p><center>图：Hadoop与Spark执行逻辑回归的时间对比<center></center></center></p>
+<h1 id="Spark生态系统"><a href="#Spark生态系统" class="headerlink" title="Spark生态系统"></a>Spark生态系统</h1><p>##Spark生态系统的原因：</p>
+<p>在实际应用中，大数据处理主要包括以下三个类型：</p>
+<ul>
+<li>复杂的批量数据处理：通常时间跨度在数十分钟到数小时之间。</li>
+<li>基于历史数据的交互式查询：通常时间跨度在数十秒到数分钟之间。</li>
+<li>基于实时数据流的数据处理：通常时间跨度在数百毫秒到数秒之间。</li>
+</ul>
+<p>当同时存在以上三种场景时，就需要同时部署三种不同的软件</p>
+<ul>
+<li>比如: MapReduce / Impala / Storm</li>
+</ul>
+<p>这样做难免会带来一些问题：</p>
+<ul>
+<li>不同场景之间输入输出数据无法做到无缝共享，通常需要进行数据格式的转换。</li>
+<li>不同的软件需要不同的开发和维护团队，带来了较高的使用成本。</li>
+<li>比较难以对同一个集群中的各个系统进行统一的资源协调和分配。</li>
+</ul>
+<h2 id="Spark设计的理念："><a href="#Spark设计的理念：" class="headerlink" title="Spark设计的理念："></a>Spark设计的理念：</h2><p>Spark的设计遵循“一个软件栈满足不同应用场景”的理念，逐渐形成了一套完整的生态系统。</p>
+<p>既能够提供内存计算框架，也可以支持SQL即席查询、实时流式计算、机器学习和图计算等。</p>
+<p>Spark可以部署在资源管理器YARN之上，提供一站式的大数据解决方案。</p>
+<p>因此，Spark所提供的生态系统足以应对上述三种场景，即同时支持批处理、交互式查询和流数据处理。</p>
+<h2 id="Spark生态系统："><a href="#Spark生态系统：" class="headerlink" title="Spark生态系统："></a>Spark生态系统：</h2><p><img src="/2018/05/25/Spark技术原理/生态系统.PNG" alt="生态系统"></p>
+<p><center>图：BDAS架构<center></center></center></p>
+<p>Spark生态系统已经成为伯克利数据分析软件栈BDAS（Berkeley Data Analytics Stack）的重要组成部分。</p>
+<p>Spark的生态系统主要包含了Spark Core、Spark SQL、Spark Streaming、MLLib和GraphX 等组件。</p>
+<p>Spark生态系统组件的应用场景：</p>
+<p><img src="/2018/05/25/Spark技术原理/Spark组件.PNG" alt="Spark组件"></p>
+<h1 id="Spark运行架构"><a href="#Spark运行架构" class="headerlink" title="Spark运行架构"></a>Spark运行架构</h1><p><img src="/2018/05/25/Spark技术原理/Spark架构.PNG" alt="Spark架构"></p>
+<p><center>图：Spark体系架构<center></center></center></p>
+<h2 id="基本概念："><a href="#基本概念：" class="headerlink" title="基本概念："></a>基本概念：</h2><ul>
+<li>RDD：是Resillient Distributed Dataset（弹性分布式数据集）的简称，是分布式内存的一个抽象概念，提供了一种高度受限的共享内存模型。</li>
+<li>DAG：是Directed Acyclic Graph（有向无环图）的简称，反映RDD之间的依赖关系。</li>
+<li>Executor：是运行在工作节点（WorkerNode）的一个进程，负责运行Task。</li>
+<li>Application：用户编写的Spark应用程序。</li>
+<li>Task：运行在Executor上的工作单元。</li>
+<li>Job：一个Job包含多个RDD及作用于相应RDD上的各种操作。</li>
+<li>Stage：是Job的基本调度单位，一个Job会分为多组Task，每组Task被称为Stage，或者也被称为TaskSet，代表了一组关联的、相互之间没有Shuffle依赖关系的任务组成的任务集。</li>
+</ul>
+<h2 id="Spark架构设计："><a href="#Spark架构设计：" class="headerlink" title="Spark架构设计："></a>Spark架构设计：</h2><p><img src="/2018/05/25/Spark技术原理/架构设计.PNG" alt="架构设计"></p>
+<p>Spark运行架构包括集群资源管理器（Cluster Manager）、运行作业任务的工作节点（Worker Node）、每个应用的任务控制节点（Driver）和每个工作节点上负责具体任务的执行进程（Executor）。</p>
+<p>资源管理器可以自带或Mesos或YARN。（<strong>在华为FusionInsight中只能用YARN。</strong>）</p>
+<p>与Hadoop MapReduce计算框架相比，Spark所采用的Executor有两个优点：</p>
+<ul>
+<li>一是利用多线程来执行具体的任务，减少任务的启动开销。</li>
+<li>二是Executor中有一个BlockManager存储模块，会将内存和磁盘共同作为存储设备，有效减少IO开销。</li>
+</ul>
+<p><img src="/2018/05/25/Spark技术原理/关系.PNG" alt="关系"></p>
+<p><center>图：Spark中各种概念之间的相互联系<center></center></center></p>
+<p>一个Application由一个Driver和若干个Job构成，一个Job由多个Stage构成，一个Stage由多个没有Shuffle关系的Task组成.</p>
+<p>当执行一个Application时，Driver会向集群管理器申请资源，启动Executor，并向Executor发送应用程序代码和文件，然后在Executor上执行Task，运行结束后，执行结果会返回给Driver，或者写到HDFS或者其他数据库中。</p>
+<h2 id="Spark运行基本流程："><a href="#Spark运行基本流程：" class="headerlink" title="Spark运行基本流程："></a>Spark运行基本流程：</h2><p><img src="/2018/05/25/Spark技术原理/Spark运行流程图.PNG" alt="Spark运行流程图"></p>
+<p><center>图：Spark运行基本流程图<center></center></center></p>
+<p>Spark运行基本流程如下：</p>
+<ol>
+<li>首先为应用构建起基本的运行环境，即由Driver创建一个SparkContext，进行资源的申请、任务的分配和监控。</li>
+<li>资源管理器为Executor分配资源，并启动Executor进程。</li>
+<li>SparkContext根据RDD的依赖关系构建DAG图，DAG图提交给DAGScheduler解析成Stage，然后把一个个TaskSet提交给底层调度器TaskScheduler处理；Executor向SparkContext申请Task，Task Scheduler将Task发放给Executor运行，并提供应用程序代码。</li>
+<li>Task在Executor上运行，把执行结果反馈给TaskScheduler，然后反馈给DAGScheduler，运行完毕后写入数据并释放所有资源。</li>
+</ol>
+<p>总体而言，Spark运行架构具有以下特点：</p>
+<ol>
+<li>每个Application都有自己专属的Executor进程，并且该进程在Application运行期间一直驻留。Executor进程以多线程的方式运行Task。</li>
+<li>Spark运行过程与资源管理器无关，只要能够获取Executor进程并保持通信即可。</li>
+<li>Task采用了数据本地性和推测执行等优化机制。</li>
+</ol>
+<h2 id="Spark-on-Yarn的运行流程："><a href="#Spark-on-Yarn的运行流程：" class="headerlink" title="Spark on Yarn的运行流程："></a>Spark on Yarn的运行流程：</h2><p><img src="/2018/05/25/Spark技术原理/Spark on client.PNG" alt="Spark on client"></p>
+<p><center>图：Spark on Yarn-client的运行流程<center></center></center></p>
+<p><img src="/2018/05/25/Spark技术原理/spark on clter.PNG" alt="spark on clter"></p>
+<p><center>图：Spark on Yarn-cluster的运行流程<center></center></center></p>
+<p>Yarn-client和Yarn-cluster的区别：</p>
+<ul>
+<li>Yarn-client和Yarn-cluster主要区别是Application Master进程的区别。</li>
+<li>Yarn-client适合测试，Yarn-cluster适合生成。</li>
+<li>Yarn-client任务提交节点宕机，整个任务失败。Yarn-cluster不会。</li>
+</ul>
+<h1 id="RDD运行原理"><a href="#RDD运行原理" class="headerlink" title="RDD运行原理"></a>RDD运行原理</h1><h2 id="设计背景："><a href="#设计背景：" class="headerlink" title="设计背景："></a>设计背景：</h2><p>许多迭代式算法（比如机器学习、图算法等）和交互式数据挖掘工具，共同之处是，不同计算阶段之间会重用中间结果。</p>
+<p>目前的MapReduce框架都是把中间结果写入到HDFS中，带来了大量的数据复制、磁盘IO和序列化开销。</p>
+<p>RDD就是为了满足这种需求而出现的，它提供了一个抽象的数据架构，我们不必担心底层数据的分布式特性，只需将具体的应用逻辑表达为一系列转换处理，不同RDD之间的转换操作形成依赖关系，可以实现管道化，避免中间数据存储。</p>
+<h2 id="RDD概念："><a href="#RDD概念：" class="headerlink" title="RDD概念："></a>RDD概念：</h2><p>一个RDD就是一个分布式对象集合，本质上是一个只读的分区记录集合，每个RDD可分成多个分区，每个分区就是一个数据集片段，并且<strong>一个RDD的不同分区可以被保存到集群中不同的节点上</strong>，从而可以在集群中的不同节点上进行并行计算。</p>
+<p>RDD提供了一种高度受限的共享内存模型，即RDD是只读的记录分区的集合，不能直接修改，只能基于稳定的物理存储中的数据集创建RDD，或者通过在其他RDD上执行确定的转换操作（如map、join和group by）而创建得到新的RDD。</p>
+<p>RDD提供了一组丰富的操作以支持常见的数据运算，分为“<strong>动作”（Action）和“转换”（Transformation）</strong>两种类型。</p>
+<p>RDD提供的转换接口都非常简单，都是类似map、filter、groupBy、join等粗粒度的数据转换操作，而不是针对某个数据项的细粒度修改（不适合网页爬虫）。</p>
+<p>表面上RDD的功能很受限、不够强大，实际上RDD已经被实践证明可以高效地表达许多框架的编程模型（比如MapReduce、SQL、Pregel）。</p>
+<p>Spark用Scala语言实现了RDD的API，程序员可以通过调用API实现对RDD的各种操作。</p>
+<p>RDD典型的执行过程如下：</p>
+<ol>
+<li>RDD读入外部数据源进行创建。</li>
+<li>RDD经过系列的转换（Transformation）操作，每一次都会产生不同的RDD，供给下一个转换操作使用。</li>
+<li>最后一个RDD经过“动作”操作进行转换，并输出到外部数据源。</li>
+</ol>
+<p>这一系列处理称为一个Lineage（血缘关系），即DAG拓扑排序的结果。</p>
+<p>优点：惰性调用、管道化、避免同步等待、不需要保存中间结果、每次操作变得简单。</p>
+<p><img src="/2018/05/25/Spark技术原理/过程示例.PNG" alt="过程示例"></p>
+<p><center>图：RDD执行过程的一个示例<center></center></center></p>
+<h2 id="RDD特性："><a href="#RDD特性：" class="headerlink" title="RDD特性："></a>RDD特性：</h2><p>Spark采用RDD以后能够实现高效计算的原因主要在于： </p>
+<p>（1）高效的容错性</p>
+<ul>
+<li>现有容错机制：数据复制或者记录日志。</li>
+<li>RDD：血缘关系、重新计算丢失分区、无需回滚系统、重算过程在不同节点之间并行、只记录粗粒度的操作。</li>
+</ul>
+<p>（2）中间结果持久化到内存，数据在内存中的多个RDD操作之间进行传递，避免了不必要的读写磁盘开销 。</p>
+<p>（3）存放的数据可以是Java对象，避免了不必要的对象序列化和反序列化。</p>
+<h2 id="RDD之间的依赖关系："><a href="#RDD之间的依赖关系：" class="headerlink" title="RDD之间的依赖关系："></a>RDD之间的依赖关系：</h2><p><img src="/2018/05/25/Spark技术原理/依赖关系.PNG" alt="依赖关系"></p>
+<p><center>图：窄依赖于宽依赖的区别<center></center></center></p>
+<p>窄依赖表现为一个父RDD的分区对应于一个子RDD的分区或多个父RDD的分区对应于一个子RDD的分区.</p>
+<p>宽依赖则表现为存在一个父RDD的一个分区对应一个子RDD的多个分区。</p>
+<h2 id="Stage的划分："><a href="#Stage的划分：" class="headerlink" title="Stage的划分："></a>Stage的划分：</h2><p>Spark通过分析各个RDD的依赖关系生成了DAG，再通过分析各个RDD中的分区之间的依赖关系来决定如何划分Stage，具体划分方法是：</p>
+<ol>
+<li>在DAG中进行反向解析，遇到宽依赖就断开</li>
+<li>遇到窄依赖就把当前的RDD加入到Stage中</li>
+<li>将窄依赖尽量划分在同一个Stage中，可以实现流水线计算</li>
+</ol>
+<p><img src="/2018/05/25/Spark技术原理/Stage划分.PNG" alt="Stage划分"></p>
+<p><center>图：根据RDD分区的依赖关系划分Stage<center></center></center></p>
+<p>如上图，被分成三个Stage，在Stage2中，从map到union都是窄依赖，这两步操作可以形成一个流水线操作。</p>
+<p>流水线操作实例：</p>
+<p>分区7通过map操作生成的分区9，可以不用等待分区8到分区10这个map操作的计算结束，而是继续进行union操作，得到分区13，这样流水线执行大大提高了计算的效率。</p>
+<p>Stage的类型包括两种：ShuffleMapStage和ResultStage，具体如下：<br>（1）ShuffleMapStage：不是最终的Stage，在它之后还有其他Stage，所以，它的输出一定需要经过Shuffle过程，并作为后续Stage的输入；这种Stage是以Shuffle为输出边界，其输入边界可以是从外部获取数据，也可以是另一个ShuffleMapStage的输出，其输出可以是另一个Stage的开始；在一个Job里可能有该类型的Stage，也可能没有该类型Stage；</p>
+<p>（2）ResultStage：最终的Stage，没有输出，而是直接产生结果或存储。这种Stage是直接输出结果，其输入边界可以是从外部获取数据，也可以是另一个ShuffleMapStage的输出。在一个Job里必定有该类型Stage。因此，一个Job含有一个或多个Stage，其中至少含有一个ResultStage。</p>
+<h2 id="RDD运行的过程"><a href="#RDD运行的过程" class="headerlink" title="RDD运行的过程:"></a>RDD运行的过程:</h2><p><img src="/2018/05/25/Spark技术原理/RDD运行过程.PNG" alt="RDD运行过程"></p>
+<p><center>图；RDD在Spark中的运行过程<center></center></center></p>
+<p>通过上述对RDD概念、依赖关系和Stage划分的介绍，结合之前介绍的Spark运行基本流程，再总结一下RDD在Spark架构中的运行过程：<br>（1）创建RDD对象；<br>（2）SparkContext负责计算RDD之间的依赖关系，构建DAG；<br>（3）DAGScheduler负责把DAG图分解成多个Stage，每个Stage中包含了多个Task，每个Task会被TaskScheduler分发给各个WorkerNode上的Executor去执行。</p>
+<h2 id="RDD的算子："><a href="#RDD的算子：" class="headerlink" title="RDD的算子："></a>RDD的算子：</h2><p>Transformation：</p>
+<ul>
+<li>Transformation是通过转换从一个或多个RDD生成新的RDD，该操作时Lazy的，当调用action算子，才发起job。</li>
+<li>典型算子：map、flatMap、filter、reduceByKey。</li>
+</ul>
+<p>Action：</p>
+<ul>
+<li>当代码调用该类型算子时，立即启动job。</li>
+<li>典型算子：take、count、savaAsTextFile等。</li>
+</ul>
+<h1 id="Spark-SQL"><a href="#Spark-SQL" class="headerlink" title="Spark SQL"></a>Spark SQL</h1><h2 id="从Shark说起："><a href="#从Shark说起：" class="headerlink" title="从Shark说起："></a>从Shark说起：</h2><p>Shark即Hive on Spark，为了实现与Hive兼容，Shark在HiveQL方面重用了Hive中HiveQL的解析、逻辑执行计划翻译、执行计划优化等逻辑，可以近似认为仅将物理执行计划从MapReduce作业替换成了Spark作业，通过Hive的HiveQL解析，把HiveQL翻译成Spark上的RDD操作。</p>
+<p>Shark的设计导致了两个问题：</p>
+<ol>
+<li>一是执行计划优化完全依赖于Hive，不方便添加新的优化策略；</li>
+<li>二是因为Spark是线程级并行，而MapReduce是进程级并行，因此，Spark在兼容Hive的实现上存在线程安全问题，导致Shark不得不使用另外一套独立维护的打了补丁的Hive源码分支。</li>
+</ol>
+<p><img src="/2018/05/25/Spark技术原理/流程.PNG" alt="流程"></p>
+<p><center>图：Hive中SQL查询的MapReduce作业转换过程<center></center></center></p>
+<h2 id="Spark-SQL设计"><a href="#Spark-SQL设计" class="headerlink" title="Spark SQL设计:"></a>Spark SQL设计:</h2><p>Spark SQL是Spark中用于结构化数据处理的模块。在Spark应用中，可以无缝的使用SQL语句亦或是DataFrame APi对结构化数据进程查询。</p>
+<p><img src="/2018/05/25/Spark技术原理/图.PNG" alt="图"></p>
+<p><img src="/2018/05/25/Spark技术原理/Spar Sql.PNG" alt="Spar Sql"></p>
+<p><center>图：Spark SQL架构<center></center></center></p>
+<p>Spark SQL在Hive兼容层面仅依赖HiveQL解析、Hive元数据，也就是说，从HQL被解析成抽象语法树（AST）起，就全部由Spark SQL接管了。Spark SQL执行计划生成和优化都由Catalyst（函数式关系查询优化框架）负责。</p>
+<p><img src="/2018/05/25/Spark技术原理/支持.PNG" alt="支持"></p>
+<p><center>图：Spark SQL支持的数据格式和编程语言<center></center></center></p>
+<p>Spark SQL增加了SchemaRDD（即带有Schema信息的RDD），使用户可以在Spark SQL中执行SQL语句，数据既可以来自RDD，也可以是Hive、HDFS、Cassandra等外部数据源，还可以是JSON格式的数据。</p>
+<p>Spark SQL目前支持Scala、Java、Python三种语言，支持SQL-92规范。</p>
+<h2 id="Dataset简介："><a href="#Dataset简介：" class="headerlink" title="Dataset简介："></a>Dataset简介：</h2><p>DataSet是一个由特定域的对象组成的强类型集合，可通过功能或关系操作并行转换其中的对象。</p>
+<p>DataSet以Catalyst逻辑执行计划表示，并且数据以编码的二进制形式存储，不需要反序列化就可以执行sort、filter、shuffle等操作。</p>
+<p>DataSet是“懒惰的”，只在执行cation操作时触发计算。当执行action操作时，Spark用查询优化程序来优化逻辑计划，并生成一个高效的并行分布式的物理计划。</p>
+<h2 id="DataFrame介绍："><a href="#DataFrame介绍：" class="headerlink" title="DataFrame介绍："></a>DataFrame介绍：</h2><p>DateFrame：指定列名称的DataSet。DataFream是Dataset[Row]的特例。</p>
+<h2 id="RDD、DataFrame与Dataset："><a href="#RDD、DataFrame与Dataset：" class="headerlink" title="RDD、DataFrame与Dataset："></a>RDD、DataFrame与Dataset：</h2><p>RDD：</p>
+<ul>
+<li>优点：类型安全，面向对象。</li>
+<li>缺点：序列化和反序列化的性能开销大；GC的性能开销，频繁的创建和销毁对象，势必会增加GC。</li>
+</ul>
+<p>DataFrame：</p>
+<ul>
+<li>优点：自带scheme信息，降低序列化反序列化开销。</li>
+<li>缺点：不是面向对象的。编译器不安全。</li>
+</ul>
+<p>Dataset的特点：</p>
+<ul>
+<li>快：大多数场景下，性能优于RDD；Encoders（编译器）优于Kryo或者Java序列号；避免了不必要的格式转换。</li>
+<li>类型安全：类似于RDD，函数尽可能编译时安全。</li>
+<li>和DataFrame，RDD互相转换。</li>
+</ul>
+<p>Dataset具有RDD和DataFrame的有点，又避免它们的缺点。</p>
+<h2 id="Spark-SQL-vs-Hive："><a href="#Spark-SQL-vs-Hive：" class="headerlink" title="Spark SQL vs Hive："></a>Spark SQL vs Hive：</h2><p>区别：</p>
+<ul>
+<li>Spark SQL的执行引擎为Spark core，HIve默认执行引擎为MapReduce。</li>
+<li>Spark SQL的执行速度是Hive的10-100倍。</li>
+<li>Spark SQL不支持buckets，Hive支持。</li>
+</ul>
+<p>联系：</p>
+<ul>
+<li>Spark SQL依赖于Hive的元数据。</li>
+<li>Spark SQL兼容绝大部分Hive的语法和函数。</li>
+<li>Spark SQL可以使用HIve的自定义函数。</li>
+</ul>
+<h1 id="Spark-Structured-Streaming"><a href="#Spark-Structured-Streaming" class="headerlink" title="Spark Structured Streaming"></a>Spark Structured Streaming</h1><h2 id="Structured-Streaming概述："><a href="#Structured-Streaming概述：" class="headerlink" title="Structured Streaming概述："></a>Structured Streaming概述：</h2><p>Structured Streaming是构建在Spark SQL引擎上的流式数据处理引擎。可以像使用静态RDD数据那样编写流式计算过程。当流数据连续不断的产生时，SPark SQL将会增量的、持续不断的处理这些数据，并将结果更新到结果集中。如下图:</p>
+<p><img src="/2018/05/25/Spark技术原理/流数据.PNG" alt="流数据"></p>
+<p><center>图：Structured Streaming<center></center></center></p>
+<h2 id="Structured-Streaming计算模型："><a href="#Structured-Streaming计算模型：" class="headerlink" title="Structured Streaming计算模型："></a>Structured Streaming计算模型：</h2><p><img src="/2018/05/25/Spark技术原理/模型.PNG" alt="模型"></p>
+<p><center>图：计算模型图<center></center></center></p>
+<p><img src="/2018/05/25/Spark技术原理/模型示例.PNG" alt="模型示例"></p>
+<p><center>图：计算模型示例<center></center></center></p>
+<p>每一次计算后将结果更新到数据集中。</p>
+<h1 id="Spark-Streaming"><a href="#Spark-Streaming" class="headerlink" title="Spark Streaming"></a>Spark Streaming</h1><h2 id="概述："><a href="#概述：" class="headerlink" title="概述："></a>概述：</h2><p>Spark Streaming是Spark核心API的一个扩展，一个实时计算框架。具有可扩展性、高吞吐量、可容错性等特定。</p>
+<p><img src="/2018/05/25/Spark技术原理/Spark Streaming.PNG" alt="Spark Streaming"></p>
+<p><center>图：Spark Streaming过程示意图<center></center></center></p>
+<h2 id="Spark-Streaming微批处理"><a href="#Spark-Streaming微批处理" class="headerlink" title="Spark Streaming微批处理:"></a>Spark Streaming微批处理:</h2><p>Spark Streaming计算基于DStream，将流式计算分解成一系列短小的批处理作业。Spark引擎将数据生成最终结果数据。</p>
+<p><img src="/2018/05/25/Spark技术原理/批处理.PNG" alt="批处理"></p>
+<p><center>图：批处理示意图<center></center></center></p>
+<p>使用DStream从Kafka和HDFS等源获取连续的数据流，DStreams由一系列连续的RDD组成，每个RDD包含确定时间间隔的数据，任何对DStreams的操作都转换成对RDD的操作。</p>
+<h2 id="Spark-Streaming容错机制："><a href="#Spark-Streaming容错机制：" class="headerlink" title="Spark Streaming容错机制："></a>Spark Streaming容错机制：</h2><p>Spark Streaming本质仍是基于RDD计算，当RDD的某些partiton丢失，可以通过RDD的血统机制重新恢复丢失的RDD。</p>
+<h1 id="Spark的部署和应用方式"><a href="#Spark的部署和应用方式" class="headerlink" title="Spark的部署和应用方式"></a>Spark的部署和应用方式</h1><h2 id="Spark三种部署方式："><a href="#Spark三种部署方式：" class="headerlink" title="Spark三种部署方式："></a>Spark三种部署方式：</h2><p>Spark支持三种不同类型的部署方式，包括：</p>
+<ul>
+<li>Standalone（类似于MapReduce1.0，slot为资源分配单位）</li>
+<li>Spark on Mesos（和Spark有血缘关系，更好支持Mesos）</li>
+<li>Spark on YARN</li>
+</ul>
+<h2 id="从Hadoop-Storm架构转向Spark架构："><a href="#从Hadoop-Storm架构转向Spark架构：" class="headerlink" title="从Hadoop+Storm架构转向Spark架构："></a>从Hadoop+Storm架构转向Spark架构：</h2><p><img src="/2018/05/25/Spark技术原理/案例.PNG" alt="案例"></p>
+<p><center>图：采用Hadoop+Storm部署方式的一个案例<center></center></center></p>
+<ul>
+<li><p>用Spark架构具有如下优点：<br>实现一键式安装和配置、线程级别的任务监控和告警.</p>
+</li>
+<li><p>降低硬件集群、软件维护、任务监控和应用开发的难度。</p>
+</li>
+<li><p>便于做成统一的硬件、计算平台资源池.</p>
+</li>
+</ul>
+<blockquote>
+<p>需要说明的是，Spark Streaming无法实现毫秒级的流计算，因此，对于需要毫秒级实时响应的企业应用而言，仍然需要采用流计算框架（如Storm）.</p>
+</blockquote>
+<p><img src="/2018/05/25/Spark技术原理/saprk.PNG" alt="saprk"></p>
+<p><center>图：用Spark架构满足批处理和流处理需求<center></center></center></p>
+<h2 id="Hadoop和Spark的统一部署："><a href="#Hadoop和Spark的统一部署：" class="headerlink" title="Hadoop和Spark的统一部署："></a>Hadoop和Spark的统一部署：</h2><p>由于Hadoop生态系统中的一些组件所实现的功能，目前还是无法由Spark取代的，比如，Storm。</p>
+<p>现有的Hadoop组件开发的应用，完全转移到Spark上需要一定的成本，不同的计算框架统一运行在YARN中，可以带来如下好处：</p>
+<ul>
+<li>计算资源按需伸缩</li>
+<li>不用负载应用混搭，集群利用率高</li>
+<li>共享底层存储，避免数据跨集群迁移</li>
+</ul>
+<p><img src="/2018/05/25/Spark技术原理/部署.PNG" alt="部署"></p>
+<p><center>图：Hadoop和Spark的统一部署<center></center></center></p>
+<hr>
+<blockquote>
+<p>以上内容为听华为大数据培训课程和大学MOOC上厦门大学 林子雨的《大数据技术原理与应用》课程而整理的笔记。</p>
+<p><strong><a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">大数据技术原理与应用</a></strong>： <a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">https://www.icourse163.org/course/XMU-1002335004</a> </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/05/25/Spark技术原理/" title="Spark技术原理">https://cshihong.github.io/2018/05/25/Spark技术原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+            <a href="/tags/Spark/" rel="tag"># Spark</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/24/Storm（流计算）技术原理/" rel="next" title="Storm（流计算）技术原理">
+                <i class="fa fa-chevron-left"></i> Storm（流计算）技术原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/30/Pregel（图计算）技术原理/" rel="prev" title="Pregel（图计算）技术原理">
+                Pregel（图计算）技术原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark概述"><span class="nav-number">1.</span> <span class="nav-text">Spark概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark简介："><span class="nav-number">1.1.</span> <span class="nav-text">Spark简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark是什么？"><span class="nav-number">1.2.</span> <span class="nav-text">Spark是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark做什么？"><span class="nav-number">1.3.</span> <span class="nav-text">Spark做什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Scala简介："><span class="nav-number">1.4.</span> <span class="nav-text">Scala简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark与Hadoop的对比："><span class="nav-number">1.5.</span> <span class="nav-text">Spark与Hadoop的对比：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark生态系统"><span class="nav-number">2.</span> <span class="nav-text">Spark生态系统</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark设计的理念："><span class="nav-number">2.1.</span> <span class="nav-text">Spark设计的理念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark生态系统："><span class="nav-number">2.2.</span> <span class="nav-text">Spark生态系统：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark运行架构"><span class="nav-number">3.</span> <span class="nav-text">Spark运行架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本概念："><span class="nav-number">3.1.</span> <span class="nav-text">基本概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark架构设计："><span class="nav-number">3.2.</span> <span class="nav-text">Spark架构设计：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark运行基本流程："><span class="nav-number">3.3.</span> <span class="nav-text">Spark运行基本流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark-on-Yarn的运行流程："><span class="nav-number">3.4.</span> <span class="nav-text">Spark on Yarn的运行流程：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RDD运行原理"><span class="nav-number">4.</span> <span class="nav-text">RDD运行原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#设计背景："><span class="nav-number">4.1.</span> <span class="nav-text">设计背景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDD概念："><span class="nav-number">4.2.</span> <span class="nav-text">RDD概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDD特性："><span class="nav-number">4.3.</span> <span class="nav-text">RDD特性：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDD之间的依赖关系："><span class="nav-number">4.4.</span> <span class="nav-text">RDD之间的依赖关系：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stage的划分："><span class="nav-number">4.5.</span> <span class="nav-text">Stage的划分：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDD运行的过程"><span class="nav-number">4.6.</span> <span class="nav-text">RDD运行的过程:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDD的算子："><span class="nav-number">4.7.</span> <span class="nav-text">RDD的算子：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark-SQL"><span class="nav-number">5.</span> <span class="nav-text">Spark SQL</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#从Shark说起："><span class="nav-number">5.1.</span> <span class="nav-text">从Shark说起：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark-SQL设计"><span class="nav-number">5.2.</span> <span class="nav-text">Spark SQL设计:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Dataset简介："><span class="nav-number">5.3.</span> <span class="nav-text">Dataset简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DataFrame介绍："><span class="nav-number">5.4.</span> <span class="nav-text">DataFrame介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RDD、DataFrame与Dataset："><span class="nav-number">5.5.</span> <span class="nav-text">RDD、DataFrame与Dataset：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark-SQL-vs-Hive："><span class="nav-number">5.6.</span> <span class="nav-text">Spark SQL vs Hive：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark-Structured-Streaming"><span class="nav-number">6.</span> <span class="nav-text">Spark Structured Streaming</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Structured-Streaming概述："><span class="nav-number">6.1.</span> <span class="nav-text">Structured Streaming概述：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Structured-Streaming计算模型："><span class="nav-number">6.2.</span> <span class="nav-text">Structured Streaming计算模型：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark-Streaming"><span class="nav-number">7.</span> <span class="nav-text">Spark Streaming</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述："><span class="nav-number">7.1.</span> <span class="nav-text">概述：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark-Streaming微批处理"><span class="nav-number">7.2.</span> <span class="nav-text">Spark Streaming微批处理:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark-Streaming容错机制："><span class="nav-number">7.3.</span> <span class="nav-text">Spark Streaming容错机制：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Spark的部署和应用方式"><span class="nav-number">8.</span> <span class="nav-text">Spark的部署和应用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spark三种部署方式："><span class="nav-number">8.1.</span> <span class="nav-text">Spark三种部署方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从Hadoop-Storm架构转向Spark架构："><span class="nav-number">8.2.</span> <span class="nav-text">从Hadoop+Storm架构转向Spark架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hadoop和Spark的统一部署："><span class="nav-number">8.3.</span> <span class="nav-text">Hadoop和Spark的统一部署：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/05/25/Spark技术原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

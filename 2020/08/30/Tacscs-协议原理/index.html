@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="参考资料：https://tools.ietf.org/html/draft-ietf-opsawg-tacacs-18    其他文章：  Tacacs+协议原理 Tacacs+服务搭建与配置详解 Tacacs+各厂商交换机配置 Tacacs+协议交互报文抓包示例 Tacacs+双通道认证配置测试与总结 Tacacs+配置single-connection单连接模式证测试与总结    TAC">
+<meta name="keywords" content="Tacscs+,安全,AAA">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tacscs+协议原理">
+<meta property="og:url" content="https://cshihong.github.io/2020/08/30/Tacscs-协议原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="参考资料：https://tools.ietf.org/html/draft-ietf-opsawg-tacacs-18    其他文章：  Tacacs+协议原理 Tacacs+服务搭建与配置详解 Tacacs+各厂商交换机配置 Tacacs+协议交互报文抓包示例 Tacacs+双通道认证配置测试与总结 Tacacs+配置single-connection单连接模式证测试与总结    TAC">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2020/08/30/Tacscs-协议原理/tacacs.png">
+<meta property="og:updated_time" content="2020-12-27T14:44:01.181Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tacscs+协议原理">
+<meta name="twitter:description" content="参考资料：https://tools.ietf.org/html/draft-ietf-opsawg-tacacs-18    其他文章：  Tacacs+协议原理 Tacacs+服务搭建与配置详解 Tacacs+各厂商交换机配置 Tacacs+协议交互报文抓包示例 Tacacs+双通道认证配置测试与总结 Tacacs+配置single-connection单连接模式证测试与总结    TAC">
+<meta name="twitter:image" content="https://cshihong.github.io/2020/08/30/Tacscs-协议原理/tacacs.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2020/08/30/Tacscs-协议原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Tacscs+协议原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2020/08/30/Tacscs-协议原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Tacscs+协议原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-08-30 16:09:50" itemprop="dateCreated datePublished" datetime="2020-08-30T16:09:50+08:00">2020-08-30</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-12-27 22:44:01" itemprop="dateModified" datetime="2020-12-27T22:44:01+08:00">2020-12-27</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络杂项/" itemprop="url" rel="index"><span itemprop="name">网络杂项</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 16,123</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 59</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<blockquote>
+<p>参考资料：<a href="https://tools.ietf.org/html/draft-ietf-opsawg-tacacs-18" target="_blank" rel="noopener">https://tools.ietf.org/html/draft-ietf-opsawg-tacacs-18</a></p>
+</blockquote>
+<hr>
+<blockquote>
+<p>其他文章：</p>
+<ul>
+<li><a href="https://cshihong.github.io/2020/08/30/Tacscs-%E5%8D%8F%E8%AE%AE%E5%8E%9F%E7%90%86/">Tacacs+协议原理</a></li>
+<li><a href="https://cshihong.github.io/2020/09/10/Tacacs-%E6%9C%8D%E5%8A%A1%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/">Tacacs+服务搭建与配置详解</a></li>
+<li><a href="https://cshihong.github.io/2020/09/28/Tacacs-%E5%90%84%E5%8E%82%E5%95%86%E4%BA%A4%E6%8D%A2%E6%9C%BA%E9%85%8D%E7%BD%AE/">Tacacs+各厂商交换机配置</a></li>
+<li><a href="https://cshihong.github.io/2020/10/06/Tacacs-%E5%8D%8F%E8%AE%AE%E4%BA%A4%E4%BA%92%E6%8A%A5%E6%96%87%E6%8A%93%E5%8C%85%E7%A4%BA%E4%BE%8B/">Tacacs+协议交互报文抓包示例</a></li>
+<li><a href="https://cshihong.github.io/2020/12/27/Tacacs-%E5%8F%8C%E9%80%9A%E9%81%93%E8%AE%A4%E8%AF%81%E9%85%8D%E7%BD%AE%E6%B5%8B%E8%AF%95%E4%B8%8E%E6%80%BB%E7%BB%93/">Tacacs+双通道认证配置测试与总结</a></li>
+<li><a href="https://cshihong.github.io/2020/12/27/Tacacs-%E9%85%8D%E7%BD%AEsingle-connection%E5%8D%95%E8%BF%9E%E6%8E%A5%E6%A8%A1%E5%BC%8F%E8%AF%81%E6%B5%8B%E8%AF%95%E4%B8%8E%E6%80%BB%E7%BB%93/">Tacacs+配置single-connection单连接模式证测试与总结</a></li>
+</ul>
+</blockquote>
+<hr>
+<h1 id="TACACS-简介"><a href="#TACACS-简介" class="headerlink" title="TACACS+ 简介"></a>TACACS+ 简介</h1><p>本文档介绍了(Terminal Access Controller Access-Control<br>   System Plus )终端访问控制器访问控制系统增强版（TACACS +）协议。 它最初被构想为通用的身份验证，授权和计费（AAA）协议。 它在当今得到了广泛的部署，但主要限于AAA(Authentication, Authorization and Accounting )的特定子集：设备管理，即：验证对网络设备的访问，提供操作的集中授权以及审核这些操作。</p>
+<p>大量的TACACS+客户端和服务器已经部署在生产网中。它们所基于的TACACS+协议是在一个最初打算用于IETF发布的草案文档中定义的，但从未标准化。该草案被称为“草案（The Draft）”。</p>
+<p>该草案是时代的产物，并没有解决设计现代标准时考虑的所有关键安全问题。因此，部署必须谨慎执行。后续安全部分讨论了这些问题。</p>
+<p>此信息性文档的主要目的是阐明“草案”的子集，这是支持设备管理的实现常见的子集。所有符合本文档的实现都将符合“草案”。然而，并不是所有符合“草案”的实现都将符合本文档。《草案》的以下功能已被删除:</p>
+<ul>
+<li>出于安全原因，本文档正式删除了SENDPASS。</li>
+<li>对遗留特性(如ARAP和outbound authtication)的规范描述已被删除。</li>
+</ul>
+<p>TACACS+协议允许任意长度和内容的身份验证交换，以支持其他身份验证机制。它是可扩展的，可以提供站点定制和未来的开发特性，并且它使用TCP来确保可靠的交付。该协议允许TACACS+客户端请求(fine-grained)细粒度的访问控制，并允许服务器响应该请求的每个组件。</p>
+<p><strong>认证、授权和计费的分离是TACACS+协议设计的关键</strong>。从本质上说，它使TACACS+成为一套三种协议。本文档将分别在不同的部分对每一个问题进行讨论。尽管TACACS+定义了这三种方法，但实现或部署并不需要采用这三种方法。分离元素对于设备管理用例非常有用，特别是对于会话中单个命令的授权。请注意，在协议级别没有为认证与授权请求关联作出规定。</p>
+<h1 id="技术定义"><a href="#技术定义" class="headerlink" title="技术定义"></a>技术定义</h1><p>本节提供了一些适用于本文档的基本定义。</p>
+<ul>
+<li><p>Client，客户端</p>
+<p>Client（客户端）是发起TACACS+协议请求以进行访问的任何设备，主要用于设备管理用例。</p>
+</li>
+<li><p>Server，服务端</p>
+<p>服务器根据其业务模型接收TACACS+协议请求，并根据本文档中定义的流进行应答。</p>
+</li>
+<li><p>Packet，包</p>
+<p>除非另有明确说明，否则在本文档中，Packet（包）一词的所有用法都指TACACS+协议数据单元。非正式术语“Packet”已经成为定义的一部分。</p>
+</li>
+<li><p>Connection，连接</p>
+<p>TACACS+使用TCP进行传输。TCP服务器端口49是由IANA分配给TACACS+流量的。</p>
+</li>
+<li><p>Session，会话</p>
+<p>整个文档都使用了会话的概念。TACACS+会话是单个认证序列、单个授权交换或单个计费交换。</p>
+<p>一个计费和授权会话将由一对数据包(请求和它的应答)组成。认证会话可能涉及正在交换的任意数量的数据包。会话是维护在TACACS+客户机和服务器之间的操作概念。它不一定对应于给定的用户或用户操作。</p>
+</li>
+<li><p>Treatment of Enumerated Protocol Values,枚举协议值的处理</p>
+<p>此文档描述了信息包报头中的各种枚举值以及特定信息包类型的报头。例如，在身份验证启动包类型中，本文档用三个值定义动作字段TAC_PLUS_AUTHEN_LOGIN、TAC_PLUS_AUTHEN_CHPASS和TAC_PLUS_AUTHEN_SENDAUTH。</p>
+<p>如果服务器没有实现它所接收的包中所定义的选项之一，或者它遇到了未在该文档中列出的头字段的选项，那么它应该以错误响应并终止会话。这将允许客户端尝试不同的选项。</p>
+<p>如果发生错误，但无法确定传入数据包的类型，则必须返回具有相同的明文报头但序列号增加1且长度设置为0的数据包来表示错误。</p>
+</li>
+<li><p>Treatment of Text Strings,文本字符串的处理</p>
+<p>TACACS+协议大量使用了文本字符串。最初的草案打算将这些字符串作为字节数组处理，其中每个字节代表一个US-ASCII字符。</p>
+<p>最近，服务器实现已经扩展到与外部标识服务交互，因此需要更细致的方法。Usernames必须使用RFC8265 [RFC8265]中指定的UsernameCasePreserved 配置文件进行编码和处理。</p>
+<p>特别提到的地方，数据字段包含协议处理所需的任意字节数组。它们不打算通过用户界面对用户可见。TACACS+中的所有其他文本字段必须作为RFC 20 [RFC0020]定义的US-ASCII的可打印字节数组处理。这里使用的术语“printable，可打印”意味着字段必须排除rfc20 [RFC0020]第5.2节中定义的“控制字符”。</p>
+</li>
+</ul>
+<h1 id="Tacacs-Packets-and-Sessions-报文和会话"><a href="#Tacacs-Packets-and-Sessions-报文和会话" class="headerlink" title="Tacacs+ Packets and Sessions,报文和会话"></a>Tacacs+ Packets and Sessions,报文和会话</h1><h2 id="Tacacs-的报文头："><a href="#Tacacs-的报文头：" class="headerlink" title="Tacacs+的报文头："></a>Tacacs+的报文头：</h2><p>所有的TACACS+数据包都以以下12字节的头开始。报头描述了包的其余部分:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line">+----------------+----------------+----------------+----------------+</span><br><span class="line">|major  | minor  |                |                |                |</span><br><span class="line">|version| version|      type      |     seq_no     |   flags        |</span><br><span class="line">+----------------+----------------+----------------+----------------+</span><br><span class="line">|                                                                   |</span><br><span class="line">|                            session_id                             |</span><br><span class="line">+----------------+----------------+----------------+----------------+</span><br><span class="line">|                                                                   |</span><br><span class="line">|                              length                               |</span><br><span class="line">+----------------+----------------+----------------+----------------+</span><br></pre></td></tr></table></figure>
+<p>以下通用规则适用于所有TACACS+报文类型:</p>
+<ul>
+<li>若要表示任何可变长度数据字段未使用，则将相应的长度值设置为零。这些字段必须被忽略，并像不存在一样处理。</li>
+<li>数据包中的数据和消息字段的长度由它们对应的长度字段指定(不以null终止)。</li>
+<li>所有长度值都是unsigned无符号的，按网络字节顺序排列。</li>
+</ul>
+<p>Tacscs+报文头字端解释：</p>
+<ul>
+<li><p>major_version: TACACS协议主版本号，当前版本号为0xc</p>
+<p>TAC_PLUS_MAJOR_VER := 0xc</p>
+</li>
+<li><p>minor_version: Tacscs协议次版本号，当前版本号为0x0.</p>
+<p>TAC_PLUS_MINOR_VER_DEFAULT := 0x0;</p>
+<p>TAC_PLUS_MINOR_VER_ONE := 0x1</p>
+</li>
+<li><p>type：Tacacs协议报文类型，包括认证（0x01）、授权（0x02）和计费（0x03）。</p>
+<ul>
+<li>TAC_PLUS_AUTHEN := 0x01 (Authentication)       </li>
+<li>TAC_PLUS_AUTHOR := 0x02 (Authorization)        </li>
+<li>TAC_PLUS_ACCT := 0x03 (Accounting)</li>
+</ul>
+</li>
+<li><p>seq_no: 这是当前数据包的序列号。会话中的第一个包必须具有序列号1，随后的每个包将增加序列号1。TACACS+客户端只发送包含奇数序列号的数据包，而TACACS+服务器只发送包含偶数序列号的数据包。</p>
+<p>序列号永远不能换行，也就是说，如果达到序列号2^8-1，该会话必须终止并以序列号1重新启动。</p>
+<blockquote>
+<p>对于同一个会话，当前报文的序列号，取值范围为1～254。</p>
+</blockquote>
+</li>
+<li><p>flags : 此字段包含各种位图标志。</p>
+<ul>
+<li><p>TAC_PLUS_UNENCRYPTED_FLAG := 0x01</p>
+<p>报文主体加密标记，<strong>0表示对报文主体加密，1表示不对报文主体加密。</strong></p>
+<p>此标志表明发送方没有加密包的主体。在生产中不能使用此选项。安全部分将介绍此标志的应用。</p>
+<p>这个标志在所有部署中都应该是清晰的。现代网络流量工具在配置共享密钥时支持加密流量，因此即使在测试期间也可以而且应该使用加密模式。</p>
+</li>
+<li><p>The single-connection flag:</p>
+<p>TAC_PLUS_SINGLE_CONNECT_FLAG := 0x04</p>
+<p>此标志用于允许客户端和服务器协商单一连接模式。</p>
+</li>
+</ul>
+<p>读取时必须忽略所有其他位，写入时应设置为零。</p>
+</li>
+<li><p>session_id: 会话ID，当前会话的唯一标识。</p>
+<p>此TACACS+会话的Id。此字段在TACACS+会议期间不会更改。此数字必须由加密的强随机数生成方法生成。如果不这样做，将危及会话的安全性。</p>
+</li>
+<li><p>length: <strong>TACACS报文主体的长度，不包括报文头</strong>。</p>
+</li>
+</ul>
+<h2 id="Tacacs-报文主体："><a href="#Tacacs-报文主体：" class="headerlink" title="Tacacs+ 报文主体："></a>Tacacs+ 报文主体：</h2><p>在数据包报头中定义了TACACS+主体类型。本文档的下一部分将介绍不同TACACS+正文的内容。</p>
+<h2 id="单连接模式："><a href="#单连接模式：" class="headerlink" title="单连接模式："></a>单连接模式：</h2><p>单连接模式（ Single Connection Mode）是为了提高性能,有很多客户端和服务器之间的流量通过允许复用多个会话在一个TCP连接。</p>
+<p>数据包头包含客户端和服务器用来协商使用单连接模式的TAC_PLUS_SINGLE_CONNECT_FLAG。</p>
+<p>客户端设置此标志，以表明它支持在单个TCP连接上多路传输TACACS+会话。在单连接状态建立之前，客户端不能在连接上发送第二个数据包。</p>
+<p>为了表示它将支持单一连接模式，服务器将在响应客户端的第一个请求的第一个应答包中设置此标志（Flag）。即使客户端没有设置该标志，服务器也可以设置该标志，但是客户端可以忽略该标志并在会话完成后关闭连接。</p>
+<p>该标志只与连接上的前两个包相关，以允许客户端和服务器建立单一连接模式。在前两个包之后没有更改单个连接模式的规定:客户端和服务器必须忽略连接上第二个包之后的标志。</p>
+<p>如果在TCP连接的前两个包中没有建立单连接模式，那么客户端和服务器都会在第一次会话结束时关闭连接。</p>
+<p>客户端采用单连接模式，提高了效率。服务器可能拒绝允许客户端使用单连接模式。例如，在某些部署中，可能不适合将持久的TCP连接分配给特定的客户端。即使服务器被配置为允许特定客户端使用单一连接模式，服务器也可以关闭连接。例如:服务器必须配置为在一段特定的不活动时期后超时单个连接模式TCP连接，以保留其资源。即使建立了单个连接模式，客户端也必须在TCP会话上适应这种终止。</p>
+<p>由于服务器或中间连接的超时，单连接模式下的TCP连接最终将关闭。如果一个会话正在进行，当客户端检测到断开连接，那么客户端应该处理它。如果会话没有进行，那么客户端将需要检测它，并在它启动下一个会话时重新启动单连接模式。</p>
+<h2 id="Session-Completion-会话完成"><a href="#Session-Completion-会话完成" class="headerlink" title="Session Completion,会话完成"></a>Session Completion,会话完成</h2><p>在下面的小节(认证、授权和计费)中为包类型定义的应答包包含一个状态字段。此字段的完整选项集取决于包类型，但所有三种应答包类型都定义了表示PASS、ERROR和FAIL的值，这些值表明常规会话(未中止的会话)的最后一个包。</p>
+<p>服务器以PASS或FAIL响应，表明请求的处理已经完成，客户端可以回应结果(PASS或FAIL)来控制提示将请求发送到服务器的操作的执行。</p>
+<p>服务器响应一个EEROR，表明该请求的处理没有完成。客户端无法回应结果，并且它的行为必须与服务器无法连接一样。例如，客户端尝试其他方法(如果有的话)，比如将请求发送到备份服务器，或者使用本地配置来确定是否应该执行提示请求的操作。</p>
+<p>当会话完成,那么TCP连接应该处理如下,根据单连接模式是否协商:</p>
+<ul>
+<li><p>如果没有协商成单连接模式,连接应该关闭。</p>
+</li>
+<li><p>如果单连接模式被启用,那么连接应该打开，但仍可能被关闭在超时时间保存部署资源。</p>
+</li>
+<li>如果启用了单连接模式，但是由于连接问题(比如不正确的密码，而出现错误，那么该连接上不能接受任何新的会话。如果有任何会议已经建立，那么他们可能会完成。一旦所有活动会话完成，则必须关闭连接。</li>
+</ul>
+<p>建议客户端实现提供健壮的方案来处理无法连接到的服务器。选项包括提供用于冗余的服务器列表，以及在无法到达服务器时提供本地回退配置的选项。具体细节将是特定于实现的。</p>
+<p>客户端应该管理连接并处理服务器建立连接但不响应的情况。确切的行为是特定于实现的。建议客户端在出现可配置的超时后关闭连接。</p>
+<h2 id="Data-Obfuscation，数据混淆（加密）："><a href="#Data-Obfuscation，数据混淆（加密）：" class="headerlink" title="Data Obfuscation，数据混淆（加密）："></a>Data Obfuscation，数据混淆（加密）：</h2><p>数据包的主体可以被混淆。下面的章节描述了协议中支持的混淆方法。在“草案”中，这一过程实际上被称为加密，但该算法不符合现代标准，因此在本文档中不会被称为加密。</p>
+<p>混淆机制依赖于一个私密的密钥，一个客户端和服务器都知道的共享密钥值。密钥必须保密。</p>
+<p>服务器实现必须允许与每个客户机关联唯一的密钥。使用单独密钥的是否合适，这取决于站点。</p>
+<p>标志（flag）字段必须配置如下位如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_UNENCRYPTED_FLAG = <span class="number">0x0</span></span><br></pre></td></tr></table></figure>
+<p>因此，数据包的主体是混淆的做（byte-wise）逐字节 XOR-ing与（pseudo-random pad）伪随机载荷。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ENCRYPTED &#123;data&#125; = data ^ pseudo_pad</span><br></pre></td></tr></table></figure>
+<p>然后，包体可以通过用伪随机载荷按字节对其进行XOR-ing来消除混淆。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data = ENCRYPTED &#123;data&#125; ^ pseudo_pad</span><br></pre></td></tr></table></figure>
+<p>该（pad）载荷是通过连接一系列MD5散列(每个16字节长)并将其截断为输入数据的长度而生成的。</p>
+<p>在本文档中，MD5指的是“RSA数据安全公司”。MD5消息摘要算法”，在RFC1321 [RFC1321]中指定。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pseudo_pad = &#123;MD5_1 [,MD5_2 [ ... ,MD5_n]]&#125; truncated to len(data)</span><br></pre></td></tr></table></figure>
+<p>第一个MD5哈希是通过连接session_id、secret key、版本号和序列号，然后在这些数据上运行MD5生成的。除了在TACACS+客户端和服务器之间共享的密钥之外，所有这些输入值都可以在数据包报头中使用。</p>
+<p>版本号和session_id是从报文头中提取的，后续的散列是通过使用相同的输入流生成的，但是将之前的散列值连接到输入流的末尾。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">MD5_1 = MD5&#123;session_id, key, version, seq_no&#125; MD5_2 = MD5&#123;session_id,</span><br><span class="line">  key, version, seq_no, MD5_1&#125; ....  MD5_n = MD5&#123;session_id, key,</span><br><span class="line">  version, seq_no, MD5_n<span class="number">-1</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>当服务器检测到它为设备配置的密钥不匹配时，它必须返回ERROR。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_UNENCRYPTED_FLAG == <span class="number">0x1</span></span><br></pre></td></tr></table></figure>
+<p>不赞成使用此选项，不能在生产中使用。在这种情况下，整个数据包主体是明文的。如果TAC_PLUS_UNENCRYPTED_FLAG设置为True，则必丢弃请求。</p>
+<p>在包体去混淆之后，对包中字段值的长度进行求和。 如果总和与报头中的明文数据长度值不同，则必须丢弃该分组，并发出错误信号。</p>
+<p>当客户端和TACACS+服务器之间的密钥不匹配时，通常会出现这样的故障。</p>
+<h1 id="Authentication，认证"><a href="#Authentication，认证" class="headerlink" title="Authentication，认证"></a>Authentication，认证</h1><p>认证是确定用户（或实体）是谁的动作。 认证可以采用多种形式。 传统身份验证使用name和固定密码。 但是，固定密码是易受攻击，因此许多现代身份验证机制都使用“one-time,一次性”密码或质询响应查询。 TACACS +旨在支持所有这些功能，并且足够灵活以处理将来的任何机制。</p>
+<p> 认证通常在用户首次登录到计算机或请求其服务时进行。 认证不是强制性的； 它是一个站点配置的选项。 一些站点不需要它。 其他人仅对某些服务需要它（请参阅下面的授权）。 当用户尝试获得额外的特权时，还必须进行认证，并且必须将自己标识为拥有这些特权所需的信息（密码等）的人。</p>
+<h2 id="The-Authentication-START-Packet-Body，认证开始报文："><a href="#The-Authentication-START-Packet-Body，认证开始报文：" class="headerlink" title="The Authentication START Packet Body，认证开始报文："></a>The Authentication START Packet Body，认证开始报文：</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    action      |    priv_lvl    |  authen_type   | authen_service |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    user_len    |    port_len    |  rem_addr_len  |    data_len    |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    user ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    port ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    rem_addr ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    data...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br></pre></td></tr></table></figure>
+<p>各字段解释如下：</p>
+<ul>
+<li><p>action : 具体的认证动作。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_AUTHEN_LOGIN := <span class="number">0x01</span></span><br><span class="line">TAC_PLUS_AUTHEN_CHPASS := <span class="number">0x02</span></span><br><span class="line">TAC_PLUS_AUTHEN_SENDAUTH := <span class="number">0x04</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>priv_lvl: 用户的权限级别。</p>
+</li>
+<li><p>authen_type: 认证的类型。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_AUTHEN_TYPE_ASCII := <span class="number">0x01</span></span><br><span class="line">TAC_PLUS_AUTHEN_TYPE_PAP := <span class="number">0x02</span></span><br><span class="line">TAC_PLUS_AUTHEN_TYPE_CHAP := <span class="number">0x03</span></span><br><span class="line">TAC_PLUS_AUTHEN_TYPE_MSCHAP := <span class="number">0x05</span></span><br><span class="line">TAC_PLUS_AUTHEN_TYPE_MSCHAPV2 := <span class="number">0x06</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>authen_service: 请求认证的服务类型</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#TAC_PLUS_AUTHEN_SVC_NONE选项用于该字段的授权应用程序，它表示设备没有执行任何认证。</span><br><span class="line">TAC_PLUS_AUTHEN_SVC_NONE := <span class="number">0x00</span></span><br><span class="line">#TAC_PLUS_AUTHEN_SVC_LOGIN选项表示客户端设备的常规登录(而不是ENABLE。</span><br><span class="line">TAC_PLUS_AUTHEN_SVC_LOGIN := <span class="number">0x01</span></span><br><span class="line">#TAC_PLUS_AUTHEN_SVC_ENABLE选项标识ENABLE authen_service，这是指请求身份验证以授予用户不同权限的服务。 这相当于Unix的“ su（<span class="number">1</span>）”命令，该命令将当前用户的身份替换为另一个。 仅当其他authen_service值都不适合时，才使用authen_service值NONE。 可以单独请求启用，协议没有对先前的认证或授权提出要求。</span><br><span class="line">TAC_PLUS_AUTHEN_SVC_ENABLE := <span class="number">0x02</span></span><br><span class="line">#其他选项还包括了legacy/backwards兼容性。</span><br><span class="line">TAC_PLUS_AUTHEN_SVC_PPP := <span class="number">0x03</span></span><br><span class="line">TAC_PLUS_AUTHEN_SVC_PT := <span class="number">0x05</span></span><br><span class="line">TAC_PLUS_AUTHEN_SVC_RCMD := <span class="number">0x06</span></span><br><span class="line">TAC_PLUS_AUTHEN_SVC_X25 := <span class="number">0x07</span></span><br><span class="line">TAC_PLUS_AUTHEN_SVC_NASI := <span class="number">0x08</span></span><br><span class="line">TAC_PLUS_AUTHEN_SVC_FWPROXY := <span class="number">0x09</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>user, user_len: 用户名在此数据包中是可选的，具体取决于认证方式。如果不存在，则客户端必须将user_len设置为0。如果存在用户名，user_len以字节表示user字段的长度。</p>
+</li>
+<li><p>port, port_len: 请求认证的用户接口名，最大长度为47。对于管理员用户，该字段是指用户终端接口（例如“console0”、“vty1”等）。例如，Telnet用户的authen_type为ASCII，service为LOGIN，port为vtyx。对于其他用户，该字段是指用户接入的接口名称。</p>
+<p>这个字段的值是自由格式的文本，并且是特定于客户端的。这个参数的示例包括表示第10个tty行的“tty10”和表示第10个异步接口的“async10”。客户文档应该定义该字段的值及其含义。</p>
+<p>port_len表示端口字段的长度，以字节为单位。</p>
+</li>
+<li><p>rem_addr, rem_addr_len :登录用户的IP地址。 rem_addr字段的长度.字节为单位。</p>
+<p>当TACACS+用于拨号（dial-up）服务时，该值包含调用者ID。</p>
+<p>当TACACS+用于设备管理时，用户通常通过网络连接，在这种情况下，该值用于保存网络地址，IPv4或IPv6。</p>
+<p>此字段是可选的(因为信息可能不可用)。</p>
+</li>
+<li><p>data, data_len: 认证数据区，根据action和authen_type的不同封装不同的数据。例如PAP认证时，该字段内容为PAP显示密码。</p>
+<p>data_len,以字节表示认证数据区的长度。</p>
+</li>
+</ul>
+<h2 id="The-Authentication-REPLY-Packet-Body-认证回应报文："><a href="#The-Authentication-REPLY-Packet-Body-认证回应报文：" class="headerlink" title="The Authentication REPLY Packet Body, 认证回应报文："></a>The Authentication REPLY Packet Body, 认证回应报文：</h2><p>TACACS+服务器只向客户端发送一种类型的认证包(REPLY包)。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line"> +----------------+----------------+----------------+----------------+</span><br><span class="line"> |     status     |      flags     |        server_msg_len           |</span><br><span class="line"> +----------------+----------------+----------------+----------------+</span><br><span class="line"> |           data_len              |        server_msg ...</span><br><span class="line"> +----------------+----------------+----------------+----------------+</span><br><span class="line"> |           data ...</span><br><span class="line"> +----------------+----------------+</span><br></pre></td></tr></table></figure>
+<p>各字段信息解释如下：</p>
+<ul>
+<li><p>status : 认证的状态</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_AUTHEN_STATUS_PASS := <span class="number">0x01</span> #认证成功PASS(<span class="number">0x01</span>)</span><br><span class="line">TAC_PLUS_AUTHEN_STATUS_FAIL := <span class="number">0x02</span> #认证失败FAIL（<span class="number">0x02</span>）</span><br><span class="line">TAC_PLUS_AUTHEN_STATUS_GETDATA := <span class="number">0x03</span>#请求用户信息GETDATA（<span class="number">0x03</span>）</span><br><span class="line">TAC_PLUS_AUTHEN_STATUS_GETUSER := <span class="number">0x04</span> #请求用户名GETUSER（<span class="number">0x04</span>）</span><br><span class="line">TAC_PLUS_AUTHEN_STATUS_GETPASS := <span class="number">0x05</span> #请求密码GETPASS（<span class="number">0x05</span>）</span><br><span class="line">TAC_PLUS_AUTHEN_STATUS_RESTART := <span class="number">0x06</span> #请求重新发起认证开始RESTART（<span class="number">0x06</span>）</span><br><span class="line">TAC_PLUS_AUTHEN_STATUS_ERROR := <span class="number">0x07</span> #服务器收到认证报文有误ERROR（<span class="number">0x07</span>）</span><br><span class="line">TAC_PLUS_AUTHEN_STATUS_FOLLOW := <span class="number">0x21</span> #服务器要求重新进行认证过程FOLLOW（<span class="number">0x21</span>）</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>flags: 位图标志，用于修改要执行的操作。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">#控制客户端是否将用户输入的密码回显。如果该标志位置<span class="number">1</span>，则用户输入的密码不会回显。</span><br><span class="line">TAC_PLUS_REPLY_FLAG_NOECHO := <span class="number">0x01</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>server_msg, server_msg_len : 要显示给用户的消息。该字段是可选的。server_msg_len表示server_msg字段的长度，以字节为单位。</p>
+</li>
+<li><p>data, data_len : 认证数据区，用于向客户端提供一些信息。此字段保存身份验证交换的一部分数据，用于客户端处理，而不是用户。它不是一种可打印的文本编码。</p>
+<p>data_len表示数据字段的长度，以字节为单位。</p>
+</li>
+</ul>
+<h2 id="The-Authentication-CONTIUNE-Packet-Body-认证持续报文中"><a href="#The-Authentication-CONTIUNE-Packet-Body-认证持续报文中" class="headerlink" title="The Authentication CONTIUNE Packet Body,认证持续报文中:"></a>The Authentication CONTIUNE Packet Body,认证持续报文中:</h2><p>在收到服务器的应答包后，此报文从客户机发送到服务器。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |          user_msg len           |            data_len             |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |     flags      |  user_msg ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    data ...</span><br><span class="line">  +----------------+</span><br></pre></td></tr></table></figure>
+<p>各字段解释如下：</p>
+<ul>
+<li><p>user_msg, user_msg_len :</p>
+<p>登录用户输入的字符串，用于回应认证回应报文中的server_msg字段，向服务器提供用户登录时输入的密码。</p>
+<p>user_len表示用户字段的长度，以字节为单位。</p>
+</li>
+<li><p>data, data_len: 认证数据区，根据action和authen_type的不同封装不同的数据。例如PAP认证时，该字段内容为PAP显示密码。它不是一种可打印的文本编码。data_len表示数据字段的长度，以字节为单位。</p>
+</li>
+<li><p>flags: 认证持续标记，0表示认证过程持续，1表示认证过程终止。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_CONTINUE_FLAG_ABORT := <span class="number">0x01</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="认证过程："><a href="#认证过程：" class="headerlink" title="认证过程："></a>认证过程：</h2><p>The action、authen_type和authen_service字段(如上所述)组合起来表示要执行的认证类型。每个认证START, REPLY and CONTIUNE都包含一个数据字段。该字段的使用取决于认证的类型。</p>
+<p>本文档定义了TACACS+支持的一组核心认证流。每个认证流由一个START报文组成。服务器响应更多信息的请求(GETDATA、GETUSER或GETPASS)或终止PASS、FAIL、ERROR或RESTART。当服务器发送RESTART或ERROR时，操作和意义是常见的，下面将进一步描述。</p>
+<p>当REPLY状态等于TAC_PLUS_AUTHEN_STATUS_GETDATA、TAC_PLUS_AUTHEN_STATUS_GETUSER或TAC_PLUS_AUTHEN_STATUS_GETPASS时，认证继续进行，服务器应该为客户端提供server_msg内容，以提示用户获取更多信息。然后客户端必须返回一个CONTINUE包，其中包含user_msg字段中所请求的信息。</p>
+<p>客户端应该将TAC_PLUS_AUTHEN_STATUS_GETUSER解释为对用户名的请求，而将TAC_PLUS_AUTHEN_STATUS_GETPASS解释为对密码的请求。TAC_PLUS_AUTHEN_STATUS_GETDATA是获取更多信息的通用请求，以灵活地支持未来的需求。</p>
+<p>如果服务器从客户端请求的信息是敏感的，则服务器应设置TAC_PLUS_REPLY_FLAG_NOECHO标志。 当客户端向用户查询信息时，在输入用户界面时，其响应绝不能反映在用户界面中。</p>
+<p>数据字段仅在下面明确定义的REPLY中使用。</p>
+<h3 id="Version-Behavior-版本行为："><a href="#Version-Behavior-版本行为：" class="headerlink" title="Version Behavior,版本行为："></a>Version Behavior,版本行为：</h3><p>TACACS +协议经过版本控制，可以在保持向后兼容性的同时进行修订。 版本号在每个数据包头中。 minor_version 0和1之间的更改仅适用于认证过程，并且全部处理CHAP和PAP认证的处理方式。 minor_version 1仅可用于下表中明确要求它的身份验证类型：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">             LOGIN    CHPASS   SENDAUTH</span><br><span class="line">ASCII          v0         v0       -</span><br><span class="line">PAP            v1         -        v1</span><br><span class="line">CHAP           v1         -        v1</span><br><span class="line">MS-CHAPv1/<span class="number">2</span>    v1         -        v1</span><br></pre></td></tr></table></figure>
+<ul>
+<li>“-”符号表示该选项无效。</li>
+<li>所有授权和计费以及ASCII认证都使用minor_version数字0。</li>
+<li>PAP、CHAP和MS-CHAP登录使用minor_version 1。通常的交换是来自客户端的单个START包和来自服务器的单个REPLY。</li>
+<li>SENDPASS的删除是出于安全考虑，不再被认为是TACACS+协议的一部分。</li>
+</ul>
+<h3 id="通用认证流程："><a href="#通用认证流程：" class="headerlink" title="通用认证流程："></a>通用认证流程：</h3><p>本节描述常见的认证流程。如果服务器没有实现某个选项，则必须使用<br>TAC_PLUS_AUTHEN_STATUS_FAIL。</p>
+<h4 id="1-ASCII-Login："><a href="#1-ASCII-Login：" class="headerlink" title="1. ASCII Login："></a>1. ASCII Login：</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">action = TAC_PLUS_AUTHEN_LOGIN</span><br><span class="line">authen_type = TAC_PLUS_AUTHEN_TYPE_ASCII</span><br><span class="line">minor_version = <span class="number">0x0</span></span><br></pre></td></tr></table></figure>
+<p>这是标准的ASCII认证。START包可能包含用户名。如果用户不包含用户名，那么服务器必须通过一个CONTINUE包的TAC_PLUS_AUTHEN_STATUS_GETUSER从客户端获取它。如果用户没有提供用户名，那么服务器可以发送另一个TAC_PLUS_AUTHEN_STATUS_GETUSER请求，但是服务器必须限制允许的重试次数，建议限制为三次。当服务器获得用户名时，它将使用带有TAC_PLUS_AUTHEN_STATUS_GETPASS的CONTINUE获得密码。ASCII登录使用user_msg字段作为用户名和密码。START和CONTINUE包中的数据字段都不用于ASCII登录，任何内容都必须被忽略。该会话由一个单独的START，接着是零个或更多对REPLYs，然后CONTINUEs，最后是一个是表示PASS、FAIL或ERROR的回复。</p>
+<h4 id="2-PAP-Login："><a href="#2-PAP-Login：" class="headerlink" title="2. PAP Login："></a>2. PAP Login：</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">action = TAC_PLUS_AUTHEN_LOGIN</span><br><span class="line">authen_type = TAC_PLUS_AUTHEN_TYPE_PAP</span><br><span class="line">minor_version = <span class="number">0x1</span></span><br></pre></td></tr></table></figure>
+<p>整个交换必须由单个START包和单个REPLY组成。START包必须包含用户名，data字段必须包含PAP ASCII密码。PAP认证只包含用户名和密码RFC1334 。来自服务器的REPLY必须是“PASS”、“FAIL”或“ERROR”。</p>
+<h4 id="3-CHAP-login"><a href="#3-CHAP-login" class="headerlink" title="3. CHAP login:"></a>3. CHAP login:</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">action = TAC_PLUS_AUTHEN_LOGIN</span><br><span class="line">authen_type = TAC_PLUS_AUTHEN_TYPE_CHAP</span><br><span class="line">minor_version = <span class="number">0x1</span></span><br></pre></td></tr></table></figure>
+<p>整个交换必须由单个STAET和单个REPLY组成。STAET包必须在user字段中包含用户名，而data字段是PPP id、challenge(挑战值)和response的连接。</p>
+<p>挑战值的长度可以由da ta字段的长度减去id的长度(总是1个八位元)和response字段的长度(总是16个八位元)来确定。</p>
+<p>为了执行认证，服务器计算在PPP认证RFC1334中定义的PPP哈希值，然后将该值与response进行比较。始终使用MD5算法选项。来自服务器的应答必须是“PASS”、“FAIL”或“ERROR”。</p>
+<p>挑战的选择和长度不是TACACS+协议的一个方面。但是，强烈建议将客户端/端站交互配置为安全挑战。当验证的挑战小于最小长度(建议最小长度为8字节)时，TACACS+服务器可以通过拒绝验证来提供帮助。</p>
+<h4 id="4-MS-CHAP-v1-login："><a href="#4-MS-CHAP-v1-login：" class="headerlink" title="4. MS-CHAP v1 login："></a>4. MS-CHAP v1 login：</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">action = TAC_PLUS_AUTHEN_LOGIN</span><br><span class="line">authen_type = TAC_PLUS_AUTHEN_TYPE_MSCHAP</span><br><span class="line">minor_version = <span class="number">0x1</span></span><br></pre></td></tr></table></figure>
+<p>整个交换必须由单个STAET和单个REPLY组成。START包必须在user字段中包含用户名，data字段将是一个连接的PPP id、MS-CHAP challenge和MS-CHAP response。</p>
+<p>挑战值的长度可以由data字段的长度减去id的长度(总是1个八位字节)和响应字段的长度(总是49个八位字节)来确定。</p>
+<p>要执行认证，服务器将对用户的secret和challenge使用MD4和DES的组合，如RFC2433 [RFC2433]中定义的那样，然后将结果值与响应进行比较。来自服务器的应答必须PASS或者FAIL。有关最佳实践，请参阅RFC2433 [RFC2433]。当验证请求偏离RFC中定义的8字节时，TACACS+服务器必须拒绝验证。</p>
+<h4 id="5-MS-CHAP-v2-login："><a href="#5-MS-CHAP-v2-login：" class="headerlink" title="5. MS-CHAP v2 login："></a>5. MS-CHAP v2 login：</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">action = TAC_PLUS_AUTHEN_LOGIN</span><br><span class="line">authen_type = TAC_PLUS_AUTHEN_TYPE_MSCHAPV2</span><br><span class="line">minor_version = <span class="number">0x1</span></span><br></pre></td></tr></table></figure>
+<p>整个交换必须由单个STAET和单个REPLY组成。START包必须在user字段中包含用户名，data字段将是一个连接的PPP id、MS-CHAP challenge和MS-CHAP response。</p>
+<p>挑战值的长度可以由data字段的长度减去id的长度(总是1个八位字节)和响应字段的长度(总是49个八位字节)来确定。</p>
+<p>为了执行认证，服务器将对用户的secret和challenge使用指定的算法RFC2759 [RFC2759]，然后将结果值与响应进行比较。来自服务器的应答必须PASS或FAIL。关于MS-CHAP v2的最佳实践，请参考RFC2759 [RFC2759]。当验证请求偏离RFC中定义的16字节时，TACACS+服务器必须拒绝验证。</p>
+<h4 id="6-Enable-Requests"><a href="#6-Enable-Requests" class="headerlink" title="6. Enable Requests:"></a>6. Enable Requests:</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">action = TAC_PLUS_AUTHEN_LOGIN</span><br><span class="line">priv_lvl = implementation dependent</span><br><span class="line">authen_type = <span class="keyword">not</span> used</span><br><span class="line">service = TAC_PLUS_AUTHEN_SVC_ENABLE</span><br></pre></td></tr></table></figure>
+<p>这是一个ENABLE请求，用于更改用户当前运行的特权级别。当服务器收集它需要的信息以允许更改主体的特权级别时，交换可能包含多个消息。这种交换非常类似于ASCII登录。</p>
+<p>为了方便地将enable请求与其他类型的请求区分开来，在请求enable时，必须将authen_service字段的值设置为TAC_PLUS_AUTHEN_SVC_ENABLE。在请求任何其他操作时，不能将其设置为此值。</p>
+<h4 id="7-ASCII-change-passwrod-requests"><a href="#7-ASCII-change-passwrod-requests" class="headerlink" title="7. ASCII change passwrod requests:"></a>7. ASCII change passwrod requests:</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">action = TAC_PLUS_AUTHEN_CHPASS</span><br><span class="line">authen_type = TAC_PLUS_AUTHEN_TYPE_ASCII</span><br></pre></td></tr></table></figure>
+<p>此交换由多个消息组成，同时服务器收集更改用户密码所需的信息。它非常类似于ASCII登录。状态值TAC_PLUS_AUTHEN_STATUS_GETPASS只能在请求“新”密码时使用。它可能被发送多次。请求“旧”密码时，状态值必须设置为TAC_PLUS_AUTHEN_STATUS_GETDATA。</p>
+<h3 id="终止一个认证会话："><a href="#终止一个认证会话：" class="headerlink" title="终止一个认证会话："></a>终止一个认证会话：</h3><p>客户端可以通过在CONTIUNE消息中设置TAC_PLUS_CONTINUE_FLAG_ABORT标志来提前终止会话。如果设置了此标志，则消息的data部分可能包含解释中止原因的消息。这些信息将由服务器根据部署的需求进行处理。</p>
+<p>在PASS、FAIL或ERROR的情况下，服务器可以在server_msg中插入一条消息显示给用户。</p>
+<p>草案定义了一种机制，可以将认证请求直接发送到另一台服务器。这种机制被认为是不安全的，不推荐使用，这里不讨论。客户端应该将TAC_PLUS_AUTHEN_STATUS_FOLLOW处理为TAC_PLUS_AUTHEN_STATUS_FAIL。</p>
+<p>如果状态等于TAC_PLUS_AUTHEN_STATUS_ERROR，那么主机表示它遇到了一个不可恢复的错误，认证将继续进行，就像无法联系到该主机一样。data字段可能包含要在管理控制台或日志中打印的消息。</p>
+<p>如果状态等于TAC_PLUS_AUTHEN_STATUS_RESTART，那么认证将使用来自客户机的新的STAET包(具有新的Session_Id)重新启动，并将seq_no设置为1。这个REPLY包表明当前的authen_type值(在开始包中指定)对于这个会话是不可接受的。客户端可以尝试另一种authen_type。</p>
+<p>如果客户机没有实现TAC_PLUS_AUTHEN_STATUS_RESTART选项，那么它必须处理响应，就像状态为TAC_PLUS_AUTHEN_STATUS_FAIL一样。</p>
+<h1 id="Authorization-授权"><a href="#Authorization-授权" class="headerlink" title="Authorization,授权"></a>Authorization,授权</h1><p>在TACACS+协议中，授权是决定允许用户做什么的操作。通常，认证先于授权，尽管客户端不一定必须使用用于授权的相同服务进行认证。授权请求可能表明用户没有经过认证(我们不知道他们是谁)。在这种情况下，由服务器根据其配置决定是否允许未经身份验证的用户使用相关服务。</p>
+<p>授权不仅仅提供是或否的答案，它还可以为特定用户定制服务。授权的一种常见用法是，当用户首次登录设备以管理该设备时，提供shell会话。TACACS+服务器可能通过允许服务来响应请求，但是在登录shell上设置时间限制。</p>
+<p>在TACACS+协议中，授权始终是一对消息:来自客户机的REQUEST和来自服务器的REPLY。</p>
+<p>授权REQUEST消息包含一组固定的字段(指示用户是如何进行身份验证的)和一组可变的参数(描述请求授权的服务和选项)。</p>
+<p>REPLY包含一组可变的响应参数(参数-值对)，它们可以限制或修改客户端的操作。</p>
+<h2 id="The-Authorization-REQUEST-Packet-Body-授权请求报文："><a href="#The-Authorization-REQUEST-Packet-Body-授权请求报文：" class="headerlink" title="The Authorization REQUEST Packet Body, 授权请求报文："></a>The Authorization REQUEST Packet Body, 授权请求报文：</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |  authen_method |    priv_lvl    |  authen_type   | authen_service |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    user_len    |    port_len    |  rem_addr_len  |    arg_cnt     |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_1_len    |   arg_2_len    |      ...       |   arg_N_len    |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   user ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   port ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   rem_addr ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_1 ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_2 ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_N ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br></pre></td></tr></table></figure>
+<p>各字段解释如下：</p>
+<ul>
+<li><p>authen_method : 该字段允许客户端指定获取用户信息所使用的认证方式。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_AUTHEN_METH_NOT_SET := <span class="number">0x00</span> #没有设置认证方式</span><br><span class="line">TAC_PLUS_AUTHEN_METH_NONE := <span class="number">0x01</span> #不认证</span><br><span class="line">TAC_PLUS_AUTHEN_METH_KRB5 := <span class="number">0x02</span> # KRB5认证</span><br><span class="line">TAC_PLUS_AUTHEN_METH_LINE := <span class="number">0x03</span> # 固定密码认证</span><br><span class="line">TAC_PLUS_AUTHEN_METH_ENABLE := <span class="number">0x04</span> # 通过认证来授予特权命令</span><br><span class="line">TAC_PLUS_AUTHEN_METH_LOCAL := <span class="number">0x05</span> # 客户端本地认证</span><br><span class="line">TAC_PLUS_AUTHEN_METH_TACACSPLUS := <span class="number">0x06</span> # Tacacs+服务器认证</span><br><span class="line">TAC_PLUS_AUTHEN_METH_GUEST := <span class="number">0x08</span> # 访客认证</span><br><span class="line">TAC_PLUS_AUTHEN_METH_RADIUS := <span class="number">0x10</span> # Radius服务器认证</span><br><span class="line">TAC_PLUS_AUTHEN_METH_KRB4 := <span class="number">0x11</span> # Kerberos <span class="number">4</span>认证</span><br><span class="line">TAC_PLUS_AUTHEN_METH_RCMD := <span class="number">0x20</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>由于某些信息并不总是需要验证，因此建议将这一部分进行评估。LINE是指用于获得访问的终端线路相关联的固定密码。LOCAL是一个客户端本地用户数据库。ENABLE是通过认证来授予新特权的命令。当然，TACACSPLUS就是TACACS+。GUEST是访客认证。RADIUS是RADIUS认证协议。RCMD指的是通过Berkeley Unix的R-command协议提供的身份验证。KRB5和KRB4是Kerberos版本5和4。</p>
+<p>如上所述，客户端使用此字段表明如何去进行认证。其中一个选项(TAC_PLUS_AUTHEN_METH_TACACSPLUS: = 0 x06) TACACS +本身,所以客户端如何执行的这个选项的细节在身份验证部分。对于所有其他选项,如KRB和RADIUS, TACACS +协议在认证阶段没有发挥任何作用;因为这些交互不是使用TACACS+协议进行的，所以这里不会对它们进行记录。对于需要其他协议细节的客户端实现者，请参考各自的Kerberos [RFC4120]和RADIUS [RFC3579] rfc。</p>
+<ul>
+<li><p>priv_lvl : 此字段的使用方式与认证请求中的priv_lvl字段相同，它表示用户当前的特权级别。</p>
+</li>
+<li><p>authen_type : 这个字段对应于上面的认证部分中的authen_type字段。它指示所执行的身份验证类型。如果此信息不可用，那么客户端将把authen_type设置为:TAC_PLUS_AUTHEN_TYPE_NOT_SET:= 0x00。此值仅在授权和计费请求中有效。</p>
+</li>
+<li><p>authen_service: 认证服务类型。</p>
+</li>
+<li><p>arg_cnt : 授权请求报文中携带的属性数。</p>
+</li>
+<li><p>arg_1 … argN : 指定授权请求报文的属性。</p>
+<p>属性是授权交互的主要元素。在请求包中，它们描述被请求的授权的细节。每个属性在包中被编码为一个arg字段(arg_1…arg_N)，并带有相应的长度字段(以字节为单位表示每个参数的长度)。</p>
+<p>REQUEST和REPLY中的授权属性都是（属性-值）对。属性和值在一个字符串中，用”=” (0X3D)或”*” (0X2A)分隔。<strong>等号表示一个强制参数。星号表示可选</strong>。</p>
+<p>属性名称不能包含这两个分隔符。属性值可以包含分隔符。这意味着必须解析属性，直到遇到第一个分隔符，属性中在这个分隔符之后的所有字符都被解释为属性值。</p>
+<p>可选属性是客户端或服务器都可以忽略的属性。强制属性要求接收方能够处理该属性，即:它的实现和配置包括如何对其进行操作的细节。如果客户端接收到无法处理的强制属性，则必须认为授权失败。属性-值对的值部分可以为空，也就是说:值的长度可以为零。</p>
+<p>属性-值字符串不是NULL终止的，而是它们的长度值表示它们的结束。属性数值字符串的最大长度为255个字符。最小值是两个字符(one name- value character and the separator)。</p>
+<p>尽管属性允许可扩展性，但客户端和服务器应该支持一组通用的核心授权属性，这些在下面的授权属性部分中列出。</p>
+</li>
+</ul>
+<h2 id="The-Authorization-REPLY-Packet-Body-授权回应报文："><a href="#The-Authorization-REPLY-Packet-Body-授权回应报文：" class="headerlink" title="The Authorization REPLY Packet Body, 授权回应报文："></a>The Authorization REPLY Packet Body, 授权回应报文：</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    status      |     arg_cnt    |         server_msg len          |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  +            data_len             |    arg_1_len   |    arg_2_len   |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |      ...       |   arg_N_len    |         server_msg ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   data ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_1 ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_2 ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_N ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br></pre></td></tr></table></figure>
+<p>各字段解释如下：</p>
+<ul>
+<li><p>status : 指定用户的授权状态，包括：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_AUTHOR_STATUS_PASS_ADD := <span class="number">0x01</span> #授权通过</span><br><span class="line">TAC_PLUS_AUTHOR_STATUS_PASS_REPL := <span class="number">0x02</span> #授权请求报文中的属性被TACACS服务器修改</span><br><span class="line">TAC_PLUS_AUTHOR_STATUS_FAIL := <span class="number">0x10</span> #授权失败</span><br><span class="line">TAC_PLUS_AUTHOR_STATUS_ERROR := <span class="number">0x11</span> #授权服务器上出现了错误</span><br><span class="line">TAC_PLUS_AUTHOR_STATUS_FOLLOW := <span class="number">0x21</span> #重新指定授权服务器</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>arg_cnt: 授权回应报文中携带的授权属性数。</p>
+</li>
+<li><p>argN : 这些属性描述了所请求的授权的细节。</p>
+</li>
+</ul>
+<p>如果status等于TAC_PLUS_AUTHOR_STATUS_FAIL，则必须拒绝请求的授权。</p>
+<p>如果status等于TAC_PLUS_AUTHOR_STATUS_PASS_ADD，则REQUEST中指定的属性得到授权，REPLY中的属性必须根据上述规则回应。</p>
+<p>如果status等于TAC_PLUS_AUTHOR_STATUS_PASS_REPL，那么客户端必须在回应中使用授权属性-值对(如果有的话)，而不是使用请求中的授权属性-值对。</p>
+<p>为了批准授权而不进行任何修改，服务器将status设置为TAC_PLUS_AUTHOR_STATUS_PASS_ADD，将arg_cnt设置为0。</p>
+<p>Status为TAC_PLUS_AUTHOR_STATUS_ERROR表示服务器上发生了ERROR。如果设置了ERROR，所有的arg值都没有任何相关性，必须忽略。</p>
+<p>当状态等于TAC_PLUS_AUTHOR_STATUS_FOLLOW时，则arg_cnt必须为0。在这种情况下，要采取的action和data字段的内容与用于认证的TAC_PLUS_AUTHEN_STATUS_FOLLOW状态相同。</p>
+<h1 id="Accounting，计费"><a href="#Accounting，计费" class="headerlink" title="Accounting，计费"></a>Accounting，计费</h1><p>计费通常是认证和授权之后的第三个操作。但是，同样，不需要认证或授权。计费是记录用户正在做什么和/或已经做了什么的行为。TACACS+中的计费有两个用途:它可以用作安全服务的审计工具。它还可以用于计算所使用的服务，例如在计费环境中。为此，TACACS+支持三种类型的计费记录。启动记录表明服务即将开始。停止记录表示服务刚刚终止，而更新记录是中间通知，表示服务仍在执行中。TACACS+计费记录包含授权记录中使用的所有信息，还包含特定于计费的信息，如启动和停止时间(适当时)和资源使用信息。计费部分定义了计费属性列表。</p>
+<h3 id="The-Account-REQUEST-Packet-Body-计费请求报文："><a href="#The-Account-REQUEST-Packet-Body-计费请求报文：" class="headerlink" title="The Account REQUEST Packet Body, 计费请求报文："></a>The Account REQUEST Packet Body, 计费请求报文：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |      flags     |  authen_method |    priv_lvl    |  authen_type   |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  | authen_service |    user_len    |    port_len    |  rem_addr_len  |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |    arg_cnt     |   arg_1_len    |   arg_2_len    |      ...       |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_N_len    |    user ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   port ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   rem_addr ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_1 ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_2 ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |   arg_N ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br></pre></td></tr></table></figure>
+<p>各字段解释如下：</p>
+<ul>
+<li><p>flags: 计费类型。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_ACCT_FLAG_START := <span class="number">0x02</span> #开始计费</span><br><span class="line">TAC_PLUS_ACCT_FLAG_STOP := <span class="number">0x04</span> #结束计费</span><br><span class="line">TAC_PLUS_ACCT_FLAG_WATCHDOG := <span class="number">0x08</span> #实时计费</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>所有其他字段都在上面的授权和认证部分中定义，具有相同的语义。</p>
+<h3 id="The-Accounting-REPLY-Packet-Body-请求回应报文："><a href="#The-Accounting-REPLY-Packet-Body-请求回应报文：" class="headerlink" title="The Accounting REPLY Packet Body, 请求回应报文："></a>The Accounting REPLY Packet Body, 请求回应报文：</h3><p>计费的目的是记录在客户身上发生的操作。服务器必须仅在计费请求后才成功答复。 如果服务器没有记录计费请求，则它必须以ERROR答复。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span>  <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span></span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |         server_msg len          |            data_len             |</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |     status     |         server_msg ...</span><br><span class="line">  +----------------+----------------+----------------+----------------+</span><br><span class="line">  |     data ...</span><br><span class="line">  +----------------+</span><br></pre></td></tr></table></figure>
+<p>字段解释：</p>
+<ul>
+<li><p>Status: 指定计费状态：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TAC_PLUS_ACCT_STATUS_SUCCESS := <span class="number">0x01</span> # 计费成功</span><br><span class="line">TAC_PLUS_ACCT_STATUS_ERROR := <span class="number">0x02</span> # 计费失败</span><br><span class="line">TAC_PLUS_ACCT_STATUS_FOLLOW := <span class="number">0x21</span> # 重新进行计费过程</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>当status等于TAC_PLUS_ACCT_STATUS_FOLLOW时，要采取的action和data字段的内容与用于认证的TAC_PLUS_AUTHEN_STATUS_FOLLOW状态相同，请求重新计费过程。</p>
+<p>TACACS+计费用于记录客户端上的各种类型的事件，例如:登录会话、命令输入，以及客户端实现所需的其他事件。这些事件在草案中统称为“任务”。</p>
+<p>TAC_PLUS_ACCT_FLAG_START标志表示这是一个开始计费消息。START消息只在任务启动时发送一次。TAC_PLUS_ACCT_FLAG_STOP表示这是一个停止记录，并且任务已经终止。TAC_PLUS_ACCT_FLAG_WATCHDOG标志表示这是一条更新记录。</p>
+<p><strong>计费报文汇总:</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">+----------+-------+-------+-------------+-------------------------+</span><br><span class="line">| Watchdog | Stop  | Start | Flags &amp; <span class="number">0xE</span> | Meaning                 |</span><br><span class="line">+----------+-------+-------+-------------+-------------------------+</span><br><span class="line">|    <span class="number">0</span>     |   <span class="number">0</span>   |   <span class="number">0</span>   |      <span class="number">0</span>      | INVALID                 |</span><br><span class="line">|    <span class="number">0</span>     |   <span class="number">0</span>   |   <span class="number">1</span>   |      <span class="number">2</span>      | Start Accounting Record |</span><br><span class="line">|    <span class="number">0</span>     |   <span class="number">1</span>   |   <span class="number">0</span>   |      <span class="number">4</span>      | Stop Accounting Record  |</span><br><span class="line">|    <span class="number">0</span>     |   <span class="number">1</span>   |   <span class="number">1</span>   |      <span class="number">6</span>      | INVALID                 |</span><br><span class="line">|    <span class="number">1</span>     |   <span class="number">0</span>   |   <span class="number">0</span>   |      <span class="number">8</span>      | Watchdog, no update     |</span><br><span class="line">|    <span class="number">1</span>     |   <span class="number">0</span>   |   <span class="number">1</span>   |      A      | Watchdog, with update   |</span><br><span class="line">|    <span class="number">1</span>     |   <span class="number">1</span>   |   <span class="number">0</span>   |      C      | INVALID                 |</span><br><span class="line">|    <span class="number">1</span>     |   <span class="number">1</span>   |   <span class="number">1</span>   |      E      | INVALID                 |</span><br><span class="line">+----------+-------+-------+-------------+-------------------------+</span><br></pre></td></tr></table></figure>
+<p>START和STOP标志是互斥的。</p>
+<p>客户端使用WATCHDOG标志来表示通信长时间运行的任务的当前状态。更新记录由客户自行决定发送。更新的频率取决于预期的应用程序: 提供进度指示的watchdog需要比daily keep-alive频率更高。当WATCHDOG标志与START标志一起设置时，它指示更新记录提供来自原始开始记录的附加或更新的属性。如果没有设置START标志，那么这只表明该任务仍在运行，并且没有提供任何新信息(服务器必须忽略任何属性)。STOP标志不能与WATCHDOG标志同时设置。</p>
+<p>如果客户端请求一个无效（INVLID）的选项，服务器必须用TAC_PLUS_ACCT_STATUS_ERROR响应。</p>
+<h1 id="Argument-Value-Pairs，属性-值对"><a href="#Argument-Value-Pairs，属性-值对" class="headerlink" title="Argument-Value Pairs，属性-值对"></a>Argument-Value Pairs，属性-值对</h1><p>TACACS+是一个可扩展的协议。在授权和计费中使用的属性不受本文件的限制。下面为常见用例定义了一些属性，客户端在支持相应的用例时必须使用这些属性。</p>
+<h2 id="Value-Encoding，值编码"><a href="#Value-Encoding，值编码" class="headerlink" title="Value Encoding，值编码"></a>Value Encoding，值编码</h2><p>所有属性值都被编码为字符串。应该遵循以下类型表示：</p>
+<ul>
+<li>Numeric(数字)： 除非另有说明，否则属性-值字符串中的所有数值都是十进制数字。所有属性都包含一个长度字段，而TACACS+实现在尝试处理数值属性之前必须验证它们能够适应它们的长度。如果不能调整长度，则必须将属性视为未处理，并且必须使用授权中有关参数处理的逻辑。</li>
+<li>Boolean（布尔值）：所有布尔值都用值“true”或“false”编码。</li>
+<li>IP-Address（IP地址）：为了避免歧义，建议主机指定为IP地址。IPv4地址被指定为由点(‘.’)分隔的8位数字，IPv6地址文本表示在RFC5952 [RFC5952]中定义。</li>
+<li>Date Time（日期时间）：日期/时间的绝对日期/时间是从1970年1月1日12点开始指定的秒数。时区必须是UTC，除非指定了时区参数。</li>
+<li>String（字符串）：许多值没有特定的类型表示，它们被解释为纯字符串。</li>
+<li>Empty Values（ 空值）：空值属性可以不带值提交，在这种情况下，它们由名称和强制或可选分隔符组成。例如，没有值的参数”cmd”被传输为四个字符的字符串”cmd=”。</li>
+</ul>
+<h2 id="Authorization-Arugments，授权属性："><a href="#Authorization-Arugments，授权属性：" class="headerlink" title="Authorization Arugments，授权属性："></a>Authorization Arugments，授权属性：</h2><ul>
+<li><p>service (String) : </p>
+<p>主要的服务。指定服务属性表明这是对该服务的授权或计费请求。例如:“shell”，“tty-server”，“connection”，“system”和“firewall”，其他的应用程序可以选择。必须始终包含此参数。</p>
+</li>
+<li><p>protocol (String):协议字段可用于表示服务的一个子集。</p>
+</li>
+<li><p>cmd (String): shell (exec) command。这表示要运行的命令的command name。如果service = “shell”，则必须指定”cmd”参数。</p>
+<p>shell命令的授权是TACACS+协议的常见用例。命令授权通常采用两种形式之一: (sessioin-based)基于会话的和(command-based)基于命令的:</p>
+<ul>
+<li>对于基于会话的shell授权，“cmd”属性将具有一个空值。客户端根据授权中的属性确定会话中允许哪些命令。</li>
+<li>在基于命令的授权中，客户机请求服务器通过对每个命令发出授权请求来确定是否允许某个命令。“cmd”参数将以命令名作为其值。</li>
+</ul>
+</li>
+<li><p>cmd-arg (String): shell (exec)命令的参数。这表示要运行的shell命令的参数。可以指定多个cmd-arg参数，它们是依赖于顺序的。</p>
+</li>
+<li><p>acl (Numeric) : 表示连接访问列表的数字。仅适用于基于会话的shell授权。</p>
+</li>
+<li><p>inacl (String) : 接口输入访问列表的标识符(name)。</p>
+</li>
+<li><p>outacl (String): 接口输出访问列表的标识符(名称)。</p>
+</li>
+<li><p>addr (IP-Address) : 网络地址。</p>
+</li>
+<li><p>addr-pool (String) : 地址池的标识符，客户端可以从中分配地址。</p>
+</li>
+<li><p>timeout (Numeric) : 连接的绝对计时器(以分钟为单位)。值为零表示没有超时。</p>
+</li>
+<li><p>idletime (String) : 连接的空闲超时(以分钟为单位)。值为零表示没有超时。</p>
+</li>
+<li><p>autocmd (String) : 要运行的(auto-command)自动命令。仅适用于基于会话的shell授权。</p>
+</li>
+<li><p>noescape (Boolean): 阻止用户使用转义字符。仅适用于基于会话的shell授权。</p>
+</li>
+<li><p>nohangup (Boolean) : 不要在自动命令后断开连接。仅适用于基于会话的shell授权。</p>
+</li>
+<li><p>priv-lvl (Numeric) : 要分配的特权级别(privilege level)。</p>
+</li>
+</ul>
+<h2 id="Accounting-Arguments-计费属性："><a href="#Accounting-Arguments-计费属性：" class="headerlink" title="Accounting Arguments, 计费属性："></a>Accounting Arguments, 计费属性：</h2><p>以下参数仅为TACACS+计费定义。它们必须位于上面授权部分中定义的任何属性-值对之前。</p>
+<ul>
+<li>task_id (String) : 同一事件的启动和停止记录必须具有匹配的task_id 属性值。客户端必须确保活动的task_id不被复制:客户端在发送了task_id的停止记录之前，不能将task_id重用为开始记录。服务器绝对不能对task_id的格式做出假设。</li>
+<li>start_time : (Date Time) : 操作的开始时间（自纪元以来的秒数）。</li>
+<li>stop_time: (Date Time): 操着的结束时间。</li>
+<li>elapsed_time (Numeric) : 操作的运行时间。</li>
+<li>timezone (String) : 此包中包含的所有时间戳的时区缩写。这里维护一个时区数据库:<a href="https://tools.ietf.org/html/draft-ietf-opsawg-tacacs-18#ref-TZDB" target="_blank" rel="noopener">TZDB</a>。</li>
+<li>event (String) : 仅在“service=system”时使用。当前值是“net_acct”、“cmd_acct”、“conn_acct”、“shell_acct”、“sys_acct”和“clock_change”。这些表示系统级别的更改。flags字段应表明服务是已启动还是已停止。</li>
+<li>reason (String) : 伴随事件的属性，它描述了事件发生的原因。</li>
+<li>bytes (Numeric) : 此操作传输的字节数</li>
+<li>bytes_in (Numeric) :  从服务器到客户端这个操作传输的字节数。</li>
+<li>bytes_out (Numeric) : 从客户端到服务器这个操作传输的字节数。</li>
+<li>paks (Numeric) :此操作传输的数据包数目。</li>
+<li>paks_in (Numeric) : 从服务器到客户端这个操作传输的包数量。</li>
+<li>paks_out (Numeric) : 从客户端到服务器这个操作传输的包数据。</li>
+<li>err_msg (String) : 关于这个操作的status描述。</li>
+</ul>
+<h1 id="Privilege-Levels-权限级别"><a href="#Privilege-Levels-权限级别" class="headerlink" title="Privilege Levels, 权限级别"></a>Privilege Levels, 权限级别</h1><p>TACACS+协议通过可扩展属性支持灵活的授权模式。有一种方案被内置于协议中，并广泛用于基于会话的shell授权: Privilege Levels 。权限级别是从0到15的有序值，每个级别都是下一个较低值的超集。客户端的配置和实现将操作(例如执行特定命令的权限)映射到不同的权限级别。 将命令分配给特权级别在很大程度上取决于部署。 。常见分配如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 通常分配给未经认证的会话。</span><br><span class="line">TAC_PLUS_PRIV_LVL_MIN := <span class="number">0x00</span>. </span><br><span class="line"># 通常分配给经过认证的常规会话的级别</span><br><span class="line">TAC_PLUS_PRIV_LVL_USER := <span class="number">0x01</span>.  </span><br><span class="line"># 通常分配给由高特权用户认证的会话的级别，以允许对系统有重大影响的命令。</span><br><span class="line">TAC_PLUS_PRIV_LVL_ROOT := <span class="number">0x0f</span>.</span><br><span class="line"># 最高权限级别</span><br><span class="line">TAC_PLUS_PRIV_LVL_MAX := <span class="number">0x0f</span>.</span><br></pre></td></tr></table></figure>
+<p>权限级别可以在启动时分配给Shell（EXEC）会话。 客户端将允许执行与此级别关联的动作。 服务器在基于会话的shell授权中返回此特权级别（当“service”等于“shell”且“ cmd”为空时）。 当用户需要执行映射到更高权限级别的操作时，客户端可以启动ENABLE类型的重新认证。 客户端会将所需的权限级别插入到认证报文头中，以启用认证请求。 </p>
+<p>客户端不是必须使用权限级别来确定基于会话的命令和资源访问。 尽管权限级别方案得到了广泛的支持，但它在要求单个单调的权限层次结构方面缺乏灵活性，这意味着其他session-based的命令授权方案已经发展。 但是，它仍然很常见，服务器应该支持它。</p>
+<blockquote>
+<table>
+<thead>
+<tr>
+<th>用户级别</th>
+<th>命令级别</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>参观级（0）</td>
+<td>网络诊断工具命令（ping、tracert）、从本设备出发访问外部设备的命令（Telnet客户端）、部分display命令等。</td>
+</tr>
+<tr>
+<td>1</td>
+<td>参观级（0）、监控级（1）</td>
+<td>用于系统维护，包括display等命令。<strong>说明：</strong>并不是所有display命令都是监控级，比如<strong>display current-configuration</strong>命令和<strong>display saved-configuration</strong>命令是3级管理级。</td>
+</tr>
+<tr>
+<td>2</td>
+<td>参观级（0）、监控级（1）、配置级（2）</td>
+<td>业务配置命令，包括路由、各个网络层次的命令，向用户提供直接网络服务。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>参观级（0）、监控级（1）、配置级（2）、管理级（3）</td>
+<td>用于系统基本运行的命令，对业务提供支撑作用，包括文件系统、FTP、TFTP下载、命令级别设置命令以及用于业务故障诊断的debugging命令等。</td>
+</tr>
+</tbody>
+</table>
+</blockquote>
+<h1 id="Security-Considerations-安全注意事项"><a href="#Security-Considerations-安全注意事项" class="headerlink" title="Security Considerations, 安全注意事项"></a>Security Considerations, 安全注意事项</h1><p>1998年最初的TACACS +草案 [TheDraft]并未解决设计现代标准时考虑的所有关键安全问题。 本节解决了已知的局限性和担忧，这些局限性和担忧会影响该协议以及部署该协议以管理集中认证，授权或网络设备管理计费的系统的整体安全性。 最初的TACACS +“草案” [TheDraft]中描述的协议的多种实现已被部署。 由于该协议从未被标准化，因此当前的实现可能以非显而易见的方式不兼容，从而带来了额外的安全风险。 本部分并不要求枚举所有可能的安全漏洞。</p>
+<h2 id="General-Security-of-the-Protocol："><a href="#General-Security-of-the-Protocol：" class="headerlink" title="General Security of the Protocol："></a>General Security of the Protocol：</h2><p>TACACS +协议不包含可以满足现代要求的安全机制。 这些安全机制最好被称为“obfuscation，混淆”，而不是“encryption，加密”，因为它们没有提供有意义的完整性，隐私或重放保护。 应该假定具有访问数据流的攻击者能够读取和修改所有TACACS +数据包。 如果不采取缓解措施，则可能会发生以下一系列风险：</p>
+<ul>
+<li>中间人攻击者可能会修改计费信息，从而使此类日志不适合也不可用于审计目的。</li>
+<li>中间人攻击者可能会在已知偏移量的各个字段中插入无效或误导性的值，以试图绕过认证或授权检查，甚至在被混淆的内部也是如此。</li>
+</ul>
+<p>虽然协议提供了某种程度的传输隐私，但它至少容易受到以下攻击:</p>
+<ul>
+<li>暴力破解利用提高MD5摘要计算效率。</li>
+<li>已知的明文攻击，可以降低暴力攻击的成本。</li>
+<li>选择纯文本攻击，可以降低暴力攻击的成本。</li>
+<li>没有向前保密（No forward secrecy）</li>
+</ul>
+<p>尽管，据作者所知，这种加密方法没有经过严格的测试，但已有足够的信息表明，最好将其称为“obfuscation 混淆”，而不是“encryption 加密”。</p>
+<p>由于这些原因，在其环境中部署TACACS+协议的用户必须限制对已知客户端的访问，并且必须控制整个传输路径的安全性。攻击者谁能猜出密钥或打破混淆将获得不受限制和不被发现的访问所有的TACACS+流量。确保像TACACS+这样的集中AAA系统部署在安全传输上，对于管理此类攻击的安全风险至关重要。</p>
+<p>本节的下面部分只列举了会话特有的风险，这些风险是与完全混淆和缺乏完整性检查相关的一般风险之外的。</p>
+<h3 id="Security-of-Authentication-Sessions-认证会话的安全性："><a href="#Security-of-Authentication-Sessions-认证会话的安全性：" class="headerlink" title="Security of Authentication Sessions, 认证会话的安全性："></a>Security of Authentication Sessions, 认证会话的安全性：</h3><p>认证会话应该通过安全的传输方式使用，因为中间人攻击可能会完全破坏它们。 即使CHAP（可能被认为可以抵抗密码拦截）也是不安全的，因为它不能保护用户名免受琐碎的中间人攻击。 </p>
+<p>本文档弃用了使用原始草案中包含的TAC_PLUS_AUTHEN_STATUS_FOLLOW选项的重定向机制。 作为此过程的一部分，新服务器的密钥已发送到客户端。 这种密钥的公开交换意味着一旦一个会话中断，就有可能利用该密钥来攻击与其他服务器的连接。 在现代部署中不得使用此机制。 绝对不能在安全部署之外使用它。</p>
+<h3 id="Security-of-Authorization-Sessions-授权会话的安全性："><a href="#Security-of-Authorization-Sessions-授权会话的安全性：" class="headerlink" title="Security of Authorization Sessions,授权会话的安全性："></a>Security of Authorization Sessions,授权会话的安全性：</h3><p>授权会话应该通过安全传输来使用，因为要成功地执行改变请求或响应中众所周知的明文的中间人攻击是很容易的。</p>
+<p>例如，使用字段“ authen_method”。 在实际部署中，通常会授权通过设备本地串行端口（console控制台端口）接收到的所有命令，因为通常由于设备位于物理上安全的位置而被认为是安全的。 如果管理员将授权系统配置为允许用户在本地控制台上输入的所有命令来帮助进行故障排除，则这将使所有攻击者都可以访问所有命令，从而能够将“ authen_method”从TAC_PLUS_AUTHEN_METH_TACACSPLUS更改为TAC_PLUS_AUTHEN_METH_LINE 。 在这方面，协议本身提供的混淆不会有太大帮助，因为：</p>
+<ul>
+<li>缺乏完整性意味着有效载荷中的任何字节都可以更改，而无需任何一方检测到更改。</li>
+<li>已知的明文意味着攻击者可以确定地知道哪个八位位组是攻击的目标（在这种情况下，标头之后的第一个八位位组）。</li>
+<li>结合已知的明文，攻击者可以确定用于混淆原始八位位组的密码填充八位位组的值。</li>
+</ul>
+<h3 id="Security-of-Accounting-Sessions-计费会话的安全性："><a href="#Security-of-Accounting-Sessions-计费会话的安全性：" class="headerlink" title="Security of Accounting Sessions, 计费会话的安全性："></a>Security of Accounting Sessions, 计费会话的安全性：</h3><p>计费会话应通过安全的传输方式使用。尽管计费会话不直接参与设备上的认证或授权操作，但是中间人攻击者可以执行以下任何操作：</p>
+<ul>
+<li>用新的有效数据或垃圾数据替换审计数据，这可能会使迷惑审计者或隐藏与其认证和/或授权攻击尝试有关的信息。 </li>
+<li><p>尝试使用旨在使系统以非预期的方式运行的条目来破坏计费日志(包括TACACS+ server和任何其他管理计费条目的系统)。</p>
+<p>除了这些直接操作之外，不同的客户端实现还传递不同的计费数据保真度。 一些供应商将敏感数据（例如密码，加密密钥等）作为审计日志的一部分进行传递。 由于缺乏具有完善的向前保密性的强加密功能，将来可能会泄露此数据，从而导致安全事件。</p>
+</li>
+</ul>
+<h3 id="TACACS-Best-Practices-TACACS-最佳实践："><a href="#TACACS-Best-Practices-TACACS-最佳实践：" class="headerlink" title="TACACS+ Best Practices, TACACS+最佳实践："></a>TACACS+ Best Practices, TACACS+最佳实践：</h3><p>关于上述安全问题的观察，网络管理员不能依赖于混淆的TACACS+协议。必须在安全部署中使用TACACS+: TACACS+必须部署在网络上，以确保通信的私密性和完整性，并且必须部署在与其他通信分离的网络上。如果不这样做，将影响整个网络安全。以下建议对如何应用该协议施加了限制。在最初的草案中没有施加这些限制。新的实现和当前实现的升级必须实现这些建议。厂商应该提供一些机制来帮助管理员实现这些最佳实践。</p>
+<h4 id="1-Shared-Secrets-共享密钥："><a href="#1-Shared-Secrets-共享密钥：" class="headerlink" title="1. Shared Secrets, 共享密钥："></a>1. Shared Secrets, 共享密钥：</h4><p>TACACS+服务器和客户端必须将共享密钥当作敏感数据来安全地管理，就像对其他敏感数据(如身份凭证信息)所期望的那样。服务器不能泄露敏感数据。例如：</p>
+<ul>
+<li><p>TACACS+服务器不能在日志中公开共享密钥。</p>
+</li>
+<li><p>TACACS+服务器必须允许为每个客户端定义一个专用密钥。</p>
+</li>
+<li><p>TACACS+服务器管理系统必须提供一种机制来跟踪密钥的生命周期，并通知管理员定期更新它们。TACACS+服务器管理员应该定期更改密钥。</p>
+</li>
+<li>TACACS+服务器管理员应该总是为每个客户端定义一个密钥。</li>
+<li>TACACS+服务器和客户端必须支持至少32个字符长的共享密钥。</li>
+<li>TACACS+服务器必须支持为共享密钥定义最小复杂度的策略。</li>
+<li>TACACS+客户端不允许在没有共享密钥或共享密钥小于16个字符的情况下配置服务器。</li>
+<li>TACACS+服务器管理员应该配置最小16个字符长度的密钥。</li>
+</ul>
+<h4 id="2-Connections-and-Obfuscation-连接与混淆："><a href="#2-Connections-and-Obfuscation-连接与混淆：" class="headerlink" title="2. Connections and Obfuscation, 连接与混淆："></a>2. Connections and Obfuscation, 连接与混淆：</h4><p>TACACS+服务器必须允许定义单个客户端。服务器必须只接受来自这些已定义的已知客户端的网络连接尝试。</p>
+<p>TACACS+服务器必须拒绝使用TAC_PLUS_UNENCRYPTED_FLAG设置的连接。服务器上必须为请求连接的客户端提供一个共享密钥设置。</p>
+<p>如果在为客户端处理数据包时检测到无效的共享密钥，那么TACACS+服务器一定不能在该连接上接受任何新的会话。TACACS+服务器必须在完成之前在连接上使用有效共享密钥建立的任何会话上及时终止连接。</p>
+<p>TACACS +客户端不能设置TAC_PLUS_UNENCRYPTED_FLAG。 必须以显式配置的方式来实现客户端，以启用TAC_PLUS_UNENCRYPTED_FLAG的使用，当客户端在生产中时，不得使用此选项。</p>
+<p>当一个TACACS+客户端从服务器接收到以下响应时，</p>
+<ul>
+<li>从配置了共享密钥的服务器接收到响应数据包，但该数据包设置了TAC_PLUS_UNENCRYPTED_FLAG。</li>
+<li>从配置为不使用混淆处理的服务器接收到响应数据包，但该数据包未设置TAC_PLUS_UNENCRYPTED_FLAG。</li>
+</ul>
+<p>然后，TACACS +客户端必须关闭TCP会话，并以与收到TAC_PLUS_AUTHEN_STATUS_FAIL（认证会话）或TAC_PLUS_AUTHOR_STATUS_FAIL（授权会话）相同的方式处理响应。</p>
+<h4 id="3-Authentication-认证："><a href="#3-Authentication-认证：" class="headerlink" title="3. Authentication, 认证："></a>3. Authentication, 认证：</h4><p>为了帮助TACACS +管理员选择较少的弱认证选项，TACACS +服务器必须允许管理员将服务器配置为仅接受（challenge/response）质询的挑战/响应选项（authen_type的TAC_PLUS_AUTHEN_TYPE_CHAP或TAC_PLUS_AUTHEN_TYPE_MSCHAP或TAC_PLUS_AUTHEN_TYPE_MSCHAPV2）。</p>
+<p> TACACS +服务器管理员应启用上一段中提到的选项。由于identity/password系统的要求，在不可避免的情况下，TACACS +服务器部署应仅启用其他选项（例如TAC_PLUS_AUTHEN_TYPE_ASCII或TAC_PLUS_AUTHEN_TYPE_PAP）。</p>
+<p> TACACS +服务器管理员不应允许将相同的凭据应用于基于质询的（TAC_PLUS_AUTHEN_TYPE_CHAP或TAC_PLUS_AUTHEN_TYPE_MSCHAP或TAC_PLUS_AUTHEN_TYPE_MSCHAPV2）和非基于质询的authen_type选项，因为后者的不安全性将损害前者的安全性。</p>
+<p>出于安全方面的考虑，不应使用原始草案中提到的TAC_PLUS_AUTHEN_SENDAUTH和TAC_PLUS_AUTHEN_SENDPASS选项。 TACACS +服务器不应实现它们。如果必须实施它们，则服务器必须默认使用禁用的选项，并且必须警告管理员这些选项不安全。</p>
+<h4 id="4-Authorization-授权："><a href="#4-Authorization-授权：" class="headerlink" title="4. Authorization, 授权："></a>4. Authorization, 授权：</h4><p>授权和计费特性旨在提供可扩展性和灵活性。本文档中定义了一个基本字典，但是在部署中可以通过使用新的属性名称对其进行扩展。灵活性的代价是，管理员和实现者必须确保客户端和服务器之间共享的属性-值对具有一致的解释。接收到无法识别的强制属性的TACACS+客户端必须像接收到TAC_PLUS_AUTHOR_STATUS_FAIL一样评估服务器响应。</p>
+<h4 id="5-Redirection-Mechanism-重定向机制："><a href="#5-Redirection-Mechanism-重定向机制：" class="headerlink" title="5. Redirection Mechanism, 重定向机制："></a>5. Redirection Mechanism, 重定向机制：</h4><p>最初的草案描述了一个重定向机制(TAC_PLUS_AUTHEN_STATUS_FOLLOW)。这个特性很难保证安全。在服务器列表中发送密钥的选项是特别不安全的，因为它会泄露客户端共享的秘密。</p>
+<p>TACACS+服务器必须弃用重定向机制。</p>
+<p>如果实现了重定向机制，那么TACACS+服务器必须在默认情况下禁用它，并且必须警告TACACS+服务器管理员，由于暴露共享机密的风险，只能在安全部署中启用它。TACACS+客户端应该通过将TAC_PLUS_AUTHEN_STATUS_FOLLOW处理为TAC_PLUS_AUTHEN_STATUS_FAIL来反对该特性。</p>
+<h1 id="Tacacs-总结"><a href="#Tacacs-总结" class="headerlink" title="Tacacs+总结"></a>Tacacs+总结</h1><p>Tacacs+主要用来部署在服务器上，对网络设备进行统一的身份认证，授权，计费等。</p>
+<h2 id="报文类型总结："><a href="#报文类型总结：" class="headerlink" title="报文类型总结："></a>报文类型总结：</h2><h3 id="3种认证报文："><a href="#3种认证报文：" class="headerlink" title="3种认证报文："></a>3种认证报文：</h3><ul>
+<li>认证开始报文（Authentication Start）认证开始时，客户端向服务器发送认证开始报文，该报文中包括认证类型，同时可能包括用户名和一些认证数据。</li>
+<li>认证持续报文（Authentication Continue）：客户端接收到服务器回应的认证回应报文后，如果确认认证过程没有结束，则使用认证持续报文响应</li>
+<li>认证回应报文（Authentication Reply）：服务器接收到客户端发送的认证开始报文或认证持续报文后，向客户端发送的唯一一种认证报文，用于向客户端反馈当前认证的状态。</li>
+</ul>
+<h3 id="2种授权报文："><a href="#2种授权报文：" class="headerlink" title="2种授权报文："></a>2种授权报文：</h3><ul>
+<li>授权请求报文（Authorization Request）：TACACS的认证和授权是分离的，用户可以使用TACACS认证而使用其他协议进行授权。如果需要通过TACACS进行授权，则客户端向服务器发送授权请求报文，该报文中包括了授权所需的一切信息。</li>
+<li>授权回应报文（Authorization Response）服务器接收到授权请求报文后，向客户端发送授权回应报文，该报文中包括了授权的结果</li>
+</ul>
+<h3 id="2种计费报文："><a href="#2种计费报文：" class="headerlink" title="2种计费报文："></a>2种计费报文：</h3><ul>
+<li>计费请求报文（Accounting Request）：该报文中包括了计费所需的信息。</li>
+<li>计费回应报文：（Accounting Response）：服务器接收并成功记录计费请求报文后，需要回应一个计费响应报文。</li>
+</ul>
+<h2 id="Tacacs报文交互流量："><a href="#Tacacs报文交互流量：" class="headerlink" title="Tacacs报文交互流量："></a>Tacacs报文交互流量：</h2><p>以Telnet用户为例，说明使用Tacacs+对用户进行认证、授权和计费的过程。</p>
+<p><img src="/2020/08/30/Tacscs-协议原理/tacacs.png" alt="tacacs"></p>
+<center>图Tacase报文交互流程图</center>
+
+<p>在整个过程中的基本消息交互流程如下：</p>
+<ol>
+<li>Telnet用户请求登录设备。</li>
+<li>Tacacs+客户端收到请求之后，向Tacacs+服务器发送认证开始报文。</li>
+<li>Tacacs+服务器发送认证回应报文，请求用户名。</li>
+<li>Tacacs+客户端收到回应报文后，向用户询问用户名。</li>
+<li>用户输入用户名。</li>
+<li>Tacacs+客户端收到用户名后，向Tacacs+服务器发送认证持续报文，其中包括了用户名。</li>
+<li>Tacacs+服务器发送认证回应报文，请求密码。</li>
+<li>Tacacs+客户端收到认证回应报文，向用户询问密码。</li>
+<li>用户输入密码。</li>
+<li>Tacacs+客户端收到密码后，向Tacacs+服务器发送认证持续报文，其中包括了密码信息。</li>
+<li>Tacacs+服务器发送认证回应报文，指示用户通过认证。</li>
+<li>Tacacs+客户端向Tacacs+服务器发送授权请求报文。</li>
+<li>Tacacs+服务器发送授权回应报文，指示用户通过授权。</li>
+<li>Tacacs+客户端收到授权回应报文，向用户输出设备的配置界面。</li>
+<li>Tacacs+客户端向Tacacs+服务器发送计费开始请求报文。</li>
+<li>Tacacs+服务器发送计费开始回应报文，指示计费开始请求报文已经收到。</li>
+<li>用户请求断开连接。</li>
+<li>Tacacs+客户端向Tacacs+服务器发送计费结束请求报文。</li>
+<li>Tacacs+服务器发送计费结束回应报文，指示计费结束请求报文已经收到。</li>
+</ol>
+<h2 id="Tacacs-协议与Radius协议的区别："><a href="#Tacacs-协议与Radius协议的区别：" class="headerlink" title="Tacacs+协议与Radius协议的区别："></a>Tacacs+协议与Radius协议的区别：</h2><table>
+<thead>
+<tr>
+<th>Tacacs+</th>
+<th>RADIUS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>通过TCP传输，网络传输更可靠。</td>
+<td>通过UDP传输，网络传输效率更高。</td>
+</tr>
+<tr>
+<td>除了标准的TACACS报文头，对报文主体全部进行加密。</td>
+<td>只是对认证报文中的密码字段进行加密。</td>
+</tr>
+<tr>
+<td>认证与授权分离，使得认证、授权服务可以在不同的安全服务器上实现。例如，可以用一台TACACS服务器进行认证，另外一台TACACS服务器进行授权。</td>
+<td>认证与授权结合，难以分离。</td>
+</tr>
+<tr>
+<td>支持对设备上的配置命令进行授权使用。即用户可使用的命令行受到命令级别和AAA授权的双重限制，某一级别的用户输入的每一条命令都需要通过TACACS服务器授权，如果授权通过，命令才可以被执行。</td>
+<td>不支持对设备上的配置命令进行授权使用。用户登录设备后可以使用的命令行由用户级别决定，用户只能使用级别等于或低于用户级别的命令行。</td>
+</tr>
+<tr>
+<td>适于进行安全控制。</td>
+<td>适于进行计费。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<blockquote>
+<p>其他文章：</p>
+<ul>
+<li><a href="https://cshihong.github.io/2020/08/30/Tacscs-%E5%8D%8F%E8%AE%AE%E5%8E%9F%E7%90%86/">Tacacs+协议原理</a></li>
+<li><a href="https://cshihong.github.io/2020/09/10/Tacacs-%E6%9C%8D%E5%8A%A1%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE%E8%AF%A6%E8%A7%A3/">Tacacs+服务搭建与配置详解</a></li>
+<li><a href="https://cshihong.github.io/2020/09/28/Tacacs-%E5%90%84%E5%8E%82%E5%95%86%E4%BA%A4%E6%8D%A2%E6%9C%BA%E9%85%8D%E7%BD%AE/">Tacacs+各厂商交换机配置</a></li>
+<li><a href="https://cshihong.github.io/2020/10/06/Tacacs-%E5%8D%8F%E8%AE%AE%E4%BA%A4%E4%BA%92%E6%8A%A5%E6%96%87%E6%8A%93%E5%8C%85%E7%A4%BA%E4%BE%8B/">Tacacs+协议交互报文抓包示例</a></li>
+<li><a href="https://cshihong.github.io/2020/12/27/Tacacs-%E5%8F%8C%E9%80%9A%E9%81%93%E8%AE%A4%E8%AF%81%E9%85%8D%E7%BD%AE%E6%B5%8B%E8%AF%95%E4%B8%8E%E6%80%BB%E7%BB%93/">Tacacs+双通道认证配置测试与总结</a></li>
+<li><a href="https://cshihong.github.io/2020/12/27/Tacacs-%E9%85%8D%E7%BD%AEsingle-connection%E5%8D%95%E8%BF%9E%E6%8E%A5%E6%A8%A1%E5%BC%8F%E8%AF%81%E6%B5%8B%E8%AF%95%E4%B8%8E%E6%80%BB%E7%BB%93/">Tacacs+配置single-connection单连接模式证测试与总结</a></li>
+</ul>
+</blockquote>
+<hr>
+<blockquote>
+<p>参考资料：</p>
+<p><a href="https://tools.ietf.org/html/draft-ietf-opsawg-tacacs-18" target="_blank" rel="noopener">https://tools.ietf.org/html/draft-ietf-opsawg-tacacs-18</a></p>
+<p><a href="https://support.huawei.com/hedex/hdx.do?docid=EDOC1100101225&amp;lang=zh&amp;idPath=24030814%7C21782165%7C21782236%7C22318638%7C7542409" target="_blank" rel="noopener">https://support.huawei.com/hedex/hdx.do?docid=EDOC1100101225&amp;lang=zh&amp;idPath=24030814%7C21782165%7C21782236%7C22318638%7C7542409</a></p>
+</blockquote>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2020/08/30/Tacscs-协议原理/" title="Tacscs+协议原理">https://cshihong.github.io/2020/08/30/Tacscs-协议原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Tacscs/" rel="tag"># Tacscs+</a>
+          
+            <a href="/tags/安全/" rel="tag"># 安全</a>
+          
+            <a href="/tags/AAA/" rel="tag"># AAA</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/08/23/光纤学习总结/" rel="next" title="光纤学习总结">
+                <i class="fa fa-chevron-left"></i> 光纤学习总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/09/10/Tacacs-服务搭建与配置详解/" rel="prev" title="Tacacs+服务搭建与配置详解">
+                Tacacs+服务搭建与配置详解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#TACACS-简介"><span class="nav-number">1.</span> <span class="nav-text">TACACS+ 简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#技术定义"><span class="nav-number">2.</span> <span class="nav-text">技术定义</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tacacs-Packets-and-Sessions-报文和会话"><span class="nav-number">3.</span> <span class="nav-text">Tacacs+ Packets and Sessions,报文和会话</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tacacs-的报文头："><span class="nav-number">3.1.</span> <span class="nav-text">Tacacs+的报文头：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tacacs-报文主体："><span class="nav-number">3.2.</span> <span class="nav-text">Tacacs+ 报文主体：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#单连接模式："><span class="nav-number">3.3.</span> <span class="nav-text">单连接模式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Session-Completion-会话完成"><span class="nav-number">3.4.</span> <span class="nav-text">Session Completion,会话完成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Data-Obfuscation，数据混淆（加密）："><span class="nav-number">3.5.</span> <span class="nav-text">Data Obfuscation，数据混淆（加密）：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Authentication，认证"><span class="nav-number">4.</span> <span class="nav-text">Authentication，认证</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Authentication-START-Packet-Body，认证开始报文："><span class="nav-number">4.1.</span> <span class="nav-text">The Authentication START Packet Body，认证开始报文：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Authentication-REPLY-Packet-Body-认证回应报文："><span class="nav-number">4.2.</span> <span class="nav-text">The Authentication REPLY Packet Body, 认证回应报文：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Authentication-CONTIUNE-Packet-Body-认证持续报文中"><span class="nav-number">4.3.</span> <span class="nav-text">The Authentication CONTIUNE Packet Body,认证持续报文中:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#认证过程："><span class="nav-number">4.4.</span> <span class="nav-text">认证过程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Version-Behavior-版本行为："><span class="nav-number">4.4.1.</span> <span class="nav-text">Version Behavior,版本行为：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#通用认证流程："><span class="nav-number">4.4.2.</span> <span class="nav-text">通用认证流程：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-ASCII-Login："><span class="nav-number">4.4.2.1.</span> <span class="nav-text">1. ASCII Login：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-PAP-Login："><span class="nav-number">4.4.2.2.</span> <span class="nav-text">2. PAP Login：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-CHAP-login"><span class="nav-number">4.4.2.3.</span> <span class="nav-text">3. CHAP login:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-MS-CHAP-v1-login："><span class="nav-number">4.4.2.4.</span> <span class="nav-text">4. MS-CHAP v1 login：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-MS-CHAP-v2-login："><span class="nav-number">4.4.2.5.</span> <span class="nav-text">5. MS-CHAP v2 login：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-Enable-Requests"><span class="nav-number">4.4.2.6.</span> <span class="nav-text">6. Enable Requests:</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-ASCII-change-passwrod-requests"><span class="nav-number">4.4.2.7.</span> <span class="nav-text">7. ASCII change passwrod requests:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#终止一个认证会话："><span class="nav-number">4.4.3.</span> <span class="nav-text">终止一个认证会话：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Authorization-授权"><span class="nav-number">5.</span> <span class="nav-text">Authorization,授权</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Authorization-REQUEST-Packet-Body-授权请求报文："><span class="nav-number">5.1.</span> <span class="nav-text">The Authorization REQUEST Packet Body, 授权请求报文：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#The-Authorization-REPLY-Packet-Body-授权回应报文："><span class="nav-number">5.2.</span> <span class="nav-text">The Authorization REPLY Packet Body, 授权回应报文：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Accounting，计费"><span class="nav-number">6.</span> <span class="nav-text">Accounting，计费</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#The-Account-REQUEST-Packet-Body-计费请求报文："><span class="nav-number">6.0.1.</span> <span class="nav-text">The Account REQUEST Packet Body, 计费请求报文：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#The-Accounting-REPLY-Packet-Body-请求回应报文："><span class="nav-number">6.0.2.</span> <span class="nav-text">The Accounting REPLY Packet Body, 请求回应报文：</span></a></li></ol></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#Argument-Value-Pairs，属性-值对"><span class="nav-number">7.</span> <span class="nav-text">Argument-Value Pairs，属性-值对</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Value-Encoding，值编码"><span class="nav-number">7.1.</span> <span class="nav-text">Value Encoding，值编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Authorization-Arugments，授权属性："><span class="nav-number">7.2.</span> <span class="nav-text">Authorization Arugments，授权属性：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Accounting-Arguments-计费属性："><span class="nav-number">7.3.</span> <span class="nav-text">Accounting Arguments, 计费属性：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Privilege-Levels-权限级别"><span class="nav-number">8.</span> <span class="nav-text">Privilege Levels, 权限级别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Security-Considerations-安全注意事项"><span class="nav-number">9.</span> <span class="nav-text">Security Considerations, 安全注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#General-Security-of-the-Protocol："><span class="nav-number">9.1.</span> <span class="nav-text">General Security of the Protocol：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Security-of-Authentication-Sessions-认证会话的安全性："><span class="nav-number">9.1.1.</span> <span class="nav-text">Security of Authentication Sessions, 认证会话的安全性：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Security-of-Authorization-Sessions-授权会话的安全性："><span class="nav-number">9.1.2.</span> <span class="nav-text">Security of Authorization Sessions,授权会话的安全性：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Security-of-Accounting-Sessions-计费会话的安全性："><span class="nav-number">9.1.3.</span> <span class="nav-text">Security of Accounting Sessions, 计费会话的安全性：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TACACS-Best-Practices-TACACS-最佳实践："><span class="nav-number">9.1.4.</span> <span class="nav-text">TACACS+ Best Practices, TACACS+最佳实践：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Shared-Secrets-共享密钥："><span class="nav-number">9.1.4.1.</span> <span class="nav-text">1. Shared Secrets, 共享密钥：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Connections-and-Obfuscation-连接与混淆："><span class="nav-number">9.1.4.2.</span> <span class="nav-text">2. Connections and Obfuscation, 连接与混淆：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Authentication-认证："><span class="nav-number">9.1.4.3.</span> <span class="nav-text">3. Authentication, 认证：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-Authorization-授权："><span class="nav-number">9.1.4.4.</span> <span class="nav-text">4. Authorization, 授权：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-Redirection-Mechanism-重定向机制："><span class="nav-number">9.1.4.5.</span> <span class="nav-text">5. Redirection Mechanism, 重定向机制：</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tacacs-总结"><span class="nav-number">10.</span> <span class="nav-text">Tacacs+总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#报文类型总结："><span class="nav-number">10.1.</span> <span class="nav-text">报文类型总结：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3种认证报文："><span class="nav-number">10.1.1.</span> <span class="nav-text">3种认证报文：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2种授权报文："><span class="nav-number">10.1.2.</span> <span class="nav-text">2种授权报文：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2种计费报文："><span class="nav-number">10.1.3.</span> <span class="nav-text">2种计费报文：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tacacs报文交互流量："><span class="nav-number">10.2.</span> <span class="nav-text">Tacacs报文交互流量：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tacacs-协议与Radius协议的区别："><span class="nav-number">10.3.</span> <span class="nav-text">Tacacs+协议与Radius协议的区别：</span></a></li></ol></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2020/08/30/Tacscs-协议原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

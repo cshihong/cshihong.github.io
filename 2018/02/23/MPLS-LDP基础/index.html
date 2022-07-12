@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="MPLS LDP简介标签分发协议LDP（Label Distribution Protocol）是多协议标签交换MPLS的一种控制协议，相当于传统网络中的信令协议，负责转发等价类FEC（Forwarding Equivalence Class）的分类、标签的分配以及标签交换路径LSP（Label Switched Path）的建立和维护等操作。LDP规定了标签分发过程中的各种消息以及相关处理过程。">
+<meta name="keywords" content="MPLS VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MPLS LDP基础">
+<meta property="og:url" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="MPLS LDP简介标签分发协议LDP（Label Distribution Protocol）是多协议标签交换MPLS的一种控制协议，相当于传统网络中的信令协议，负责转发等价类FEC（Forwarding Equivalence Class）的分类、标签的分配以及标签交换路径LSP（Label Switched Path）的建立和维护等操作。LDP规定了标签分发过程中的各种消息以及相关处理过程。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/LDP消息作用：.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/Label%20mapping.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/LDP%20hello报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/LDP的Init消息.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/keepalive.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/LDP会话建立过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/标签发布方式.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/LSP的建立过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/LDP跨域.png">
+<meta property="og:updated_time" content="2019-08-25T01:51:02.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MPLS LDP基础">
+<meta name="twitter:description" content="MPLS LDP简介标签分发协议LDP（Label Distribution Protocol）是多协议标签交换MPLS的一种控制协议，相当于传统网络中的信令协议，负责转发等价类FEC（Forwarding Equivalence Class）的分类、标签的分配以及标签交换路径LSP（Label Switched Path）的建立和维护等操作。LDP规定了标签分发过程中的各种消息以及相关处理过程。">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/LDP消息作用：.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MPLS LDP基础 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">MPLS LDP基础
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-02-23 21:32:37" itemprop="dateCreated datePublished" datetime="2018-02-23T21:32:37+08:00">2018-02-23</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:51:02" itemprop="dateModified" datetime="2019-08-25T09:51:02+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 6,506</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 24</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="MPLS-LDP简介"><a href="#MPLS-LDP简介" class="headerlink" title="MPLS LDP简介"></a>MPLS LDP简介</h1><p>标签分发协议LDP（Label Distribution Protocol）是多协议标签交换MPLS的一种控制协议，相当于传统网络中的信令协议，负责转发等价类FEC（Forwarding Equivalence Class）的分类、标签的分配以及标签交换路径LSP（Label Switched Path）的建立和维护等操作。LDP规定了标签分发过程中的各种消息以及相关处理过程。</p>
+<h2 id="目的："><a href="#目的：" class="headerlink" title="目的："></a>目的：</h2><p>MPLS支持多层标签，并且转发平面面向连接，故具有良好的扩展性，使在统一的MPLS/IP基础网络架构上为客户提供各类服务成为可能。通过LDP协议，标签交换路由器LSR（Label Switched Router）可以把网络层的路由信息直接映射到数据链路层的交换路径上，动态建立起网络层的LSP。</p>
+<p>目前，LDP广泛地应用在VPN服务上，具有组网、配置简单、支持基于路由动态建立LSP、支持大容量LSP等优点。</p>
+<h2 id="LDP基本概念："><a href="#LDP基本概念：" class="headerlink" title="LDP基本概念："></a>LDP基本概念：</h2><p><strong>LDP对等体：</strong></p>
+<p>LDP对等体是指相互之间存在LDP会话、使用LDP来交换标签消息的两个LSR。LDP对等体通过它们之间的LDP会话获得对方的标签。</p>
+<p><strong>LDP邻居体：</strong></p>
+<p>当一台LSR接收到对端发送过来的Hello消息后LDP邻接体建立。LDP邻接体存在两种类型：</p>
+<ul>
+<li>本地邻接体（Local Adjacency）：以组播形式发送Hello消息（即链路Hello消息）发现的邻接体叫做本地邻接体。</li>
+<li>远端邻接体（Remote Adjacency）：以单播形式发送Hello消息（即目标Hello消息）发现的邻接体叫做远端邻接体。</li>
+</ul>
+<p>LDP通过邻接体来维护对等体的存在，对等体的类型取决于维护它的邻接体的类型。一个对等体可以由多个邻接体来维护，如果由本地邻接体和远端邻接体两者来维护，则对等体类型为本远共存对等体。</p>
+<p><strong>LDP会话：</strong></p>
+<p>LDP会话用于LSR之间交换标签映射、释放等消息。只有存在对等体才能建立LDP会话，LDP会话分为两种类型：</p>
+<ul>
+<li>本地LDP会话（Local LDP Session）：建立会话的两个LSR之间是直连的。</li>
+<li>远端LDP会话（Remote LDP Session）：建立会话的两个LSR之间可以是直连的，也可以是非直连的。</li>
+</ul>
+<p>本地LDP会话和远端LDP会话可以共存。</p>
+<h1 id="LDP工作机制"><a href="#LDP工作机制" class="headerlink" title="LDP工作机制"></a>LDP工作机制</h1><p>LDP协议规定了标签分发过程中的各种消息以及相关的处理过程。通过LDP，LSR可以把网络层的路由信息映射到数据链路层的交换路径上，进而建立起LSP。</p>
+<h2 id="LDP消息类型："><a href="#LDP消息类型：" class="headerlink" title="LDP消息类型："></a>LDP消息类型：</h2><p>LDP协议主要使用四类消息：</p>
+<ul>
+<li>发现（Discovery）消息：用于通告和维护网络中LSR的存在，如Hello消息。</li>
+<li>会话（Session）消息：用于建立、维护和终止LDP对等体之间的会话，如Initialization消息、Keepalive消息。</li>
+<li>通告（Advertisement）消息：用于创建、改变和删除FEC的标签映射。</li>
+<li>通知（Notification）消息：用于提供建议性的消息和差错通知。</li>
+</ul>
+<p>为保证LDP消息的可靠发送，除了Discovery消息使用UDP（User Datagram Protocol）传输外，LDP的Session消息、Advertisement消息和Notification消息都使用TCP（Transmission Control Protocol）传输。</p>
+<h2 id="LDP消息作用："><a href="#LDP消息作用：" class="headerlink" title="LDP消息作用："></a>LDP消息作用：</h2><p><img src="/2018/02/23/MPLS-LDP基础/LDP消息作用：.png" alt="LDP消息作用："></p>
+<h2 id="图：LDP消息作用"><a href="#图：LDP消息作用" class="headerlink" title="图：LDP消息作用"></a><center>图：LDP消息作用<center></center></center></h2><p><img src="/2018/02/23/MPLS-LDP基础/Label mapping.png" alt="Label mapping"></p>
+<h2 id="图：Label-mapping消息报文"><a href="#图：Label-mapping消息报文" class="headerlink" title="图：Label mapping消息报文"></a><center>图：Label mapping消息报文<center></center></center></h2><h3 id="LDP报文消息抓包示例"><a href="#LDP报文消息抓包示例" class="headerlink" title="LDP报文消息抓包示例:"></a>LDP报文消息抓包示例:</h3><hr>
+<p><img src="/2018/02/23/MPLS-LDP基础/LDP hello报文.png" alt="LDP hello报文"></p>
+<h2 id="图：LDP的hello报文抓包示例"><a href="#图：LDP的hello报文抓包示例" class="headerlink" title="图：LDP的hello报文抓包示例"></a><center>图：LDP的hello报文抓包示例<center></center></center></h2><p><img src="/2018/02/23/MPLS-LDP基础/LDP的Init消息.png" alt="LDP的Init消息"></p>
+<h2 id="图：LDP的init报文抓包示例"><a href="#图：LDP的init报文抓包示例" class="headerlink" title="图：LDP的init报文抓包示例"></a><center>图：LDP的init报文抓包示例<center></center></center></h2><p><img src="/2018/02/23/MPLS-LDP基础/keepalive.png" alt="keepalive"></p>
+<h2 id="图：KeepAlive消息和Address消息抓包示例"><a href="#图：KeepAlive消息和Address消息抓包示例" class="headerlink" title="图：KeepAlive消息和Address消息抓包示例"></a><center>图：KeepAlive消息和Address消息抓包示例<center></center></center></h2><h2 id="LDP工作过程："><a href="#LDP工作过程：" class="headerlink" title="LDP工作过程："></a>LDP工作过程：</h2><p>LDP工作过程主要分为两个阶段：</p>
+<ol>
+<li><p>LDP会话的建立</p>
+<p>通过Hello消息发现邻居后，LSR之间开始建立LDP会话。会话建立后，LDP对等体之间通过不断地发送Hello消息和Keepalive消息来维护这个会话。</p>
+<ul>
+<li>LDP对等体之间，通过周期性发送Hello消息表明自己希望继续维持这种邻接关系。如果Hello保持定时器超时仍没有收到新的Hello消息，则删除Hello邻接关系。邻接关系被删除后，本端LSR将发送Notification消息，结束该LDP会话。</li>
+<li>LDP对等体之间通过LDP会话连接上传送的Keepalive消息来维持LDP会话。如果会话保持定时器(Keepalive保持定时器)超时仍没有收到任何Keepalive消息，则关闭TCP连接，本端LSR将发送Notification消息，结束LDP会话。</li>
+</ul>
+</li>
+<li><p>LDP LSP的建立</p>
+<p>会话建立后，LDP通过发送标签请求和标签映射消息，在LDP对等体之间通告FEC和标签的绑定关系，从而建立LSP。</p>
+</li>
+</ol>
+<h2 id="LDP会话的建立："><a href="#LDP会话的建立：" class="headerlink" title="LDP会话的建立："></a>LDP会话的建立：</h2><p>通过LDP发现机制发现LDP对等体用来建立LDP会话。只有建立了LDP会话后，才能建立LDP LSP来承载业务。</p>
+<h3 id="LDP发现机制："><a href="#LDP发现机制：" class="headerlink" title="LDP发现机制："></a>LDP发现机制：</h3><p>LDP发现机制用于LSR发现潜在的LDP对等体。LDP有两种发现机制：</p>
+<ul>
+<li><p>基本发现机制：用于发现链路上直连的LSR。</p>
+<p>LSR通过周期性地发送LDP链路Hello消息（LDP Link Hello），实现LDP基本发现机制，建立本地LDP会话。</p>
+<p>LDP链路Hello消息使用UDP报文，目的地址是组播地址224.0.0.2。如果LSR在特定接口接收到LDP链路Hello消息，表明该接口存在LDP对等体。</p>
+</li>
+<li><p>扩展发现机制：用于发现链路上非直连LSR。</p>
+<p>LSR周期性地发送LDP目标Hello消息（LDP Targeted Hello）到指定IP地址，实现LDP扩展发现机制，建立远端LDP会话。</p>
+<p>LDP目标Hello消息使用UDP报文，目的地址是指定IP地址。如果LSR接收到LDP目标Hello消息，表明该LSR存在LDP对等体。</p>
+</li>
+</ul>
+<h3 id="LDP会话的建立过程："><a href="#LDP会话的建立过程：" class="headerlink" title="LDP会话的建立过程："></a>LDP会话的建立过程：</h3><p>两台LSR之间交换Hello消息触发LDP会话的建立。</p>
+<p>LDP会话的建立过程如下图所示：</p>
+<p><img src="/2018/02/23/MPLS-LDP基础/LDP会话建立过程.png" alt="LDP会话建立过程"></p>
+<p><center>图：LDP会话的建立过程<center></center></center></p>
+<ol>
+<li><p>两个LSR之间互相发送Hello消息。</p>
+<p>Hello消息中携带传输地址（即设备的IP地址），双方使用传输地址建立LDP会话。</p>
+</li>
+<li><p><strong>传输地址较大的一方作为主动方，发起建立TCP连接</strong>。</p>
+<p>如上图所示，LSR_1作为主动方发起建立TCP连接，LSR_2作为被动方等待对方发起连接。</p>
+</li>
+<li><p>TCP连接建立成功后，由主动方LSR_1发送初始化消息，协商建立LDP会话的相关参数。</p>
+<p>LDP会话的相关参数包括LDP协议版本、标签分发方式、Keepalive保持定时器的值、最大PDU长度和标签空间等。</p>
+</li>
+<li><p>被动方LSR_2收到初始化消息后，LSR_2接受相关参数，则发送初始化消息，同时发送Keepalive消息给主动方LSR_1。</p>
+<p>如果被动方LSR_2不能接受相关参数，则发送Notification消息终止LDP会话的建立。</p>
+<p>初始化消息中包括LDP协议版本、标签分发方式、Keepalive保持定时器的值、最大PDU长度和标签空间等。</p>
+</li>
+<li><p>主动方LSR_1收到初始化消息后，接受相关参数，则发送Keepalive消息给被动方LSR_2。</p>
+<p>如果主动方LSR_1不能接受相关参数，则发送Notification消息给被动方LSR_2终止LDP会话的建立。</p>
+</li>
+</ol>
+<p>当双方都收到对端的Keepalive消息后，LDP会话建立成功。</p>
+<h2 id="LDP-LSP的建立："><a href="#LDP-LSP的建立：" class="headerlink" title="LDP LSP的建立："></a>LDP LSP的建立：</h2><p>LDP通过发送标签请求和标签映射消息，在LDP对等体之间通告FEC和标签的绑定关系来建立LSP，而标签的发布和管理由标签发布方式、标签分配控制方式和标签保持方式来决定。</p>
+<h3 id="标签的发布和管理："><a href="#标签的发布和管理：" class="headerlink" title="标签的发布和管理："></a>标签的发布和管理：</h3><p><strong>标签发布方式（Label Advertisement Mode）</strong></p>
+<p>在MPLS体系中，由下游LSR决定将标签分配给特定FEC，再通知上游LSR，即标签由下游指定，标签的分配按从下游到上游的方向分发。</p>
+<p>标签发布方式有两种方式。具有标签分发邻接关系的上游LSR和下游LSR必须对使用的标签发布方式达成一致。</p>
+<p><img src="/2018/02/23/MPLS-LDP基础/标签发布方式.png" alt="标签发布方式"></p>
+<p><center>图：标签发布方式<center></center></center></p>
+<table>
+<thead>
+<tr>
+<th>标签发布方式</th>
+<th>含义</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>下游自主方式DU（Downstream Unsolicited）</td>
+<td>对于一个特定的FEC，LSR无需从上游获得标签请求消息即进行标签分配与分发。</td>
+<td>如上图所示，对于目的地址为192.168.1.1/32的FEC，下游（Egress）通过标签映射消息主动向上游（Transit）通告自己的主机路由192.168.1.1/32的标签。</td>
+</tr>
+<tr>
+<td>下游按需方式DoD（Downstream on Demand）</td>
+<td>对于一个特定的FEC，LSR获得标签请求消息之后才进行标签分配与分发。</td>
+<td>如上图所示，对于目的地址为192.168.1.1/32的FEC，上游（Ingress）向下游发送标签请求消息，下游（Egress）收到标签请求消息后，才会向上游发送标签映射消息。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>标签分配控制方式（Label Distribution Control Mode）</strong></p>
+<p>标签分配控制方式是指在LSP的建立过程中，LSR分配标签时采用的处理方式。</p>
+<ul>
+<li>独立标签分配控制方式（Independent）：本地LSR可以自主地分配一个标签绑定到某个FEC，并通告给上游LSR，而无需等待下游的标签。 </li>
+<li>有序标签分配控制方式（Ordered）：对于LSR上某个FEC的标签映射，只有当该LSR已经具有此FEC下一跳的标签映射消息、或者该LSR就是此FEC的出节点时，该LSR才可以向上游发送此FEC的标签映射。</li>
+</ul>
+<p><strong>标签分配控制方式和标签发布方式的组合：</strong></p>
+<table>
+<thead>
+<tr>
+<th>标签分配控制方式</th>
+<th>下游自主方式DU（Downstream Unsolicited）</th>
+<th>下游按需方式DoD（Downstream on Demand）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>独立标签分配控制方式（Independent）</strong></td>
+<td>DU ＋ Independent：LSR（Transit）无需等待下游（Egress）的标签，就会直接向上游（Ingress）分发标签。</td>
+<td>DoD ＋ Independent：发送标签请求的LSR（Ingress）的直连下游（Transit）会直接回应标签，而不必等待来自最终下游（Egress）的标签。</td>
+</tr>
+<tr>
+<td><strong>有序标签分配控制方式（Ordered）</strong></td>
+<td>DU ＋ Ordered：LSR（Transit）只有收到下游（Egress）的标签映射消息，才会向上游（Ingress）分发标签。</td>
+<td>DoD ＋ Ordered：发送标签请求的LSR（Ingress）的直连下游（Transit）只有收到最终下游（Egress）的标签映射消息，才会向上游（Ingress）分发标签。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>标签保持方式（Label Retention Mode）</strong></p>
+<p>标签保持方式是指LSR对收到的、但目前暂时不需要的标签映射的处理方式。</p>
+<p>LSR收到的标签映射可能来自下一跳，也可能来自非下一跳。</p>
+<p>标签保持方式：</p>
+<ol>
+<li><p>自由标签保持方式（Liberal）</p>
+<p>对于从邻居LSR收到的标签映射，无论邻居LSR是不是自己的下一跳都保留。</p>
+</li>
+<li><p>保守标签保持方式（Conservative）</p>
+<p>对于从邻居LSR收到的标签映射，只有当邻居LSR是自己的下一跳时才保留。</p>
+</li>
+</ol>
+<p><strong>目前设备支持如下组合方式：</strong></p>
+<ul>
+<li>下游自主方式（DU）＋ 有序标签分配控制方式（Ordered）＋ 自由标签保持方式（Liberal），该方式为缺省方式。</li>
+<li>下游按需方式（DoD）＋ 有序标签分配控制方式（Ordered）＋ 保守标签保持方式（Conservative）。</li>
+<li>下游自主方式（DU）＋ 独立标签分配控制方式（Independent）＋ 自由标签保持方式（Liberal）。</li>
+<li>下游按需方式（DoD）＋ 独立标签分配控制方式（Independent）＋ 保守标签保持方式（Conservative）。</li>
+</ul>
+<h3 id="LDP-LSP的建立过程："><a href="#LDP-LSP的建立过程：" class="headerlink" title="LDP LSP的建立过程："></a>LDP LSP的建立过程：</h3><p>LSP的建立过程实际就是将FEC和标签进行绑定，并将这种绑定通告LSP上相邻LSR的过程。如下图所示，下面结合下游自主标签发布方式和有序标签控制方式来说明其主要步骤。</p>
+<p><img src="/2018/02/23/MPLS-LDP基础/LSP的建立过程.png" alt="LSP的建立过程"></p>
+<p><center>图：LDP LSP的建立过程<center></center></center></p>
+<ol>
+<li>缺省情况下，网络的路由改变时，如果有一个边缘节点（Egress）发现自己的路由表中出现了新的主机路由，并且这一路由不属于任何现有的FEC，则该边缘节点需要为这一路由建立一个新的FEC。</li>
+<li>如果MPLS网络的Egress有可供分配的标签，则为FEC分配标签，并主动向上游发出标签映射消息，标签映射消息中包含分配的标签和绑定的FEC等信息。</li>
+<li>Transit收到标签映射消息后，判断标签映射的发送者（Egress）是否为该FEC的下一跳。若是，则在其标签转发表中增加相应的条目，然后主动向上游LSR发送对于指定FEC的标签映射消息。</li>
+<li>Ingress收到标签映射消息后，判断标签映射的发送者（Transit）是否为该FEC的下一跳。若是，则在标签转发表中增加相应的条目。这时，就完成了LSP的建立，接下来就可以对该FEC对应的数据报文进行标签转发。</li>
+</ol>
+<p>上面介绍的是普通LDP LSP的建立，还有一种代理Egress LSP。代理Egress（Proxy Egress）是能够针对非本地路由触发建立LSP的Egress节点，当路由器使能倒数第二跳弹出时，倒数第二跳节点实际上就是一种特殊的代理Egress。一般情况下，代理Egress由配置产生。代理Egress可以应用于网络中有不支持MPLS特性的路由器场景，也可用于解决BGP路由负载分担问题。</p>
+<h2 id="LDP的安全机制："><a href="#LDP的安全机制：" class="headerlink" title="LDP的安全机制："></a>LDP的安全机制：</h2><p>为了提高LDP报文的安全性，MPLS提供了三种保护机制：LDP MD5认证、LDP Keychain认证和LDP GTSM。</p>
+<p>LDP Keychain认证是比LDP MD5认证更安全的加密认证，对于同一邻居，只能选择其中一个加密认证；而LDP GTSM用来防止设备受到非法LDP报文的攻击，其可以与前面两个配合使用。</p>
+<h3 id="LDP-MD5认证："><a href="#LDP-MD5认证：" class="headerlink" title="LDP MD5认证："></a>LDP MD5认证：</h3><p>MD5（Message-Digest Algorithm 5）是RFC1321定义的国际标准摘要密码算法。MD5的典型应用是针对一段信息计算出对应的信息摘要，从而防止信息被篡改。MD5信息摘要是通过不可逆的字符串变换算法产生的，结果唯一。因此，不管信息内容在传输过程中发生任何形式的改变，只要重新计算就会产生不同的信息摘要，接收端就可以由此判定收到的是一个不正确的报文。</p>
+<p>LDP MD5应用其对同一信息段产生唯一摘要信息的特点来实现LDP报文防篡改校验，比一般意义上TCP校验和更为严格。其实现过程如下：</p>
+<ol>
+<li>LDP会话消息在经TCP发出前，会在TCP头后面填充一个唯一的信息摘要再发出。而这个信息摘要就是把TCP头、LDP会话消息以及用户设置的密码一起作为原始信息，通过MD5算法计算出的。</li>
+<li>当接收端收到这个TCP报文时，首先会取得报文的TCP头、信息摘要、LDP会话消息，并结合TCP头、LDP会话消息以及本地保存的密码，利用MD5计算出信息摘要，然后与报文携带的信息摘要进行比较，从而检验报文是否被篡改过。</li>
+</ol>
+<h3 id="LDP-Keychain认证："><a href="#LDP-Keychain认证：" class="headerlink" title="LDP Keychain认证："></a>LDP Keychain认证：</h3><p>Keychain是一种增强型加密算法，类似于MD5，Keychain也是针对同一段信息计算出对应的信息摘要，实现LDP报文防篡改校验。</p>
+<p>Keychain允许用户定义一组密码，形成一个密码串，并且分别为每个密码指定加解密算法（包括MD5，SHA-1等）及密码使用的有效时间。在收发报文时，系统会按照用户的配置选出一个当前有效的密码，并按照与此密码相匹配的加密解密算法以及密码的有效时间，进行发送时加密和接收时解密报文。此外，系统可以依据密码使用的有效时间，自动完成有效密码的切换，避免了长时间不更改密码导致的密码易破解问题。</p>
+<p>Keychain的密码、所使用的加解密算法以及密码使用的有效时间可以单独配置，形成一个Keychain配置节点，每个Keychain配置节点至少需要配置一个密码，并指定加解密算法。</p>
+<h3 id="LDP-GTSM："><a href="#LDP-GTSM：" class="headerlink" title="LDP GTSM："></a>LDP GTSM：</h3><p>通用TTL安全保护机制GTSM（Generalized TTL Security Mechanism）是一种通过检查IP报文头中的TTL值是否在一个预先定义好的范围内来实现对IP业务进行保护的机制。使用GTSM的两个前提：</p>
+<ul>
+<li>设备之间正常报文的TTL值确定</li>
+<li>报文的TTL值很难被修改</li>
+</ul>
+<p>LDP GTSM是GTSM在LDP方面的具体应用。</p>
+<p>GTSM通过判定报文的TTL值，确定报文是否有效，从而保护设备免受攻击。LDP GTSM是对相邻或相近（基于只要跳数确定的原则）设备间的LDP消息报文应用此种机制。用户预先在各设备上设定好针对其他设备报文的有效范围，使能GTSM，这样当相应设备之间应用LDP时，如果LDP消息报文的TTL不符合之前设置的范围要求，设备就认为此报文为非法攻击报文予以丢弃，进而实现对上层协议的保护。</p>
+<h1 id="LDP扩展"><a href="#LDP扩展" class="headerlink" title="LDP扩展"></a>LDP扩展</h1><h2 id="LDP跨域扩展："><a href="#LDP跨域扩展：" class="headerlink" title="LDP跨域扩展："></a>LDP跨域扩展：</h2><p>LDP跨域扩展通过使能LDP按最长匹配原则查找路由，使LDP能够依据聚合后的路由建立起跨越多个IGP区域的LDP LSP。</p>
+<h3 id="产生原因："><a href="#产生原因：" class="headerlink" title="产生原因："></a>产生原因：</h3><p>当网络规模比较大时，通常需要部署多个IGP区域来达到灵活部署和快速收敛的目的。在这种情况下，IGP区域间进行路由通告时，为了避免路由数量多而引起的对资源的过多占用，区域边界路由器（ABR）需要将区域内路由聚合，再通告给相邻的IGP区域。然而，LDP在建立LSP的时候，会在路由表中查找与收到的标签映射消息中携带的FEC精确匹配的路由，对于聚合路由，LDP只能建立Liberal LSP，无法建立跨越IGP区域的LDP LSP。因此，引入LDP跨域扩展来解决这个问题。</p>
+<p><strong>注：已经被分配标签，但是没有建立成功的LSP叫做Liberal LSP。</strong></p>
+<h3 id="实现过程："><a href="#实现过程：" class="headerlink" title="实现过程："></a>实现过程：</h3><p>如下图所示,存在Area10和Area20两个IGP区域。在Area10区域边缘的LSR_2的路由表中，存在到LSR_3和LSR_4的两条主机路由，为了避免路由数量多而引起的对资源的过多占用，在LSR_2上通过ISIS路由协议将这两条路由聚合为1.3.0.0/24发送到Area20区域。</p>
+<p><img src="/2018/02/23/MPLS-LDP基础/LDP跨域.png" alt="LDP跨域"></p>
+<p><center>图：LDP跨域扩展组网拓扑<center></center></center></p>
+<p>LDP在建立LSP的时候，会在路由表中查找与收到的标签映射消息中携带的FEC精确匹配的路由，对于上图中的情况，LSR_1的路由表中只有这条聚合后的路由，而没有32位的主机路由。</p>
+<p>对于聚合路由，LDP只能建立Liberal LSP，无法建立跨越IGP区域的LDP LSP，以至于无法提供必要的骨干网隧道。</p>
+<p>因此，在LSR_1上需要按照最长匹配方式查找路由建立LSP。在LSR_1的路由表中，已经存在聚合路由1.3.0.0/24。当LSR_1收到Area10区域的标签映射消息时（例如携带的FEC为1.3.0.1/32），按照最长匹配的查找方式，LSR_1能够找到聚合路由1.3.0.0/24的信息，把该路由的出接口和下一跳作为到FEC 1.3.0.1/32的出接口和下一跳。这样，LDP就可以建立跨越IGP区域的LDP  LSP。</p>
+<h1 id="LDP学习笔记"><a href="#LDP学习笔记" class="headerlink" title="LDP学习笔记"></a>LDP学习笔记</h1><p>LDP是用来在LSR之间建立LDP Session并交换Label/FEC映射信息的协议。</p>
+<p>LDP用UDP（协议ID=17）发现邻居，用TCP（协议ID=6）建立邻接（LDP协议的目的端口号：646）</p>
+<p>LDP协议将hello报文发往224.0.0.2（所有开启组播功能的路由器）的组播组，用于发现直连链路上的LDP邻居。</p>
+<p>LDP的hello报文发送间隔是5s，hold time是3倍的hello时间15s。</p>
+<p>LDP的keepalive报文的发送间隔是15s，old timer是3倍的keepalive时间45s。</p>
+<p>##LDP的环路检测机制：</p>
+<p>LDP路由向量法和最大跳数法分别通过两类TLV实现：Path Vector TLV和Hop Count TLV。如果配置使用者两类方法检测环路，那么在标签请求消息（Label Requset Message）和标签映射消息（Label Mapping MEssage）中都会携带者两种TLv。</p>
+<p>距离向量法：每个LSR在发送标签请求消息（标签映射消息）中，包含一个Path Vector TLV，并且入口（出口）LSR产生的路由长度值为1，并且把自己的LSR ID加入到TLV的列表中，标签请求消息（标签映射消息）每经过一跳长度值加1，接收端LSR如果收到标签请求消息（标签映射消息），发现长度值达到预先设定的最大值或者发现LSR ID列表中有自己的LSR ID，认为发生环路，发出通告消息，拒绝LSP的建立。</p>
+<h2 id="LDP可以为以下协议分配标签："><a href="#LDP可以为以下协议分配标签：" class="headerlink" title="LDP可以为以下协议分配标签："></a>LDP可以为以下协议分配标签：</h2><ul>
+<li>LDP：可以为直连、静态和IGP路由分配标签。</li>
+<li>RSVR-TE：为TE预留资源和分配标签。</li>
+<li>MPBGP：可以为私网路由分配标签。</li>
+<li>BGP：可以为BGP路由分配标签。</li>
+</ul>
+<h2 id="FEC简介："><a href="#FEC简介：" class="headerlink" title="FEC简介："></a>FEC简介：</h2><p>转发等价类FEC（Forwarding Equivalence Class）是一组具有某些共性的数据流的集合。这些数据流在转发过程中被LSR以相同的方式出。</p>
+<p>FEC可以根据地质、业务类型、QoS等要素进行划分。例如，在传统的采用最常匹配算法的IP转发中，到同一条路由的所有报文就是一个转发等价类。</p>
+<p>Cisco定义：</p>
+<ul>
+<li>LFIB：标签转发表。</li>
+<li>LIB：标签信息数据库。</li>
+<li>FIB：转发信息数据库。</li>
+</ul>
+<p>华为定义：</p>
+<ul>
+<li>FTN（FEC to NHLFE）：FIB。</li>
+<li>NHLFE（Next hop lable forward entry）</li>
+<li>ILM（Incoming lable map）：LFIB+LIB。</li>
+</ul>
+<h1 id="LDP配置命令"><a href="#LDP配置命令" class="headerlink" title="LDP配置命令"></a>LDP配置命令</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">fec-<span class="built_in">list</span></span><br><span class="line"><span class="comment">//来创建动态BFD检测LDP LSP的FEC列表。</span></span><br><span class="line">fec-node</span><br><span class="line"><span class="comment">//增加BFD会话的FEC节点。</span></span><br><span class="line">gtsm peer valid-ttl-hops</span><br><span class="line"><span class="comment">//在指定的LDP对等体上配置GTSM功能。</span></span><br><span class="line">label advertise &#123; <span class="keyword">explicit</span>-null | implicit-null | non-null &#125;</span><br><span class="line"><span class="comment">//配置出节点向倒数第二跳分配的标签。</span></span><br><span class="line"><span class="comment">//explicit-null:不支持PHP特性，出节点向倒数第二跳分配显式空标签。显式空标签的值为0。</span></span><br><span class="line"><span class="comment">//implicit-null:支持PHP特性，出节点向倒数第二跳分配隐式空标签。隐式空标签的值为3。</span></span><br><span class="line"><span class="comment">//non-null:不支持PHP特性，出节点向倒数第二跳正常分配标签。分配的标签值不小于16。</span></span><br><span class="line">label distribution control-mode &#123; independent | ordered &#125;</span><br><span class="line"><span class="comment">//配置LDP标签分配控制方式。</span></span><br><span class="line"><span class="comment">//缺省情况下，LDP标签分配控制方式为有序标签分配控制（Ordered）。</span></span><br><span class="line">label-withdraw-delay</span><br><span class="line"><span class="comment">//使能Label Withdraw消息延迟发送功能。</span></span><br><span class="line"><span class="comment">//执行此命令后,Label Withdraw消息延迟发送的时间默认为5秒，</span></span><br><span class="line">label-withdraw-delay timer <span class="number">5</span></span><br><span class="line"><span class="comment">//设置Label Withdraw消息延迟发送的时间。</span></span><br><span class="line">ldp-sync enable</span><br><span class="line"><span class="comment">//使能IS-IS进程下所有接口的LDP和IS-IS联动功能。</span></span><br><span class="line">longest-match</span><br><span class="line"><span class="comment">//配置LDP跨域扩展功能，使能LDP按照最长匹配方式查找路由建立LSP。</span></span><br><span class="line"><span class="comment">//缺省情况下，LDP按照精确匹配方式查找路由建立LSP。</span></span><br><span class="line">lsp-trigger bgp-label-route</span><br><span class="line"><span class="comment">//配置LDP为带标签的公网BGP路由分标签的能力。</span></span><br><span class="line">lsp-trigger</span><br><span class="line"><span class="comment">//设置触发建立LSP的策略。</span></span><br><span class="line">lsr-id</span><br><span class="line"><span class="comment">//配置LDP实例的LSR ID。</span></span><br><span class="line">md5-password</span><br><span class="line"><span class="comment">//配置在建立LDP会话时，TCP连接所使用的密码。</span></span><br><span class="line">md5-password all</span><br><span class="line"><span class="comment">//对所有对等体批量配置LDP MD5认证。</span></span><br><span class="line">mpls</span><br><span class="line"><span class="comment">//使能本节点的全局MPLS能力</span></span><br><span class="line">mpls bfd enable</span><br><span class="line"><span class="comment">//在LDP LSP的源端设备上使能动态创建BFD会话的功能。</span></span><br><span class="line">mpls bfd</span><br><span class="line"><span class="comment">//设置BFD会话的相关参数</span></span><br><span class="line">mpls ldp advertisement &#123; dod | du &#125;</span><br><span class="line"><span class="comment">//配置标签发布模式。</span></span><br><span class="line"><span class="comment">//缺省情况下，标签发布模式为下游自主标签分发（Downstream Unsolicited）。</span></span><br><span class="line">mpls ldp</span><br><span class="line"><span class="comment">//来使能本节点的LDP能力</span></span><br><span class="line">mpls ldp remote-peer</span><br><span class="line"><span class="comment">//创建远端对等体并进入远端对等体视图。</span></span><br><span class="line">mpls ldp timer hello-hold <span class="number">45</span></span><br><span class="line"><span class="comment">//设置Hello保持定时器的值。</span></span><br><span class="line">mpls ldp timer hello-send <span class="number">15</span></span><br><span class="line"><span class="comment">//配置Hello发送定时器的值。</span></span><br><span class="line">mpls ldp timer igp-sync-delay <span class="number">10</span></span><br><span class="line"><span class="comment">//配置LDP会话建立后等待LSP建立的时间间隔。</span></span><br><span class="line">mpls ldp timer keepalive-hold <span class="number">45</span></span><br><span class="line"><span class="comment">//配置Keepalive保持定时器的值。</span></span><br><span class="line">mpls ldp timer keepalive-send <span class="number">15</span></span><br><span class="line"><span class="comment">//配置Keepalive发送定时器的值。</span></span><br><span class="line">mpls ldp transport-address</span><br><span class="line"><span class="comment">//配置LDP传输地址。</span></span><br><span class="line">mpls-passive</span><br><span class="line"><span class="comment">//在LSP的目的端设备上使能被动动态创建BFD会话功能。</span></span><br><span class="line">remote-ip</span><br><span class="line"><span class="comment">//配置LDP远端对等体的IP地址。</span></span><br><span class="line">remote-ip <span class="keyword">auto</span>-dod-request</span><br><span class="line"><span class="comment">//配置在采用DoD的标签发布方式下，自动向下游指定的远端对等体请求标签映射消息。</span></span><br><span class="line">remote-peer pwe3</span><br><span class="line"><span class="comment">//配置禁止向所有远端邻居分发公网标签。</span></span><br><span class="line">route recursive-lookup tunnel</span><br><span class="line"><span class="comment">//使能迭代隧道功能。</span></span><br><span class="line"><span class="keyword">static</span>-lsp egress</span><br><span class="line"><span class="comment">//在出口节点配置静态LSP。</span></span><br><span class="line"><span class="keyword">static</span>-lsp ingress</span><br><span class="line"><span class="comment">//为入口节点配置静态LSP。</span></span><br><span class="line"><span class="keyword">static</span>-lsp transit</span><br><span class="line"><span class="comment">//为中间转发节点配置静态LSP。</span></span><br><span class="line">ttl expiration pop</span><br><span class="line"><span class="comment">//配置MPLS TTL超时后ICMP响应报文沿本地IP路由转发。</span></span><br><span class="line">undo ttl expireation pop</span><br><span class="line"><span class="comment">//ICMP超时应答报文会沿着LSP继续往下传，由边界设备回送给发送源</span></span><br><span class="line">ttl propagate</span><br><span class="line"><span class="comment">//配置MPLS报文中TTL传播模式为uniform。</span></span><br><span class="line"><span class="comment">//缺省情况下，ttl propagate命令使能，MPLS报文中TTL传播模式是uniform。 </span></span><br><span class="line">ttl propagate <span class="keyword">public</span></span><br><span class="line"><span class="comment">//使能MPLS公网报文的IP TTL复制功能。</span></span><br><span class="line"><span class="comment">//缺省情况下，对公网报文使能TTL复制功能。</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/02/23/MPLS-LDP基础/" title="MPLS LDP基础">https://cshihong.github.io/2018/02/23/MPLS-LDP基础/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/MPLS-VPN/" rel="tag"># MPLS VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/22/MPLS基础/" rel="next" title="MPLS基础">
+                <i class="fa fa-chevron-left"></i> MPLS基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/03/MPLS-VPN/" rel="prev" title="MPLS VPN">
+                MPLS VPN <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MPLS-LDP简介"><span class="nav-number">1.</span> <span class="nav-text">MPLS LDP简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目的："><span class="nav-number">1.1.</span> <span class="nav-text">目的：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP基本概念："><span class="nav-number">1.2.</span> <span class="nav-text">LDP基本概念：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LDP工作机制"><span class="nav-number">2.</span> <span class="nav-text">LDP工作机制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP消息类型："><span class="nav-number">2.1.</span> <span class="nav-text">LDP消息类型：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP消息作用："><span class="nav-number">2.2.</span> <span class="nav-text">LDP消息作用：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：LDP消息作用"><span class="nav-number">2.3.</span> <span class="nav-text">图：LDP消息作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Label-mapping消息报文"><span class="nav-number">2.4.</span> <span class="nav-text">图：Label mapping消息报文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LDP报文消息抓包示例"><span class="nav-number">2.4.1.</span> <span class="nav-text">LDP报文消息抓包示例:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：LDP的hello报文抓包示例"><span class="nav-number">2.5.</span> <span class="nav-text">图：LDP的hello报文抓包示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：LDP的init报文抓包示例"><span class="nav-number">2.6.</span> <span class="nav-text">图：LDP的init报文抓包示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：KeepAlive消息和Address消息抓包示例"><span class="nav-number">2.7.</span> <span class="nav-text">图：KeepAlive消息和Address消息抓包示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP工作过程："><span class="nav-number">2.8.</span> <span class="nav-text">LDP工作过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP会话的建立："><span class="nav-number">2.9.</span> <span class="nav-text">LDP会话的建立：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LDP发现机制："><span class="nav-number">2.9.1.</span> <span class="nav-text">LDP发现机制：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDP会话的建立过程："><span class="nav-number">2.9.2.</span> <span class="nav-text">LDP会话的建立过程：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP-LSP的建立："><span class="nav-number">2.10.</span> <span class="nav-text">LDP LSP的建立：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#标签的发布和管理："><span class="nav-number">2.10.1.</span> <span class="nav-text">标签的发布和管理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDP-LSP的建立过程："><span class="nav-number">2.10.2.</span> <span class="nav-text">LDP LSP的建立过程：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP的安全机制："><span class="nav-number">2.11.</span> <span class="nav-text">LDP的安全机制：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LDP-MD5认证："><span class="nav-number">2.11.1.</span> <span class="nav-text">LDP MD5认证：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDP-Keychain认证："><span class="nav-number">2.11.2.</span> <span class="nav-text">LDP Keychain认证：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LDP-GTSM："><span class="nav-number">2.11.3.</span> <span class="nav-text">LDP GTSM：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LDP扩展"><span class="nav-number">3.</span> <span class="nav-text">LDP扩展</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP跨域扩展："><span class="nav-number">3.1.</span> <span class="nav-text">LDP跨域扩展：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#产生原因："><span class="nav-number">3.1.1.</span> <span class="nav-text">产生原因：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现过程："><span class="nav-number">3.1.2.</span> <span class="nav-text">实现过程：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LDP学习笔记"><span class="nav-number">4.</span> <span class="nav-text">LDP学习笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#LDP可以为以下协议分配标签："><span class="nav-number">4.1.</span> <span class="nav-text">LDP可以为以下协议分配标签：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FEC简介："><span class="nav-number">4.2.</span> <span class="nav-text">FEC简介：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LDP配置命令"><span class="nav-number">5.</span> <span class="nav-text">LDP配置命令</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/02/23/MPLS-LDP基础/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

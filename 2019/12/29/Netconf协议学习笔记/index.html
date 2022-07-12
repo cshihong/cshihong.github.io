@@ -1,0 +1,2314 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Netconf简介 网络配置协议NETCONF（Network Configuration Protocol）提供一套管理网络设备的机制，用户可以使用这套机制增加、修改、删除网络设备的配置，获取网络设备的配置和状态信息。通过NETCONF协议，网络设备可以提供规范的应用程序编程接口API（Application Programming Interface），应用程序可以直接使用这些API，向网络设">
+<meta name="keywords" content="网络自动化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Netconf协议学习笔记">
+<meta property="og:url" content="https://cshihong.github.io/2019/12/29/Netconf协议学习笔记/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="Netconf简介 网络配置协议NETCONF（Network Configuration Protocol）提供一套管理网络设备的机制，用户可以使用这套机制增加、修改、删除网络设备的配置，获取网络设备的配置和状态信息。通过NETCONF协议，网络设备可以提供规范的应用程序编程接口API（Application Programming Interface），应用程序可以直接使用这些API，向网络设">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/12/29/Netconf协议学习笔记/协议分层.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/12/29/Netconf协议学习笔记/netconf报文.png">
+<meta property="og:updated_time" content="2019-12-29T10:07:36.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Netconf协议学习笔记">
+<meta name="twitter:description" content="Netconf简介 网络配置协议NETCONF（Network Configuration Protocol）提供一套管理网络设备的机制，用户可以使用这套机制增加、修改、删除网络设备的配置，获取网络设备的配置和状态信息。通过NETCONF协议，网络设备可以提供规范的应用程序编程接口API（Application Programming Interface），应用程序可以直接使用这些API，向网络设">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/12/29/Netconf协议学习笔记/协议分层.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/12/29/Netconf协议学习笔记/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Netconf协议学习笔记 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/12/29/Netconf协议学习笔记/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Netconf协议学习笔记
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-12-29 15:28:09 / 修改时间：18:07:36" itemprop="dateCreated datePublished" datetime="2019-12-29T15:28:09+08:00">2019-12-29</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络自动化/" itemprop="url" rel="index"><span itemprop="name">网络自动化</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 7,118</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 28</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Netconf简介"><a href="#Netconf简介" class="headerlink" title="Netconf简介"></a>Netconf简介</h1><p> 网络配置协议NETCONF（Network Configuration Protocol）提供一套管理网络设备的机制，用户可以使用这套机制增加、修改、删除网络设备的配置，获取网络设备的配置和状态信息。通过NETCONF协议，网络设备可以提供规范的应用程序编程接口API（Application Programming Interface），应用程序可以直接使用这些API，向网络设备发送和获取配置。 </p>
+<h2 id="Netconf协议："><a href="#Netconf协议：" class="headerlink" title="Netconf协议："></a>Netconf协议：</h2><p>NETCONF（Network Configuration Protocol）是基于可扩展标记语言XML（Extensible Markup Language）的网络配置和管理协议，使用简单的基于RPC（Remote Procedure Call）机制实现客户端和服务器之间通信。客户端可以是脚本或者网管上运行的一个应用程序。服务器是一个典型的网络设备。</p>
+<p>NETCONF提供了一种通过运行网络管理软件的中心计算机（即网络管理工作站）来远程管理和监控设备的方法。其优点如下：</p>
+<ul>
+<li>NETCONF协议以XML格式定义消息，运用RPC机制修改配置信息，这样既能方便管理配置信息，又能满足来自不同制造商设备之间的互操作性。</li>
+<li>可减少由于人工配置错误引起的网络故障。</li>
+<li>可提高使用配置工具升级系统软件的效率。</li>
+<li>扩展性好，不同制造商设备可以定义自己的协议操作，以实现独特的管理功能。</li>
+<li>NETCONF提供了认证、鉴权等安全机制，保证了消息传递的安全。</li>
+</ul>
+<h2 id="Netconf与SNMP比较："><a href="#Netconf与SNMP比较：" class="headerlink" title="Netconf与SNMP比较："></a>Netconf与SNMP比较：</h2><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>SNMP</th>
+<th>NETCONF</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>配置管理</td>
+<td>SNMP在进行设备数据操作时，如果多个用户对同一个配置量进行操作，协议没有提供保护锁定机制。</td>
+<td>NETCONF提供保护锁定机制，防止多用户操作产生冲突。</td>
+</tr>
+<tr>
+<td>查询</td>
+<td>SNMP能够对某个表的一条或多条记录进行操作，查询中需要多次交互才能够完成。</td>
+<td>NETCONF针对整个系统的配置数据可直接进行操作，且定义了过滤功能。</td>
+</tr>
+<tr>
+<td>扩展性</td>
+<td>扩展性差。</td>
+<td>扩展性好：协议模型采取分层定义，各层之间相互独立，当对协议中的某一层进行扩展时，能够最大限度不影响到其上层协议。协议采用了XML编码，使得协议在管理能力上和系统兼容性方面也具有一定的可扩展性。</td>
+</tr>
+<tr>
+<td>安全性</td>
+<td>以目前最新的SNMPv3为例，SNMPv3在安全上存在的主要问题是，SNMPv3全部自己定义，未有扩展的余地。</td>
+<td>NETCONF利用现有的安全协议提供安全保证，并不与具体的安全协议绑定。在使用中，NETCONF要比SNMP更灵活。<strong>说明：</strong>NETCONF传输层首选推荐SSH协议，XML信息通过SSH协议承载。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Netconf协议框架；"><a href="#Netconf协议框架；" class="headerlink" title="Netconf协议框架；"></a>Netconf协议框架；</h2><p>NETCONF协议采用了分层结构。每层分别对协议的某一方面进行包装，并向上层提供相关服务。分层结构使每层只关注协议的一个方面，实现起来更简单，同时使各层之间的依赖、内部实现的变更对其他层的影响降到最低。</p>
+<p>NETCONF协议在概念上可以划分为4层：</p>
+<ul>
+<li>安全传输（Secure Transport）层为客户端和服务器之间交互提供通讯路径。</li>
+<li>消息（Messages）（RPC） （Remote Procedure Call，远程调用） 层提供一种简单的不依赖传输协议层的，生成RPC请求和回应消息框架的机制。Client把RPC请求内容封装在一个<rpc>元素内，发送给Server；Server把请求处理结果封装在一个<rpc-reply>元素内，回应给Client。</rpc-reply></rpc></li>
+<li>操作（Operations）层定义一组基本的操作，作为RPC的调用方法，可以使用XML编码的参数调用这些方法。</li>
+<li>内容（Content）层由管理对象的数据模型定义，数据模型定义依赖NETCONF的实现情况。</li>
+</ul>
+<p><img src="/2019/12/29/Netconf协议学习笔记/协议分层.png" alt="协议分层"></p>
+<p><strong>Netconf报文结构：</strong></p>
+<p><img src="/2019/12/29/Netconf协议学习笔记/netconf报文.png" alt="netconf报文"></p>
+<h2 id="Netconf基本网络结构："><a href="#Netconf基本网络结构：" class="headerlink" title="Netconf基本网络结构："></a>Netconf基本网络结构：</h2><p>NETCONF基本网络架构的主要元素：</p>
+<ul>
+<li><p>客户端（Client）。主要作用如下：</p>
+<ul>
+<li>利用NETCONF协议对网络设备进行系统管理。</li>
+<li>向NETCONF Server发送<rpc>请求，查询或修改一个或多个具体的参数值。</rpc></li>
+<li>接收NETCONF Server主动发送的告警和事件，以获知被管理设备的当前状态。</li>
+</ul>
+</li>
+<li><p>服务器（Server）。主要用于维护被管理设备的信息数据并响应客户端的请求。</p>
+<ul>
+<li>服务器收到客户端的请求后会进行数据解析，然后给客户端返回响应。</li>
+<li>当设备发生故障或其他事件时，服务器利用Notification机制主动将设备的告警和事件通知给客户端，向客户端报告设备的当前状态变化。</li>
+</ul>
+</li>
+<li><p>配置数据集（Datastores）</p>
+<p>NETCONF定义了一个或多个配置数据集的存在，并允许对它们进行配置操作。配置数据集被定义为使设备从其初始默认状态进入期望的操作状态所需的完整配置数据集合。</p>
+<p>运行的配置数据集保存网络设备上当前处于活动状态的完整配置。 在设备上只存在一个此类型的配置数据集，并且始终存在。NETCONF协议使用<running>引用此数据库。</running></p>
+<p>基本模型中只存在<running>配置数据集。 其他配置数据集可以由能力集定义，且只在宣称支持该能力集的设备上可用。例如：</running></p>
+<ul>
+<li><candidate>备用配置数据集。存放设备将要提交到<running>的各项配置数据的集合。管理员可以在<candidate>上进行操作，对<candidate>的任何改变不会直接影响网络设备。可以通过<commit>指令将备用配置数据提交为设备运行数据。<strong>华为设备支持的备用配置数据集在不同会话间独立，不存在会话间配置数据共享，所以配置备用配置数据集时，不需要额外的加锁操作</strong>。</commit></candidate></candidate></running></candidate></li>
+<li><startup>启动配置数据集。存放设备启动时所加载的配置数据，相当于已保存的配置文件</startup></li>
+</ul>
+<p>NETCONF会话是Client与Server之间的逻辑连接，网络设备必须至少支持一个NETCONF会话。Client从运行的Server上获取的信息包括配置数据和状态数据。 </p>
+</li>
+<li><p>Client从运行的Server上获取的信息包括配置数据和状态数据。</p>
+</li>
+<li>Client可以修改配置数据，并通过操作配置数据，使Server的状态迁移到用户期望的状态。</li>
+<li>Client不能修改状态数据，状态数据主要是Server的运行状态和统计的相关信息。</li>
+</ul>
+<h3 id="Netconf建模语言："><a href="#Netconf建模语言：" class="headerlink" title="Netconf建模语言："></a>Netconf建模语言：</h3><ul>
+<li><p>Schema：</p>
+<p>Schema是为了描述XML文档而定义的一套规则。Schema文件中定义了设备所有管理对象，以及管理对象的层次关系、读写属性和约束条件。</p>
+<p>设备通过Schema文件向网管提供配置和管理设备的接口。Schema文件类似于SNMP的MIB文件。</p>
+</li>
+<li><p>YANG：</p>
+<p>YANG是专门为NETCONF协议设计的数据建模语言，用来为NETCONF协议设计可操作的配置数据、状态数据模型、远程调用（RPCs）模型和通知机制等。</p>
+<p>YANG数据模型定位为一个面向机器的模型接口，明确定义数据结构及其约束，可以更灵活、更完整的进行数据描述。</p>
+</li>
+</ul>
+<h3 id="相关概念："><a href="#相关概念：" class="headerlink" title="相关概念："></a>相关概念：</h3><p>NETCONF Client和Server之间使用RPC机制进行通信。Client必须和Server成功建立一个安全的、面向连接的会话才能进行通信。Client向Server发送一个RPC请求，Server处理完用户请求后，给Client发送一个回应消息。Client的RPC请求和Server的回应消息全部使用XML编码。</p>
+<p>NETCONF协议提供了定义capabilities语法语意规范，协议允许Client与Server交互各自支持的capabilities，Client只能发送Server支持的capabilities范围内的操作请求。</p>
+<h4 id="XML编码："><a href="#XML编码：" class="headerlink" title="XML编码："></a>XML编码：</h4><p>XML作为NETCONF协议的编码格式，用文本文件表示复杂的层次化数据，即支持使用传统的文本编译工具，也支持使用XML专用的编辑工具读取、保存和操作配置数据。</p>
+<p>基于XML网络管理的主要思想是利用XML的强大数据表示能力，使用XML描述被管理数据和管理操作，使管理信息成为计算机可以理解的数据库，提高计算机对网络管理数据的处理能力，从而提高网络管理能力。</p>
+<p><strong>总而言之，基于XML的网络管理的主要优点：</strong></p>
+<ul>
+<li><strong>具有强大的数据表示能力。</strong></li>
+<li><strong>方便高效安全的进行大量数据传输。</strong></li>
+<li><strong>很好的适应网络配置管理的需求。</strong></li>
+</ul>
+<p>XML编码格式文件头为&lt;?xml version=”1.0” encoding=”UTF-8”?&gt;，其中：</p>
+<ul>
+<li>&lt;?：表示一条指令的开始。</li>
+<li>xml：表示此文件是XML文件。</li>
+<li>version：NETCONF协议版本号。”1.0”表示使用XML1.0标准版本。</li>
+<li>encoding：字符集编码格式，当前仅支持UTF-8编码。</li>
+<li>?&gt;：表示一条指令的结束。</li>
+</ul>
+<h4 id="RPC模式："><a href="#RPC模式：" class="headerlink" title="RPC模式："></a>RPC模式：</h4><p>NETCONF协议使用RPC通信模式，采用XML编码的<rpc>和<rpc-reply>元素提供独立于传输层协议的请求和回应消息框架。一些基本的RPC元素如表所示。</rpc-reply></rpc></p>
+<table>
+<thead>
+<tr>
+<th>元素</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><rpc></rpc></td>
+<td><rpc>元素用来封装Client发送给NETCONF Server端的请求。</rpc></td>
+</tr>
+<tr>
+<td><rpc-reply></rpc-reply></td>
+<td><rpc-reply>元素用来封装<rpc>请求的应答消息，NETCONF Server给每个<rpc>操作回应一个使用<rpc-reply>元素封装的应答消息。</rpc-reply></rpc></rpc></rpc-reply></td>
+</tr>
+<tr>
+<td><rpc-error></rpc-error></td>
+<td>在处理<rpc>请求过程中，如果发生任何错误，则在<rpc-reply>元素内只封装<rpc-error>元素返回给Client。</rpc-error></rpc-reply></rpc></td>
+</tr>
+<tr>
+<td><ok></ok></td>
+<td>在处理<rpc>请求过程中，如果没有发生任何错误，则在<rpc-reply>元素内封装一个<ok>元素返回给Client。</ok></rpc-reply></rpc></td>
+</tr>
+</tbody>
+</table>
+<h4 id="能力集（Capabliity）："><a href="#能力集（Capabliity）：" class="headerlink" title="能力集（Capabliity）："></a>能力集（Capabliity）：</h4><p>NETCONF能力集是补充基本NETCONF规范的一组功能。 该能力由统一资源标识符（URI）标识。</p>
+<p>能力集扩展了设备的基本操作，描述了附加操作和操作中允许的内容。客户端可以发现服务器的功能，并使用由这些能力集定义的任何其他操作，参数和内容。</p>
+<p>能力集定义可以命名一个或多个依赖的能力集。 为了支持一种能力集，服务器必须支持它所依赖的任何能力集。</p>
+<h2 id="Netconf鉴权机制："><a href="#Netconf鉴权机制：" class="headerlink" title="Netconf鉴权机制："></a>Netconf鉴权机制：</h2><p>NETCONF鉴权机制用于管理特定用户执行NETCONF操作和访问NETCONF资源权限。</p>
+<p>NETCONF鉴权支持的内容如下：</p>
+<ul>
+<li><p>协议操作（Protocol Operation）鉴权：允许使用指定的NETCONF协议操作。</p>
+<p>例如：<edit-config>、<get-config>、<get>、<commit>等操作。</commit></get></get-config></edit-config></p>
+</li>
+<li><p>模块（Module）鉴权：允许访问指定的特性模块。</p>
+<p>例如：Telnet-client、L3VPN、OSPF、Fault-MGR、Device-MGR、ISIS等特性模块。</p>
+</li>
+<li><p>数据节点（Data-node）鉴权：允许查询、修改指定的数据节点。</p>
+<p>例如：/ifm/interfaces/interface/ifAdminStatus/devm/globalPara/maxChassisNum等数据节点。</p>
+</li>
+</ul>
+<p>NETCONF鉴权机制用于管理特定用户执行NETCONF操作和访问NETCONF资源权限，使这些用户只能执行或访问NETCONF协议规定的操作和能力集中预配置好的子集。</p>
+<h1 id="Netconf会话和能力集"><a href="#Netconf会话和能力集" class="headerlink" title="Netconf会话和能力集"></a>Netconf会话和能力集</h1><h2 id="Netconf会话基本流程："><a href="#Netconf会话基本流程：" class="headerlink" title="Netconf会话基本流程："></a>Netconf会话基本流程：</h2><ol>
+<li>客户端触发NETCONF会话建立，完成SSH连接建立，并进行认证与授权。</li>
+<li>客户端和服务器完成NETCONF会话建立和能力协商。</li>
+<li>客户端发送一个或多个请求给服务器，进行RPC交互（鉴权）。例如：<ul>
+<li>修改并提交配置。</li>
+<li>查询配置数据或状态。</li>
+<li>对设备进行维护操作。</li>
+</ul>
+</li>
+<li>客户端关闭NETCONF会话。</li>
+<li>SSH连接关闭。</li>
+</ol>
+<h2 id="能力集交互："><a href="#能力集交互：" class="headerlink" title="能力集交互："></a>能力集交互：</h2><p>能力集扩展了设备的基本操作，描述了附加操作和操作中允许的内容。客户端可以发现服务器的功能，并使用由这些能力集定义的任何其他操作，参数和内容。</p>
+<p>能力协商是在会话建立阶段，双方通过发送消息给对方来通告自己支持的能力。当NETCONF会话打开，每一端（包括Client和Server）必须发送一个包含自身能力列表的<hello>消息。双方至少要发送NETCONF基本能力”urn:ietf:params:netconf:base:1.0”或”urn:ietf:params:netconf:base:1.1”。除了基本功能，NETCONF协议还允许客户端发现服务器端支持的其它能力列表。</hello></p>
+<p>在交换过Hello消息后，Server等待Client发送<rpc>请求。Server为每个<rpc>请求回应<rpc-reply>。</rpc-reply></rpc></rpc></p>
+<h1 id="Netconf基本操作"><a href="#Netconf基本操作" class="headerlink" title="Netconf基本操作"></a>Netconf基本操作</h1><h2 id="get查询数据；"><a href="#get查询数据；" class="headerlink" title="get查询数据；"></a>get查询数据；</h2><p><get>查询的是设备当前运行的状态数据，即只能从<running>配置数据库中获取数据。所以，<get>不需要使用source参数指定配置数据库。</get></running></get></p>
+<p><get>操作成功，Server回复的<rpc-reply>元素中含有<data>参数，<data>中封装了获取的结果数据。否则在<rpc-reply>消息中返回<rpc-error>。</rpc-error></rpc-reply></data></data></rpc-reply></get></p>
+<p><strong>示例：</strong></p>
+<p>RPC请求：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span>  <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">get</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">filter</span> <span class="attr">type</span>=<span class="string">"subtree"</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">ifm</span> <span class="attr">xmlns</span>=<span class="string">"http://www.huawei.com/netconf/vrp"</span> <span class="attr">content-version</span>=<span class="string">"1.0"</span> <span class="attr">format-version</span>=<span class="string">"1.0"</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">interfaces</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">interface</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">ifName</span>&gt;</span>10GE1/0/1<span class="tag">&lt;/<span class="name">ifName</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">interface</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">interfaces</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">ifm</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">get</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>RPC应答：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc-reply</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">data</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">ifm</span> <span class="attr">xmlns</span>=<span class="string">"http://www.huawei.com/netconf/vrp"</span> <span class="attr">format-version</span>=<span class="string">"1.0"</span> <span class="attr">content-version</span>=<span class="string">"1.0"</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">interfaces</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">interface</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">ifIndex</span>&gt;</span>5<span class="tag">&lt;/<span class="name">ifIndex</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">ifName</span>&gt;</span>10GE1/0/1<span class="tag">&lt;/<span class="name">ifName</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">ifPhyType</span>&gt;</span>MEth<span class="tag">&lt;/<span class="name">ifPhyType</span>&gt;</span></span><br><span class="line">         <span class="comment">&lt;!-- additional &lt;interface&gt; elements appear here... --&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">interface</span>&gt;</span> </span><br><span class="line">       <span class="tag">&lt;/<span class="name">interfaces</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">ifm</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">data</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc-reply</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="get-config查询配置数据："><a href="#get-config查询配置数据：" class="headerlink" title="get-config查询配置数据："></a>get-config查询配置数据：</h2><p><get-config>操作用来查询全部或部分指定配置数据。</get-config></p>
+<ul>
+<li>source：正在查询的配置数据库名称，<running>、<candidate>或<startup>。</startup></candidate></running></li>
+<li>filter：此参数用来标识要查询配置数据库的范围。如果此参数不存在，则返回设备上所有的配置。</li>
+</ul>
+<p>示例：查询running中接口配置；</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span>  <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">get-config</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">source</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">running</span>/&gt;</span></span><br><span class="line">       <span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">       <span class="tag">&lt;<span class="name">filter</span> <span class="attr">type</span>=<span class="string">"subtree"</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">ifm</span> <span class="attr">xmlns</span>=<span class="string">"http://www.huawei.com/netconf/vrp"</span> <span class="attr">content-version</span>=<span class="string">"1.0"</span> <span class="attr">format-version</span>=<span class="string">"1.0"</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">interfaces</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">interface</span>/&gt;</span></span><br><span class="line">             <span class="tag">&lt;/<span class="name">interfaces</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">ifm</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;/<span class="name">get-config</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><get>和<get-config>区别在于：</get-config></get></p>
+<ul>
+<li><get>只能查询<running>配置数据库的数据，<get-config>可以查询<running>、<candidate>和<startup>中数据。</startup></candidate></running></get-config></running></get></li>
+<li><get>可以查询配置数据和状态数据，<get-config>只能查询配置数据。</get-config></get></li>
+</ul>
+<h2 id="edit-config编辑配置数据："><a href="#edit-config编辑配置数据：" class="headerlink" title="edit-config编辑配置数据："></a>edit-config编辑配置数据：</h2><p><edit-config>操作用来把全部或部分配置数据加载到指定的目标配置数据库（<running>或<candidate>）。设备对<edit-config>中的操作进行鉴权，鉴权通过后，执行相应的修改。</edit-config></candidate></running></edit-config></p>
+<p><edit-config>操作支持多种加载配置方式，例如：支持加载本地文件、远程文件，支持在线编辑。如果NETCONF服务器支持URL能力，可以使用标识本地配置文件的<url>参数替代<config>参数。</config></url></edit-config></p>
+<p><edit-config>操作RPC报文中各参数含义如下：</edit-config></p>
+<ul>
+<li><p><config>：一组由数据模型定义的层次化的配置数据。</config></p>
+<p><config>中可能包含可选的“operation”属性，用来给配置数据指定操作类型。如果未携带“operation”属性，则默认为merge操作。Operation取值如下：</config></p>
+<ul>
+<li>merge：在数据库中修改存在或不存在的目标数据，如果目标数据不存在则创建，如果目标数据存在则修改。这是默认操作。</li>
+<li>create：当且仅当配置数据库中不存在待创建的配置数据时，才能成功添加到配置数据库。如果配置数据存在，则会返回<rpc-error>，其中包含一个<error-tag>值“data-exists”。</error-tag></rpc-error></li>
+<li>delete：删除配置数据库中指定的配置数据记录。如果数据存在，则删除该数据，如果数据不存在，则返回<rpc-error>，其中包含一个<error-tag>值“data-missing”。</error-tag></rpc-error></li>
+</ul>
+</li>
+<li><p>target：待编辑的配置数据库。基于场景选择对应的数据库：</p>
+<ul>
+<li>立即生效模式，配置数据库为<running>。</running></li>
+<li>两阶段生效模式，配置数据库为<candidate>，对该数据库操作后需执行<commit>操作提交配置，修改后的配置才能生效。</commit></candidate></li>
+<li>试运行，配置数据库设置为<candidate>。</candidate></li>
+</ul>
+</li>
+<li><p>default-operation：为<edit-config>操作设置默认操作。</edit-config></p>
+<p>default-operation参数是可选的，缺省值为“merge”，取值如下：</p>
+<ul>
+<li>merge：<config>参数中的配置数据与目标配置数据库中的配置合并。这是默认操作。</config></li>
+<li>replace：使用<config>参数中的配置数据，完全替换目标配置数据库中的配置。</config></li>
+<li>none：除了执行operation属性指定的操作外，目标配置数据库中的配置数据不受<config>中其他配置数据影响。如果<config>参数中含有目标配置数据库中对应的数据层次上不存在的配置数据，则返回<rpc-error>，<error-tag>值为“data-missing”，这样可以避免在执行指定操作时，无意中创建了冗余的元素。比如执行删除指定子元素操作时，<config>中包含该子元素的父层次结构，而目标数据库中不包含其父元素的配置，此时如果default-operation参数取值为非none的其他操作类型，则在删除该子元素的同时也会在目的数据库中创建其父元素的配置，如果default-operation参数取值为none，则只会删除该子元素，而不会创建其父元素的配置。</config></error-tag></rpc-error></config></config></li>
+</ul>
+</li>
+<li><p>error-option：<error-option>用于设置一个实例配置出错后，后续实例配置的处理方式，缺省值为stop-on-error，取值为</error-option></p>
+<ul>
+<li>stop-on-error：出现错误后停止操作。</li>
+<li>continue-on-error：出现错误后记录错误信息并继续执行，只要发生错误，NETCONF服务器会给客户端返回一个操作失败的<rpc-reply>消息。</rpc-reply></li>
+<li>rollback-on-error：出现错误后停止操作，并将配置回退到执行<edit-config>操作之前的状态。只有设备支持rollback-on-error能力才支持此操作。</edit-config></li>
+</ul>
+</li>
+</ul>
+<p>示例：将运行配置数据库中接口名为10GE1/0/1的接口的ifDescr值修改为“huawei”。</p>
+<p><strong>RPC请求</strong></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"60"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">edit-config</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">running</span>/&gt;</span>  </span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">default-operation</span>&gt;</span>merge<span class="tag">&lt;/<span class="name">default-operation</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">error-option</span>&gt;</span>rollback-on-error<span class="tag">&lt;/<span class="name">error-option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">config</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">ifm</span> <span class="attr">xmlns</span>=<span class="string">"http://www.huawei.com/netconf/vrp"</span> <span class="attr">content-version</span>=<span class="string">"1.0"</span> <span class="attr">format-version</span>=<span class="string">"1.0"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">interfaces</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">interface</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">ifName</span>&gt;</span>10GE1/0/1<span class="tag">&lt;/<span class="name">ifName</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">ifDescr</span>&gt;</span>huawei<span class="tag">&lt;/<span class="name">ifDescr</span>&gt;</span>   </span><br><span class="line">          <span class="tag">&lt;/<span class="name">interface</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">interfaces</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">ifm</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">config</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">edit-config</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>RPC应答：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc-reply</span> <span class="attr">message-id</span>=<span class="string">"60"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span> <span class="attr">flow-id</span>=<span class="string">"104"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">ok</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc-reply</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="copy-config拷贝操作："><a href="#copy-config拷贝操作：" class="headerlink" title="copy-config拷贝操作："></a>copy-config拷贝操作：</h2><p>源配置数据库替换目标配置数据库。如果目标配置数据库没有创建，则直接创建配置数据库，否则用源配置数据库直接覆盖目标配置数据库。</p>
+<p><copy-config>从<running>拷贝配置数据到<startup>，文件格式必须是<em>.cfg、</em>.zip或者*.dat，不支持以XML格式保存。</startup></running></copy-config></p>
+<p>示例： 将<running>数据库中的配置保存至<startup>数据库。</startup></running></p>
+<p>RPC请求：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span> </span><br><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"596"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">copy-config</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">target</span>&gt;</span> </span><br><span class="line">   <span class="tag">&lt;<span class="name">startup</span>/&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">target</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">source</span>&gt;</span> </span><br><span class="line">   <span class="tag">&lt;<span class="name">running</span>/&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">copy-config</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>RPC应答：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc-reply</span> <span class="attr">message-id</span>=<span class="string">"596"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">ok</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc-reply</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="delete-config删除配置数据："><a href="#delete-config删除配置数据：" class="headerlink" title="delete-config删除配置数据："></a>delete-config删除配置数据：</h2><p>用来删除一个配置数据库，但不能删除<running>配置数据库。</running></p>
+<p><strong>删除<startup>数据库示例。</startup></strong></p>
+<p>RPC请求：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">delete-config</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span>&gt;</span> </span><br><span class="line">      <span class="tag">&lt;<span class="name">startup</span>/&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">delete-config</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>RPC应答：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc-reply</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;<span class="name">ok</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc-reply</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="lock锁定配置数据库："><a href="#lock锁定配置数据库：" class="headerlink" title="lock锁定配置数据库："></a>lock锁定配置数据库：</h2><p>用来锁定设备的配置数据库，独占配置数据库的修改权。这种锁定允许用户在配置时，不会受到如NETCONF  mannager、SNMP或者CLI脚本的配置影响，防止产生冲突。</p>
+<p>如果配置数据库被合法用户锁定，则返回的reply报文<error-tag>中将显示lock-denied，并且<error-info>中将显示锁定者的<session-id>。</session-id></error-info></error-tag></p>
+<p><strong>锁定<running>配置数据库成功示例。</running></strong></p>
+<p>RPC请求：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">lock</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span>&gt;</span> </span><br><span class="line">      <span class="tag">&lt;<span class="name">running</span>/&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">lock</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>RPC应答：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc-reply</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">ok</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc-reply</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><strong>锁定<running>配置数据库失败示例。</running></strong></p>
+<p>RPC请求</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">lock</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">running</span>/&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">lock</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>RPC应答</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc-reply</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">rpc-error</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">error-type</span>&gt;</span>protocol<span class="tag">&lt;/<span class="name">error-type</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">error-tag</span>&gt;</span>lock-denied<span class="tag">&lt;/<span class="name">error-tag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">error-severity</span>&gt;</span>error<span class="tag">&lt;/<span class="name">error-severity</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">error-app-tag</span>&gt;</span>43<span class="tag">&lt;/<span class="name">error-app-tag</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">error-message</span>&gt;</span>The configuration is locked by other user. [Session ID = 629] <span class="tag">&lt;/<span class="name">error-message</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">error-info</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">session-id</span>&gt;</span>629<span class="tag">&lt;/<span class="name">session-id</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">error-paras</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">error-para</span>&gt;</span>629<span class="tag">&lt;/<span class="name">error-para</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">error-paras</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">error-info</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">rpc-error</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc-reply</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="unlock取消锁定配置数据库："><a href="#unlock取消锁定配置数据库：" class="headerlink" title="unlock取消锁定配置数据库："></a>unlock取消锁定配置数据库：</h2><p>用来取消用户自己之前执行的<lock>操作，不能取消其他用户的<lock>操作。</lock></lock></p>
+<p>取消锁定<running>数据库操作示例：</running></p>
+<p>RPC请求</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">unlock</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">running</span>/&gt;</span> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span> </span><br><span class="line">  <span class="tag">&lt;/<span class="name">unlock</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>RPC应答</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc-reply</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">ok</span>/&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc-reply</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="close-session关闭netconf会话："><a href="#close-session关闭netconf会话：" class="headerlink" title="close-session关闭netconf会话："></a>close-session关闭netconf会话：</h2><p>用来正常关闭当前NETCONF会话。</p>
+<p>当NETCONF  Server收到<close-session>请求时，它将关闭当前的NETCONF会话。服务器将释放与该会话相关的所有锁和资源。在收到<close-session>请求后，NETCONF  Server将忽略这个会话的所有请求消息。</close-session></close-session></p>
+<p><strong>关闭当前NETCONF会话示例：</strong></p>
+<ul>
+<li>RPC请求</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">close-session</span>/&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>RPC应答</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc-reply</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">ok</span>/&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc-reply</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="kill-session强制关闭netconf会话："><a href="#kill-session强制关闭netconf会话：" class="headerlink" title="kill-session强制关闭netconf会话："></a>kill-session强制关闭netconf会话：</h2><p>用来强制关闭另一个NETCONF会话，只有管理员用户才有权限执行<kill-session>操作。</kill-session></p>
+<p>当NETCONF  Server收到<kill-session>请求时，它将中止该会话正在进行的所有操作，释放与该会话相关联的任何锁和资源，并关闭该会话。</kill-session></p>
+<p>如果NETCONF服务器在处理<commit>操作时收到<kill-session>请求，它必须将配置恢复到发出确认提交之前的状态。</kill-session></commit></p>
+<p>强制关闭session-id为4的NETCONF会话示例：</p>
+<ul>
+<li>RPC请求</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">kill-session</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">session-id</span>&gt;</span>4<span class="tag">&lt;/<span class="name">session-id</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">kill-session</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="Netconf能力集"><a href="#Netconf能力集" class="headerlink" title="Netconf能力集"></a>Netconf能力集</h1><h2 id="Netconf标准能力："><a href="#Netconf标准能力：" class="headerlink" title="Netconf标准能力："></a>Netconf标准能力：</h2><h3 id="Writable-running能力："><a href="#Writable-running能力：" class="headerlink" title="Writable-running能力："></a>Writable-running能力：</h3><p>此能力指明设备支持对<running>配置数据库的写能力，即设备支持对运行的配置进行<edit-config>和<copy-config>操作。</copy-config></edit-config></running></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>urn:ietf:params:netconf:capability:writable-running:1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="Candidate-Configureation能力："><a href="#Candidate-Configureation能力：" class="headerlink" title="Candidate Configureation能力："></a>Candidate Configureation能力：</h3><p>此能力指明设备支持<candidate>备用配置数据库。</candidate></p>
+<p><candidate>配置数据库中存放设备一套完整的配置数据。操作这些配置数据时，不会影响设备当前运行的配置数据。</candidate></p>
+<p>用户为了得到期望的配置数据，可以执行删除和修改操作。任意时刻可以执行如下操作：</p>
+<ul>
+<li><p><commit>：将<candidate>配置数据库中的所有数据全部提交，转化为设备当前运行的配置数据。</candidate></commit></p>
+<p>如果<commit>操作失败，<candidate>配置数据库中的内容保持不变。</candidate></commit></p>
+</li>
+<li><p><discard-changes>：放弃执行<candidate>配置数据库中还未提交的配置数据，使<candidate>数据库中的配置数据恢复到与当前<running>配置数据库相同数据。</running></candidate></candidate></discard-changes></p>
+</li>
+</ul>
+<p>设备会为每个NETCONF会话单独创建一个<candidate>配置数据库，不同的NETCONF会话的<candidate>之间，配置数据相互独立。</candidate></candidate></p>
+<p>能力标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>urn:ietf:params:netconf:capability:candidate:1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="Confirmed-Commit能力："><a href="#Confirmed-Commit能力：" class="headerlink" title="Confirmed Commit能力："></a>Confirmed Commit能力：</h3><p>此能力指明设备支持协议操作<commit>携带参数<confirmed>和<confirm-timeout>。</confirm-timeout></confirmed></commit></p>
+<ul>
+<li><confirmed>：将<candidate>数据库中的配置数据提交，转化为设备当前运行的配置数据，即<running>数据库中的配置。</running></candidate></confirmed></li>
+<li><confirm-timeout>：<commit>操作确认超时时间，单位是秒，缺省值是600秒。设备执行<commit>操作后，在确认超时时间内，如果没有执行确认操作，则对<running>数据库中的配置进行回滚，配置数据恢复到执行<commit>操作之前的状态，并放弃<candidate>数据库中的编辑数据。</candidate></commit></running></commit></commit></confirm-timeout></li>
+</ul>
+<p>此能力仅在支持Candidate Configuration能力时有效，主要应用于对业务进行试运行、验证的场景中。</p>
+<p>能力标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>urn:ietf:params:netconf:capability:confirmed-commit:1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>提交当前的配置，并设置<commit>操作确认超时时间为120s示例。</commit></p>
+<p>RPC请求：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">commit</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">confirmed</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">confirm-timeout</span>&gt;</span>120<span class="tag">&lt;/<span class="name">confirm-timeout</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">commit</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rp</span></span></span><br></pre></td></tr></table></figure>
+<h3 id="Rollback-on-Error能力："><a href="#Rollback-on-Error能力：" class="headerlink" title="Rollback on Error能力："></a>Rollback on Error能力：</h3><p>此能力表明设备具备错误回滚能力。即支持在<edit-config>操作的<error-option>参数中携带“rollback-on-error”字段，如果在执行<edit-config>操作时出现错误并产生错误元素<rpc-error>，则服务器将停止处理<edit-config>操作，并将配置恢复至执行<edit-config>操作之前的状态。</edit-config></edit-config></rpc-error></edit-config></error-option></edit-config></p>
+<p>此能力仅在设备支持Candidate Configuration能力时生效。</p>
+<p>能力标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>urn:ietf:params:netconf:capability:rollback-on-error:1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>示例RPC请求：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">edit-config</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">running</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">error-option</span>&gt;</span>rollback-on-error<span class="tag">&lt;/<span class="name">error-option</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">config</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">ifm</span> <span class="attr">xmlns</span>=<span class="string">"urn:huawei:yang:huawei-ifm"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">interfaces</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">interface</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">name</span>&gt;</span>GigabitEthernet1/0/0<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">mtu</span>&gt;</span>1000<span class="tag">&lt;/<span class="name">mtu</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">interface</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">interfaces</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">ifm</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">config</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">edit-config</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="Distinct-Startup能力："><a href="#Distinct-Startup能力：" class="headerlink" title="Distinct Startup能力："></a>Distinct Startup能力：</h3><p>此能力指明设备具备独立启动的能力，即设备能够区分运行数据库<running>和启动数据库<startup>。</startup></running></p>
+<p>NETCONF服务器需要对运行的配置进行独立维护，并在设备重新启动后能够恢复运行的配置。对<running>数据库的配置操作不会自动同步到<startup>数据库，必须执行一个从<running>到<startup>的操作（例如<copy-config>操作），才能把<running>数据库中的数据更新到<startup>数据库中。</startup></running></copy-config></startup></running></startup></running></p>
+<p>能力标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>urn:ietf:params:netconf:capability:startup:1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>执行<copy-config>操作，将<running>数据库的配置拷贝到<startup>数据库示例。</startup></running></copy-config></p>
+<p>RPC请求</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">copy-config</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">source</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">running</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">startup</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">copy-config</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="Notification能力"><a href="#Notification能力" class="headerlink" title="Notification能力:"></a>Notification能力:</h3><p>该能力指明设备可以通过NETCONF协议的Notification能力向客户端上报告警和事件，以便客户端及时感知设备配置等的变更。用户通过执行<create-subscription>操作向设备订阅告警和事件，若设备回复的<rpc-reply>元素中含有<ok>元素，则表示<create-subscription>操作成功，设备会主动将产生的告警和事件通过NETCONF上报客户端。</create-subscription></ok></rpc-reply></create-subscription></p>
+<p>能力标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>urn:ietf:params:netconf:capability:notification:1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="扩展能力集："><a href="#扩展能力集：" class="headerlink" title="扩展能力集："></a>扩展能力集：</h2><h3 id="Action能力："><a href="#Action能力：" class="headerlink" title="Action能力："></a>Action能力：</h3><p>此能力指明设备具备处理<execute-action>操作能力。用户通过<execute-action>操作请求设备执行某个维护命令，例如：复位单板，激活补丁等。</execute-action></execute-action></p>
+<p><execute-action>操作即维护操作，修改、查询以外的命令</execute-action></p>
+<p>能力标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>http://www.huawei.com/netconf/capability/action/1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="Execute-CLI能力："><a href="#Execute-CLI能力：" class="headerlink" title="Execute CLI能力："></a>Execute CLI能力：</h3><p>此能力指明设备在处理请求过程中，能与发送端进行交互。</p>
+<p>能力标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>http://www.huawei.com/netconf/capability/execute-cli/1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Client端通过<execute-cli>操作来执行CLI命令。一条RPC请求最多可包含60条命令，最大字符串长度为512字节。若执行<execute-cli>操作过程中出错，将无法执行RPC请求中的其他命令。</execute-cli></execute-cli></p>
+<p>客户端通过<execute-cli>操作请求设备执行display saved-configuration time命令示例。</execute-cli></p>
+<p>RPC请求</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"11"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">execute-cli</span> <span class="attr">xmlns</span>=<span class="string">"http://www.huawei.com/netconf/capability/base/1.0"</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">cmd</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span>&gt;</span>1<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">cmdline</span>&gt;</span>display saved-configuration time<span class="tag">&lt;/<span class="name">cmdline</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">cmd</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">execute-cli</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="Discard-Commit能力"><a href="#Discard-Commit能力" class="headerlink" title="Discard Commit能力:"></a>Discard Commit能力:</h3><p>此能力用来取消或终止正在执行的confirmed-commit操作。例如，在commit操作确认超时之前或正在执行的<commit>操作过程中，执行discard-commit操作可以放弃当前所有的二阶段缓存数据，即放弃<candidate>数据库中的数据。</candidate></commit></p>
+<p>能力标识</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">capability</span>&gt;</span>http://www.huawei.com/netconf/capability/discard-commit/1.0<span class="tag">&lt;/<span class="name">capability</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>放弃当前正在执行的commit操作示例。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">rpc</span> <span class="attr">message-id</span>=<span class="string">"101"</span> <span class="attr">xmlns</span>=<span class="string">"urn:ietf:params:xml:ns:netconf:base:1.0"</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">discard-commit</span> <span class="attr">xmlns</span>=<span class="string">"http://www.huawei.com/netconf/capability/discard-commit/1.0"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rpc</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<hr>
+<h1 id="Netconf编程实现"><a href="#Netconf编程实现" class="headerlink" title="Netconf编程实现"></a>Netconf编程实现</h1><h2 id="Python—ncclient实现："><a href="#Python—ncclient实现：" class="headerlink" title="Python—ncclient实现："></a>Python—ncclient实现：</h2><p><a href="[https://cshihong.github.io/2019/12/19/python%E7%BD%91%E7%BB%9C%E8%87%AA%E5%8A%A8%E5%8C%96netconf%E9%85%8D%E7%BD%AE%E6%A8%A1%E5%9D%97ncclient%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/](https://cshihong.github.io/2019/12/19/python网络自动化netconf配置模块ncclient学习笔记/">python网络自动化netconf配置模块ncclient学习笔记</a> )</p>
+<p> <a href="https://github.com/ncclient/ncclient" target="_blank" rel="noopener">https://github.com/ncclient/ncclient</a> </p>
+<h2 id="Go–go-netconf实现："><a href="#Go–go-netconf实现：" class="headerlink" title="Go–go-netconf实现："></a>Go–go-netconf实现：</h2><p><a href="https://github.com/Juniper/go-netconf" target="_blank" rel="noopener">netconf-go语言-go-netconf包学习笔记：</a></p>
+<p> <a href="https://github.com/Juniper/go-netconf" target="_blank" rel="noopener">https://github.com/Juniper/go-netconf</a> </p>
+<hr>
+<blockquote>
+<p>参考文档：</p>
+<p> <a href="http://www.h3c.com/cn/d_201709/1031825_30005_0.htm#_Toc492405216" target="_blank" rel="noopener">http://www.h3c.com/cn/d_201709/1031825_30005_0.htm#_Toc492405216</a> </p>
+<p> <a href="https://support.huawei.com/hedex/hdx.do?lib=EDOC110010122531180BDB&amp;docid=EDOC1100101225&amp;lang=zh&amp;v=02&amp;tocLib=EDOC110010122531180BDB&amp;tocV=02&amp;id=ZH-CN_CONCEPT_0141126376&amp;tocURL=resources%2fdc%2fdc%5fvrp%5flog%5fnetconf%2ehtml&amp;p=t&amp;fe=1&amp;ui=3&amp;keyword=netconf" target="_blank" rel="noopener">https://support.huawei.com/hedex/hdx.do?lib=EDOC110010122531180BDB&amp;docid=EDOC1100101225&amp;lang=zh&amp;v=02&amp;tocLib=EDOC110010122531180BDB&amp;tocV=02&amp;id=ZH-CN_CONCEPT_0141126376&amp;tocURL=resources%252fdc%252fdc%255fvrp%255flog%255fnetconf%252ehtml&amp;p=t&amp;fe=1&amp;ui=3&amp;keyword=netconf</a> </p>
+<p> <a href="https://tools.ietf.org/html/rfc6241" target="_blank" rel="noopener">https://tools.ietf.org/html/rfc6241</a> </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/12/29/Netconf协议学习笔记/" title="Netconf协议学习笔记">https://cshihong.github.io/2019/12/29/Netconf协议学习笔记/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/网络自动化/" rel="tag"># 网络自动化</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/19/python网络自动化netconf配置模块ncclient学习笔记/" rel="next" title="python网络自动化netconf配置模块ncclient学习笔记">
+                <i class="fa fa-chevron-left"></i> python网络自动化netconf配置模块ncclient学习笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/29/python通过xlrd读取Excel表格和Template批量生成配置/" rel="prev" title="python通过xlrd读取Excel表格和Template批量生成配置">
+                python通过xlrd读取Excel表格和Template批量生成配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Netconf简介"><span class="nav-number">1.</span> <span class="nav-text">Netconf简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Netconf协议："><span class="nav-number">1.1.</span> <span class="nav-text">Netconf协议：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Netconf与SNMP比较："><span class="nav-number">1.2.</span> <span class="nav-text">Netconf与SNMP比较：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Netconf协议框架；"><span class="nav-number">1.3.</span> <span class="nav-text">Netconf协议框架；</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Netconf基本网络结构："><span class="nav-number">1.4.</span> <span class="nav-text">Netconf基本网络结构：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Netconf建模语言："><span class="nav-number">1.4.1.</span> <span class="nav-text">Netconf建模语言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#相关概念："><span class="nav-number">1.4.2.</span> <span class="nav-text">相关概念：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#XML编码："><span class="nav-number">1.4.2.1.</span> <span class="nav-text">XML编码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RPC模式："><span class="nav-number">1.4.2.2.</span> <span class="nav-text">RPC模式：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#能力集（Capabliity）："><span class="nav-number">1.4.2.3.</span> <span class="nav-text">能力集（Capabliity）：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Netconf鉴权机制："><span class="nav-number">1.5.</span> <span class="nav-text">Netconf鉴权机制：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Netconf会话和能力集"><span class="nav-number">2.</span> <span class="nav-text">Netconf会话和能力集</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Netconf会话基本流程："><span class="nav-number">2.1.</span> <span class="nav-text">Netconf会话基本流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#能力集交互："><span class="nav-number">2.2.</span> <span class="nav-text">能力集交互：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Netconf基本操作"><span class="nav-number">3.</span> <span class="nav-text">Netconf基本操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#get查询数据；"><span class="nav-number">3.1.</span> <span class="nav-text">get查询数据；</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#get-config查询配置数据："><span class="nav-number">3.2.</span> <span class="nav-text">get-config查询配置数据：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#edit-config编辑配置数据："><span class="nav-number">3.3.</span> <span class="nav-text">edit-config编辑配置数据：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#copy-config拷贝操作："><span class="nav-number">3.4.</span> <span class="nav-text">copy-config拷贝操作：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#delete-config删除配置数据："><span class="nav-number">3.5.</span> <span class="nav-text">delete-config删除配置数据：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lock锁定配置数据库："><span class="nav-number">3.6.</span> <span class="nav-text">lock锁定配置数据库：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#unlock取消锁定配置数据库："><span class="nav-number">3.7.</span> <span class="nav-text">unlock取消锁定配置数据库：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#close-session关闭netconf会话："><span class="nav-number">3.8.</span> <span class="nav-text">close-session关闭netconf会话：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kill-session强制关闭netconf会话："><span class="nav-number">3.9.</span> <span class="nav-text">kill-session强制关闭netconf会话：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Netconf能力集"><span class="nav-number">4.</span> <span class="nav-text">Netconf能力集</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Netconf标准能力："><span class="nav-number">4.1.</span> <span class="nav-text">Netconf标准能力：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Writable-running能力："><span class="nav-number">4.1.1.</span> <span class="nav-text">Writable-running能力：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Candidate-Configureation能力："><span class="nav-number">4.1.2.</span> <span class="nav-text">Candidate Configureation能力：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Confirmed-Commit能力："><span class="nav-number">4.1.3.</span> <span class="nav-text">Confirmed Commit能力：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rollback-on-Error能力："><span class="nav-number">4.1.4.</span> <span class="nav-text">Rollback on Error能力：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Distinct-Startup能力："><span class="nav-number">4.1.5.</span> <span class="nav-text">Distinct Startup能力：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Notification能力"><span class="nav-number">4.1.6.</span> <span class="nav-text">Notification能力:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#扩展能力集："><span class="nav-number">4.2.</span> <span class="nav-text">扩展能力集：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Action能力："><span class="nav-number">4.2.1.</span> <span class="nav-text">Action能力：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Execute-CLI能力："><span class="nav-number">4.2.2.</span> <span class="nav-text">Execute CLI能力：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Discard-Commit能力"><span class="nav-number">4.2.3.</span> <span class="nav-text">Discard Commit能力:</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Netconf编程实现"><span class="nav-number">5.</span> <span class="nav-text">Netconf编程实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Python—ncclient实现："><span class="nav-number">5.1.</span> <span class="nav-text">Python—ncclient实现：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Go–go-netconf实现："><span class="nav-number">5.2.</span> <span class="nav-text">Go–go-netconf实现：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/12/29/Netconf协议学习笔记/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

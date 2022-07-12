@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Kafka简介Kafka概述：Kafka由 linked-in 开源 。 kafka-高产出的分布式消息系统(A high-throughput distributed messaging system)。 Kafka是一个高吞吐、分布式、基于发布订阅的消息系统，利用Kafka技术可以在廉价的PC Server上搭建起大规模消息系统。 Kafka的特性： 高吞吐量、低延迟：kafka每秒可以处理几">
+<meta name="keywords" content="Hadoop,Kafka">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kafka技术原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="Kafka简介Kafka概述：Kafka由 linked-in 开源 。 kafka-高产出的分布式消息系统(A high-throughput distributed messaging system)。 Kafka是一个高吞吐、分布式、基于发布订阅的消息系统，利用Kafka技术可以在廉价的PC Server上搭建起大规模消息系统。 Kafka的特性： 高吞吐量、低延迟：kafka每秒可以处理几">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/应用.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/位置.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/Topics.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/Partition.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/offset.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/副本1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/副本2.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/副本3.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/log.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/删除.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/cleanup.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/可靠.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/写流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/读流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/用法.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/走.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/镜像.png">
+<meta property="og:updated_time" content="2019-11-15T14:37:04.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Kafka技术原理">
+<meta name="twitter:description" content="Kafka简介Kafka概述：Kafka由 linked-in 开源 。 kafka-高产出的分布式消息系统(A high-throughput distributed messaging system)。 Kafka是一个高吞吐、分布式、基于发布订阅的消息系统，利用Kafka技术可以在廉价的PC Server上搭建起大规模消息系统。 Kafka的特性： 高吞吐量、低延迟：kafka每秒可以处理几">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/06/02/Kafka技术原理/应用.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/06/02/Kafka技术原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Kafka技术原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/06/02/Kafka技术原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Kafka技术原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-02 18:02:45" itemprop="dateCreated datePublished" datetime="2018-06-02T18:02:45+08:00">2018-06-02</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-15 22:37:04" itemprop="dateModified" datetime="2019-11-15T22:37:04+08:00">2019-11-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 3,079</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 11</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Kafka简介"><a href="#Kafka简介" class="headerlink" title="Kafka简介"></a>Kafka简介</h1><h2 id="Kafka概述："><a href="#Kafka概述：" class="headerlink" title="Kafka概述："></a>Kafka概述：</h2><p>Kafka由 linked-in 开源 。</p>
+<p>kafka-高产出的分布式消息系统(A high-throughput distributed messaging system)。</p>
+<p>Kafka是一个高吞吐、分布式、基于发布订阅的消息系统，利用Kafka技术可以在廉价的PC Server上搭建起大规模消息系统。</p>
+<h2 id="Kafka的特性："><a href="#Kafka的特性：" class="headerlink" title="Kafka的特性："></a>Kafka的特性：</h2><ul>
+<li>高吞吐量、低延迟：kafka每秒可以处理几十万条消息，它的延迟最低只有几毫秒，每个topic可以分多个partition, consumer group 对partition进行consume操作；</li>
+<li>可扩展性：kafka集群支持热扩展；</li>
+<li>持久性、可靠性：消息被持久化到本地磁盘，并且支持数据备份防止数据丢失；</li>
+<li>容错性：允许集群中节点失败（若副本数量为n,则允许n-1个节点失败）；</li>
+<li>高并发：支持数千个客户端同时读写；</li>
+<li>支持实时在线处理和离线处理：可以使用Storm这种实时流处理系统对消息进行实时进行处理，同时还可以使用Hadoop这种批处理系统进行离线处理；</li>
+</ul>
+<h2 id="Kafka应用场景："><a href="#Kafka应用场景：" class="headerlink" title="Kafka应用场景："></a>Kafka应用场景：</h2><p><img src="/2018/06/02/Kafka技术原理/应用.png" alt="应用"></p>
+<p><center>图：Kafka应用场景<center></center></center></p>
+<p>Kafka和其他组件比较，具有消息持久化、高吞吐、分布式、多客户端支持、实时等特性，适用于离线和在线的消息消费，如常规的消息收集、网站活性跟踪、聚合统计系统运营数据（监控数据）、日志收集等大量数据的互联网服务的数据收集场景。</p>
+<ol>
+<li><p>日志收集：一个公司可以用Kafka可以收集各种服务的log，通过kafka以统一接口服务的方式开放给各种consumer，例如Hadoop、Hbase、Solr等；</p>
+</li>
+<li><p>消息系统：解耦和生产者和消费者、缓存消息等；</p>
+</li>
+<li><p>用户活动跟踪：Kafka经常被用来记录web用户或者app用户的各种活动，如浏览网页、搜索、点击等活动，这些活动信息被各个服务器发布到kafka的topic中，然后订阅者通过订阅这些topic来做实时的监控分析，或者装载到Hadoop、数据仓库中做离线分析和挖掘；</p>
+</li>
+<li><p>运营指标：Kafka也经常用来记录运营监控数据。包括收集各种分布式应用的数据，生产各种操作的集中反馈，比如报警和报告；</p>
+</li>
+<li><p>流式处理：比如spark streaming和storm；</p>
+</li>
+<li><p>事件源；</p>
+</li>
+<li><h2 id="kafka在FusionInsight中的位置："><a href="#kafka在FusionInsight中的位置：" class="headerlink" title="kafka在FusionInsight中的位置："></a>kafka在FusionInsight中的位置：</h2></li>
+</ol>
+<p><img src="/2018/06/02/Kafka技术原理/位置.png" alt="位置"></p>
+<p><center>图：Kafka在FusionInsight中的位置<center></center></center></p>
+<p>Kafka作为一个分布式消息系统，支持在线和离线消息处理，并提供了Java API以便其他组件对接使用。</p>
+<h1 id="Kafka架构与功能"><a href="#Kafka架构与功能" class="headerlink" title="Kafka架构与功能"></a>Kafka架构与功能</h1><h2 id="Kafka架构："><a href="#Kafka架构：" class="headerlink" title="Kafka架构："></a>Kafka架构：</h2><p><img src="/2018/06/02/Kafka技术原理/架构.png" alt="架构"></p>
+<p><center>图：Kafka架构图<center></center></center></p>
+<p>基本概念：</p>
+<ul>
+<li>Broker：Kafka集群包含一个或多个服务实例，这些服务实例被称为Broker。是Kafka当中具体处理数据的单元。Kafka支持Broker的水平扩展。一般Broker数据越多，集群的吞吐力就越强。</li>
+<li>Topic：每条发布到Kafka集群的消息都有一个类别，这个类别被称为Topic。</li>
+<li>Partition：Kafka将Topic分成一个或多个Partition，每个Partition在物理上对应一个文件夹，该文件下存储这个Partition的所有消息。</li>
+<li>Producer：负责发布消息到Kafka Broker。</li>
+<li>Consumer：消息消费者，从Kafka Broker读取消息的客户端。</li>
+<li>Consumer Group：每个Consumer属于一个特定的Consumer Group（可为每个Consumer指定group name）。</li>
+<li>ZooKeeper：kafka与Zookeeper级联，通过Zookeeper管理级联配置，选举Leader。</li>
+</ul>
+<h3 id="Kafka-Topics："><a href="#Kafka-Topics：" class="headerlink" title="Kafka Topics："></a>Kafka Topics：</h3><p><img src="/2018/06/02/Kafka技术原理/Topics.png" alt="Topics"></p>
+<p><center>图；Kafka Topics<center></center></center></p>
+<p>每条发布到Kafka的消息都有个类别，这个类别被称为Topic，也可以理解为一个存储消息的队列。例如：天气作为一个Topic，每天的温度消息就可以存储在“天气”这个队列里。数据总数先进先出。后来的数据追加到后面。</p>
+<h3 id="Kafka-Partition："><a href="#Kafka-Partition：" class="headerlink" title="Kafka Partition："></a>Kafka Partition：</h3><p><img src="/2018/06/02/Kafka技术原理/Partition.png" alt="Partition"></p>
+<p><center>图：Kafka Partition<center></center></center></p>
+<p>每个Topic都有一个或者多个Partitions构成。每个Partition都是有序且不可变的消息队列。引入Partition机制，保证了Kafka的高吞吐能力。</p>
+<p>在每个Partition当中，都会存储一个Log文件，Log文件中记录了所有的消息文件。一个Topic的多个Partition，它分布在不同的Kafka节点上，这样多个客户端包括Producer和Consumer就可以并发的访问不同节点，对同一个Topic进行消息的读取。</p>
+<p><img src="/2018/06/02/Kafka技术原理/1.png" alt="1"></p>
+<p><center>图：Partition<center></center></center></p>
+<ul>
+<li>Topic的Partition数量可以在创建时配置。</li>
+<li>Partition数据决定了每个Consumer group中并发消费者的最大数据。</li>
+<li>Consumer group A有两个消费者来读取4个Partition中数据；Consumer group B有四个消费者来读取4个partition中数据。</li>
+</ul>
+<p><strong>Kafka Partition offset:</strong></p>
+<p><img src="/2018/06/02/Kafka技术原理/offset.png" alt="offset"></p>
+<p><center>图：Kafka Partition offset<center></center></center></p>
+<ul>
+<li>任何发布到此Partition的消息都会被直接追加到log文件的尾部。</li>
+<li>每条消息在文件中的位置称为offset（偏移量），offset是一个long型数字，它唯一标记一条消息。消费者通过（offset、partition、topic）跟踪记录。</li>
+<li>Kafka不支持消息的随机读取。</li>
+</ul>
+<p><strong>Kafak Partition Replicas（副本）:</strong></p>
+<p><img src="/2018/06/02/Kafka技术原理/副本1.png" alt="副本1"></p>
+<p><center>图：副本机制<center></center></center></p>
+<ul>
+<li>副本以分区为单位。每个分区都有各自的主副本。</li>
+<li>可以通过配置文件，配置副本的个数。</li>
+<li>一个Kafka集群中，各个节点可能互为Leader和Follower。</li>
+<li>主副本叫做Leader，从副本叫做Follower，处于同步状态的副本叫做In-Sync Replicas（ISR）。</li>
+<li>如果Leader失效，那么将会有其他的Follower来接管成为新的Leader。如果由于Follower自身的原因，比如网络原因导致同步落后太多，那么当Leader失效后，就不会将这个Follower选为leader。</li>
+<li>由于Leader的Server承载了全部的请求压力，因此从集群的整体考虑，Kafka会将Leader均衡的分散在每个实例上，来保持整体稳定。</li>
+<li>Follower通过<strong>拉取</strong>的方式从Leader中同步数据。消费者和生产这都是从Leader中读取数据，不与Follower交互。</li>
+</ul>
+<p><strong>主副本和从副本的数据同步：</strong></p>
+<p><img src="/2018/06/02/Kafka技术原理/副本2.png" alt="副本2"></p>
+<p><center>图：主副本和从副本的数据同步<center></center></center></p>
+<p>从Partition的Leader复制数据到Follower，需要一个线程，实际上，复制数据的操作，是Follower主动从Leader上批量拉取数据，这就极大的提高了Kafka的吞吐量。Follower复制数据的线程叫做ReplicaFetcher Thread，而Kafka的Producer和Consumer只与Leader进行交互，不会与Follower进行交互。</p>
+<p><img src="/2018/06/02/Kafka技术原理/副本3.png" alt="副本3"></p>
+<p>Kafka中每个Broker启动的时候，都会创建一个副本管理服务ReplicaManager，该服务负责维护ReplicaFether Thread与其他Broker链路连接关系。该服务中存在的Follower Partition对应的Leader Partition会分布在不同的Broker上，这些Broker创建相同数量的ReplicaFether Thread，同步对应Partition数据。Kafka中Partition间复制数据，是由Follower主动从Leader拉消息的。Follower每次读取消息都会更新HW状态，用于记录当前最新消息的标识。每当Follower的Partition发生变化而影响Leader所在的Broker时，ReplicaManager就会新建或者销毁相对应的ReplicaFether Thread。</p>
+<h2 id="Kafka-Logs："><a href="#Kafka-Logs：" class="headerlink" title="Kafka Logs："></a>Kafka Logs：</h2><p>为了使得Kafka的吞吐率可以线性提高，物理上把Topic分成一个或多个Partition，每个Partition在物理上对应一个文件夹，该文件夹下存储这个Partition的所有消息和索性文件。Kafka把Topic中一个Partition大文件分成多个小文件段通过多个小文件段，就容易定期清除或删除已经消费完的文件，减少磁盘占用。</p>
+<p>Kafka的存储布局非常简单，Topic的每个分区对应一个逻辑日志，物理上一个日志为相同大小的一个分段文件。每次Producer发布一个消息到一个分区的时候，代理就将这些数据追加到最后一个段文件当中。当发布的消息数量达到消息设定的阈值，或者经过一定的时间后，段文件就会真正的写到磁盘当中。在写入完成以后，消息就会公开给Consumer。</p>
+<p>同一个Topic下有不同的分区，每个分区会划分为多个文件，只有一个当前文件在写，其他文件是只读的。当写满一个文件（即达到某个设定的值）Kafka会新建一个空文件继续来写。而老文件切换为只读。</p>
+<p>文件的命名以起始的偏移量来进行命名。Segment Files由两大部分组成，分别为Index file和data file，此两个文件一一对应成对出现。后缀 .index 和 .log 就分别表示为Segment的索引文件和数据文件。Segment文件的命名规则是：Partition全局的第一个Segment从0开始，后续每个segment文件为上一个全局Partition的最大offset，这个数据时64位的long型数据。如果没有数据就用0进行填充。通常把日志文件默认为1G，当达到1G就会创建新的Log文件和index文件。如果设置的参数过小，会产生大量的log文件和index文件，系统在启动的时候就需要加载大量的index到内存，占用大量的句柄。如果设置的太大，分段文件又比较少，不利于快速的查找。Kafka就是通过索引实现快速的定位message。</p>
+<p><img src="/2018/06/02/Kafka技术原理/log.png" alt="log"></p>
+<p><center>图：索引文件<center></center></center></p>
+<ul>
+<li>通过索引信息可以快速定位message。</li>
+<li>通过将index元数据全部映射到memory，可以避免segment file的index数据IO磁盘操作。</li>
+<li>通过索引文件稀疏存储，可以大幅降低index文件元数据占用空间大小。</li>
+<li>稀疏存储：将原来完整的数据，只间隔的选择多条数据进行存储。</li>
+</ul>
+<p><strong>Kafka Log Cleanup:</strong></p>
+<p>日志的清理方式有两种：delete和compact。</p>
+<p>删除的阈值有两种：过期的时间和分区内总日志大小。</p>
+<p><img src="/2018/06/02/Kafka技术原理/删除.png" alt="删除"></p>
+<p><img src="/2018/06/02/Kafka技术原理/cleanup.png" alt="cleanup"></p>
+<p><center>图：日志清理方式–compact<center></center></center></p>
+<p>compact操作是保存每个消息的最新value值。消息时顺序存储的，offset大的为最新的数据。</p>
+<h2 id="Kafka数据可靠性："><a href="#Kafka数据可靠性：" class="headerlink" title="Kafka数据可靠性："></a>Kafka数据可靠性：</h2><p>Kafka所有消息都会被持久化到磁盘中，同时Kafka通过对Topic Partition设置Replication来保障数据可靠。</p>
+<p>消息传输过程中保障通常有以下三种：</p>
+<ul>
+<li>最多一次（At Most Once）：消息可能丢失；消息不会重复发送和处理。</li>
+<li>最少一次（At Lease Once）：消息不会丢失；消息可能会重复发送和处理。</li>
+<li>仅有一次（Exactly Once）：消息不会丢失；消息仅被处理一次。</li>
+</ul>
+<p>Kafka消息传输保障机制，通过配置不同的消息发送模式来保障消息传输，进而满足不同的可靠性要求应用场景。</p>
+<p><img src="/2018/06/02/Kafka技术原理/可靠.png" alt="可靠"></p>
+<h1 id="Kafka关键流程"><a href="#Kafka关键流程" class="headerlink" title="Kafka关键流程"></a>Kafka关键流程</h1><h2 id="写流程："><a href="#写流程：" class="headerlink" title="写流程："></a>写流程：</h2><p><img src="/2018/06/02/Kafka技术原理/写流程.png" alt="写流程"></p>
+<p><center>图：Kafka写流程–Producer写数据<center></center></center></p>
+<p>总体流程：</p>
+<ul>
+<li>Producer连接任意存活的Broker，请求制定Topic、Partition的Leader元数据信息，然后直接与对应的Broker直接链接，发布数据。</li>
+</ul>
+<p>开发分区接口：</p>
+<ul>
+<li>用户可以指定分区函数，使得消息可以根据Key，发送到特定的Partition。</li>
+</ul>
+<h2 id="Kafka读流程："><a href="#Kafka读流程：" class="headerlink" title="Kafka读流程："></a>Kafka读流程：</h2><p><img src="/2018/06/02/Kafka技术原理/读流程.png" alt="读流程"></p>
+<p><center>图：Kafka读流程–Consumer读数据<center></center></center></p>
+<p>总体流程：</p>
+<ul>
+<li>Consumer连接指定Topic Partition所在的Leader Broker，用主动获取方式从Kafka中获取消息。</li>
+</ul>
+<h1 id="Kafka在Zookeeper上的目录结构"><a href="#Kafka在Zookeeper上的目录结构" class="headerlink" title="Kafka在Zookeeper上的目录结构"></a>Kafka在Zookeeper上的目录结构</h1><h2 id="Zookeeper在Kafka的作用："><a href="#Zookeeper在Kafka的作用：" class="headerlink" title="Zookeeper在Kafka的作用："></a>Zookeeper在Kafka的作用：</h2><ol>
+<li>无论是kafka集群，还是producer和consumer都依赖于zookeeper来保证系统可用性集群保存一些meta信息。</li>
+<li>Kafka使用zookeeper作为其分布式协调框架，很好的将消息生产、消息存储、消息消费的过程结合在一起。</li>
+<li>同时借助zookeeper，kafka能够生产者、消费者和broker在内的所以组件在无状态的情况下，建立起生产者和消费者的订阅关系，并实现生产者与消费者的负载均衡。</li>
+</ol>
+<h2 id="Zookeeper-Shell："><a href="#Zookeeper-Shell：" class="headerlink" title="Zookeeper Shell："></a>Zookeeper Shell：</h2><p>通过zkCli来连接正在运行的Zookeeper Shell客户端，可以通过ls和get命令来获取Kafka相关信息。</p>
+<p><img src="/2018/06/02/Kafka技术原理/用法.png" alt="用法"></p>
+<p><center>图：用法示例<center></center></center></p>
+<h2 id="Kafka-in-ZooKeeper："><a href="#Kafka-in-ZooKeeper：" class="headerlink" title="Kafka in ZooKeeper："></a>Kafka in ZooKeeper：</h2><p><img src="/2018/06/02/Kafka技术原理/走.png" alt="走"></p>
+<p><center>图：Kafka在ZooKeeper中的目录结构<center></center></center></p>
+<h1 id="Kafka-Cluster-Mirroring"><a href="#Kafka-Cluster-Mirroring" class="headerlink" title="Kafka Cluster Mirroring"></a>Kafka Cluster Mirroring</h1><p><img src="/2018/06/02/Kafka技术原理/镜像.png" alt="镜像"></p>
+<p><center>图：Kafka CLuster Mirroring<center><br>Kafka Cluster Mirroring是Kafka跨集群数据同步方案，通过Kafka内置的MirrorMaker工具来实现。通过Mirror Maker工具中的consumer从源集群消费数据，然后再通过内置的Producer，将数据重新发布到目标集群。</center></center></p>
+<hr>
+<blockquote>
+<p>以上内容为听华为大数据培训课程和大学MOOC上厦门大学 林子雨的《大数据技术原理与应用》课程而整理的笔记。</p>
+<p><strong><a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">大数据技术原理与应用</a></strong>： <a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">https://www.icourse163.org/course/XMU-1002335004</a> </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/06/02/Kafka技术原理/" title="Kafka技术原理">https://cshihong.github.io/2018/06/02/Kafka技术原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+            <a href="/tags/Kafka/" rel="tag"># Kafka</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/06/02/Flume技术原理/" rel="next" title="Flume技术原理">
+                <i class="fa fa-chevron-left"></i> Flume技术原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/03/ZooKeeper技术原理/" rel="prev" title="ZooKeeper技术原理">
+                ZooKeeper技术原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka简介"><span class="nav-number">1.</span> <span class="nav-text">Kafka简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka概述："><span class="nav-number">1.1.</span> <span class="nav-text">Kafka概述：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka的特性："><span class="nav-number">1.2.</span> <span class="nav-text">Kafka的特性：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka应用场景："><span class="nav-number">1.3.</span> <span class="nav-text">Kafka应用场景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#kafka在FusionInsight中的位置："><span class="nav-number">1.4.</span> <span class="nav-text">kafka在FusionInsight中的位置：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka架构与功能"><span class="nav-number">2.</span> <span class="nav-text">Kafka架构与功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka架构："><span class="nav-number">2.1.</span> <span class="nav-text">Kafka架构：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-Topics："><span class="nav-number">2.1.1.</span> <span class="nav-text">Kafka Topics：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka-Partition："><span class="nav-number">2.1.2.</span> <span class="nav-text">Kafka Partition：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-Logs："><span class="nav-number">2.2.</span> <span class="nav-text">Kafka Logs：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka数据可靠性："><span class="nav-number">2.3.</span> <span class="nav-text">Kafka数据可靠性：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka关键流程"><span class="nav-number">3.</span> <span class="nav-text">Kafka关键流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#写流程："><span class="nav-number">3.1.</span> <span class="nav-text">写流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka读流程："><span class="nav-number">3.2.</span> <span class="nav-text">Kafka读流程：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka在Zookeeper上的目录结构"><span class="nav-number">4.</span> <span class="nav-text">Kafka在Zookeeper上的目录结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper在Kafka的作用："><span class="nav-number">4.1.</span> <span class="nav-text">Zookeeper在Kafka的作用：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Zookeeper-Shell："><span class="nav-number">4.2.</span> <span class="nav-text">Zookeeper Shell：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kafka-in-ZooKeeper："><span class="nav-number">4.3.</span> <span class="nav-text">Kafka in ZooKeeper：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka-Cluster-Mirroring"><span class="nav-number">5.</span> <span class="nav-text">Kafka Cluster Mirroring</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/06/02/Kafka技术原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

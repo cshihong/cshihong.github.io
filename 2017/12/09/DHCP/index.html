@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="DHCP简介动态主机配置协议DHCP（Dynamic Host Configuration Protocol）是一种用于集中对用户IP地址进行动态管理和配置的技术。 DHCP采用客户端/服务器通信模式，由客户端（DHCP Client）向服务器（DHCP Server）提出配置申请，服务器返回为客户端分配的配置信息（包括IP地址、缺省网关、DNS Server、WINS Server等参数），可以">
+<meta name="keywords" content="交换基础,DHCP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DHCP">
+<meta property="og:url" content="https://cshihong.github.io/2017/12/09/DHCP/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="DHCP简介动态主机配置协议DHCP（Dynamic Host Configuration Protocol）是一种用于集中对用户IP地址进行动态管理和配置的技术。 DHCP采用客户端/服务器通信模式，由客户端（DHCP Client）向服务器（DHCP Server）提出配置申请，服务器返回为客户端分配的配置信息（包括IP地址、缺省网关、DNS Server、WINS Server等参数），可以">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/无中继场景.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/有中继场景.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/使用曾经的地址.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/DHCP报文格式：.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/DHCP报文抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/DHCP基于接口配置.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/DHCP全局.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/DHCP分配情况.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/12/09/DHCP/DHCP中继情况.png">
+<meta property="og:updated_time" content="2018-04-12T10:53:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DHCP">
+<meta name="twitter:description" content="DHCP简介动态主机配置协议DHCP（Dynamic Host Configuration Protocol）是一种用于集中对用户IP地址进行动态管理和配置的技术。 DHCP采用客户端/服务器通信模式，由客户端（DHCP Client）向服务器（DHCP Server）提出配置申请，服务器返回为客户端分配的配置信息（包括IP地址、缺省网关、DNS Server、WINS Server等参数），可以">
+<meta name="twitter:image" content="https://cshihong.github.io/2017/12/09/DHCP/无中继场景.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2017/12/09/DHCP/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DHCP | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2017/12/09/DHCP/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">DHCP
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-12-09 20:43:09" itemprop="dateCreated datePublished" datetime="2017-12-09T20:43:09+08:00">2017-12-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-04-12 18:53:24" itemprop="dateModified" datetime="2018-04-12T18:53:24+08:00">2018-04-12</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 8,447</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 32</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="DHCP简介"><a href="#DHCP简介" class="headerlink" title="DHCP简介"></a>DHCP简介</h1><p>动态主机配置协议DHCP（Dynamic Host Configuration Protocol）是一种用于集中对用户IP地址进行动态管理和配置的技术。</p>
+<p>DHCP采用客户端/服务器通信模式，由客户端（DHCP Client）向服务器（DHCP Server）提出配置申请，服务器返回为客户端分配的配置信息（包括IP地址、缺省网关、DNS Server、WINS Server等参数），可以实现IP地址动态分配，以及其他网络参数的集中配置管理。</p>
+<h2 id="DHCP的发展："><a href="#DHCP的发展：" class="headerlink" title="DHCP的发展："></a>DHCP的发展：</h2><p>DHCP是在BOOTP（BOOTstrap Protocol）基础上发展而来，但BOOTP运行在相对静态（每台主机都有固定的网络连接）的环境中，管理员为每台主机配置专门的BOOTP参数文件，该文件会在相当长的时间内保持不变。DHCP从以下两方面对BOOTP进行了扩展：</p>
+<ul>
+<li>DHCP加入了对重新使用的网络地址的动态分配和附加配置选项的功能，可使计算机仅用一个消息就获取它所需要的所有配置信息。</li>
+<li>DHCP允许计算机动态地获取IP地址，而不是静态为每台主机指定地址。</li>
+</ul>
+<p>DHCP技术实现用户地址和配置信息的动态分配和集中管理，使企业可以动态地为企业用户分配和管理地址，避免繁琐的手工配置，可以快速适应网络的变化。</p>
+<h1 id="DHCP原理描述"><a href="#DHCP原理描述" class="headerlink" title="DHCP原理描述"></a>DHCP原理描述</h1><h2 id="DHCP角色："><a href="#DHCP角色：" class="headerlink" title="DHCP角色："></a>DHCP角色：</h2><ul>
+<li>DHCP客户端：通过DHCP协议请求获取IP地址等网络参数的设备。例如，IP电话、PC、手机、无盘工作站等。</li>
+<li>DHCP服务器：负责为DHCP客户端分配网络参数的设备。</li>
+<li>（可选）DHCP中继：负责转发DHCP服务器和DHCP客户端之间的DHCP报文，协助DHCP服务器向DHCP客户端动态分配网络参数的设备。</li>
+</ul>
+<p>DHCP客户端广播发送请求报文（即目的IP地址为255.255.255.255），位于同一网段内的DHCP服务器能够接收请求报文。如果DHCP客户端和DHCP服务器不在同一个网段，DHCP服务器无法接收来自客户端的请求报文，此时，需要通过DHCP中继来转发DHCP报文。不同于传统的IP报文转发，DHCP中继接收到DHCP请求或应答报文后，会重新修改报文格式并生成一个新的DHCP报文再进行转发。</p>
+<p>在企业网络中，如果需要规划较多网段，且网段中的终端都需要通过DHCP自动获取IP地址等网络参数时，可以部署DHCP中继。这样，不同网段的终端可以共用一个DHCP服务器，节省了服务器资源，方便统一管理。</p>
+<blockquote>
+<p><strong>DHCP报文是基于UDP协议传输的。DHCP客户端向DHCP服务器发送报文时采用67端口号，DHCP服务器向DHCP客户端发送报文时采用68端口号。</strong></p>
+</blockquote>
+<h2 id="DHCP服务器给首次接入网络的客户端分配网络参数的工作原理："><a href="#DHCP服务器给首次接入网络的客户端分配网络参数的工作原理：" class="headerlink" title="DHCP服务器给首次接入网络的客户端分配网络参数的工作原理："></a>DHCP服务器给首次接入网络的客户端分配网络参数的工作原理：</h2><h3 id="无中继场景时DHCP客户端首次接入网络的工作原理："><a href="#无中继场景时DHCP客户端首次接入网络的工作原理：" class="headerlink" title="无中继场景时DHCP客户端首次接入网络的工作原理："></a>无中继场景时DHCP客户端首次接入网络的工作原理：</h3><p><img src="/2017/12/09/DHCP/无中继场景.png" alt="无中继场景"></p>
+<p><center>图：无中继场景DHCP客户端首次接入网络的报文交互示意图<center></center></center></p>
+<ol>
+<li><p><strong>发现阶段，即DHCP客户端发现DHCP服务器的阶段。</strong></p>
+<p>DHCP客户端发送DHCP DISCOVER报文来发现DHCP服务器。由于DHCP客户端不知道DHCP服务器的IP地址，所以DHCP客户端以广播方式发送DHCP DISCOVER报文（目的IP地址为255.255.255.255），同一网段内所有DHCP服务器或中继都能收到此报文。DHCP DISCOVER报文中携带了客户端的MAC地址（DHCP DISCOVER报文中的chaddr字段）、需要请求的参数列表选项（Option55中填充的内容，标识了客户端需要从服务器获取的网络配置参数）、广播标志位（DHCP DISCOVER报文中的flags字段，表示客户端请求服务器以单播或广播形式发送响应报文）等信息。</p>
+<ul>
+<li>DHCP DISCOVER报文中的Option字段定义了网络参数信息，不同Option值代表了不同的参数。例如，Option3表示客户端的网关地址选项（当客户端发送的DHCP DISCOVER报文的Option55中填充了选项值3，就表示客户端希望从服务器获取网关地址）；Option53表示DHCP报文类型（例如，DHCP DISCOVER报文）。Option选项分为知名选项和自定义选项，关于知名选项的含义请参见RFC2132。除了RFC2132里面定义的知名选项，不同厂商可以根据需求自己定义自定义选项，例如，Option43为厂商特定信息选项。</li>
+<li>RFC2131中定义了DHCP报文的广播标志字段（flags），当标志字段的最高位为0时，表示客户端希望服务器以单播方式发送DHCP OFFER/DHCP ACK报文；当标志字段的最高位为1时，表示客户端希望服务器以广播方式发送DHCP OFFER/DHCP ACK报文。Huawei AR100&amp;AR120&amp;AR150&amp;AR160&amp;AR200&amp;AR1200&amp;AR2200&amp;AR3200&amp;AR3600系列作为客户端时，此字段为1。</li>
+</ul>
+</li>
+<li><p><strong>提供阶段，即DHCP服务器提供网络配置信息的阶段。</strong></p>
+<p>位于同一网段的DHCP服务器都会接收到DHCP DISCOVER报文，每个DHCP服务器上可能会部署多个地址池，服务器通过地址池来管理可供分配的IP地址等网络参数。服务器接收到DHCP DISCOVER报文后，选择跟接收DHCP DISCOVER报文接口的IP地址处于同一网段的地址池，并且从中选择一个可用的IP地址，然后通过DHCP OFFER报文发送给DHCP客户端。DHCP OFFER报文里面携带了希望分配给指定MAC地址客户端的IP地址（DHCP报文中的yiaddr字段）及其租期等配置参数。</p>
+<p>通常，DHCP服务器的地址池中会指定IP地址的租期，如果DHCP客户端发送的DHCP DISCOVER报文中携带了期望租期，服务器会将客户端请求的期望租期与其指定的租期进行比较，选择其中时间较短的租期分配给客户端。</p>
+<ol>
+<li>DHCP服务器上已配置的与客户端MAC地址静态绑定的IP地址。</li>
+<li>客户端发送的DHCP DISCOVER报文中Option50字段（请求IP地址选项）指定的地址。</li>
+<li>DHCP服务器上记录的曾经分配给客户端的IP地址。</li>
+<li>按照IP地址从大到小的顺序查询，选择最先找到的可供分配的IP地址。</li>
+<li>如果未找到可供分配的IP地址，则依次查询超过租期、处于冲突状态的IP地址，如果找到可用的IP地址，则进行分配；否则，发送DHCP NAK报文作为应答，通知DHCP客户端无法分配IP地址。DHCP客户端需要重新发送DHCP DISCOVER报文来申请IP地址。</li>
+</ol>
+<p>为了防止分配出去的IP地址跟网络中其他客户端的IP地址冲突，DHCP服务器在发送DHCP OFFER报文前可以通过发送源地址和目的地址都为预分配出去IP地址的ICMP ECHO REQUEST报文对分配的IP地址进行地址冲突探测。如果在指定的时间内没有收到应答报文，表示网络中没有客户端使用这个IP地址，可以分配给客户端；如果指定时间内收到应答报文，表示网络中已经存在使用此IP地址的客户端，则把此地址列为冲突地址，然后等待重新接收到DHCP DISCOVER报文后按照前面介绍的选择IP地址的优先顺序重新选择可用的IP地址。</p>
+</li>
+</ol>
+<blockquote>
+<p>此阶段DHCP服务器分配给客户端的IP地址不一定是最终确定使用的IP地址，因为DHCP OFFER报文发送给客户端等待16秒后如果没有收到客户端的响应，此地址就可以继续分配给其他客户端。通过下面的选择阶段和确认阶段后才能最终确定客户端可以使用的IP地址。</p>
+</blockquote>
+<ol start="3">
+<li><p><strong>选择阶段，即DHCP客户端选择IP地址的阶段。</strong></p>
+<p>因为DHCP DISCOVER报文是广播发送的，所以如果同一网段内存在多个DHCP服务器，接收到DHCP DISCOVER报文的服务器都会回应DHCP OFFER报文。如果有多个DHCP服务器向DHCP客户端回应DHCP OFFER报文，则DHCP客户端一般只接收第一个收到的DHCP OFFER报文，然后以广播方式发送DHCP REQUEST报文，该报文中包含客户端想选择的DHCP服务器标识符（即Option54）和客户端IP地址（即Option50，填充了接收的DHCP OFFER报文中yiaddr字段的IP地址）。</p>
+<p>以广播方式发送DHCP REQUEST报文，是为了通知所有的DHCP服务器，它将选择某个DHCP服务器提供的IP地址，其他DHCP服务器可以重新将曾经分配给客户端的IP地址分配给其他客户端。</p>
+</li>
+<li><p><strong>确认阶段，即DHCP服务器确认所分配IP地址的阶段。</strong></p>
+<p>当DHCP服务器收到DHCP客户端发送的DHCP REQUEST报文后，DHCP服务器回应DHCP ACK报文，表示DHCP REQUEST报文中请求的IP地址（Opton50填充的）分配给客户端使用。</p>
+<p>DHCP客户端收到DHCP ACK报文，会广播发送免费ARP报文，探测本网段是否有其他终端使用服务器分配的IP地址，如果在指定时间内没有收到回应，表示客户端可以使用此地址。如果收到了回应，说明有其他终端使用了此地址，客户端会向服务器发送DECLINE报文，并重新向服务器请求IP地址，同时，服务器会将此地址列为冲突地址。当服务器没有空闲地址可分配时，再选择冲突地址进行分配，尽量减少分配出去的地址冲突。</p>
+<p>当DHCP服务器收到DHCP客户端发送的DHCP REQUEST报文后，如果DHCP服务器由于某些原因（例如协商出错或者由于发送REQUEST过慢导致服务器已经把此地址分配给其他客户端）无法分配DHCP REQUEST报文中Opton50填充的IP地址，则发送DHCP NAK报文作为应答，通知DHCP客户端无法分配此IP地址。DHCP客户端需要重新发送DHCP DISCOVER报文来申请新的IP地址。</p>
+</li>
+</ol>
+<h3 id="有中继场景时DHCP客户端首次接入网络的工作原理："><a href="#有中继场景时DHCP客户端首次接入网络的工作原理：" class="headerlink" title="有中继场景时DHCP客户端首次接入网络的工作原理："></a>有中继场景时DHCP客户端首次接入网络的工作原理：</h3><p><img src="/2017/12/09/DHCP/有中继场景.png" alt="有中继场景"></p>
+<p><center>图：有中继场景时DHCP客户端首次接入网络的工作原理<center></center></center></p>
+<ol>
+<li><p><strong>发现阶段</strong></p>
+<ol>
+<li><p>检查DHCP报文中的hops字段，如果大于16，则丢弃DHCP报文；否则，将hops字段加1（表明经过一次DHCP中继），并继续下面的操作。</p>
+<p>DHCP报文中的hops字段表示DHCP报文经过的DHCP中继的数目，该字段由客户端或服务器设置为0，每经过一个DHCP中继时，该字段加1。hops字段的作用是限制DHCP报文所经过的DHCP中继的数目。目前，设备最多支持DHCP客户端与服务器之间有存在16个中继。</p>
+</li>
+<li><p>检查DHCP报文中的giaddr字段。如果是0，将giaddr字段设置为接收DHCP DISCOVER报文的接口IP地址。如果不是0，则不修改该字段，继续下面的操作。</p>
+<p>DHCP报文中的giaddr字段标识客户端网关的IP地址。如果服务器和客户端不在同一个网段且中间存在多个DHCP中继，当客户端发出DHCP请求时，第一个DHCP中继会把自己的IP地址填入此字段，后面的DHCP中继不修改此字段内容，DHCP服务器会根据此字段来判断出客户端所在的网段地址，从而为客户端分配该网段的IP地址。</p>
+</li>
+<li><p>将DHCP报文的目的IP地址改为DHCP服务器或下一跳中继的IP地址，源地址改为中继连接客户端的接口地址，通过路由转发将DHCP报文单播发送到DHCP服务器或下一跳中继。</p>
+</li>
+</ol>
+<p>如果DHCP客户端与DHCP服务器之间存在多个DHCP中继，后面的中继接收到DHCP DISCOVER报文的处理流程同前面所述。</p>
+</li>
+<li><p>提供阶段</p>
+<p>DHCP服务器接收到DHCP DISCOVER报文后，选择与报文中giaddr字段为同一网段的地址池，并为客户端分配IP地址等参数然后向giaddr字段标识的DHCP中继单播发送DHCP OFFER报文。</p>
+</li>
+</ol>
+<ul>
+<li>检查报文中的giaddr字段，如果不是接口的地址，则丢弃该报文；否则，继续下面的操作。</li>
+<li>DHCP中继检查报文的广播标志位。如果广播标志位为1，则将DHCP OFFER报文广播发送给DHCP客户端；否则将DHCP OFFER报文单播发送给DHCP客户端。</li>
+</ul>
+<ol start="3">
+<li><p>选择阶段</p>
+</li>
+<li><p>确认阶段</p>
+<p>选择阶段和确认阶段的过程同无中继场景。</p>
+</li>
+</ol>
+<h2 id="DHCP客户端重用曾经使用的地址的工作原理："><a href="#DHCP客户端重用曾经使用的地址的工作原理：" class="headerlink" title="DHCP客户端重用曾经使用的地址的工作原理："></a>DHCP客户端重用曾经使用的地址的工作原理：</h2><p>DHCP客户端非首次接入网络时，可以重用曾经使用过的地址。</p>
+<p><img src="/2017/12/09/DHCP/使用曾经的地址.png" alt="使用曾经的地址"></p>
+<p><center>图：DHCP客户端重用曾经使用过的IP地址的报文交互过程 <center></center></center></p>
+<ol>
+<li>客户端广播发送包含前一次分配的IP地址的DHCP REQUEST报文，报文中的Option50（请求的IP地址选项）字段填入曾经使用过的IP地址。</li>
+<li>DHCP服务器收到DHCP REQUEST报文后，根据DHCP REQUEST报文中携带的MAC地址来查找有没有相应的租约记录，如果有则返回DHCP ACK报文，通知DHCP客户端可以继续使用这个IP地址。否则，保持沉默，等待客户端重新发送DHCP DISCOVER报文请求新的IP地址。</li>
+</ol>
+<h2 id="DHCP客户端更新租期的工作原理："><a href="#DHCP客户端更新租期的工作原理：" class="headerlink" title="DHCP客户端更新租期的工作原理："></a>DHCP客户端更新租期的工作原理：</h2><p>DHCP服务器采用动态分配机制给客户端分配IP地址时，分配出去的IP地址有租期限制。DHCP客户端向服务器申请地址时可以携带期望租期，服务器在分配租期时把客户端期望租期和地址池中租期配置比较，分配其中一个较短的租期给客户端。租期时间到后服务器会收回该IP地址，收回的IP地址可以继续分配给其他客户端使用。这种机制可以提高IP地址的利用率，避免客户端下线后IP地址继续被占用。如果DHCP客户端希望继续使用该地址，需要更新IP地址的租期（如延长IP地址租期）。</p>
+<ol>
+<li>当租期达到50%（T1）时，DHCP客户端会自动以单播的方式向DHCP服务器发送DHCP REQUEST报文，请求更新IP地址租期。如果收到DHCP服务器回应的DHCP ACK报文，则租期更新成功（即租期从0开始计算）；如果收到DHCP NAK报文，则重新发送DHCP DISCOVER报文请求新的IP地址。</li>
+<li>当租期达到87.5%（T2）时，如果仍未收到DHCP服务器的应答，DHCP客户端会自动以广播的方式向DHCP服务器发送DHCP REQUEST报文，请求更新IP地址租期。如果收到DHCP服务器回应的DHCP ACK报文，则租期更新成功（即租期从0开始计算）；如果收到DHCP NAK报文，则重新发送DHCP DISCOVER报文请求新的IP地址。</li>
+<li>如果租期时间到时都没有收到服务器的回应，客户端停止使用此IP地址，重新发送DHCP DISCOVER报文请求新的IP地址。</li>
+</ol>
+<p>客户端在租期时间到之前，如果用户不想使用分配的IP地址（例如客户端网络位置需要变更），会触发DHCP客户端向DHCP服务器发送DHCP RELEASE报文，通知DHCP服务器释放IP地址的租期。DHCP服务器会保留这个DHCP客户端的配置信息，将IP地址列为曾经分配过的IP地址中，以便后续重新分配给该客户端或其他客户端。</p>
+<p>客户端可以通过发送DHCP INFORM报文向服务器请求更新配置信息。</p>
+<h1 id="DHCP报文："><a href="#DHCP报文：" class="headerlink" title="DHCP报文："></a>DHCP报文：</h1><h2 id="DHCP报文类型："><a href="#DHCP报文类型：" class="headerlink" title="DHCP报文类型："></a>DHCP报文类型：</h2><ul>
+<li><p>DHCP Discover</p>
+<p>由客户端来查找可用的服务器。</p>
+</li>
+<li><p>DHCP offer</p>
+<p>服务器用来响应客户端的DHCP Discover报文，并指定相应的配置参数。</p>
+</li>
+<li><p>DHCP Resquet</p>
+<p>由客户端发送给服务器来请求配置参数或者请求配置确认或者续借租期。</p>
+</li>
+<li><p>DHCP ACK</p>
+<p>由服务器到客户端，含有配置参数包括IP地址。</p>
+</li>
+<li><p>DHCP Decline</p>
+<p>当客户端发现地址已经被使用时，用来通知服务器。</p>
+</li>
+<li><p>DHCP Inform</p>
+<p>客户端已经有IP地址时用它来向服务器请求其他的配置参数。</p>
+</li>
+<li><p>DHCP NAK</p>
+<p>由服务器发送给客户端来报名客户端的地址请求不正确或者租期已过期。</p>
+</li>
+<li><p>DHCP Release</p>
+<p>客户端要释放地址时用来通知服务器。</p>
+</li>
+</ul>
+<p>DHCP报文是承载于UDP上的高层协议报文，采用67（DHCP服务器）和68（DHCP客户端）两个端口号。</p>
+<p>DHCP的报文格式如下图所示。</p>
+<h2 id="DHCP报文格式："><a href="#DHCP报文格式：" class="headerlink" title="DHCP报文格式："></a>DHCP报文格式：</h2><p><img src="/2017/12/09/DHCP/DHCP报文格式：.png" alt="DHCP报文格式："></p>
+<p><center>图：DHCP报文格式<center></center></center></p>
+<h2 id="报文字段解释："><a href="#报文字段解释：" class="headerlink" title="报文字段解释："></a>报文字段解释：</h2><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OP  （op code）</td>
+<td>1字节</td>
+<td>表示报文的类型：1：客户端请求报文2：服务器响应报文</td>
+</tr>
+<tr>
+<td>htype （hardware type）</td>
+<td>1字节</td>
+<td>表示硬件地址的类型。对于以太网，该类型的值为“1”。</td>
+</tr>
+<tr>
+<td>hlen （hardware type）</td>
+<td>1字节</td>
+<td>表示硬件地址的长度，单位是字节。对于以太网，该值为6。</td>
+</tr>
+<tr>
+<td>Hops</td>
+<td>1字节</td>
+<td>表示当前的DHCP报文经过的DHCP中继的数目。该字段由客户端或服务器设置为0，每经过一个DHCP中继时，该字段加1。此字段的作用是限制DHCP报文所经过的DHCP中继数目。</td>
+</tr>
+<tr>
+<td>xid</td>
+<td>4字节</td>
+<td>事务ID，由客户端选择的一个随机数，被服务器和客户端用来在它们之间交流请求和响应，客户端用它对请求和应答进行匹配。该ID由客户端设置并由服务器返回，为32位整数。</td>
+</tr>
+<tr>
+<td>secs (seconds)</td>
+<td>2字节</td>
+<td>由客户端填充，表示从客户端开始获得IP地址或IP地址续借后所使用了的秒数。</td>
+</tr>
+<tr>
+<td>flags</td>
+<td>2字节</td>
+<td>此字段在BOOTP中保留未用，在DHCP中表示标志字段。只有标志字段的最高位才有意义，其余的位均被置为0。最左边的字段被解释为广播响应标志位，内容如下所示：0：客户端请求服务器以单播形式发送响应报文1：客户端请求服务器以广播形式发送响应报文</td>
+</tr>
+<tr>
+<td>ciaddr (client ip address)</td>
+<td>4字节</td>
+<td>表示客户端的IP地址。可以是服务器分配给客户端的IP地址或者客户端已有的IP地址。客户端在初始化状态时没有IP地址，此字段为0.0.0.0。IP地址0.0.0.0仅在采用DHCP方式的系统启动时允许本主机利用它进行临时的通信，不是有效目的地址。</td>
+</tr>
+<tr>
+<td>yiaddr  (your client ip address)</td>
+<td>4字节</td>
+<td>表示服务器分配给客户端的IP地址。当服务器进行DHCP响应时，将分配给客户端的IP地址填入此字段。</td>
+</tr>
+<tr>
+<td>siaddr (server ip address)</td>
+<td>4字节</td>
+<td>DHCP客户端获得启动配置信息的服务器的IP地址。</td>
+</tr>
+<tr>
+<td>giaddr （gateway ip address）</td>
+<td>4字节</td>
+<td>该字段表示第一个DHCP中继的IP地址（注意：不是地址池中定义的网关）。当客户端发出DHCP请求时，如果服务器和客户端不在同一个网络中，那么第一个DHCP中继在转发这个DHCP请求报文时会把自己的IP地址填入此字段。服务器会根据此字段来判断出网段地址，从而选择为用户分配地址的地址池。服务器还会根据此地址将响应报文发送给此DHCP中继，再由DHCP中继将此报文转发给客户端。若在到达DHCP服务器前经过了不止一个DHCP中继，那么第一个DHCP中继后的中继不会改变此字段，只是把Hops的数目加1。</td>
+</tr>
+<tr>
+<td>chaddr (client hardware address)</td>
+<td>16字节</td>
+<td>该字段表示客户端的MAC地址，此字段与前面的“Hardware Type”和“Hardware Length”保持一致。当客户端发出DHCP请求时，将自己的硬件地址填入此字段。对于以太网，当“Hardware Type”和“Hardware Length”分别为“1”和“6”时，此字段必须填入6字节的以太网MAC地址。</td>
+</tr>
+<tr>
+<td>sname (server host name)</td>
+<td>64字节</td>
+<td>该字段表示客户端获取配置信息的服务器名字。此字段由DHCP Server填写，是可选的。如果填写，必须是一个以0结尾的字符串。</td>
+</tr>
+<tr>
+<td>file (file name)</td>
+<td>128字节</td>
+<td>该字段表示客户端的启动配置文件名。此字段由DHCP Server填写，是可选的，如果填写，必须是一个以0结尾的字符串。</td>
+</tr>
+<tr>
+<td>options</td>
+<td>可变</td>
+<td>该字段表示DHCP的选项字段，至少为312字节，格式为”代码+长度+数据”。DHCP通过此字段包含了服务器分配给终端的配置信息，如网关IP地址，DNS服务器的IP地址，客户端可以使用IP地址的有效租期等信息。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="DHCP报文抓包示例："><a href="#DHCP报文抓包示例：" class="headerlink" title="DHCP报文抓包示例："></a>DHCP报文抓包示例：</h2><p><img src="/2017/12/09/DHCP/DHCP报文抓包.png" alt="DHCP报文抓包"></p>
+<p><center>图：DHCP报文抓包示例<center></center></center></p>
+<h2 id="DHCP-Opthion字段选项："><a href="#DHCP-Opthion字段选项：" class="headerlink" title="DHCP Opthion字段选项："></a>DHCP Opthion字段选项：</h2><p>DHCP报文中的Options字段可以用来存放普通协议中没有定义的控制信息和参数。如果用户在DHCP服务器端配置了Options字段，DHCP客户端在申请IP地址的时候，会通过服务器端回应的DHCP报文获得Options字段中的配置信息。</p>
+<p>Options字段由Type、Length和Value三部分组成。这三部分的表示含义如下所示：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type</td>
+<td>1字节</td>
+<td>该字段表示信息类型。</td>
+</tr>
+<tr>
+<td>Length</td>
+<td>1字节</td>
+<td>该字段表示后面信息内容的长度。</td>
+</tr>
+<tr>
+<td>Value</td>
+<td>其长度为Length字段所指定</td>
+<td>该字段表示信息内容。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DHCP Options选项的取值范围为1～255。</strong></p>
+<table>
+<thead>
+<tr>
+<th>Options号</th>
+<th>Options作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>设置子网掩码选项。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>设置网关地址选项。</td>
+</tr>
+<tr>
+<td>6</td>
+<td>设置DNS服务器地址选项。</td>
+</tr>
+<tr>
+<td>12</td>
+<td>设置DHCP客户端的主机名选项。</td>
+</tr>
+<tr>
+<td>15</td>
+<td>设置域名后缀选项。</td>
+</tr>
+<tr>
+<td>33</td>
+<td>设置静态路由选项。该选项中包含一组有分类静态路由（即目的地址的掩码固定为自然掩码，不能划分子网），客户端收到该选项后，将在路由表中添加这些静态路由。如果存在Option121，则忽略该选项。</td>
+</tr>
+<tr>
+<td>44</td>
+<td>设置NetBios服务器选项。</td>
+</tr>
+<tr>
+<td>46</td>
+<td>设置NetBios节点类型选项。</td>
+</tr>
+<tr>
+<td>50</td>
+<td>设置请求IP地址选项。</td>
+</tr>
+<tr>
+<td>51</td>
+<td>设置IP地址租约时间选项。</td>
+</tr>
+<tr>
+<td>52</td>
+<td>设置Option附加选项。</td>
+</tr>
+<tr>
+<td>53</td>
+<td>设置DHCP消息类型。</td>
+</tr>
+<tr>
+<td>54</td>
+<td>设置服务器标识。</td>
+</tr>
+<tr>
+<td>55</td>
+<td>设置请求参数列表选项。客户端利用该选项指明需要从服务器获取哪些网络配置参数。该选项内容为客户端请求的参数对应的选项值。</td>
+</tr>
+<tr>
+<td>58</td>
+<td>设置续约T1时间，一般是租期时间的50%。</td>
+</tr>
+<tr>
+<td>59</td>
+<td>设置续约T2时间。一般是租期时间的87.5%。</td>
+</tr>
+<tr>
+<td>60</td>
+<td>设置厂商分类信息选项，用于标识DHCP客户端的类型和配置。</td>
+</tr>
+<tr>
+<td>61</td>
+<td>设置客户端标识选项。</td>
+</tr>
+<tr>
+<td>66</td>
+<td>设置TFTP服务器名选项，用来指定为客户端分配的TFTP服务器的域名。</td>
+</tr>
+<tr>
+<td>67</td>
+<td>设置启动文件名选项，用来指定为客户端分配的启动文件名。</td>
+</tr>
+<tr>
+<td>77</td>
+<td>设置用户类型标识。</td>
+</tr>
+<tr>
+<td>121</td>
+<td>设置无分类路由选项。该选项中包含一组无分类静态路由（即目的地址的掩码为任意值，可以通过掩码来划分子网），客户端收到该选项后，将在路由表中添加这些静态路由。</td>
+</tr>
+</tbody>
+</table>
+<p>根据Options选项功能的不同，此字段的作用对象也不同。比如Option77用于DHCP客户端，用于识别用户所属的类型，根据Options字段中所携带的用户类型（User Class），DHCP服务器选择适当的地址池为客户端分配IP地址以及相关配置参数。Option77一般在客户端由用户进行配置，而不必在服务器端配置。</p>
+<h3 id="自定义DHCP选项："><a href="#自定义DHCP选项：" class="headerlink" title="自定义DHCP选项："></a>自定义DHCP选项：</h3><p>除了RFC2132中规定的字段选项外，还有部分选项内容没有统一规定，例如Option82。</p>
+<p>Option82称为中继代理信息选项，该选项记录了DHCP客户端的位置信息。DHCP中继或DHCP Snooping设备接收到DHCP客户端发送给DHCP服务器的请求报文后，在该报文中添加Option82，并转发给DHCP服务器。</p>
+<p><strong>管理员可以从Option82中获得DHCP客户端的位置信息，以便定位DHCP客户端，实现对客户端的安全和计费等控制。</strong>支持Option82的服务器还可以根据该选项的信息制定IP地址和其他参数的分配策略，提供更加灵活的地址分配方案。</p>
+<p>Option82最多可以包含255个子选项。若定义了Option82，则至少要定义一个子选项。目前设备只支持两个子选项：sub-option1（Circuit ID，电路ID子选项）和sub-option2（Remote ID，远程ID子选项）。</p>
+<p>由于Option82的内容没有统一规定，不同厂商通常根据需要进行填充。</p>
+<h3 id="DHCP的Option82原理："><a href="#DHCP的Option82原理：" class="headerlink" title="DHCP的Option82原理："></a>DHCP的Option82原理：</h3><ol>
+<li>DHCP Relay Agent插入到用户的DHCP报文，DHCP服务器通过识别Option82来执行IP地址分配策略或其他策略。</li>
+<li>DHCP服务器的响应报文也带Option82，Relay Agent将Option82剥离后发给用户。</li>
+<li>Agent Information Fied中包含多个子选项，每个子选项格式为iSubOpt/Length/Value三元组。</li>
+</ol>
+<p>使能Option82功能，可以根据Option82信息建立精确到接口的绑定表。</p>
+<h3 id="DHCP服务器如果存在多个地址池，如何判断应该分配哪个地址池的地址？"><a href="#DHCP服务器如果存在多个地址池，如何判断应该分配哪个地址池的地址？" class="headerlink" title="DHCP服务器如果存在多个地址池，如何判断应该分配哪个地址池的地址？"></a>DHCP服务器如果存在多个地址池，如何判断应该分配哪个地址池的地址？</h3><ol>
+<li>如果discovery报文中gateway ip address （relay agent address）被填充地址，则分配该IP地址所在网段的地址。</li>
+<li>如果discovery报文中gateway ip address 为空，则分配discovery报文接收端口所在IP网段的地址。</li>
+</ol>
+<p>unr：Uer Nerwork Router，用户网络路由。由DHCP服务器通告给客户端的静态路由。</p>
+<h1 id="DHCP配置"><a href="#DHCP配置" class="headerlink" title="DHCP配置"></a>DHCP配置</h1><h2 id="配置为客户端分配IP地址："><a href="#配置为客户端分配IP地址：" class="headerlink" title="配置为客户端分配IP地址："></a>配置为客户端分配IP地址：</h2><h3 id="创建地址池："><a href="#创建地址池：" class="headerlink" title="创建地址池："></a>创建地址池：</h3><ul>
+<li>基于接口方式的地址池：在DHCP Server与Client相连的接口上配置IP地址，地址池是跟此接口地址所属同一网段的IP地址，且地址池中地址只能分配给此接口下的Client。这种配置方式简单，仅适用于DHCP Server与Client在同一个网段，即不存在中继的场景。例如，设备做DHCP Server仅给一个接口下的Client分配IP地址或者给多个接口下的Client分别分配不同网段的IP地址。</li>
+<li>基于全局方式的地址池：在系统视图下创建指定网段的地址池，且地址池中地址可以分配给设备所有接口下的Client。这种配置方式适用于：<ul>
+<li>DHCP Server与Client在不同网段，即存在中继的场景。</li>
+<li>DHCP Server与Client在同一网段，且需要给一个接口下的Client分配IP地址或者给多个接口下的Client分别分配IP地址。</li>
+</ul>
+</li>
+</ul>
+<h2 id="DHCP基于接口配置："><a href="#DHCP基于接口配置：" class="headerlink" title="DHCP基于接口配置："></a>DHCP基于接口配置：</h2><p>如下图，AR1为DHCP服务器，接口配置地址为192.168.0.1/24.给接口下所连接的设备主机分配IP地址。</p>
+<p><img src="/2017/12/09/DHCP/DHCP基于接口配置.png" alt="DHCP基于接口配置"></p>
+<p><center>图：DHCP基于接口配置拓扑<center></center></center></p>
+<h3 id="配置文件："><a href="#配置文件：" class="headerlink" title="配置文件："></a>配置文件：</h3><p>DHCP服务器配置：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;DHCP&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line"> sysname DHCP</span><br><span class="line">#</span><br><span class="line">dhcp enable <span class="comment">//使能DHCP功能</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ip address <span class="number">192.168</span><span class="number">.0</span><span class="number">.1</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> dhcp check dhcp-rate enable </span><br><span class="line"> <span class="comment">//使能DHCP报文速率检查功能。</span></span><br><span class="line"> dhcp check dhcp-rate <span class="number">90</span></span><br><span class="line"> <span class="comment">//配置DHCP报文上送到DHCP协议栈的检查速率。</span></span><br><span class="line"> dhcp alarm dhcp-rate enable</span><br><span class="line"> <span class="comment">//使能DHCP报文速率告警功能。</span></span><br><span class="line"> dhcp alarm dhcp-rate threshold <span class="number">500</span></span><br><span class="line"> <span class="comment">//配置DHCP报文速率检查告警阈值。</span></span><br><span class="line"> dhcp select interface</span><br><span class="line"> <span class="comment">//开启接口采用接口地址池的DHCP Server功能。</span></span><br></pre></td></tr></table></figure>
+<p>AR3作为DHCP客户端配置：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&lt;AR2&gt;dis current-configuration </span><br><span class="line"> sysname AR2</span><br><span class="line">#</span><br><span class="line">dhcp enable <span class="comment">//使能DHCP功能</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> dhcp client <span class="keyword">default</span>-route preference <span class="number">100</span></span><br><span class="line"> <span class="comment">//配置DHCP服务器下发给DHCP客户端的路由表项优先级。</span></span><br><span class="line"> dhcp client gateway-detect period <span class="number">3600</span> retransmit <span class="number">3</span> timeout <span class="number">500</span></span><br><span class="line"> <span class="comment">//来配置DHCP Client网关探测功能。</span></span><br><span class="line"> dhcp client expected-lease <span class="number">3600</span></span><br><span class="line"> <span class="comment">//配置DHCP Client期望租期功能。</span></span><br><span class="line"> dhcp client <span class="class"><span class="keyword">class</span>-<span class="title">id</span> <span class="title">huawei</span></span></span><br><span class="line"><span class="class">//配置设备作为<span class="title">DHCP</span>客户端时，发送<span class="title">DHCP</span>请求报文中的<span class="title">Option60</span>字段。</span></span><br><span class="line"><span class="class"> <span class="title">dhcp</span> <span class="title">client</span> <span class="title">hostname</span> <span class="title">DHCPClient</span></span></span><br><span class="line"><span class="class"> //配置<span class="title">DHCP</span>客户的主机名</span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> <span class="title">dhcp</span>-<span class="title">alloc</span></span></span><br><span class="line"><span class="class"> //配置<span class="title">ip</span>地址获取方式为通过<span class="title">DHCP</span>获取</span></span><br></pre></td></tr></table></figure>
+<h4 id="dhcp-client-gateway-detect-period-3600-retransmit-3-timeout-500"><a href="#dhcp-client-gateway-detect-period-3600-retransmit-3-timeout-500" class="headerlink" title="dhcp client gateway-detect period 3600 retransmit 3 timeout 500"></a><strong>dhcp client gateway-detect period 3600 retransmit 3 timeout 500</strong></h4><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>参数说明</th>
+<th>取值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>period</strong> <em>period</em></td>
+<td>指定DHCP Client网关探测周期。</td>
+<td>整数形式，取值范围是1～86400。单位是秒。</td>
+</tr>
+<tr>
+<td><strong>retransmit</strong> <em>retransmit</em></td>
+<td>指定DHCP Client网关探测重传次数。</td>
+<td>整数形式，取值范围是1～10。</td>
+</tr>
+<tr>
+<td><strong>timeout</strong> <em>time</em></td>
+<td>指定DHCP Client网关探测超时时间。</td>
+<td>整数形式，取值范围是300～2000。单位是毫秒。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>应用场景</strong></p>
+<p>此命令应用于DHCP客户端。当DHCP Client成功获取IP地址后，该功能可以使DHCP Client迅速检测正在使用的网关状态，如果网关地址错误或网关设备故障，DHCP Client将向DHCP Server重新发送IP地址请求。</p>
+<p><strong>注意事项</strong></p>
+<p>DHCP Client网关探测功能适用于双上行链路场景。</p>
+<h3 id="dhcp-client-class-id"><a href="#dhcp-client-class-id" class="headerlink" title="dhcp client class-id"></a><strong>dhcp client class-id</strong></h3><p>DHCP服务器需要根据请求报文中的Option60字段内容来区分不同设备，用户可以使用此命令自定义设备作为DHCP客户端时，发送的请求报文中封装的Option60内容。</p>
+<p>接口下配置此命令后，设备作为DHCP客户端时，从该接口发送的DHCP请求报文中将使用配置的内容填充Option60字段。</p>
+<h4 id="dhcp-client-client-id"><a href="#dhcp-client-client-id" class="headerlink" title="dhcp client client-id"></a><strong>dhcp client client-id</strong></h4><p>该命令用来配置DHCP客户端的标识，该标识将会封装在DHCP请求报文中与服务器进行交互。DHCP客户端在申请IP地址的时候，DHCP服务器会获取请求报文中的DHCP客户端标识信息，DHCP服务器将根据该标识，为DHCP客户端分配IP地址。</p>
+<h2 id="DHCP基于全局配置："><a href="#DHCP基于全局配置：" class="headerlink" title="DHCP基于全局配置："></a>DHCP基于全局配置：</h2><p>如下图，路由器AR1为DHCP服务器，为不同VLAN的主机分配不同网段的IP地址，同时，为了节约IP地址，使用了聚合VLAN。</p>
+<p><img src="/2017/12/09/DHCP/DHCP全局.png" alt="DHCP全局"></p>
+<h3 id="基于全局的配置文件："><a href="#基于全局的配置文件：" class="headerlink" title="基于全局的配置文件："></a>基于全局的配置文件：</h3><p>AR1DHCP服务器的配置文件：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">&lt;DHCP&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line"> sysname DHCP</span><br><span class="line">#</span><br><span class="line">dhcp enable</span><br><span class="line">#</span><br><span class="line">dhcp snooping enable</span><br><span class="line">#</span><br><span class="line">ip pool VLAN100</span><br><span class="line"> gateway-<span class="built_in">list</span> <span class="number">10.0</span><span class="number">.10</span><span class="number">.254</span> </span><br><span class="line"> network <span class="number">10.0</span><span class="number">.10</span><span class="number">.0</span> mask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> excluded-ip-address <span class="number">10.0</span><span class="number">.10</span><span class="number">.1</span> </span><br><span class="line"> lease day <span class="number">1</span> hour <span class="number">23</span> minute <span class="number">30</span> </span><br><span class="line"> dns-<span class="built_in">list</span> <span class="number">114.114</span><span class="number">.114</span><span class="number">.144</span> <span class="number">8.8</span><span class="number">.8</span><span class="number">.8</span> </span><br><span class="line"> domain-name VLAN100</span><br><span class="line">#</span><br><span class="line">ip pool VLAN200 <span class="comment">//配置VLAN200地址池</span></span><br><span class="line"> gateway-<span class="built_in">list</span> <span class="number">10.0</span><span class="number">.20</span><span class="number">.254</span>  </span><br><span class="line"> network <span class="number">10.0</span><span class="number">.20</span><span class="number">.0</span> mask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> excluded-ip-address <span class="number">10.0</span><span class="number">.20</span><span class="number">.1</span> </span><br><span class="line"> dns-<span class="built_in">list</span> <span class="number">10.0</span><span class="number">.20</span><span class="number">.254</span> </span><br><span class="line"> domain-name VLAN200</span><br><span class="line">#</span><br><span class="line">ip pool VLAN300</span><br><span class="line"> gateway-<span class="built_in">list</span> <span class="number">10.0</span><span class="number">.30</span><span class="number">.1</span> <span class="number">10.0</span><span class="number">.30</span><span class="number">.254</span> </span><br><span class="line"> network <span class="number">10.0</span><span class="number">.30</span><span class="number">.0</span> mask <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> dns-<span class="built_in">list</span> <span class="number">10.0</span><span class="number">.30</span><span class="number">.254</span> <span class="number">8.8</span><span class="number">.8</span><span class="number">.8</span> </span><br><span class="line"> domain-name VLAN300</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ip address <span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line"> dhcp select global </span><br><span class="line"> <span class="comment">//开启接口采用全局地址池的DHCP Server功能。</span></span><br><span class="line">#</span><br><span class="line"><span class="comment">//配置去往DHCP中继不同网段的路由</span></span><br><span class="line">ip route-<span class="keyword">static</span> <span class="number">10.0</span><span class="number">.10</span><span class="number">.0</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> <span class="number">10.0</span><span class="number">.0</span><span class="number">.2</span></span><br><span class="line">ip route-<span class="keyword">static</span> <span class="number">10.0</span><span class="number">.20</span><span class="number">.0</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> <span class="number">10.0</span><span class="number">.0</span><span class="number">.2</span></span><br><span class="line">ip route-<span class="keyword">static</span> <span class="number">10.0</span><span class="number">.30</span><span class="number">.0</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> <span class="number">10.0</span><span class="number">.0</span><span class="number">.2</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2017/12/09/DHCP/DHCP分配情况.png" alt="DHCP分配情况"></p>
+<p><center>图：DHCP服务器分配情况<center></center></center></p>
+<p>SW1作为DHCP中继的配置：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line">[SW]dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW</span><br><span class="line">#</span><br><span class="line">vlan batch <span class="number">10</span> to <span class="number">11</span> <span class="number">20</span> to <span class="number">21</span> <span class="number">30</span> to <span class="number">31</span> <span class="number">100</span> <span class="number">200</span> <span class="number">300</span> </span><br><span class="line"><span class="comment">//批量创建VLAN</span></span><br><span class="line">#</span><br><span class="line">dhcp enable<span class="comment">//使能DHCP功能 </span></span><br><span class="line">#</span><br><span class="line">dhcp snooping enable <span class="comment">//使能DHCP Snooping功能</span></span><br><span class="line">#</span><br><span class="line"><span class="comment">//在每个VLAN下都开启DHCP Snooping功能</span></span><br><span class="line">vlan <span class="number">1</span></span><br><span class="line"> dhcp snooping enable</span><br><span class="line">vlan <span class="number">10</span></span><br><span class="line"> dhcp snooping enable</span><br><span class="line">vlan <span class="number">11</span></span><br><span class="line"> dhcp snooping enable</span><br><span class="line">vlan <span class="number">20</span></span><br><span class="line"> dhcp snooping enable</span><br><span class="line">vlan <span class="number">21</span></span><br><span class="line"> dhcp snooping enable</span><br><span class="line">vlan <span class="number">30</span></span><br><span class="line"> dhcp snooping enable</span><br><span class="line">vlan <span class="number">31</span></span><br><span class="line"> dhcp snooping enable</span><br><span class="line">vlan <span class="number">100</span> <span class="comment">//聚合VLAN</span></span><br><span class="line"> aggregate-vlan </span><br><span class="line"> access-vlan <span class="number">10</span> to <span class="number">11</span></span><br><span class="line">vlan <span class="number">200</span> <span class="comment">//聚合VLAN</span></span><br><span class="line"> aggregate-vlan</span><br><span class="line"> access-vlan <span class="number">20</span> to <span class="number">21</span></span><br><span class="line">vlan <span class="number">300</span> <span class="comment">//聚合VLAN</span></span><br><span class="line"> aggregate-vlan</span><br><span class="line"> access-vlan <span class="number">30</span> to <span class="number">31</span></span><br><span class="line">#</span><br><span class="line">interface Vlanif1 </span><br><span class="line"> ip address <span class="number">10.0</span><span class="number">.0</span><span class="number">.2</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"> <span class="comment">//配置与DHCP服务器直通的路由</span></span><br><span class="line">#</span><br><span class="line">interface Vlanif100</span><br><span class="line"> ip address <span class="number">10.0</span><span class="number">.10</span><span class="number">.254</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"> dhcp select relay <span class="comment">//开启DHCP 中继</span></span><br><span class="line"> dhcp relay server-ip <span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line"> <span class="comment">//DHCP服务器IP地址</span></span><br><span class="line">#</span><br><span class="line">interface Vlanif200</span><br><span class="line"> ip address <span class="number">10.0</span><span class="number">.20</span><span class="number">.254</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"> dhcp select relay</span><br><span class="line"> dhcp relay server-ip <span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">#</span><br><span class="line">interface Vlanif300</span><br><span class="line"> ip address <span class="number">10.0</span><span class="number">.30</span><span class="number">.254</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line"> dhcp select relay</span><br><span class="line"> dhcp relay server-ip <span class="number">10.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> dhcp snooping trusted </span><br><span class="line"> <span class="comment">//配置接口为信任状态。</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">10</span> to <span class="number">11</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">20</span> to <span class="number">21</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">4</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">30</span> to <span class="number">31</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p><img src="/2017/12/09/DHCP/DHCP中继情况.png" alt="DHCP中继情况"></p>
+<p><center>图：DHCP中继情况<center></center></center></p>
+<p>SW2配置文件：SW3,4与之类似。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;SW2&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW2</span><br><span class="line">#</span><br><span class="line">vlan batch <span class="number">10</span> to <span class="number">11</span></span><br><span class="line">#</span><br><span class="line">dhcp enable</span><br><span class="line">#</span><br><span class="line">dhcp snooping enable</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">2</span> to <span class="number">4094</span></span><br><span class="line"> dhcp snooping enable</span><br><span class="line"> dhcp snooping trusted</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> port link-type access</span><br><span class="line"> port <span class="keyword">default</span> vlan <span class="number">10</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> port link-type access</span><br><span class="line"> port <span class="keyword">default</span> vlan <span class="number">11</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2017/12/09/DHCP/" title="DHCP">https://cshihong.github.io/2017/12/09/DHCP/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/交换基础/" rel="tag"># 交换基础</a>
+          
+            <a href="/tags/DHCP/" rel="tag"># DHCP</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/29/MSTP多区域生成树协议/" rel="next" title="MSTP多区域生成树协议">
+                <i class="fa fa-chevron-left"></i> MSTP多区域生成树协议
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/09/DHCP-Snooping/" rel="prev" title="DHCP Snooping">
+                DHCP Snooping <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCP简介"><span class="nav-number">1.</span> <span class="nav-text">DHCP简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP的发展："><span class="nav-number">1.1.</span> <span class="nav-text">DHCP的发展：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCP原理描述"><span class="nav-number">2.</span> <span class="nav-text">DHCP原理描述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP角色："><span class="nav-number">2.1.</span> <span class="nav-text">DHCP角色：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP服务器给首次接入网络的客户端分配网络参数的工作原理："><span class="nav-number">2.2.</span> <span class="nav-text">DHCP服务器给首次接入网络的客户端分配网络参数的工作原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#无中继场景时DHCP客户端首次接入网络的工作原理："><span class="nav-number">2.2.1.</span> <span class="nav-text">无中继场景时DHCP客户端首次接入网络的工作原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有中继场景时DHCP客户端首次接入网络的工作原理："><span class="nav-number">2.2.2.</span> <span class="nav-text">有中继场景时DHCP客户端首次接入网络的工作原理：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP客户端重用曾经使用的地址的工作原理："><span class="nav-number">2.3.</span> <span class="nav-text">DHCP客户端重用曾经使用的地址的工作原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP客户端更新租期的工作原理："><span class="nav-number">2.4.</span> <span class="nav-text">DHCP客户端更新租期的工作原理：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCP报文："><span class="nav-number">3.</span> <span class="nav-text">DHCP报文：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP报文类型："><span class="nav-number">3.1.</span> <span class="nav-text">DHCP报文类型：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP报文格式："><span class="nav-number">3.2.</span> <span class="nav-text">DHCP报文格式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#报文字段解释："><span class="nav-number">3.3.</span> <span class="nav-text">报文字段解释：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP报文抓包示例："><span class="nav-number">3.4.</span> <span class="nav-text">DHCP报文抓包示例：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP-Opthion字段选项："><span class="nav-number">3.5.</span> <span class="nav-text">DHCP Opthion字段选项：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#自定义DHCP选项："><span class="nav-number">3.5.1.</span> <span class="nav-text">自定义DHCP选项：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCP的Option82原理："><span class="nav-number">3.5.2.</span> <span class="nav-text">DHCP的Option82原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCP服务器如果存在多个地址池，如何判断应该分配哪个地址池的地址？"><span class="nav-number">3.5.3.</span> <span class="nav-text">DHCP服务器如果存在多个地址池，如何判断应该分配哪个地址池的地址？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCP配置"><span class="nav-number">4.</span> <span class="nav-text">DHCP配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置为客户端分配IP地址："><span class="nav-number">4.1.</span> <span class="nav-text">配置为客户端分配IP地址：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建地址池："><span class="nav-number">4.1.1.</span> <span class="nav-text">创建地址池：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP基于接口配置："><span class="nav-number">4.2.</span> <span class="nav-text">DHCP基于接口配置：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置文件："><span class="nav-number">4.2.1.</span> <span class="nav-text">配置文件：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dhcp-client-gateway-detect-period-3600-retransmit-3-timeout-500"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">dhcp client gateway-detect period 3600 retransmit 3 timeout 500</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dhcp-client-class-id"><span class="nav-number">4.2.2.</span> <span class="nav-text">dhcp client class-id</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#dhcp-client-client-id"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">dhcp client client-id</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCP基于全局配置："><span class="nav-number">4.3.</span> <span class="nav-text">DHCP基于全局配置：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基于全局的配置文件："><span class="nav-number">4.3.1.</span> <span class="nav-text">基于全局的配置文件：</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2017/12/09/DHCP/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

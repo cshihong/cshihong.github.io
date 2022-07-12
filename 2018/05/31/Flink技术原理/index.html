@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Flink简介Flink概述： Flink是一个批处理和流处理结合的统一计算框架，其核心是一个提供了数据分发以及并发化计算的流数据处理引擎。它的最大亮点是流处理，是业界最顶级的开源流处理引擎。 Flink与Storm类似，属于事件驱动型实时流系统。 Flink特点： Streaming-first、流处理引擎。 Fault-tolerant，容错，可靠性，checkpoint。 Scalable，">
+<meta name="keywords" content="Flink,Hadoop">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink技术原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/05/31/Flink技术原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="Flink简介Flink概述： Flink是一个批处理和流处理结合的统一计算框架，其核心是一个提供了数据分发以及并发化计算的流数据处理引擎。它的最大亮点是流处理，是业界最顶级的开源流处理引擎。 Flink与Storm类似，属于事件驱动型实时流系统。 Flink特点： Streaming-first、流处理引擎。 Fault-tolerant，容错，可靠性，checkpoint。 Scalable，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/Flink.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/对比.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/位置.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/Flink架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/Flink技术栈.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/DataStream.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/Transformation.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/流程图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/Flink%20on%20Yarn.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/原理.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/并行数据流.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/操作符.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/时间.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/滚动.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/滑动.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/会话.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/容错.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/check1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/check2.png">
+<meta property="og:updated_time" content="2019-11-15T14:37:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flink技术原理">
+<meta name="twitter:description" content="Flink简介Flink概述： Flink是一个批处理和流处理结合的统一计算框架，其核心是一个提供了数据分发以及并发化计算的流数据处理引擎。它的最大亮点是流处理，是业界最顶级的开源流处理引擎。 Flink与Storm类似，属于事件驱动型实时流系统。 Flink特点： Streaming-first、流处理引擎。 Fault-tolerant，容错，可靠性，checkpoint。 Scalable，">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/05/31/Flink技术原理/Flink.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/05/31/Flink技术原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Flink技术原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/05/31/Flink技术原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Flink技术原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-31 11:26:14" itemprop="dateCreated datePublished" datetime="2018-05-31T11:26:14+08:00">2018-05-31</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-15 22:37:18" itemprop="dateModified" datetime="2019-11-15T22:37:18+08:00">2019-11-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 2,965</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 11</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Flink简介"><a href="#Flink简介" class="headerlink" title="Flink简介"></a>Flink简介</h1><h2 id="Flink概述："><a href="#Flink概述：" class="headerlink" title="Flink概述："></a>Flink概述：</h2><p><img src="/2018/05/31/Flink技术原理/Flink.png" alt="Flink"></p>
+<p>Flink是一个批处理和流处理结合的统一计算框架，其核心是一个提供了数据分发以及并发化计算的流数据处理引擎。它的最大亮点是流处理，是业界最顶级的开源流处理引擎。</p>
+<p>Flink与Storm类似，属于事件驱动型实时流系统。</p>
+<h2 id="Flink特点："><a href="#Flink特点：" class="headerlink" title="Flink特点："></a>Flink特点：</h2><ul>
+<li>Streaming-first、流处理引擎。</li>
+<li>Fault-tolerant，容错，可靠性，checkpoint。</li>
+<li>Scalable，可扩展性，1000节点以上。</li>
+<li>Performance，性能，高吞吐量， 低延迟。</li>
+</ul>
+<h2 id="Flink关键特性："><a href="#Flink关键特性：" class="headerlink" title="Flink关键特性："></a>Flink关键特性：</h2><ul>
+<li>低延时：提供ms级时延的处理能力。</li>
+<li>Exactly Once：提供异步快照机制，保证所有数据真正处理一次。</li>
+<li>HA：JobManager支持主备模式，保证无单点故障。</li>
+<li>水平扩展能力：TaskManager支持手动水平扩展。</li>
+</ul>
+<h2 id="Hadoop兼容性："><a href="#Hadoop兼容性：" class="headerlink" title="Hadoop兼容性："></a>Hadoop兼容性：</h2><ul>
+<li>Flink能够支持Yarn，能够从HDFS和HBase中获取数据。</li>
+<li>能够使用所有的Hadoop的格式化输入和输出。</li>
+<li>能够使用Hadoop原有的Mappers和Reducers，并且能与FLink的操作混合使用。</li>
+<li>能够更快的运行Hadoop作业。</li>
+</ul>
+<h2 id="Flink应用场景："><a href="#Flink应用场景：" class="headerlink" title="Flink应用场景："></a>Flink应用场景：</h2><p>Flink最适合的应用场景是低延时的数据处理场景：高并发处理数据，实验毫秒级，且兼具可靠性。</p>
+<p>典型应用场景有：</p>
+<ul>
+<li>互联网金融业务。</li>
+<li>点击流日志处理。</li>
+<li>舆情监控。</li>
+</ul>
+<h2 id="流式计算框架的性能对比："><a href="#流式计算框架的性能对比：" class="headerlink" title="流式计算框架的性能对比："></a>流式计算框架的性能对比：</h2><p><img src="/2018/05/31/Flink技术原理/对比.png" alt="对比"></p>
+<p><center>图：Storm和Flink流式计算框架的性能对比<center></center></center></p>
+<blockquote>
+<p>通过对比，可以看出Flink流计算框架比Storm的性能高的多。</p>
+</blockquote>
+<h2 id="Flink在FusionInsight产品中的位置："><a href="#Flink在FusionInsight产品中的位置：" class="headerlink" title="Flink在FusionInsight产品中的位置："></a>Flink在FusionInsight产品中的位置：</h2><p><img src="/2018/05/31/Flink技术原理/位置.png" alt="位置"></p>
+<p><center>图：Flink在FusionInsight中的位置<center></center></center></p>
+<p>FusionInsight HD提供大数处理环境，基于社交开源软件增强，按照场景选择业界最佳实践。</p>
+<p>FLink是批处理和流处理结合的统计计算框架，用于高并发pipeline处理数据，实验毫秒级的场景响应，且兼具可靠性。</p>
+<p>在FusionInsight HD集群中，Flink主要组以下组件进行交互：</p>
+<ul>
+<li>HDFS：Flink在HDFS文件系统中读写数据（必选）。</li>
+<li>YARN：Flink任务的运行以来Yarn来进行资源的调度管理（必选）。</li>
+<li>Zookeeper：FLink的checkpoint的实现依赖Zookeeper。（必选）</li>
+<li>Kafka：Flink可以接收Kafka发送的数据流（可选）。</li>
+</ul>
+<h1 id="Flink原理与技术架构"><a href="#Flink原理与技术架构" class="headerlink" title="Flink原理与技术架构"></a>Flink原理与技术架构</h1><h2 id="Flink架构："><a href="#Flink架构：" class="headerlink" title="Flink架构："></a>Flink架构：</h2><p><img src="/2018/05/31/Flink技术原理/Flink架构.png" alt="Flink架构"></p>
+<p><center>图：Flink架构图<center></center></center></p>
+<p>##Flink技术栈：</p>
+<p><img src="/2018/05/31/Flink技术原理/Flink技术栈.png" alt="Flink技术栈"></p>
+<p><center>图：Flink技术栈<center></center></center></p>
+<ul>
+<li><p>API:DataStream API是用于流处理的接口。</p>
+<p>DataSet API是用于批处理的接口。它们都会使用单独编译的处理方式。</p>
+</li>
+</ul>
+<ul>
+<li>Core：Flink的Core叫做Runtime，是Flink流处理和批处理时共用的一个引擎。Runtime以</li>
+</ul>
+<ul>
+<li>Deploy（部署方式）：在最底层，Flink提供了三种部署模式。分别为Local，Cluster，Cloud。</li>
+</ul>
+<h2 id="Flink核心概念–DataStream："><a href="#Flink核心概念–DataStream：" class="headerlink" title="Flink核心概念–DataStream："></a>Flink核心概念–DataStream：</h2><p>DataStream：FLink用类DataStream来表示程序中的流式数据、用户可以认为它们是含有重复数据的不可修改的集合（Collection），DataStaram中元素的数据时无限的。</p>
+<p><img src="/2018/05/31/Flink技术原理/DataStream.png" alt="DataStream"></p>
+<p><center>图：DataStream类<center></center></center></p>
+<p><img src="/2018/05/31/Flink技术原理/流程.png" alt="流程"></p>
+<p><center>图：处理流程<center></center></center></p>
+<ul>
+<li>Data Source：流数据源的接入，支持HDFS文件，Kafka，文本数据等。</li>
+<li>Transformations：流数据转换。</li>
+<li>Data sink：数据输出，支持HDFS，Kafka，文本等。</li>
+</ul>
+<p><strong>Flink数据源：</strong></p>
+<p>批处理：</p>
+<ul>
+<li>Files：HDFS，Local file system，MapReduce file system，Text，csv等。</li>
+<li>JDBC</li>
+<li>HBase</li>
+<li>Collections</li>
+</ul>
+<p>流处理：</p>
+<ul>
+<li>Files</li>
+<li>Socket streams</li>
+<li>Kafka</li>
+<li>Flume</li>
+<li>Collections</li>
+<li>RabbitMQ</li>
+</ul>
+<p><strong>DataStream Transformation：</strong></p>
+<p><img src="/2018/05/31/Flink技术原理/Transformation.png" alt="Transformation"></p>
+<p>常用的Transformation有：map(), flatMap(), filter(), keyBy(), partition(), rebalance(), shuffle(), broadcast(), project()等。</p>
+<h2 id="Flink运行流程："><a href="#Flink运行流程：" class="headerlink" title="Flink运行流程："></a>Flink运行流程：</h2><p><img src="/2018/05/31/Flink技术原理/流程图.png" alt="流程图"></p>
+<p><center>图：Flink架构，运行流程<center></center></center></p>
+<p>关键角色概念：</p>
+<ul>
+<li>Client：需求提出方，负责提交需求（应用），构造流图。</li>
+<li>JobManager：负责应用的资源管理，根据应用的需求，想资源管理部门（ResourceManager）申请资源。</li>
+<li>Yarn的ResourceManager：资源管理部门，负责整个集群的资源统一调度和分配。</li>
+<li>TaskManager：负责实际计算工资，一个应用会拆给多个TaskManager来进行计算。</li>
+<li>TaskSlot：任务槽，类似于Yarn当中的Container，用于资源的封装。但是在FLink中，<strong>taskSlot只负责封装内存的资源，不包含CPU的资源</strong>。每一个TaskManager中会包含3个TaskSlot，所以每一个TaskManager中最多能并发执行的任务是可控的，最多3个。TaskSlot有独占的内存资源，在一个TaskManager中可以运行不同的任务。</li>
+<li>Task：TsakSlot当中的Task就是任务执行的具体单元。</li>
+</ul>
+<h2 id="Flink-on-YARN："><a href="#Flink-on-YARN：" class="headerlink" title="Flink on YARN："></a>Flink on YARN：</h2><p><img src="/2018/05/31/Flink技术原理/Flink on Yarn.png" alt="Flink on Yarn"></p>
+<p><center>图：Flink on YARN运行流程图<center></center></center></p>
+<ol>
+<li>首先Flink Yarn Client会检验系统是否有足够的资源来启动YARN集群，如果资源足够，它就会将Jar包和配置文件上传到HDFS。</li>
+<li>Flink YARN CLient首先与Yarn ResourceManager进行通信，申请启动applicationMaster，在FLink Yarn的集群中，ApplicationMaster与Flink JobManager被封装在同一个container中。</li>
+<li>ApplicationMaster在启动的过程中，会和Yarn的ResourceManager进行交互，向ResourceManager申请所需要的TaskManager Container。当ApplicationMaster申请到TaskManager Container以后，它会在所对应的NodeManager节点上启动TaskManager进程。</li>
+<li>由于ApplicationMaster和Flink JobManager是封装在同一个Container中的，所以ApplicationMaster会将JobManager的IPC地址，通过HDFS共享的方式通知到各个TaskManager上。TaskManager启动成功以后，就会向JobManager进行注册。</li>
+<li>当所有的TaskManager都向JobManager注册成功以后，Flink基于Yarn的集群就启动成功了。Flink Yarn Client就可以提交FLink job到Flink JobManager上，然后进程后面的映射、调度、计算等处理。</li>
+</ol>
+<h2 id="Flink原理："><a href="#Flink原理：" class="headerlink" title="Flink原理："></a>Flink原理：</h2><p>用户实现的Flink程序是由Stream数据和Transformation算子组成。</p>
+<p>Stream是一个中间结果数据，而Transformation是算子，它对一个或多个输入Stream进行计算处理，输出一个或多个结果Stream。</p>
+<hr>
+<p><img src="/2018/05/31/Flink技术原理/原理.png" alt="原理"></p>
+<p><center>图：Flink原理图<center></center></center></p>
+<p>Flink程序在执行的时候，会被映射成一个Streaming Dataflow，一个Streaming Dataflow是由一组Stream和Transformation Operator组成的。在启动时从一个或多个Source Operator开始，结束与一个或多个Sink Operator。</p>
+<p>Source操作符载入数据，通过map(), keyBy(), apply()等Transformation操作符处理stream。数据处理完成后，调用sink写入相关存储系统，如HDFS、HBase、Kafka等。</p>
+<p>###Flink并行数据流：</p>
+<p><img src="/2018/05/31/Flink技术原理/并行数据流.png" alt="并行数据流"></p>
+<p><center>图：Flink并行数据流<center></center></center></p>
+<p>一个Stream可以被分成多个Stream的分区，也就是Stream Partition。一个Operator也可以被分为多个Operator Subtask。如上图中，Source被分成Source1和Source2，它们分别为Source的Operator Subtask。每一个Operator Subtask都是在不同的线程当中独立执行的。一个Operator的并行度，就等于Operator Subtask的个数。上图Source的并行度为2。而一个Stream的并行度就等于它生成的Operator的并行度。</p>
+<p>数据在两个operator之间传递的时候有两种模式：</p>
+<ol>
+<li>One to One模式：两个operator用此模式传递的时候，会保持数据的分区数和数据的排序；如上图中的Source1到Map1，它就保留的Source的分区特性，以及分区元素处理的有序性。</li>
+<li>Redistributing 模式：这种模式会改变数据的分区数；每个一个operator subtask会根据选择transformation把数据发送到不同的目标subtasks,比如keyBy()会通过hashcode重新分区,broadcast()和rebalance()方法会随机重新分区；</li>
+</ol>
+<p>###Flink操作符链：</p>
+<p><img src="/2018/05/31/Flink技术原理/操作符.png" alt="操作符"></p>
+<p><center>图：FLink操作符链<center></center></center></p>
+<p>Flink内部有一个优化的功能，它会根据上下游算子的紧密程度来进行优化，紧密程度高的算子可以把它优化成一个大的Operator。如图中的Source和Map紧密程度很高，就可以优化成一个Operator Chain。实际上就是一个执行链，每个执行链都会在TaskManager中一个独立的线程汇总执行。Operator Chain实际上就是一个Operator，keyBy也是一个Operator，sink也是一个Operator，图的上半部分都是通过Stream连接，每个Operator都在一个独立的Task中运行。下半部分是上半部分的一个并行版本，对每一个Task都并行为多个Subtask。</p>
+<h2 id="Flink窗口："><a href="#Flink窗口：" class="headerlink" title="Flink窗口："></a>Flink窗口：</h2><p>Flink支持基于时间窗口操作，也支持基于数据的窗口操作：</p>
+<ul>
+<li>按分割标准划分：timeWindow、countWindow。</li>
+<li>按窗口行为划分：Tumbling Window， Sliding Window、自定义窗口。</li>
+</ul>
+<h3 id="Flink常用窗口类型—时间和计数窗口："><a href="#Flink常用窗口类型—时间和计数窗口：" class="headerlink" title="Flink常用窗口类型—时间和计数窗口："></a>Flink常用窗口类型—时间和计数窗口：</h3><p>TimeWindow：时间窗口，按固定的时间划分的窗口。</p>
+<p>CountWindow：事件窗口，窗口是以数据驱动的，比如每经过100个元素，就把这100个元素归结到一个事件窗口当中。</p>
+<p><img src="/2018/05/31/Flink技术原理/时间.png" alt="时间"></p>
+<p><center>图：时间和事件窗口示意图<center></center></center></p>
+<h3 id="Flink常用窗口类型—滚动窗口："><a href="#Flink常用窗口类型—滚动窗口：" class="headerlink" title="Flink常用窗口类型—滚动窗口："></a>Flink常用窗口类型—滚动窗口：</h3><p>Tumbing Windows：滚动窗口，窗口之间时间点不重叠。它是按照固定的时间，或固定的事件个数划分的，分别可以叫做滚动时间窗口和滚动事件窗口。</p>
+<p><img src="/2018/05/31/Flink技术原理/滚动.png" alt="滚动"></p>
+<p><center>图：时间滚动窗口示意图<center></center></center></p>
+<h3 id="Flink常用窗口类型—滑动窗口："><a href="#Flink常用窗口类型—滑动窗口：" class="headerlink" title="Flink常用窗口类型—滑动窗口："></a>Flink常用窗口类型—滑动窗口：</h3><p>Sliding Windows：滑动窗口，窗口之间时间点存在重叠。对于某些应用，它们需要的时间是不间断的，需要平滑的进行窗口聚合。例如，可以每30s记算一次最近1分钟用户所购买的商品数量的总数，这个就是时间滑动窗口；或者每10个客户点击购买，然后就计算一下最近100个客户购买的商品的总和，这个就是事件滑动窗口。</p>
+<p><img src="/2018/05/31/Flink技术原理/滑动.png" alt="滑动"></p>
+<p><center>图 ：滑动窗口示意图<center></center></center></p>
+<h3 id="Flink常用窗口类型—会话窗口："><a href="#Flink常用窗口类型—会话窗口：" class="headerlink" title="Flink常用窗口类型—会话窗口："></a>Flink常用窗口类型—会话窗口：</h3><p>Session Windows：会话窗口，经过一段设置时间无数据认为窗口完成。</p>
+<p><img src="/2018/05/31/Flink技术原理/会话.png" alt="会话"></p>
+<p><center>图：会话窗口示意图<center></center></center></p>
+<h1 id="Flink高级特性"><a href="#Flink高级特性" class="headerlink" title="Flink高级特性"></a>Flink高级特性</h1><h2 id="Flink容错功能："><a href="#Flink容错功能：" class="headerlink" title="Flink容错功能："></a>Flink容错功能：</h2><ul>
+<li>ckeckpoint机制是FLink运行过程中容错的重要手段。</li>
+<li>checkpoint机制不断绘制流应用的快照，流应用的状态快照被保存在配置的位置（如：JobManager的内存里，或者HDFS上）。</li>
+<li>Flink分布式快照机制的核心是barriers，这些barriers周期性插入到数据流中，并作为数据流的一部分随之流动。</li>
+</ul>
+<p><img src="/2018/05/31/Flink技术原理/容错.png" alt="容错"></p>
+<p><center>图：checkpoint机制<center></center></center></p>
+<p>Checkpoint机制是Flink可靠运行的基石，可以保证Flink集群在某个算子因为某些原因（如异常退出）出现故障时，能够将整个应用流图的状态恢复到故障之前的某一状态，保证应用流图状态的一致性。</p>
+<p>该机制可以保证应用在运行过程中出现失败时，应用的所以有状态能够从某一个检测点恢复，保证数据仅被处理一次（Exactly Once）。另外，也可以选择至少处理一次（at least once）。</p>
+<p><strong>Checkpoint机制具体执行过程：</strong></p>
+<p><img src="/2018/05/31/Flink技术原理/check1.png" alt="check1"></p>
+<p><center>图：Checkpoint机制执行具体过程<center></center></center></p>
+<p>每个需要checkpoint的应用，它在启动的时候，Flink的JobManager就会为它创建一个checkpointCoordinator。checkpointCoordinator它全权负责本应用的快照的制作，用户可以通过checkpointCoordinator中的setCheckpointInterval接口设置checkpoint的周期。</p>
+<ul>
+<li>Checkpoint机制的第一步，就是CheckpointCoordinator周期性的向该流应用，所有的source算子发送barrier。</li>
+<li>第二步，Source算子接收到一个barrier后，便暂停处理数据，将当前的状态制作成快照，并保存到指定的持久化存储中，最后它再向CheckpointCoordinator报告自己的快照制作情况。同时向自身下游所有算子广播该barrier。然后恢复该算子的数据处理工作。</li>
+<li>下游的算子接收到barrier后，也会暂停自的数据处理过程，同2过程。</li>
+<li>最后CheckpointCoordinator会确认它接收到的报告，如果收到本周期的所有算子的快照就认为快照制作成功，否则失败。</li>
+</ul>
+<p><strong>多Source源的Checkpoint机制：</strong></p>
+<p><img src="/2018/05/31/Flink技术原理/check2.png" alt="check2"></p>
+<p><center>图：多Source源的Checkpoint机制<center></center></center></p>
+<p>当一个算子上游有多个来源时，它会将首先接收到barrier端阻塞掉，等待其他输入端的barrier，只有当接收到所有输入端的barrier时，该算子才会开始合并barrier执行制作快照过程，并将合并后的barrier广播到下游算子。</p>
+<hr>
+<blockquote>
+<p>以上内容为听华为大数据培训课程和大学MOOC上厦门大学 林子雨的《大数据技术原理与应用》课程而整理的笔记。</p>
+<p><strong><a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">大数据技术原理与应用</a></strong>： <a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">https://www.icourse163.org/course/XMU-1002335004</a> </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/05/31/Flink技术原理/" title="Flink技术原理">https://cshihong.github.io/2018/05/31/Flink技术原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Flink/" rel="tag"># Flink</a>
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/30/Pregel（图计算）技术原理/" rel="next" title="Pregel（图计算）技术原理">
+                <i class="fa fa-chevron-left"></i> Pregel（图计算）技术原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/06/01/Loader技术原理/" rel="prev" title="Loader技术原理">
+                Loader技术原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Flink简介"><span class="nav-number">1.</span> <span class="nav-text">Flink简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink概述："><span class="nav-number">1.1.</span> <span class="nav-text">Flink概述：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink特点："><span class="nav-number">1.2.</span> <span class="nav-text">Flink特点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink关键特性："><span class="nav-number">1.3.</span> <span class="nav-text">Flink关键特性：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hadoop兼容性："><span class="nav-number">1.4.</span> <span class="nav-text">Hadoop兼容性：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink应用场景："><span class="nav-number">1.5.</span> <span class="nav-text">Flink应用场景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#流式计算框架的性能对比："><span class="nav-number">1.6.</span> <span class="nav-text">流式计算框架的性能对比：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink在FusionInsight产品中的位置："><span class="nav-number">1.7.</span> <span class="nav-text">Flink在FusionInsight产品中的位置：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Flink原理与技术架构"><span class="nav-number">2.</span> <span class="nav-text">Flink原理与技术架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink架构："><span class="nav-number">2.1.</span> <span class="nav-text">Flink架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink核心概念–DataStream："><span class="nav-number">2.2.</span> <span class="nav-text">Flink核心概念–DataStream：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink运行流程："><span class="nav-number">2.3.</span> <span class="nav-text">Flink运行流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink-on-YARN："><span class="nav-number">2.4.</span> <span class="nav-text">Flink on YARN：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink原理："><span class="nav-number">2.5.</span> <span class="nav-text">Flink原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink窗口："><span class="nav-number">2.6.</span> <span class="nav-text">Flink窗口：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Flink常用窗口类型—时间和计数窗口："><span class="nav-number">2.6.1.</span> <span class="nav-text">Flink常用窗口类型—时间和计数窗口：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flink常用窗口类型—滚动窗口："><span class="nav-number">2.6.2.</span> <span class="nav-text">Flink常用窗口类型—滚动窗口：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flink常用窗口类型—滑动窗口："><span class="nav-number">2.6.3.</span> <span class="nav-text">Flink常用窗口类型—滑动窗口：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Flink常用窗口类型—会话窗口："><span class="nav-number">2.6.4.</span> <span class="nav-text">Flink常用窗口类型—会话窗口：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Flink高级特性"><span class="nav-number">3.</span> <span class="nav-text">Flink高级特性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink容错功能："><span class="nav-number">3.1.</span> <span class="nav-text">Flink容错功能：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/05/31/Flink技术原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

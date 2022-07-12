@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="DHCPv6简介IPv6动态主机配置协议DHCPv6(Dynamic Host Configuration Protocol for IPv6)是针对IPv6编址方案设计，为主机分配IPv6地址/前缀和其他网络配置参数。 目的：IPv6协议具有地址空间巨大的特点，但同时长达128比特的IPv6地址又要求高效合理的地址自动分配和管理策略。IPv6无状态地址配置方式（参看协议RFC2462）是目前广泛">
+<meta name="keywords" content="路由基础,DHCP,IPv6">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DHCPv6基础">
+<meta property="og:url" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="DHCPv6简介IPv6动态主机配置协议DHCPv6(Dynamic Host Configuration Protocol for IPv6)是针对IPv6编址方案设计，为主机分配IPv6地址/前缀和其他网络配置参数。 目的：IPv6协议具有地址空间巨大的特点，但同时长达128比特的IPv6地址又要求高效合理的地址自动分配和管理策略。IPv6无状态地址配置方式（参看协议RFC2462）是目前广泛">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/DHCPv6基本架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/DHCPv6报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Solicit.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Advertise.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Request.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Renewbaow.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Rebind.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Reply.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Release.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Relay-Forwarding.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/Relay-reply.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/四步分配.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/两步交互.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/无状态.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/PD.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/DHCP%20中继.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/DHCPv6.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/DHCP.png">
+<meta property="og:updated_time" content="2019-08-25T01:52:56.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DHCPv6基础">
+<meta name="twitter:description" content="DHCPv6简介IPv6动态主机配置协议DHCPv6(Dynamic Host Configuration Protocol for IPv6)是针对IPv6编址方案设计，为主机分配IPv6地址/前缀和其他网络配置参数。 目的：IPv6协议具有地址空间巨大的特点，但同时长达128比特的IPv6地址又要求高效合理的地址自动分配和管理策略。IPv6无状态地址配置方式（参看协议RFC2462）是目前广泛">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/02/01/DHCPv6基础/DHCPv6基本架构.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/02/01/DHCPv6基础/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DHCPv6基础 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/02/01/DHCPv6基础/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">DHCPv6基础
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-02-01 20:37:16" itemprop="dateCreated datePublished" datetime="2018-02-01T20:37:16+08:00">2018-02-01</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:52:56" itemprop="dateModified" datetime="2019-08-25T09:52:56+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 7,839</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 29</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="DHCPv6简介"><a href="#DHCPv6简介" class="headerlink" title="DHCPv6简介"></a>DHCPv6简介</h1><p>IPv6动态主机配置协议DHCPv6(Dynamic Host Configuration Protocol for IPv6)是针对IPv6编址方案设计，为主机分配IPv6地址/前缀和其他网络配置参数。</p>
+<h2 id="目的："><a href="#目的：" class="headerlink" title="目的："></a>目的：</h2><p>IPv6协议具有地址空间巨大的特点，但同时长达128比特的IPv6地址又要求高效合理的地址自动分配和管理策略。IPv6无状态地址配置方式（参看协议RFC2462）是目前广泛采用的IPv6地址自动配置方式。配置了该协议的主机只需相邻设备开启IPv6路由通告功能，即可以根据通告报文包含的前缀信息自动配置本机地址。</p>
+<p>无状态地址配置方案中设备并不记录所连接的IPv6主机的具体地址信息，可管理性差。而且当前无状态地址配置方式不能使IPv6主机获取DNS服务器的IPv6地址等配置信息，在可用性上有一定缺陷。对于互联网服务提供商来说，也没有相关的规范指明如何向设备自动分配IPv6前缀，所以在部署IPv6网络时，只能采用手动配置的方法为设备配置IPv6地址。</p>
+<p>DHCPv6技术解决了这一问题。DHCPv6属于一种有状态地址自动配置协议。</p>
+<p>与其他IPv6地址分配方式（手工配置、通过路由器通告消息中的网络前缀无状态自动配置等）相比，DHCPv6具有以下优点：</p>
+<ul>
+<li>更好地控制IPv6地址的分配。DHCPv6方式不仅可以记录为IPv6主机分配的地址，还可以为特定的IPv6主机分配特定的地址，以便于网络管理。</li>
+<li>DHCPv6支持为网络设备分配IPv6前缀，便于全网络的自动配置和网络层次性管理。</li>
+<li>除了为IPv6主机分配IPv6地址/前缀外，还可以分配DNS服务器IPv6地址等网络配置参数。</li>
+</ul>
+<h1 id="DHCPv6原理描述"><a href="#DHCPv6原理描述" class="headerlink" title="DHCPv6原理描述"></a>DHCPv6原理描述</h1><h2 id="DHCPv6概述："><a href="#DHCPv6概述：" class="headerlink" title="DHCPv6概述："></a>DHCPv6概述：</h2><p>DHCPv6是一种运行在客户端和服务器之间的协议，与IPv4中的DHCP一样，所有的协议报文都是基于UDP的。但是由于在IPv6中没有广播报文，因此DHCPv6使用组播报文，客户端也无需配置服务器的IPv6地址。</p>
+<h3 id="IPv6地址分配类型："><a href="#IPv6地址分配类型：" class="headerlink" title="IPv6地址分配类型："></a>IPv6地址分配类型：</h3><p>IPv6协议具有地址空间巨大的特点，但同时长达128比特的IPv6地址又要求高效合理的地址自动分配和管理策略。</p>
+<ul>
+<li>手动配置。手动配置IPv6地址/前缀及其他网络配置参数（DNS、NIS、SNTP服务器地址等参数）。</li>
+<li>无状态自动地址分配。由接口ID生成链路本地地址，再根据路由通告报文RA（Router Advertisement）包含的前缀信息自动配置本机地址。</li>
+<li>有状态自动地址分配，即DHCPv6方式。DHCPv6又分为如下两种:<ul>
+<li>DHCPv6有状态自动分配。DHCPv6服务器自动分配IPv6地址/PD前缀及其他网络配置参数（DNS、NIS、SNTP服务器地址等参数）。</li>
+<li>DHCPv6无状态自动分配。主机IPv6地址仍然通过路由通告方式自动生成，DHCPv6服务器只分配除IPv6地址以外的配置参数，包括DNS、NIS、SNTP服务器等参数。</li>
+</ul>
+</li>
+</ul>
+<h3 id="DHCPv6基本架构："><a href="#DHCPv6基本架构：" class="headerlink" title="DHCPv6基本架构："></a>DHCPv6基本架构：</h3><p><img src="/2018/02/01/DHCPv6基础/DHCPv6基本架构.png" alt="DHCPv6基本架构"></p>
+<p><center>图：DHCPv6基本架构<center></center></center></p>
+<p>DHCPv6基本协议架构中，主要包括以下三种角色：</p>
+<ul>
+<li><p>DHCPv6 Client：</p>
+<p>DHCPv6客户端，通过与DHCPv6服务器进行交互，获取IPv6地址/前缀和网络配置信息，完成自身的地址配置功能。</p>
+</li>
+<li><p>DHCPv6 Relay：</p>
+<p>DHCPv6中继代理，负责转发来自客户端方向或服务器方向的DHCPv6报文，协助DHCPv6客户端和DHCPv6服务器完成地址配置功能。一般情况下，DHCPv6客户端通过本地链路范围的组播地址与DHCPv6服务器通信，以获取IPv6地址/前缀和其他网络配置参数。如果服务器和客户端不在同一个链路范围内，则需要通过DHCPv6中继代理来转发报文，这样可以避免在每个链路范围内都部署DHCPv6服务器，既节省了成本，又便于进行集中管理。</p>
+<p>DHCPv6基本协议架构中，DHCPv6中继代理不是必须的角色。如果DHCPv6客户端和DHCPv6服务器位于同一链路范围内，或DHCPv6客户端和DHCPv6服务器直接通过单播交互完成地址分配或信息配置的情况下，是不需要DHCPv6中继代理参与的。只有当DHCPv6客户端和DHCPv6服务器不在同一链路范围内，或DHCPv6客户端和DHCPv6服务器无法单播交互的情况下，才需要DHCPv6中继代理的参与。</p>
+</li>
+<li><p>DHCPv6 Server：</p>
+<p>DHCPv6服务器，负责处理来自客户端或中继代理的地址分配、地址续租、地址释放等请求，为客户端分配IPv6地址/前缀和其他网络配置信息。</p>
+</li>
+</ul>
+<h3 id="DHCPv6基本概念："><a href="#DHCPv6基本概念：" class="headerlink" title="DHCPv6基本概念："></a>DHCPv6基本概念：</h3><p><strong>组播地址</strong></p>
+<ul>
+<li>在DHCPv6协议中，客户端不用配置DHCPv6 Server的IPv6地址，而是发送目的地址为组播地址的Solicit报文来定位DHCPv6服务器。</li>
+<li>在DHCPv4协议中，客户端发送广播报文来定位服务器。为避免广播风暴，在IPv6中，已经没有了广播类型的报文，而是采用组播报文。DHCPv6用到的组播地址有两个：<ul>
+<li>FF02::1:2（All DHCP Relay Agents and Servers）：所有DHCPv6服务器和中继代理的组播地址，这个地址是链路范围的，用于客户端和相邻的服务器及中继代理之间通信。所有DHCPv6服务器和中继代理都是该组的成员。</li>
+<li>FF05::1:3（All DHCP Servers）：所有DHCPv6服务器组播地址，这个地址是站点范围的，用于中继代理和服务器之间的通信，站点内的所有DHCPv6服务器都是此组的成员。</li>
+</ul>
+</li>
+</ul>
+<p><strong>UDP端口号</strong></p>
+<ul>
+<li>DHCPv6报文承载在UDPv6上。</li>
+<li>客户端侦听的UDP目的端口号是546。</li>
+<li>服务器、中继代理侦听的UDP端口号是547。</li>
+</ul>
+<p><strong>DHCP唯一标识符（DUID）</strong></p>
+<p>DHCP设备唯一标识符DUID（DHCPv6 Unique Identifier），每个服务器或客户端有且只有一个唯一标识符，服务器使用DUID来识别不同的客户端，客户端则使用DUID来识别服务器。</p>
+<p>客户端和服务器DUID的内容分别通过DHCPv6报文中的Client Identifier和Server Identifier选项来携带。两种选项的格式一样，通过option-code字段的取值来区分是Client Identifier还是Server Identifier选项。</p>
+<p><strong>身份联盟（IA）</strong></p>
+<ul>
+<li>身份联盟IA（Identity Association）是使得服务器和客户端能够识别、分组和管理一系列相关IPv6地址的结构。每个IA包括一个IAID和相关联的配置信息。</li>
+<li>客户端必须为它的每一个要通过服务器获取IPv6地址的接口关联至少一个IA。客户端用给接口关联的IA来从服务器获取配置信息。每个IA必须明确关联到一个接口。</li>
+<li>IA的身份由IAID唯一确定，同一个客户端的IAID不能出现重复。IAID不应因为设备的重启等因素发生丢失或改变。</li>
+<li>IA中的配置信息由一个或多个IPv6地址以及T1和T2生存期组成。IA中的每个地址都有首选生存期和有效生存期。</li>
+<li>一个接口至少关联一个IA，一个IA可以包含一个或多个地址信息。</li>
+</ul>
+<h2 id="DHCPv6报文类型"><a href="#DHCPv6报文类型" class="headerlink" title="DHCPv6报文类型"></a>DHCPv6报文类型</h2><h3 id="DHCPv6报文格式："><a href="#DHCPv6报文格式：" class="headerlink" title="DHCPv6报文格式："></a>DHCPv6报文格式：</h3><p><img src="/2018/02/01/DHCPv6基础/DHCPv6报文格式.png" alt="DHCPv6报文格式"></p>
+<p><center>图：DHCPv6的报文格式<center></center></center></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>msg-type</td>
+<td>1字节</td>
+<td>表示报文的类型，取值为1～13，具体请参见<strong>DHCPv6报文类型</strong>。</td>
+</tr>
+<tr>
+<td>transaction-ID</td>
+<td>3字节</td>
+<td>DHCPv6交互ID，也叫事务ID，用来标识一个来回的DHCPv6报文交互。例如Solicit/Advertise报文为一个交互。Request/Reply报文为另外一个交互，两者有不同的事务ID。交互ID特点如下：交互ID是DHCPv6客户端生成的一个随机值，DHCPv6客户端应当保证交互ID具有一定的随机性。对于DHCPv6服务器响应报文和相应的请求报文，两者交互ID保持一致。如果是DHCPv6服务器主动发起的会话报文，则交互ID为0。</td>
+</tr>
+<tr>
+<td>Options</td>
+<td>可变</td>
+<td>表示DHCPv6的选项字段。此字段包含了DHCPv6服务器分配给IPv6主机的配置信息，如DNS服务器的IPv6地址等信息。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="DHCPv6报文类型："><a href="#DHCPv6报文类型：" class="headerlink" title="DHCPv6报文类型："></a>DHCPv6报文类型：</h3><p>目前DHCPv6定义了如下十三种类型报文，DHCPv6服务器和DHCPv6客户端之间通过这十三种类型的报文进行通信。</p>
+<p><strong>DHCPv6和DHCPv4报文对比：</strong></p>
+<table>
+<thead>
+<tr>
+<th>报文类型</th>
+<th>DHCPv6报文</th>
+<th>DHCPv4报文</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>SOLICIT</td>
+<td>DHCP DISCOVER</td>
+<td>DHCPv6客户端使用Solicit报文来确定DHCPv6服务器的位置。</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ADVERTISE</td>
+<td>DHCP OFFER</td>
+<td>DHCPv6服务器发送Advertise报文来对Solicit报文进行回应，宣告自己能够提供DHCPv6服务。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>REQUEST</td>
+<td>DHCP REQUEST</td>
+<td>DHCPv6客户端发送Request报文来向DHCPv6服务器请求IPv6地址和其它配置信息。</td>
+</tr>
+<tr>
+<td>4</td>
+<td>CONFIRM</td>
+<td>-</td>
+<td>DHCPv6客户端向任意可达的DHCPv6服务器发送Confirm报文检查自己目前获得的IPv6地址是否适用与它所连接的链路。</td>
+</tr>
+<tr>
+<td>5</td>
+<td>RENEW</td>
+<td>DHCP REQUEST</td>
+<td>DHCPv6客户端向给其提供地址和配置信息的DHCPv6服务器发送Renew报文来延长地址的生存期并更新配置信息。</td>
+</tr>
+<tr>
+<td>6</td>
+<td>REBIND</td>
+<td>DHCP REQUEST</td>
+<td>如果Renew报文没有得到应答，DHCPv6客户端向任意可达的DHCPv6服务器发送Rebind报文来延长地址的生存期并更新配置信息。</td>
+</tr>
+<tr>
+<td>7</td>
+<td>REPLY</td>
+<td>DHCP ACK/NAK</td>
+<td>DHCPv6服务器在以下场合发送Reply报文：DHCPv6服务器发送携带了地址和配置信息的Reply消息来回应从DHCPv6客户端收到的Solicit、Request、Renew、Rebind报文。DHCPv6服务器发送携带配置信息的Reply消息来回应收到的Information-Request报文。用来回应DHCPv6客户端发来的Confirm、Release、Decline报文。</td>
+</tr>
+<tr>
+<td>8</td>
+<td>RELEASE</td>
+<td>DHCP RELEASE</td>
+<td>DHCPv6客户端向为其分配地址的DHCPv6服务器发送Release报文，表明自己不再使用一个或多个获取的地址。</td>
+</tr>
+<tr>
+<td>9</td>
+<td>DECLINE</td>
+<td>DHCP DECLINE</td>
+<td>DHCPv6客户端向DHCPv6服务器发送Decline报文，声明DHCPv6服务器分配的一个或多个地址在DHCPv6客户端所在链路上已经被使用了。</td>
+</tr>
+<tr>
+<td>10</td>
+<td>RECONFIGURE</td>
+<td>-</td>
+<td>DHCPv6服务器向DHCPv6客户端发送Reconfigure报文，用于提示DHCPv6客户端，在DHCPv6服务器上存在新的网络配置信息。</td>
+</tr>
+<tr>
+<td>11</td>
+<td>INFORMATION-REQUEST</td>
+<td>DHCP INFORM</td>
+<td>DHCPv6客户端向DHCPv6服务器发送Information-Request报文来请求除IPv6地址以外的网络配置信息。</td>
+</tr>
+<tr>
+<td>12</td>
+<td>RELAY-FORW</td>
+<td>-</td>
+<td>中继代理通过Relay-Forward报文来向DHCPv6服务器转发DHCPv6客户端请求报文。</td>
+</tr>
+<tr>
+<td>13</td>
+<td>RELAY-REPL</td>
+<td>-</td>
+<td>DHCPv6服务器向中继代理发送Relay-Reply报文，其中携带了转发给DHCPv6客户端的报文。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="DHCPv6报文抓包："><a href="#DHCPv6报文抓包：" class="headerlink" title="DHCPv6报文抓包："></a>DHCPv6报文抓包：</h3><hr>
+<h4 id="Solicit报文（类型1）："><a href="#Solicit报文（类型1）：" class="headerlink" title="Solicit报文（类型1）："></a>Solicit报文（类型1）：</h4><p>DHCPv6客户端使用Solicit报文来确定DHCPv6服务器的位置。</p>
+<p><img src="/2018/02/01/DHCPv6基础/Solicit.png" alt="Solicit"></p>
+<h2 id="图：Solicit报文抓包示例"><a href="#图：Solicit报文抓包示例" class="headerlink" title="图：Solicit报文抓包示例"></a><center>图：Solicit报文抓包示例<center></center></center></h2><h4 id="Advertise报文（类型2）："><a href="#Advertise报文（类型2）：" class="headerlink" title="Advertise报文（类型2）："></a>Advertise报文（类型2）：</h4><p>DHCPv6服务器发送Advertise报文来对Solicit报文进行回应，宣告自己能够提供DHCPv6服务。</p>
+<p><img src="/2018/02/01/DHCPv6基础/Advertise.png" alt="Advertise"></p>
+<h2 id="图：Advertise报文抓包示例"><a href="#图：Advertise报文抓包示例" class="headerlink" title="图：Advertise报文抓包示例"></a><center>图：Advertise报文抓包示例<center></center></center></h2><h4 id="Request报文（类型3）："><a href="#Request报文（类型3）：" class="headerlink" title="Request报文（类型3）："></a>Request报文（类型3）：</h4><p>DHCPv6客户端发送Request报文来向DHCPv6服务器请求IPv6地址和其它配置信息。</p>
+<p><img src="/2018/02/01/DHCPv6基础/Request.png" alt="Request"></p>
+<h2 id="图：Request报文抓包示例"><a href="#图：Request报文抓包示例" class="headerlink" title="图：Request报文抓包示例"></a><center>图：Request报文抓包示例<center></center></center></h2><h4 id="Renew报文（类型5）："><a href="#Renew报文（类型5）：" class="headerlink" title="Renew报文（类型5）："></a>Renew报文（类型5）：</h4><p>DHCPv6客户端向给其提供地址和配置信息的DHCPv6服务器发送Renew报文来延长地址的生存期并更新配置信息。</p>
+<p><img src="/2018/02/01/DHCPv6基础/Renewbaow.png" alt="Renewbaow"></p>
+<h2 id="图：Renew报文抓包示例"><a href="#图：Renew报文抓包示例" class="headerlink" title="图：Renew报文抓包示例"></a><center>图：Renew报文抓包示例<center></center></center></h2><h4 id="Rebind报文（类型6）："><a href="#Rebind报文（类型6）：" class="headerlink" title="Rebind报文（类型6）："></a>Rebind报文（类型6）：</h4><p>如果Renew报文没有得到应答，DHCPv6客户端向任意可达的DHCPv6服务器发送Rebind报文来延长地址的生存期并更新配置信息。</p>
+<p><img src="/2018/02/01/DHCPv6基础/Rebind.png" alt="Rebind"></p>
+<h2 id="图：Rebind报文抓包示例"><a href="#图：Rebind报文抓包示例" class="headerlink" title="图：Rebind报文抓包示例"></a><center>图：Rebind报文抓包示例<center></center></center></h2><h4 id="Reply报文（类型7）："><a href="#Reply报文（类型7）：" class="headerlink" title="Reply报文（类型7）："></a>Reply报文（类型7）：</h4><p>DHCPv6服务器在以下场合发送Reply报文：DHCPv6服务器发送携带了地址和配置信息的Reply消息来回应从DHCPv6客户端收到的Solicit、Request、Renew、Rebind报文。DHCPv6服务器发送携带配置信息的Reply消息来回应收到的Information-Request报文。用来回应DHCPv6客户端发来的Confirm、Release、Decline报文。</p>
+<p><img src="/2018/02/01/DHCPv6基础/Reply.png" alt="Reply"></p>
+<h2 id="图：Reply报文抓包示例"><a href="#图：Reply报文抓包示例" class="headerlink" title="图：Reply报文抓包示例"></a><center>图：Reply报文抓包示例<center></center></center></h2><h4 id="Release-类型8"><a href="#Release-类型8" class="headerlink" title="Release(类型8);"></a>Release(类型8);</h4><p>DHCPv6客户端向为其分配地址的DHCPv6服务器发送Release报文，表明自己不再使用一个或多个获取的地址。</p>
+<p><img src="/2018/02/01/DHCPv6基础/Release.png" alt="Release"></p>
+<h2 id="图：Release报文抓包示例"><a href="#图：Release报文抓包示例" class="headerlink" title="图：Release报文抓包示例"></a><center>图：Release报文抓包示例<center></center></center></h2><h4 id="Reply-forw报文（类型12）："><a href="#Reply-forw报文（类型12）：" class="headerlink" title="Reply-forw报文（类型12）："></a>Reply-forw报文（类型12）：</h4><p>中继代理通过Relay-Forward报文来向DHCPv6服务器转发DHCPv6客户端请求报文。<img src="/2018/02/01/DHCPv6基础/Relay-Forwarding.png" alt="Relay-Forwarding"></p>
+<h2 id="图：Relay-Forw报文抓包示例"><a href="#图：Relay-Forw报文抓包示例" class="headerlink" title="图：Relay-Forw报文抓包示例"></a><center>图：Relay-Forw报文抓包示例<center></center></center></h2><h4 id="Relay-reply报文（类型13）："><a href="#Relay-reply报文（类型13）：" class="headerlink" title="Relay-reply报文（类型13）："></a>Relay-reply报文（类型13）：</h4><p>DHCPv6服务器向中继代理发送Relay-Reply报文，其中携带了转发给DHCPv6客户端的报文。</p>
+<p><img src="/2018/02/01/DHCPv6基础/Relay-reply.png" alt="Relay-reply"></p>
+<h2 id="图：Relay-Reply报文抓包示例"><a href="#图：Relay-Reply报文抓包示例" class="headerlink" title="图：Relay-Reply报文抓包示例"></a><center>图：Relay-Reply报文抓包示例<center></center></center></h2><h2 id="DHCPv6工作原理：："><a href="#DHCPv6工作原理：：" class="headerlink" title="DHCPv6工作原理：："></a>DHCPv6工作原理：：</h2><p>DHCPv6自动分配分为DHCPv6有状态自动分配和DHCPv6无状态自动分配。</p>
+<ul>
+<li>DHCPv6有状态自动分配。DHCPv6服务器自动配置IPv6地址/前缀，同时分配DNS、NIS、SNTP服务器等网络配置参数。</li>
+<li>DHCPv6无状态自动分配。主机IPv6地址仍然通过路由通告方式自动生成，DHCP服务器只分配除IPv6地址以外的配置参数，包括DNS、NIS、SNTP服务器地址等参数。</li>
+</ul>
+<h3 id="DHVPv6有状态自动分配："><a href="#DHVPv6有状态自动分配：" class="headerlink" title="DHVPv6有状态自动分配："></a>DHVPv6有状态自动分配：</h3><p>IPv6主机通过有状态DHCPv6方式获取IPv6地址和其他配置参数（例如DNS服务器的IPv6地址等）。 </p>
+<p>DHCPv6服务器为客户端分配地址/前缀的过程分为两类：</p>
+<ul>
+<li>DHCPv6四步交互分配过程</li>
+<li>DHCPv6两步交互快速分配过程</li>
+</ul>
+<p><strong>DHCPv6四步交互</strong></p>
+<p>四步交互常用于网络中有多个DHCPv6服务器的情况。DHCPv6客户端首先通过组播发送Solicit报文来定位可以为其提供服务的DHCPv6服务器，在收到多个DHCPv6服务器的Advertise报文后，根据DHCPv6服务器的优先级选择一个为其分配地址和配置信息的服务器，接着通过Request/Reply报文交互完成地址申请和分配过程。</p>
+<p>DHCPv6服务器端如果没有配置使能两步交互，无论客户端报文中是否包含Rapid Commit选项，服务器都采用四步交互方式为客户端分配地址和配置信息。</p>
+<p>DHCPv6四步交互地址分配过程如下：</p>
+<p><img src="/2018/02/01/DHCPv6基础/四步分配.png" alt="四步分配"></p>
+<p><center>图：DHCPv6四步交互地址分配过程 <center></center></center></p>
+<p>DHCPv6四步交互地址分配过程如下：</p>
+<ol>
+<li>DHCPv6客户端发送Solicit报文，请求DHCPv6服务器为其分配IPv6地址和网络配置参数。</li>
+<li>如果Solicit报文中没有携带Rapid Commit选项，或Solicit报文中携带Rapid Commit选项，但服务器不支持快速分配过程，则DHCPv6服务器回复Advertise报文，通知客户端可以为其分配的地址和网络配置参数。</li>
+<li>如果DHCPv6客户端接收到多个服务器回复的Advertise报文，则根据Advertise报文中的服务器优先级等参数，选择优先级最高的一台服务器，并向所有的服务器发送Request组播报文，该报文中携带已选择的DHCPv6服务器的DUID。</li>
+<li>DHCPv6服务器回复Reply报文，确认将地址和网络配置参数分配给客户端使用。</li>
+</ol>
+<p><strong>DHCPv6两步交互</strong></p>
+<p>两步交互常用于网络中只有一个DHCPv6服务器的情况。DHCPv6客户端首先通过组播发送Solicit报文来定位可以为其提供服务的DHCPv6服务器，DHCPv6服务器收到客户端的Solicit报文后，为其分配地址和配置信息，直接回应Reply报文，完成地址申请和分配过程。</p>
+<p>两步交换可以提高DHCPv6过程的效率，但在有多个DHCPv6服务器的网络中，多个DHCPv6服务器都可以为DHCPv6客户端分配IPv6地址，回应Reply报文，但是客户端实际只可能使用其中一个服务器为其分配的IPv6地址和配置信息。为了防止这种情况的发生，管理员可以配置DHCPv6服务器是否支持两步交互地址分配方式。</p>
+<ul>
+<li>DHCPv6服务器端如果配置使能了两步交互，并且客户端报文中也包含Rapid Commit选项，服务器采用两步交互方式为客户端分配地址和配置信息。</li>
+<li>如果DHCPv6服务器不支持快速分配地址，则采用四步交互方式为客户端分配IPv6地址和其他网络配置参数。</li>
+</ul>
+<p>DHCPv6两步交互地址分配过程如下图：</p>
+<p><img src="/2018/02/01/DHCPv6基础/两步交互.png" alt="两步交互"></p>
+<p><center>图：DHCPv6两步交互地址分配过程 <center></center></center></p>
+<p>DHCPv6两步交互地址分配过程如下：</p>
+<ol>
+<li>DHCPv6客户端在发送的Solicit报文中携带Rapid Commit选项，标识客户端希望服务器能够快速为其分配地址和网络配置参数。</li>
+<li>DHCPv6服务器接收到Solicit报文后，将进行如下处理：<ul>
+<li>如果DHCPv6服务器支持快速分配地址，则直接返回Reply报文，为客户端分配IPv6地址和其他网络配置参数，Replay报文中也携带Rapid Commit选项。</li>
+<li>如果DHCPv6服务器不支持快速分配过程，则采用四步交互方式为客户端分配IPv6地址/前缀和其他网络配置参数。</li>
+</ul>
+</li>
+</ol>
+<h3 id="DHCPv6无状态自动分配："><a href="#DHCPv6无状态自动分配：" class="headerlink" title="DHCPv6无状态自动分配："></a>DHCPv6无状态自动分配：</h3><p>IPv6节点可以通过DHCPv6无状态方式获取配置参数（包括DNS、SIP、SNTP等服务器配置信息，不包括IPv6地址）。</p>
+<p>DHCPv6无状态工作过程如下图所示：</p>
+<p><img src="/2018/02/01/DHCPv6基础/无状态.png" alt="无状态"></p>
+<p><center>图：DHCPv6无状态工作过程 <center></center></center></p>
+<p>DHCPv6无状态工作过程如下：</p>
+<ol>
+<li>DHCPv6客户端以组播方式向DHCPv6服务器发送Information-Request报文，该报文中携带Option Request选项，指定DHCPv6客户端需要从DHCPv6服务器获取的配置参数。</li>
+<li>DHCPv6服务器收到Information-Request报文后，为DHCPv6客户端分配网络配置参数，并单播发送Reply报文，将网络配置参数返回给DHCPv6客户端。DHCPv6客户端根据收到Reply报文提供的参数完成DHCPv6客户端无状态配置。</li>
+</ol>
+<h2 id="DHCPv6-PD工作原理："><a href="#DHCPv6-PD工作原理：" class="headerlink" title="DHCPv6 PD工作原理："></a>DHCPv6 PD工作原理：</h2><p>DHCPv6前缀代理DHCPv6 PD(Prefix Delegation)是由Cisco公司提出的一种前缀分配机制，并在RFC3633中得以标准化。在一个层次化的网络拓扑结构中，不同层次的IPv6地址分配一般是手工指定的。手工配置IPv6地址扩展性不好，不利于IPv6地址的统一规划管理。</p>
+<p>通过DHCPv6前缀代理机制，下游网络设备不需要再手工指定用户侧链路的IPv6地址前缀，它只需要向上游网络设备提出前缀分配申请，上游网络设备便可以分配合适的地址前缀给下游设备，下游设备把获得的前缀(一般前缀长度小于64)进一步自动细分成64前缀长度的子网网段，把细分的地址前缀再通过路由通告(RA)至与IPv6主机直连的用户链路上，实现IPv6主机的地址自动配置，完成整个系统层次的地址布局。</p>
+<p>DHCPv6 PD工作过程下图所示：</p>
+<p><img src="/2018/02/01/DHCPv6基础/PD.png" alt="PD"></p>
+<p><center>图：DHCPv6 PD工作原理 <center></center></center></p>
+<p>DHCPv6 PD四步交互地址分配过程如下：</p>
+<ol>
+<li>DHCPv6 PD客户端发送Solicit报文，请求DHCPv6 PD服务器为其分配IPv6地址前缀。</li>
+<li>如果Solicit报文中没有携带Rapid Commit选项，或Solicit报文中携带Rapid Commit选项，但服务器不支持快速分配过程，则DHCPv6服务器回复Advertise报文，通知客户端可以为其分配的IPv6地址前缀。</li>
+<li>如果DHCPv6客户端接收到多个服务器回复的Advertise报文，则根据Advertise报文中的服务器优先级等参数，选择优先级最高的一台服务器，并向该服务器发送Request报文，请求服务器确认为其分配地址前缀。</li>
+<li>DHCPv6 PD服务器回复Reply报文，确认将IPv6地址前缀分配给DHCPv6 PD客户端使用。</li>
+</ol>
+<h2 id="DHCPv6中继工作原理："><a href="#DHCPv6中继工作原理：" class="headerlink" title="DHCPv6中继工作原理："></a>DHCPv6中继工作原理：</h2><p>DHCPv6客户端通过DHCPv6中继转发报文，获取IPv6地址/前缀和其他网络配置参数（例如DNS服务器的IPv6地址等）。</p>
+<p>DHCPv6中继工作过程如下图所示：</p>
+<p><img src="/2018/02/01/DHCPv6基础/DHCP 中继.png" alt="DHCP 中继"></p>
+<p><center>图：DHCPv6中继工作原理<center></center></center></p>
+<p>DHCPv6中继工作交互过程如下：</p>
+<ol>
+<li>DHCPv6客户端向所有DHCPv6服务器和DHCPv6中继发送目的地址为FF02::1:2（组播地址）的请求报文。</li>
+<li>根据DHCPv6中继转发报文有如下两种情况：<ul>
+<li>如果DHCPv6中继和DHCPv6客户端位于同一个链路上，即DHCPv6中继为DHCPv6客户端的第一跳中继，中继转发直接来自客户端的报文，此时DHCPv6中继实质上也是客户端的IPv6网关设备。DHCPv6中继收到客户端的报文后，将其封装在Relay-Forward报文的中继消息选项（Relay Message Option）中，并将Relay-Forward报文发送给DHCPv6服务器或下一跳中继。</li>
+<li>如果DHCPv6中继和DHCPv6客户端不在同一个链路上，中继收到的报文是来自其他中继的Relay-Forward报文。中继构造一个新的Relay-Forward报文，并将Relay-Forward报文发送给DHCPv6服务器或下一跳中继。</li>
+</ul>
+</li>
+<li>DHCPv6服务器从Relay-Forward报文中解析出DHCPv6客户端的请求，为DHCPv6客户端选取IPv6地址和其他配置参数，构造应答消息，将应答消息封装在Relay-Reply报文的中继消息选项中，并将Relay-Reply报文发送给DHCPv6中继。</li>
+<li>DHCPv6中继从Relay-Reply报文中解析出DHCPv6服务器的应答，转发给DHCPv6客户端。如果DHCPv6客户端接收到多个DHCPv6服务器的应答，则根据报文中的服务器优先级选择一个DHCPv6服务器，后续从该DHCPv6服务器获取IPv6地址和其他网络配置参数。</li>
+</ol>
+<h2 id="IPv6地址-前缀的分配与更新原则："><a href="#IPv6地址-前缀的分配与更新原则：" class="headerlink" title="IPv6地址/前缀的分配与更新原则："></a>IPv6地址/前缀的分配与更新原则：</h2><h3 id="IPv6地址分配的优先次序："><a href="#IPv6地址分配的优先次序：" class="headerlink" title="IPv6地址分配的优先次序："></a>IPv6地址分配的优先次序：</h3><p>DHCPv6服务器按照如下次序为DHCPv6客户端选择IPv6地址/前缀。</p>
+<ol>
+<li><p>选择IPv6地址池</p>
+<p>DHCPv6服务器的接口可以绑定IPv6地址池，DHCPv6服务器将选择该IPv6地址池为接口下的DHCPv6客户端分配地址/前缀。对于存在中继的场景，DHCPv6服务器的接口可以不绑定IPv6地址池，而是根据报文中第一个不为0的“link-address”字段（标识DHCPv6客户端所在链路范围），选择与地址池中已配置的网络前缀或IPv6地址前缀属于同一链路范围的地址池。</p>
+</li>
+<li><p>选择IPv6地址/前缀</p>
+<p>确定地址池后，DHCPv6服务器将按照下面步骤为DHCPv6客户端分配IPV6地址/前缀：</p>
+<ol>
+<li>如果地址池中为客户端指定了地址/前缀，优先从地址池中选择与客户端DUID匹配的地址/前缀分配给客户端。</li>
+<li>如果客户端报文中的IA选项携带了有效的地址/前缀，优先从地址池中选择该地址/前缀分配给客户端。如果该地址/前缀在地址池中不可用，则另外分配一个空闲地址/前缀给客户端。如果IPV6前缀长度比指定分配长度大，则按指定分配长度来分配。</li>
+<li>从地址池中选择空闲地址/前缀分配给客户端，保留地址（例如RFC 2526中定义的任播地址）、冲突地址、已被分配的地址不能再分配给客户端。</li>
+<li>如果没有合适的IPv6地址/前缀可以分配，则分配失败。</li>
+</ol>
+</li>
+</ol>
+<h3 id="DHCPv6地址租约更新："><a href="#DHCPv6地址租约更新：" class="headerlink" title="DHCPv6地址租约更新："></a>DHCPv6地址租约更新：</h3><p>DHCPv6服务器为DHCPv6客户端分配的地址是有租约的，租约由生命期（包括地址的首选生命期和有效生命期构成）和续租时间点（IA的T1、T2）构成。地址有效生命期结束后，DHCPv6客户端不能再使用该地址。在有效生命期到达之前，如果DHCPv6客户端希望继续使用该地址，则需要更新地址租约。</p>
+<p>DHCPv6客户端为了延长其与IA关联的地址的有效生命期和首选生命期，在T1时刻，发送包含IA选项的Renew报文给服务器，其中IA选项中携带需要续租的IA地址选项。如果DHCPv6客户端一直没有收到T1时刻续租报文的回应报文，那么在T2时刻，DHCPv6客户端通过Rebind报文向DHCPv6服务器继续续租地址。</p>
+<p><strong>T1时刻地址租约更新过程如下：</strong></p>
+<ol>
+<li>DHCPv6客户端在T1时刻（推荐值为优先生命期的0.5倍）发送Renew报文进行地址租约更新请求。</li>
+<li>DHCPv6服务器回应Reply报文。<ul>
+<li>如果DHCPv6客户端可以继续使用该地址，则DHCPv6服务器回应续约成功的Reply报文，通知DHCPv6客户端已经成功更新地址租约。</li>
+<li>如果该地址不可以再分配给该DHCPv6客户端，则DHCPv6服务器回应续约失败的Reply报文，通知DHCPv6客户端不能获得新的租约。</li>
+</ul>
+</li>
+</ol>
+<p><strong>T2时刻地址租约更新过程如下：</strong></p>
+<ol>
+<li><p>DHCPv6客户端在T1时刻发送Renew请求更新租约，但是没有收到DHCPv6服务器的回应报文。</p>
+</li>
+<li><p>DHCPv6客户端在T2时刻（推荐值为优先生命期的0.8倍），向所有DHCPv6服务器组播发送Rebind报文请求更新租约。</p>
+</li>
+<li><p>DHCPv6服务器回应Reply报文。</p>
+<ul>
+<li>如果DHCPv6客户端可以继续使用该地址，则DHCPv6服务器回应续约成功的Reply报文，通知DHCPv6客户端已经成功更新地址/前缀租约。</li>
+<li>如果该地址不可以再分配给该DHCPv6客户端，则DHCPv6服务器回应续约失败的Reply报文，通知DHCPv6客户端不能获得新的租约。</li>
+</ul>
+<p>如果DHCPv6客户端没有收到DHCPv6服务器的应答报文，则到达有效生命期后，DHCPv6客户端停止使用该地址。</p>
+</li>
+</ol>
+<h3 id="IP地址预留："><a href="#IP地址预留：" class="headerlink" title="IP地址预留："></a>IP地址预留：</h3><p>DHCPv6服务器支持预留IPv6地址，即保留部分IPv6地址不参与动态分配。比如预留的IPv6地址可作为DNS服务器的IPv6地址。</p>
+<h1 id="DHCPv6基础配置命令"><a href="#DHCPv6基础配置命令" class="headerlink" title="DHCPv6基础配置命令"></a>DHCPv6基础配置命令</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line">address prefix </span><br><span class="line"><span class="comment">//IPv6地址池视图下配置网络前缀和生命周期。</span></span><br><span class="line"><span class="comment">//infinite:指定生命周期为无穷大。</span></span><br><span class="line"><span class="comment">//生命周期默认值为86400，即1天。</span></span><br><span class="line">capwap-ac ipv6-address</span><br><span class="line"><span class="comment">//在IPv6地址池视图下配置AC的IPv6地址。</span></span><br><span class="line">conflict-address expire-time expire-time</span><br><span class="line"><span class="comment">//配置IPv6地址池下冲突地址老化时间。</span></span><br><span class="line"><span class="comment">//缺省情况下，地址池下的冲突地址老化时间是172800秒，即2天。</span></span><br><span class="line">dhcpv6 client information-request</span><br><span class="line"><span class="comment">//使能接口以DHCPv6无状态自动分配方式获取网络配置参数</span></span><br><span class="line"><span class="comment">//（不包括IPv6地址）的功能。</span></span><br><span class="line">dhcpv6 client pd</span><br><span class="line"><span class="comment">//配置DHCPv6 PD客户端功能。</span></span><br><span class="line"><span class="comment">//hint ipv6-address:指定期望申请的IPv6地址</span></span><br><span class="line"><span class="comment">//hint ipv6-prefix/ipv6-prefix-length:</span></span><br><span class="line"><span class="comment">//      指定期望申请的IPv6地址前缀和前缀长度。</span></span><br><span class="line"><span class="comment">//rapid-commit:指定客户端以两步交互申请IPv6地址前缀。</span></span><br><span class="line"><span class="comment">//unicast-option:指定客户端以单播方式申请IPv6地址前缀。</span></span><br><span class="line"><span class="comment">//union-mode:指定客户端使用一个报文同时获取IPv6地址和前缀。</span></span><br><span class="line">dhcpv6 duid &#123; ll | llt | duid &#125;</span><br><span class="line"><span class="comment">//配置DHCPv6设备的唯一标识符DUID。</span></span><br><span class="line"><span class="comment">//缺省情况下，设备以ll的方式生成DUID。</span></span><br><span class="line"><span class="comment">//ll:指定设备采用链路层地址（即MAC地址）方式生成DUID。</span></span><br><span class="line"><span class="comment">//llt:指定设备采用链路层地址（即MAC地址）加时间的方式生成DUID。</span></span><br><span class="line">dhcpv6 client renew</span><br><span class="line"><span class="comment">//手动更新DHCPv6客户端申请到的IPv6地址/前缀。</span></span><br><span class="line">renew-time-percent rebind-time-percent</span><br><span class="line"><span class="comment">//配置IPv6地址池的续租时间和重绑定时间占优先生命周期的百分比。</span></span><br><span class="line"><span class="comment">//缺省情况下，IPv6地址池的续租时间占优先生命周期的50%</span></span><br><span class="line"><span class="comment">//重绑定时间占优先生命周期的80%。</span></span><br><span class="line">dhcpv6 interface-id format &#123; <span class="keyword">default</span> | user-defined text &#125;</span><br><span class="line"><span class="comment">//配置DHCPv6报文中Interface-ID选项的格式。</span></span><br><span class="line">dhcpv6 packet-rate</span><br><span class="line"><span class="comment">//使能DHCPv6报文限速功能，并配置速率抑制值。</span></span><br><span class="line"><span class="comment">//缺省情况下，DHCPv6报文限速功能处于未使能状态。</span></span><br><span class="line">dhcpv6 packet-rate drop-alarm enable</span><br><span class="line"><span class="comment">//使能DHCPv6报文限速丢弃告警功能。</span></span><br><span class="line">dhcpv6 packet-rate drop-alarm threshold <span class="number">100</span></span><br><span class="line">  <span class="comment">//配置DHCPv6报文限速丢弃告警阈值.缺省值为100包</span></span><br><span class="line">dhcpv6 pool pool-name</span><br><span class="line"><span class="comment">//创建IPv6/IPv6 PD地址池或进入IPv6/IPv6 PD地址池视图</span></span><br><span class="line">dhcpv6 relay destination</span><br><span class="line"><span class="comment">//使能接口的DHCPv6中继代理功能</span></span><br><span class="line"><span class="comment">//并配置DHCPv6服务器或下一跳中继代理的IPv6地址。</span></span><br><span class="line">dhcpv6 relay server-select group-name </span><br><span class="line"><span class="comment">//来配置DHCPv6中继所对应的DHCPv6服务器组。 </span></span><br><span class="line">dhcpv6 relay source-interface</span><br><span class="line"><span class="comment">//配置接口地址作为报文源IPv6地址。</span></span><br><span class="line">dhcpv6 remote-id format</span><br><span class="line"><span class="comment">//配置DHCPv6报文中Remote-ID选项的格式。</span></span><br><span class="line">dhcpv6 remote-id insert enable</span><br><span class="line"><span class="comment">//使能在DHCPv6中继报文中插入remote-id选项的功能。</span></span><br><span class="line">dhcpv6 server</span><br><span class="line"><span class="comment">//使能DHCPv6服务器或DHCPv6 PD服务器功能。</span></span><br><span class="line">dhcpv6-server ipv6-address</span><br><span class="line"><span class="comment">//配置在DHCPv6服务器组中添加DHCPv6服务器或下一跳中继的成员。</span></span><br><span class="line">dhcpv6 server database</span><br><span class="line"><span class="comment">//使能DHCPv6数据保存功能。</span></span><br><span class="line"><span class="comment">//write-delay :指定DHCPv6数据保存的时间间隔。</span></span><br><span class="line">dhcpv6 server group group-name </span><br><span class="line"><span class="comment">//创建一个DHCPv6服务器组并进入DHCPv6服务器组视图</span></span><br><span class="line">dns-domain-name</span><br><span class="line"><span class="comment">//配置DHCPv6服务器为DHCPv6客户端分配的域名后缀。</span></span><br><span class="line">dns-server ipv6-address </span><br><span class="line"><span class="comment">//配置DNS服务器IPv6地址。</span></span><br><span class="line">excluded-address</span><br><span class="line"><span class="comment">//配置IPv6地址池中不参与自动分配的IPv6地址范围。</span></span><br><span class="line">information-refresh time</span><br><span class="line"><span class="comment">//设置无状态DHCPv6方式分配给客户端的配置信息刷新时间。</span></span><br><span class="line"><span class="comment">//缺省情况下，IPv6地址池配置信息刷新时间86400秒，即24小时。</span></span><br><span class="line">ipv6 address <span class="keyword">auto</span> dhcp命</span><br><span class="line"><span class="comment">//使能接口通过DHCPv6协议自动获取IPv6地址及其他网络配置参数。</span></span><br><span class="line">link-address</span><br><span class="line"><span class="comment">//在IPv6地址池视图下配置网络前缀。</span></span><br><span class="line">lock</span><br><span class="line"><span class="comment">//锁定IPv6地址池。</span></span><br><span class="line">nis-domain-name</span><br><span class="line"><span class="comment">//配置DHCPv6服务器为DHCPv6客户端分配的NIS域名后缀</span></span><br><span class="line">nisp-domain-name</span><br><span class="line"><span class="comment">//配置DHCPv6服务器为DHCPv6客户端分配的NISP域名后缀。</span></span><br><span class="line">prefix-delegation</span><br><span class="line"><span class="comment">//配置地址池视图下的代理前缀。</span></span><br><span class="line"><span class="keyword">static</span>-bind prefix</span><br><span class="line"><span class="comment">//在DHCPv6地址池下静态绑定地址前缀与DHCPv6 PD客户端。</span></span><br><span class="line"><span class="keyword">import</span> all</span><br><span class="line"><span class="comment">//使能设备向DHCPv6客户端动态分配DNS服务器和SNTP服务器配置信息的功能。</span></span><br></pre></td></tr></table></figure>
+<h1 id="DHCPv6服务器、中继配置示例"><a href="#DHCPv6服务器、中继配置示例" class="headerlink" title="DHCPv6服务器、中继配置示例"></a>DHCPv6服务器、中继配置示例</h1><p>实验拓扑：</p>
+<p><img src="/2018/02/01/DHCPv6基础/DHCPv6.png" alt="DHCPv6"></p>
+<p><center>图：DHCPv6实验拓扑<center></center></center></p>
+<h2 id="实验要求："><a href="#实验要求：" class="headerlink" title="实验要求："></a>实验要求：</h2><p>在AR1为DHCPv6服务器，AR2为DHCP中继。通过配置，为主机分配IPv6地址。</p>
+<h2 id="配置文件："><a href="#配置文件：" class="headerlink" title="配置文件："></a>配置文件：</h2><p>AR1：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;DHCPv6&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line"> sysname DHCPv6</span><br><span class="line">#</span><br><span class="line">ipv6 </span><br><span class="line">#</span><br><span class="line">dhcp enable</span><br><span class="line">#</span><br><span class="line">dhcpv6 pool pool1</span><br><span class="line"> address prefix <span class="number">2000</span>::/<span class="number">64</span></span><br><span class="line">  <span class="comment">//配置IPv6地址前缀</span></span><br><span class="line"> excluded-address <span class="number">2000</span>::<span class="number">1</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ipv6 enable </span><br><span class="line"> ipv6 address <span class="number">3000</span>::<span class="number">1</span>/<span class="number">64</span> </span><br><span class="line"> dhcpv6 server pool1</span><br><span class="line">#</span><br><span class="line">ipv6 route-<span class="keyword">static</span> :: <span class="number">0</span> <span class="number">3000</span>::<span class="number">2</span> </span><br><span class="line">#</span><br><span class="line"><span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<p>AR2：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&lt;Realy&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line"> sysname Realy</span><br><span class="line">#</span><br><span class="line">ipv6 </span><br><span class="line">#</span><br><span class="line">dhcp enable</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ipv6 enable </span><br><span class="line"> ipv6 address <span class="number">3000</span>::<span class="number">2</span>/<span class="number">64</span> </span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> ipv6 enable </span><br><span class="line"> ipv6 address <span class="number">2000</span>::<span class="number">1</span>/<span class="number">64</span> </span><br><span class="line"> undo ipv6 nd ra halt</span><br><span class="line"> <span class="comment">//使能路由器向主机发送路由通告信息</span></span><br><span class="line"> ipv6 nd autoconfig managed-address-flag</span><br><span class="line"> <span class="comment">//使M和O标志位置位。实现主机通过DHCPv6方式获取地址</span></span><br><span class="line"> ipv6 nd autoconfig other-flag</span><br><span class="line"> dhcpv6 relay destination <span class="number">3000</span>::<span class="number">1</span></span><br><span class="line"> <span class="comment">//指明DHCP服务器的地址</span></span><br><span class="line">#</span><br><span class="line"><span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<hr>
+<p><img src="/2018/02/01/DHCPv6基础/DHCP.png" alt="DHCP"></p>
+<h2 id="图：DHCPv6服务器地址分配状况"><a href="#图：DHCPv6服务器地址分配状况" class="headerlink" title="图：DHCPv6服务器地址分配状况"></a><center>图：DHCPv6服务器地址分配状况<center></center></center></h2><hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/02/01/DHCPv6基础/" title="DHCPv6基础">https://cshihong.github.io/2018/02/01/DHCPv6基础/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/路由基础/" rel="tag"># 路由基础</a>
+          
+            <a href="/tags/DHCP/" rel="tag"># DHCP</a>
+          
+            <a href="/tags/IPv6/" rel="tag"># IPv6</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/01/IPv6命令行配置/" rel="next" title="IPv6命令行配置">
+                <i class="fa fa-chevron-left"></i> IPv6命令行配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/05/QoS概述/" rel="prev" title="QoS概述">
+                QoS概述 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCPv6简介"><span class="nav-number">1.</span> <span class="nav-text">DHCPv6简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目的："><span class="nav-number">1.1.</span> <span class="nav-text">目的：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCPv6原理描述"><span class="nav-number">2.</span> <span class="nav-text">DHCPv6原理描述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCPv6概述："><span class="nav-number">2.1.</span> <span class="nav-text">DHCPv6概述：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IPv6地址分配类型："><span class="nav-number">2.1.1.</span> <span class="nav-text">IPv6地址分配类型：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCPv6基本架构："><span class="nav-number">2.1.2.</span> <span class="nav-text">DHCPv6基本架构：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCPv6基本概念："><span class="nav-number">2.1.3.</span> <span class="nav-text">DHCPv6基本概念：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCPv6报文类型"><span class="nav-number">2.2.</span> <span class="nav-text">DHCPv6报文类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCPv6报文格式："><span class="nav-number">2.2.1.</span> <span class="nav-text">DHCPv6报文格式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCPv6报文类型："><span class="nav-number">2.2.2.</span> <span class="nav-text">DHCPv6报文类型：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCPv6报文抓包："><span class="nav-number">2.2.3.</span> <span class="nav-text">DHCPv6报文抓包：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Solicit报文（类型1）："><span class="nav-number">2.2.3.1.</span> <span class="nav-text">Solicit报文（类型1）：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Solicit报文抓包示例"><span class="nav-number">2.3.</span> <span class="nav-text">图：Solicit报文抓包示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Advertise报文（类型2）："><span class="nav-number">2.3.0.1.</span> <span class="nav-text">Advertise报文（类型2）：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Advertise报文抓包示例"><span class="nav-number">2.4.</span> <span class="nav-text">图：Advertise报文抓包示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Request报文（类型3）："><span class="nav-number">2.4.0.1.</span> <span class="nav-text">Request报文（类型3）：</span></a></li></ol></li></ol><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Request报文抓包示例"><span class="nav-number">2.5.</span> <span class="nav-text">图：Request报文抓包示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Renew报文（类型5）："><span class="nav-number">2.5.0.1.</span> <span class="nav-text">Renew报文（类型5）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Renew报文抓包示例"><span class="nav-number">2.6.</span> <span class="nav-text">图：Renew报文抓包示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Rebind报文（类型6）："><span class="nav-number">2.6.0.1.</span> <span class="nav-text">Rebind报文（类型6）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Rebind报文抓包示例"><span class="nav-number">2.7.</span> <span class="nav-text">图：Rebind报文抓包示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Reply报文（类型7）："><span class="nav-number">2.7.0.1.</span> <span class="nav-text">Reply报文（类型7）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Reply报文抓包示例"><span class="nav-number">2.8.</span> <span class="nav-text">图：Reply报文抓包示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Release-类型8"><span class="nav-number">2.8.0.1.</span> <span class="nav-text">Release(类型8);</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Release报文抓包示例"><span class="nav-number">2.9.</span> <span class="nav-text">图：Release报文抓包示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Reply-forw报文（类型12）："><span class="nav-number">2.9.0.1.</span> <span class="nav-text">Reply-forw报文（类型12）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Relay-Forw报文抓包示例"><span class="nav-number">2.10.</span> <span class="nav-text">图：Relay-Forw报文抓包示例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Relay-reply报文（类型13）："><span class="nav-number">2.10.0.1.</span> <span class="nav-text">Relay-reply报文（类型13）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：Relay-Reply报文抓包示例"><span class="nav-number">2.11.</span> <span class="nav-text">图：Relay-Reply报文抓包示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCPv6工作原理：："><span class="nav-number">2.12.</span> <span class="nav-text">DHCPv6工作原理：：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DHVPv6有状态自动分配："><span class="nav-number">2.12.1.</span> <span class="nav-text">DHVPv6有状态自动分配：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCPv6无状态自动分配："><span class="nav-number">2.12.2.</span> <span class="nav-text">DHCPv6无状态自动分配：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCPv6-PD工作原理："><span class="nav-number">2.13.</span> <span class="nav-text">DHCPv6 PD工作原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DHCPv6中继工作原理："><span class="nav-number">2.14.</span> <span class="nav-text">DHCPv6中继工作原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPv6地址-前缀的分配与更新原则："><span class="nav-number">2.15.</span> <span class="nav-text">IPv6地址/前缀的分配与更新原则：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IPv6地址分配的优先次序："><span class="nav-number">2.15.1.</span> <span class="nav-text">IPv6地址分配的优先次序：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DHCPv6地址租约更新："><span class="nav-number">2.15.2.</span> <span class="nav-text">DHCPv6地址租约更新：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IP地址预留："><span class="nav-number">2.15.3.</span> <span class="nav-text">IP地址预留：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCPv6基础配置命令"><span class="nav-number">3.</span> <span class="nav-text">DHCPv6基础配置命令</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DHCPv6服务器、中继配置示例"><span class="nav-number">4.</span> <span class="nav-text">DHCPv6服务器、中继配置示例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#实验要求："><span class="nav-number">4.1.</span> <span class="nav-text">实验要求：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件："><span class="nav-number">4.2.</span> <span class="nav-text">配置文件：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：DHCPv6服务器地址分配状况"><span class="nav-number">4.3.</span> <span class="nav-text">图：DHCPv6服务器地址分配状况</span></a></li></ol></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/02/01/DHCPv6基础/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

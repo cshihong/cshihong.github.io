@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="包过滤技术基础包过滤技术简介：对需要转发的数据包，先获取报头信息，然后和设定的规则进行比较，根据比较的结果对数据包进行转发或丢弃。 实现包过滤的核心技术是访问控制列表。  包过滤作为一种网络安全保护机制，主要用于对网络中各种不同的流量是否转发做一个最基本的控制。 传统的包过滤防火墙对于需要转发的报文，会先获取报文头信息，包括报文的源IP地址、目的IP地址、IP层所承载的上层协议的协议号、源端口号和">
+<meta name="keywords" content="组网,防火墙">
+<meta property="og:type" content="article">
+<meta property="og:title" content="防火墙安全策略">
+<meta property="og:url" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="包过滤技术基础包过滤技术简介：对需要转发的数据包，先获取报头信息，然后和设定的规则进行比较，根据比较的结果对数据包进行转发或丢弃。 实现包过滤的核心技术是访问控制列表。  包过滤作为一种网络安全保护机制，主要用于对网络中各种不同的流量是否转发做一个最基本的控制。 传统的包过滤防火墙对于需要转发的报文，会先获取报文头信息，包括报文的源IP地址、目的IP地址、IP层所承载的上层协议的协议号、源端口号和">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/包过滤基础.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/会话.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/域间.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/实验拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/主机1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/主机2.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/策略.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/会话表.png">
+<meta property="og:updated_time" content="2019-08-25T01:48:44.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="防火墙安全策略">
+<meta name="twitter:description" content="包过滤技术基础包过滤技术简介：对需要转发的数据包，先获取报头信息，然后和设定的规则进行比较，根据比较的结果对数据包进行转发或丢弃。 实现包过滤的核心技术是访问控制列表。  包过滤作为一种网络安全保护机制，主要用于对网络中各种不同的流量是否转发做一个最基本的控制。 传统的包过滤防火墙对于需要转发的报文，会先获取报文头信息，包括报文的源IP地址、目的IP地址、IP层所承载的上层协议的协议号、源端口号和">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/04/26/防火墙安全策略/包过滤基础.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/04/26/防火墙安全策略/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>防火墙安全策略 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/04/26/防火墙安全策略/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">防火墙安全策略
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-26 22:08:47" itemprop="dateCreated datePublished" datetime="2018-04-26T22:08:47+08:00">2018-04-26</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:48:44" itemprop="dateModified" datetime="2019-08-25T09:48:44+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 3,579</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 13</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="包过滤技术基础"><a href="#包过滤技术基础" class="headerlink" title="包过滤技术基础"></a>包过滤技术基础</h1><h2 id="包过滤技术简介："><a href="#包过滤技术简介：" class="headerlink" title="包过滤技术简介："></a>包过滤技术简介：</h2><p>对需要转发的数据包，先获取报头信息，然后和设定的规则进行比较，根据比较的结果对数据包进行转发或丢弃。</p>
+<p><strong>实现包过滤的核心技术是访问控制列表。</strong></p>
+<ul>
+<li>包过滤作为一种网络安全保护机制，主要用于对网络中各种不同的流量是否转发做一个最基本的控制。</li>
+<li>传统的包过滤防火墙对于需要转发的报文，会先获取报文头信息，包括报文的源IP地址、目的IP地址、IP层所承载的上层协议的协议号、源端口号和目的端口号等，然后和预先设定的过滤规则进行匹配，并根据匹配结果对报文采取转发或丢弃处理。</li>
+<li>包过滤防火墙的转发机制是逐包匹配包过滤规则并检查，所以转发效率低下。目前防火墙基本使用状态检查机制，将只对一个连接的首包进行包过滤检查，如果这个首包能够通过包过滤规则的检查，并建立会话的话，后续报文将不再继续通过包过滤机制检测，而是直接通过会话表进行转发。</li>
+</ul>
+<h2 id="包过滤的基础："><a href="#包过滤的基础：" class="headerlink" title="包过滤的基础："></a>包过滤的基础：</h2><p><img src="/2018/04/26/防火墙安全策略/包过滤基础.png" alt="包过滤基础"></p>
+<p><center>图：包过滤基础-五元素<center></center></center></p>
+<p>包过滤能够通过报文的源MAC地址、目的MAC地址、源IP地址、目的IP地址、源端口号、目的端口号、上层协议等信息组合定义网络中的数据流，其中<strong>源IP地址、目的IP地址、源端口号、目的端口号、上层协议</strong>就是在状态检测防火墙中经常所提到的五无组，也是组成TCP/UDP连接非常重要的五个元素。</p>
+<h2 id="防火墙安全策略："><a href="#防火墙安全策略：" class="headerlink" title="防火墙安全策略："></a>防火墙安全策略：</h2><p>定义：</p>
+<ol>
+<li>安全策略是按一定规则检查数据流是否可以通过防火墙的基本安全控制机制。</li>
+<li>规则的本质是包过滤。</li>
+</ol>
+<p>主要应用：</p>
+<ol>
+<li>对跨防火墙的网络互访进行控制。</li>
+<li>对设备本身的访问进行控制。</li>
+</ol>
+<p>防火墙的基本作用是保护特定网络免受“不信任”的网络的攻击，但是同时还必须允许两个网络之间可以进行合法的通信。安全策略的作用就是对通过防火墙的数据流进行检验，符合安全策略的合法数据流才能通过防火墙。</p>
+<p>通过防火墙安全策略可以控制内网访问外网的权限、控制内网不同安全级别的子网间的访问权限等。同时也能够对设备本身的访问进行控制，例如限制哪些IP地址可以通过Telnet和Web等方式登录设备，控制网管服务器、NTP服务器等与设备的互访等。</p>
+<h2 id="防火墙安全策略的原理："><a href="#防火墙安全策略的原理：" class="headerlink" title="防火墙安全策略的原理："></a>防火墙安全策略的原理：</h2><p>过程：</p>
+<ol>
+<li>入数据流经过防火墙</li>
+<li>查找防火墙安全策略，判断是否允许下一步操作。</li>
+<li>防火墙根据安全策略定义规则对包进行处理。</li>
+</ol>
+<p>防护墙安全策略的作用：</p>
+<blockquote>
+<p>根据定义的规则对经过防火墙的流量进行筛选，并根据关键字确定筛选出的流量如何进行下一步操作。</p>
+</blockquote>
+<h2 id="安全策略分类："><a href="#安全策略分类：" class="headerlink" title="安全策略分类："></a>安全策略分类：</h2><ul>
+<li><p>域间安全策略</p>
+<p><strong>域间安全策略用于控制域间流量的转发（此时称为转发策略），适用于接口加入不同安全区域的场景</strong>。域间安全策略按IP地址、时间段和服务（端口或协议类型）、用户等多种方式匹配流量，并对符合条件的流量进行包过滤控制（permit/deny）或高级的UTM应用层检测。域间安全策略也用于控制外界与设备本身的互访（此时称为本地策略），按IP地址、时间段和服务（端口或协议类型）等多种方式匹配流量，并对符合条件的流量进行包过滤控制（permit/deny），允许或拒绝与设备本身的互访。</p>
+</li>
+<li><p>域内安全策略</p>
+<p><strong>缺省情况下域内数据流动不受限制</strong>，如果需要进行安全检查可以应用域内安全策略。与域间安全策略一样可以按IP地址、时间段和服务（端口或协议类型）、用户等多种方式匹配流量，然后对流量进行安全检查。例如：市场部和财务部都属于内网所在的安全区域Trust，可以正常互访。但是财务部是企业重要数据所在的部门，需要防止内部员工对服务器、PC等的恶意攻击。所以在域内应用安全策略进行IPS检测，阻断恶意员工的非法访问。</p>
+</li>
+<li><p>接口包过滤</p>
+<p>当接口未加入安全区域的情况下，通过接口包过滤控制接口接收和发送的IP报文，可以按IP地址、时间段和服务（端口或协议类型）等多种方式匹配流量并执行相应动作（permit/deny）。基于MAC地址的包过滤用来控制接口可以接收哪些以太网帧，可以按MAC地址、帧的协议类型和帧的优先级匹配流量并执行相应动作（permit/deny）。硬件包过滤是在特定的二层硬件接口卡上实现的，用来控制接口卡上的接口可以接收哪些流量。硬件包过滤直接通过硬件实现，所以过滤速度更快。</p>
+</li>
+</ul>
+<h1 id="防火墙转发原理"><a href="#防火墙转发原理" class="headerlink" title="防火墙转发原理"></a>防火墙转发原理</h1><h2 id="防火墙域间转发："><a href="#防火墙域间转发：" class="headerlink" title="防火墙域间转发："></a>防火墙域间转发：</h2><ul>
+<li>早期包过滤防火墙采取的是“逐包检测”机制，即对设备收到的所有报文都根据包过滤规则每次都进行检查以决定是否对该报文放行。这种机制严重影响了设备转发效率，使包过滤防火墙成为网络中的转发瓶颈。</li>
+<li>于是越来越多的防火墙产品采用了“状态检测”机制来进行包过滤。<strong>“状态检测”机制以流量为单位来对报文进行检测和转发，即对一条流量的第一个报文进行包过滤规则检查，并将判断结果作为该条流量的“状态”记录下来。对于该流量的后续报文都直接根据这个“状态”来判断是转发还是丢弃，而不会再次检查报文的数据内容。</strong>这个“状态”就是我们平常所述的会话表项。这种机制迅速提升了防火墙产品的检测速率和转发效率，已经成为目前主流的包过滤机制。</li>
+<li>在防火墙一般是检查IP报文中的五个元素，又称为“五元组”，即源IP地址和目的IP地址，源端口号和目的端口号，协议类型。通过判断IP数据报文报文的五元组，就可以判断一条数据流相同的IP数据报文。</li>
+<li>其中TCP协议的数据报文，一般情况下在三次握手阶段除了基于五元组外，还会计算及检查其它字段。三次握手建立成功后，就通过会话表中的五元组对设备收到后续报文进行匹配检测，以确定是否允许此报文通过。</li>
+</ul>
+<h2 id="查询和创建会话："><a href="#查询和创建会话：" class="headerlink" title="查询和创建会话："></a>查询和创建会话：</h2><p><img src="/2018/04/26/防火墙安全策略/过程.png" alt="过程"></p>
+<p><center>图：创建会话过程<center></center></center></p>
+<p>可以看出，对于已经存在会话表的报文的检测过程比没有会话表的报文要短很多。而通常情况下，通过对一条连接的首包进行检测并建立会话后，该条连接的绝大部分报文都不再需要重新检测。这就是状态检测防火墙的“状态检测机制”相对于包过滤防火墙的“逐包检测机制”的改进之处。这种改进使状态检测防火墙在检测和转发效率上有迅速提升。</p>
+<h2 id="状态监测机制："><a href="#状态监测机制：" class="headerlink" title="状态监测机制："></a>状态监测机制：</h2><ul>
+<li>状态监测机制开启状态下，只有首包通过设备才能建立会话表项，后续包直接匹配会话表项进行转发。</li>
+<li>状态监测机制关闭状态下，即使首包没有经过设备，后续好只要通过设备也可以生成会话表项。</li>
+</ul>
+<p>对于TCP报文</p>
+<ul>
+<li>开启状态检测机制时，首包（SYN报文）建立会话表项。对除SYN报文外的其他报文，如果没有对应会话表项（设备没有收到SYN报文或者会话表项已老化），则予以丢弃，也不会建立会话表项。</li>
+<li>关闭状态检测机制时，任何格式的报文在没有对应会话表项的情况下，只要通过各项安全机制的检查，都可以为其建立会话表项。</li>
+</ul>
+<p>对于UDP报文</p>
+<ul>
+<li>UDP是基于无连接的通信，任何UDP格式的报文在没有对应会话表项的情况下，只要通过各项安全机制的检查，都可以为其建立会话表项。</li>
+</ul>
+<p>对于ICMP报文</p>
+<ul>
+<li>开启状态检测机制时，没有对应会话的ICMP应答报文将被丢弃。</li>
+<li>关闭状态检测机制时，没有对应会话的应答报文以首包形式处理</li>
+</ul>
+<h2 id="会话表项："><a href="#会话表项：" class="headerlink" title="会话表项："></a>会话表项：</h2><p><img src="/2018/04/26/防火墙安全策略/会话.png" alt="会话"></p>
+<p><center>图：会话表项示例<center><br>会话是状态检测防火墙的基础，每一个通过防火墙的数据流都会在防火墙上建立一个会话表项，以五元组（源目的IP地址、源目的端口、协议号）为Key值，通过建立动态的会话表提供域间转发数据流更高的安全性。</center></center></p>
+<h1 id="智能安全策略："><a href="#智能安全策略：" class="headerlink" title="智能安全策略："></a>智能安全策略：</h1><h2 id="安全策略配置存在的问题："><a href="#安全策略配置存在的问题：" class="headerlink" title="安全策略配置存在的问题："></a>安全策略配置存在的问题：</h2><ol>
+<li>配置逻辑复杂。</li>
+<li>易产生安全风险</li>
+<li>易冗余</li>
+</ol>
+<h2 id="解决方案：-智能安全策略"><a href="#解决方案：-智能安全策略" class="headerlink" title="解决方案： 智能安全策略"></a>解决方案： 智能安全策略</h2><ol>
+<li>冗余分析</li>
+<li>策略命中</li>
+<li>风险调优</li>
+</ol>
+<h2 id="条件："><a href="#条件：" class="headerlink" title="条件："></a>条件：</h2><p>中低端设备必须硬盘在位，高端设备只需要有硬盘插槽，不需要硬盘在位。低端设备不支持。</p>
+<h2 id="为什么需要有智能安全策略："><a href="#为什么需要有智能安全策略：" class="headerlink" title="为什么需要有智能安全策略："></a>为什么需要有智能安全策略：</h2><ol>
+<li>策略匹配条件多</li>
+<li>未匹配内容安全</li>
+<li>重复（包含）策略</li>
+<li>未命中策略</li>
+</ol>
+<h1 id="防火墙安全策略及应用"><a href="#防火墙安全策略及应用" class="headerlink" title="防火墙安全策略及应用"></a>防火墙安全策略及应用</h1><h2 id="域间安全策略的匹配规则："><a href="#域间安全策略的匹配规则：" class="headerlink" title="域间安全策略的匹配规则："></a>域间安全策略的匹配规则：</h2><ul>
+<li><p>域间缺省包过滤</p>
+<p>当数据流无法匹配域间安全策略时，会按照域间缺省包过滤规则来转发或丢弃该数据流的报文。</p>
+</li>
+<li><p>转发策略</p>
+<p>转发策略是指控制哪些流量可以经过设备转发的域间安全策略，对域间（除Local域外）转发流量进行安全检查，例如控制哪些Trust域的内网用户可以访问Untrust域的Internet。</p>
+</li>
+<li><p>本地策略</p>
+<p>本地策略是指与Local安全区域有关的域间安全策略，用于控制外界与设备本身的互访。</p>
+</li>
+</ul>
+<h2 id="域间安全策略业务流程："><a href="#域间安全策略业务流程：" class="headerlink" title="域间安全策略业务流程："></a>域间安全策略业务流程：</h2><p><img src="/2018/04/26/防火墙安全策略/域间.png" alt="域间"></p>
+<p><center>图：域间安全策略业务流程<center></center></center></p>
+<p>报文入站后，将首先匹配会话表，如果命中会话表，将进入后续包处理流程，刷新会话表时间，并直接根据会话表中的出接口，转发数据。</p>
+<p>报文入站后，将首先匹配会话表，如果没有命中会话表，将进入首包包处理流程。依次进行黑名单检查，查找路由表，匹配域间安全策略，新建会话表，转发数据。</p>
+<p>黑名单的实现原理就是：设备上建立一个黑名单表。对于接收到的报文的源IP地址存在于黑名单中，就将该报文予以丢弃。</p>
+<p>黑名单分类：</p>
+<ul>
+<li><p>静态黑名单</p>
+<p>管理员可以通过命令行或Web方式手工逐个将IP地址添加到黑名单中。</p>
+</li>
+<li><p>动态黑名单</p>
+<p>转发策略和缺省域间包过滤优先级</p>
+<p>转发策略优先于缺省域间包过滤匹配。设备将首先查找域间的转发策略，如果没有找到匹配项将匹配缺省包过滤进行处理。</p>
+</li>
+<li><p>刷新会话表</p>
+<p>刷新会话表主要是刷新会话表老化时间，老化时间决定会话在没有相应的报文匹配的情况下，何时被系统删除。</p>
+</li>
+</ul>
+<h2 id="配置转发策略流程："><a href="#配置转发策略流程：" class="headerlink" title="配置转发策略流程："></a>配置转发策略流程：</h2><p><img src="/2018/04/26/防火墙安全策略/流程.png" alt="流程"></p>
+<p><center>图：配置转发策略的流程图<center></center></center></p>
+<h2 id="基于IP地址的转发策略配置示例："><a href="#基于IP地址的转发策略配置示例：" class="headerlink" title="基于IP地址的转发策略配置示例："></a>基于IP地址的转发策略配置示例：</h2><h3 id="实验拓扑："><a href="#实验拓扑：" class="headerlink" title="实验拓扑："></a>实验拓扑：</h3><p><img src="/2018/04/26/防火墙安全策略/实验拓扑.png" alt="实验拓扑"></p>
+<p><center>图：实验拓扑图<center></center></center></p>
+<h3 id="实验要求："><a href="#实验要求：" class="headerlink" title="实验要求："></a>实验要求：</h3><p>如上图，防火墙的Gi0/0/0口在Trust区域，Gi0/0/01在UNtrust区域，通过配置策略，使得内网中除了PC1:192.168.1.2可以访问服务器，其他主机都不能访问服务器。</p>
+<h3 id="配置文件："><a href="#配置文件：" class="headerlink" title="配置文件："></a>配置文件：</h3><p><strong>FW配置文件：</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">[FW]dis current-configuration  </span><br><span class="line"><span class="number">23</span>:<span class="number">45</span>:<span class="number">46</span>  <span class="number">2018</span>/<span class="number">04</span>/<span class="number">26</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line"> ip address <span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> ip address <span class="number">10.1</span><span class="number">.1</span><span class="number">.1</span> <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line">#</span><br><span class="line">firewall zone local</span><br><span class="line"> <span class="built_in">set</span> priority <span class="number">100</span></span><br><span class="line">#</span><br><span class="line">firewall zone trust</span><br><span class="line"> <span class="built_in">set</span> priority <span class="number">85</span></span><br><span class="line"> add interface GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span></span><br><span class="line">#</span><br><span class="line">firewall zone untrust</span><br><span class="line"> <span class="built_in">set</span> priority <span class="number">5</span></span><br><span class="line"> add interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line">#</span><br><span class="line">firewall zone dmz</span><br><span class="line"> <span class="built_in">set</span> priority <span class="number">50</span></span><br><span class="line">#</span><br><span class="line"> <span class="comment">//配置地址集</span></span><br><span class="line">ip address-<span class="built_in">set</span> ip_deny type object</span><br><span class="line"> address <span class="number">1</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.3</span> <span class="number">0</span></span><br><span class="line"> address <span class="number">2</span> <span class="number">192.168</span><span class="number">.1</span><span class="number">.4</span> <span class="number">0</span></span><br><span class="line">#</span><br><span class="line"> sysname FW</span><br><span class="line">#</span><br><span class="line"> firewall packet-filter <span class="keyword">default</span> permit interzone local trust direction inbound</span><br><span class="line"> firewall packet-filter <span class="keyword">default</span> permit interzone local trust direction outbound</span><br><span class="line"> firewall packet-filter <span class="keyword">default</span> permit interzone local untrust direction outboun</span><br><span class="line">d</span><br><span class="line"> firewall packet-filter <span class="keyword">default</span> permit interzone local dmz direction outbound</span><br><span class="line">#</span><br><span class="line">#</span><br><span class="line"> firewall statistic system enable</span><br><span class="line"> <span class="comment">//防火墙状态检测默认开启</span></span><br><span class="line">#</span><br><span class="line"><span class="comment">//防火墙策略</span></span><br><span class="line">policy interzone trust untrust inbound</span><br><span class="line"> policy <span class="number">0</span></span><br><span class="line">  action permit</span><br><span class="line">  policy destination <span class="number">192.168</span><span class="number">.1</span><span class="number">.2</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line"> policy <span class="number">1</span></span><br><span class="line">  action permit</span><br><span class="line">  policy source <span class="number">192.168</span><span class="number">.1</span><span class="number">.2</span> <span class="number">0</span></span><br><span class="line">#</span><br><span class="line">policy interzone trust untrust outbound</span><br><span class="line"> policy <span class="number">0</span></span><br><span class="line">  action deny</span><br><span class="line">  policy source address-<span class="built_in">set</span> ip_deny</span><br><span class="line"></span><br><span class="line"> policy <span class="number">1</span></span><br><span class="line">  action permit</span><br><span class="line">  policy source <span class="number">192.168</span><span class="number">.1</span><span class="number">.2</span> <span class="number">0</span></span><br><span class="line">#</span><br><span class="line"><span class="keyword">return</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置成功后测试："><a href="#配置成功后测试：" class="headerlink" title="配置成功后测试："></a>配置成功后测试：</h3><p><img src="/2018/04/26/防火墙安全策略/主机1.png" alt="主机1"></p>
+<h2 id="图：PC1可以ping通服务器"><a href="#图：PC1可以ping通服务器" class="headerlink" title="图：PC1可以ping通服务器"></a><center>图：PC1可以ping通服务器<center></center></center></h2><p><img src="/2018/04/26/防火墙安全策略/主机2.png" alt="主机2"></p>
+<h2 id="图：PC2不能ping通服务器"><a href="#图：PC2不能ping通服务器" class="headerlink" title="图：PC2不能ping通服务器"></a><center>图：PC2不能ping通服务器<center></center></center></h2><p><img src="/2018/04/26/防火墙安全策略/策略.png" alt="策略"></p>
+<h2 id="图：防火墙策略"><a href="#图：防火墙策略" class="headerlink" title="图：防火墙策略"></a><center>图：防火墙策略<center></center></center></h2><p><img src="/2018/04/26/防火墙安全策略/会话表.png" alt="会话表"></p>
+<h2 id="图：会话表"><a href="#图：会话表" class="headerlink" title="图：会话表"></a><center>图：会话表<center></center></center></h2><hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/04/26/防火墙安全策略/" title="防火墙安全策略">https://cshihong.github.io/2018/04/26/防火墙安全策略/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/组网/" rel="tag"># 组网</a>
+          
+            <a href="/tags/防火墙/" rel="tag"># 防火墙</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/26/WLAN组网配置/" rel="next" title="WLAN组网配置">
+                <i class="fa fa-chevron-left"></i> WLAN组网配置
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/27/防火墙双机热备技术/" rel="prev" title="防火墙双机热备技术">
+                防火墙双机热备技术 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#包过滤技术基础"><span class="nav-number">1.</span> <span class="nav-text">包过滤技术基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#包过滤技术简介："><span class="nav-number">1.1.</span> <span class="nav-text">包过滤技术简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#包过滤的基础："><span class="nav-number">1.2.</span> <span class="nav-text">包过滤的基础：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防火墙安全策略："><span class="nav-number">1.3.</span> <span class="nav-text">防火墙安全策略：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防火墙安全策略的原理："><span class="nav-number">1.4.</span> <span class="nav-text">防火墙安全策略的原理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安全策略分类："><span class="nav-number">1.5.</span> <span class="nav-text">安全策略分类：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#防火墙转发原理"><span class="nav-number">2.</span> <span class="nav-text">防火墙转发原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#防火墙域间转发："><span class="nav-number">2.1.</span> <span class="nav-text">防火墙域间转发：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查询和创建会话："><span class="nav-number">2.2.</span> <span class="nav-text">查询和创建会话：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态监测机制："><span class="nav-number">2.3.</span> <span class="nav-text">状态监测机制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#会话表项："><span class="nav-number">2.4.</span> <span class="nav-text">会话表项：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#智能安全策略："><span class="nav-number">3.</span> <span class="nav-text">智能安全策略：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安全策略配置存在的问题："><span class="nav-number">3.1.</span> <span class="nav-text">安全策略配置存在的问题：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案：-智能安全策略"><span class="nav-number">3.2.</span> <span class="nav-text">解决方案： 智能安全策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#条件："><span class="nav-number">3.3.</span> <span class="nav-text">条件：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么需要有智能安全策略："><span class="nav-number">3.4.</span> <span class="nav-text">为什么需要有智能安全策略：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#防火墙安全策略及应用"><span class="nav-number">4.</span> <span class="nav-text">防火墙安全策略及应用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#域间安全策略的匹配规则："><span class="nav-number">4.1.</span> <span class="nav-text">域间安全策略的匹配规则：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#域间安全策略业务流程："><span class="nav-number">4.2.</span> <span class="nav-text">域间安全策略业务流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置转发策略流程："><span class="nav-number">4.3.</span> <span class="nav-text">配置转发策略流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于IP地址的转发策略配置示例："><span class="nav-number">4.4.</span> <span class="nav-text">基于IP地址的转发策略配置示例：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实验拓扑："><span class="nav-number">4.4.1.</span> <span class="nav-text">实验拓扑：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实验要求："><span class="nav-number">4.4.2.</span> <span class="nav-text">实验要求：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置文件："><span class="nav-number">4.4.3.</span> <span class="nav-text">配置文件：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置成功后测试："><span class="nav-number">4.4.4.</span> <span class="nav-text">配置成功后测试：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：PC1可以ping通服务器"><span class="nav-number">4.5.</span> <span class="nav-text">图：PC1可以ping通服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：PC2不能ping通服务器"><span class="nav-number">4.6.</span> <span class="nav-text">图：PC2不能ping通服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：防火墙策略"><span class="nav-number">4.7.</span> <span class="nav-text">图：防火墙策略</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图：会话表"><span class="nav-number">4.8.</span> <span class="nav-text">图：会话表</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/04/26/防火墙安全策略/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

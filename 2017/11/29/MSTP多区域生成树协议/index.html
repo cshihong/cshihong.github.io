@@ -1,0 +1,2398 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="MSTP简介多生成树协议MSTP（Multiple Spanning Tree Protocol）是IEEE802.1s中定义的生成树协议，通过生成多个生成树，来解决以太网环路问题。 目的：在以太网中部署MSTP协议后可实现如下功能：  形成多棵无环路的树，解决广播风暴并实现冗余备份。 多棵生成树在VLAN间实现负载均衡，不同VLAN的流量按照不同的路径转发。  MSTP原理描述STP/RSTP的">
+<meta name="keywords" content="交换基础,STP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MSTP多区域生成树协议">
+<meta property="og:url" content="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="MSTP简介多生成树协议MSTP（Multiple Spanning Tree Protocol）是IEEE802.1s中定义的生成树协议，通过生成多个生成树，来解决以太网环路问题。 目的：在以太网中部署MSTP协议后可实现如下功能：  形成多棵无环路的树，解决广播风暴并实现冗余备份。 多棵生成树在VLAN间实现负载均衡，不同VLAN的流量按照不同的路径转发。  MSTP原理描述STP/RSTP的">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/MSTP报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/MST%20BPDU.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/增强方式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/MSTP实验拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/SW4STP端口状态.png">
+<meta property="og:updated_time" content="2019-08-25T01:54:12.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MSTP多区域生成树协议">
+<meta name="twitter:description" content="MSTP简介多生成树协议MSTP（Multiple Spanning Tree Protocol）是IEEE802.1s中定义的生成树协议，通过生成多个生成树，来解决以太网环路问题。 目的：在以太网中部署MSTP协议后可实现如下功能：  形成多棵无环路的树，解决广播风暴并实现冗余备份。 多棵生成树在VLAN间实现负载均衡，不同VLAN的流量按照不同的路径转发。  MSTP原理描述STP/RSTP的">
+<meta name="twitter:image" content="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/MSTP报文格式.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MSTP多区域生成树协议 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">MSTP多区域生成树协议
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-11-29 18:33:38" itemprop="dateCreated datePublished" datetime="2017-11-29T18:33:38+08:00">2017-11-29</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:54:12" itemprop="dateModified" datetime="2019-08-25T09:54:12+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 6,490</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 25</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="MSTP简介"><a href="#MSTP简介" class="headerlink" title="MSTP简介"></a>MSTP简介</h1><p>多生成树协议MSTP（Multiple Spanning Tree Protocol）是IEEE<br>802.1s中定义的生成树协议，通过生成多个生成树，来解决以太网环路问题。</p>
+<h2 id="目的："><a href="#目的：" class="headerlink" title="目的："></a>目的：</h2><p>在以太网中部署MSTP协议后可实现如下功能：</p>
+<ul>
+<li>形成多棵无环路的树，解决广播风暴并实现冗余备份。</li>
+<li>多棵生成树在VLAN间实现负载均衡，不同VLAN的流量按照不同的路径转发。</li>
+</ul>
+<h1 id="MSTP原理描述"><a href="#MSTP原理描述" class="headerlink" title="MSTP原理描述"></a>MSTP原理描述</h1><h2 id="STP-RSTP的缺陷："><a href="#STP-RSTP的缺陷：" class="headerlink" title="STP/RSTP的缺陷："></a>STP/RSTP的缺陷：</h2><p>RSTP在STP基础上进行了改进，实现了网络拓扑快速收敛。但RSTP和STP还存在同一个缺陷：由于局域网内所有的VLAN共享一棵生成树，因此无法在VLAN间实现数据流量的负载均衡，链路被阻塞后将不承载任何流量，还有可能造成部分VLAN的报文无法转发。</p>
+<h2 id="MSTP对STP和RSTP的改进："><a href="#MSTP对STP和RSTP的改进：" class="headerlink" title="MSTP对STP和RSTP的改进："></a>MSTP对STP和RSTP的改进：</h2><ul>
+<li>为了弥补STP和RSTP的缺陷，IEEE于2002年发布的802.1S标准定义了MSTP。MSTP兼容STP和RSTP，既可以快速收敛，又提供了数据转发的多个冗余路径，在数据转发过程中实现VLAN数据的负载均衡。</li>
+<li>MSTP把一个交换网络划分成多个域，每个域内形成多棵生成树，生成树之间彼此独立。每棵生成树叫做一个多生成树实例MSTI（Multiple Spanning Tree Instance），每个域叫做一个MST域（MST Region：Multiple Spanning Tree Region）。</li>
+<li>所谓生成树实例就是多个VLAN的一个集合。通过将多个VLAN捆绑到一个实例，可以节省通信开销和资源占用率。MSTP各个实例拓扑的计算相互独立，在这些实例上可以实现负载均衡。可以把多个相同拓扑结构的VLAN映射到一个实例里，这些VLAN在端口上的转发状态取决于端口在对应MSTP实例的状态。</li>
+</ul>
+<h2 id="MSTP基本概念："><a href="#MSTP基本概念：" class="headerlink" title="MSTP基本概念："></a>MSTP基本概念：</h2><ul>
+<li><p><strong>MST域（MST Region）</strong></p>
+<p>​              都启动了MSTP。</p>
+<ul>
+<li>具有相同的域名。</li>
+<li>具有相同的VLAN到生成树实例映射配置。</li>
+<li>具有相同的MSTP修订级别配置。</li>
+</ul>
+<p>一个局域网可以存在多个MST域，各MST域之间在物理上直接或间接相连。用户可以通过MSTP配置命令把多台交换设备划分在同一个MST域内。</p>
+</li>
+<li><p><strong>VLAN映射表：</strong></p>
+<p>VLAN映射表是MST域的属性，它描述了VLAN和MSTI之间的映射关系。</p>
+</li>
+<li><p><strong>CST</strong></p>
+<p>公共生成树CST（Common Spanning Tree）是连接交换网络内所有MST域的一棵生成树。</p>
+<p>如果把每个MST域看作是一个节点，CST就是这些节点通过STP或RSTP协议计算生成的一棵生成树。</p>
+</li>
+<li><p><strong>IST</strong></p>
+<p>内部生成树IST（Internal Spanning Tree）是各MST域内的一棵生成树。</p>
+<p>IST是一个特殊的MSTI，MSTI的ID为0，通常称为MSTI0。</p>
+<p>IST是CIST在MST域中的一个片段。</p>
+</li>
+<li><p><strong>SST</strong></p>
+<p>运行STP或RSTP的交换设备只能属于一个生成树。</p>
+<p>MST域中只有一个交换设备，这个交换设备构成单生成树。</p>
+</li>
+<li><p>CIST</p>
+<p>公共和内部生成树CIST（Common and Internal Spanning Tree）是通过STP或RSTP协议计算生成的，连接一个交换网络内所有交换设备的单生成树。</p>
+</li>
+<li><p><strong>域根</strong></p>
+<p>域根（Regional Root）分为IST域根和MSTI域根。</p>
+<p>一个MST域内可以生成多棵生成树，每棵生成树都称为一个MSTI。MSTI域根是每个多生成树实例的树根。</p>
+</li>
+<li><p><strong>总根</strong></p>
+<p>总根是CIST（Common and Internal Spanning Tree）的根桥。</p>
+</li>
+<li><p><strong>主桥</strong></p>
+<p>主桥（Master Bridge）也就是IST Master，它是域内距离总根最近的交换设备。</p>
+</li>
+<li><p><strong>端口角色</strong></p>
+<p>根端口、指定端口、Alternate端口、Backup端口和边缘端口的作用同RSTP协议中定义。</p>
+<p>除边缘端口外，其他端口角色都参与MSTP的计算过程。</p>
+<p>同一端口在不同的生成树实例中可以担任不同的角色。</p>
+</li>
+</ul>
+<h2 id="端口角色："><a href="#端口角色：" class="headerlink" title="端口角色："></a>端口角色：</h2><table>
+<thead>
+<tr>
+<th>端口角色</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>根端口</td>
+<td>在非根桥上，离根桥最近的端口是本交换设备的根端口。根交换设备没有根端口。根端口负责向树根方向转发数据。</td>
+</tr>
+<tr>
+<td>指定端口</td>
+<td>对一台交换设备而言，它的指定端口是向下游交换设备转发BPDU报文的端口。</td>
+</tr>
+<tr>
+<td>Alternate端口</td>
+<td>从配置BPDU报文发送角度来看，Alternate端口就是由于学习到其它网桥发送的配置BPDU报文而阻塞的端口。  从用户流量角度来看，Alternate端口提供了从指定桥到根的另一条可切换路径，作为根端口的备份端口。</td>
+</tr>
+<tr>
+<td>Backup端口</td>
+<td>从配置BPDU报文发送角度来看，Backup端口就是由于学习到自己发送的配置BPDU报文而阻塞的端口。 从用户流量角度来看，Backup端口作为指定端口的备份，提供了另外一条从根节点到叶节点的备份通路。</td>
+</tr>
+<tr>
+<td>Master端口</td>
+<td>1、 Master端口是MST域和总根相连的所有路径中最短路径上的端口，它是交换设备上连接MST域到总根的端口。 2、 Master端口是域中的报文去往总根的必经之路。 3、 Master端口是特殊域边缘端口，Master端口在CIST上的角色是Root Port，在其它各实例上的角色都是Master端口。</td>
+</tr>
+<tr>
+<td>域边缘端口</td>
+<td>域边缘端口是指位于MST域的边缘并连接其它MST域或SST的端口。</td>
+</tr>
+<tr>
+<td>边缘端口</td>
+<td>1、如果指定端口位于整个域的边缘，不再与任何交换设备连接，这种端口叫做边缘端口。2、 边缘端口一般与用户终端设备直接连接。  3、 端口使能MSTP功能后，会默认启用边缘端口自动探测功能，当端口在（2 × Hello Timer + 1）秒的时间内收不到BPDU报文，自动将端口设置为边缘端口，否则设置为非边缘端口。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="端口状态："><a href="#端口状态：" class="headerlink" title="端口状态："></a>端口状态：</h2><p>MSTP定义的端口状态与RSTP协议中定义相同。</p>
+<p>注：根端口、Master端口、指定端口和域边缘端口支持Forwarding、Learning和Discarding状态，Alternate端口和Backup端口仅支持Discarding状态。</p>
+<h2 id="MSPT报文："><a href="#MSPT报文：" class="headerlink" title="MSPT报文："></a>MSPT报文：</h2><p>MSTP使用多生成树桥协议数据单元MST BPDU（Multiple Spanning Tree Bridge Protocol Data Unit）作为生成树计算的依据。MST BPDU报文用来计算生成树的拓扑、维护网络拓扑以及传达拓扑变化记录。</p>
+<p>STP中定义的配置BPDU、RSTP中定义的RST BPDU、MSTP中定义的MST BPDU及TCN BPDU差异对比如下：</p>
+<p> <strong>四种BPDU差异比较：</strong></p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>类型</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0x00</td>
+<td>配置BPDU</td>
+</tr>
+<tr>
+<td>0</td>
+<td>0x80</td>
+<td>TCN BPDU</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0x02</td>
+<td>RST BPDU</td>
+</tr>
+<tr>
+<td>3</td>
+<td>0x02</td>
+<td>MST BPDU</td>
+</tr>
+</tbody>
+</table>
+<h3 id="MSTP帧格式："><a href="#MSTP帧格式：" class="headerlink" title="MSTP帧格式："></a>MSTP帧格式：</h3><p><img src="/2017/11/29/MSTP多区域生成树协议/MSTP报文格式.png" alt="MSTP报文格式"></p>
+<p><center>图：MSTP帧格式<center></center></center></p>
+<p>无论是域内的MST BPDU还是域间的，前35个字节和RST BPDU相同。 </p>
+<p>从第36个字节开始是MSTP专有字段。最后的MSTI配置信息字段由若干MSTI配置信息组连缀而成。 </p>
+<h3 id="MSTP-报文字段解释："><a href="#MSTP-报文字段解释：" class="headerlink" title="MSTP 报文字段解释："></a>MSTP 报文字段解释：</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protocol Identifier</td>
+<td>协议标识符。</td>
+</tr>
+<tr>
+<td>Protocol Version Identifier</td>
+<td>协议版本标识符，STP为0，RSTP为2，MSTP为3。</td>
+</tr>
+<tr>
+<td>BPDU Type</td>
+<td>BPDU类型，MSTP为0x02。0x00：STP的Configuration BPDU0x80：STP的TCN BPDU（Topology Change Notification BPDU）0x02：RST BPDU（Rapid Spanning-Tree BPDU）或者MST BPDU（Multiple Spanning-Tree BPDU）</td>
+</tr>
+<tr>
+<td>CIST Flags</td>
+<td>CIST标志字段。</td>
+</tr>
+<tr>
+<td>CIST Root Identifier</td>
+<td>CIST的总根交换机ID。</td>
+</tr>
+<tr>
+<td>CIST External Path Cost</td>
+<td>CIST外部路径开销指从本交换机所属的MST域到CIST根交换机的累计路径开销。CIST外部路径开销根据链路带宽计算。</td>
+</tr>
+<tr>
+<td>CIST Regional Root Identifier</td>
+<td>CIST的域根交换机ID，即IST Master的ID。 如果总根在这个域内，那么域根交换机ID就是总根交换机ID。</td>
+</tr>
+<tr>
+<td>CIST Port Identifier</td>
+<td>本端口在IST中的指定端口ID。</td>
+</tr>
+<tr>
+<td>Message Age</td>
+<td>BPDU报文的生存期。</td>
+</tr>
+<tr>
+<td>Max Age</td>
+<td>BPDU报文的最大生存期，超时则认为到根交换机的链路故障。</td>
+</tr>
+<tr>
+<td>Hello Time</td>
+<td>Hello定时器，缺省为2秒。</td>
+</tr>
+<tr>
+<td>Forward Delay</td>
+<td>Forward Delay定时器，缺省为15秒。</td>
+</tr>
+<tr>
+<td>Version 1 Length</td>
+<td>Version1 BPDU的长度，值固定为0。</td>
+</tr>
+<tr>
+<td>Version 3 Length</td>
+<td>Version3 BPDU的长度。</td>
+</tr>
+<tr>
+<td>MST Configuration Identifier</td>
+<td>MST配置标识，表示MST域的标签信息，包含4个字段：Configuration Identifier Format Selector：固定为0。Configuration Name：“域名”，32字节长字符串。Revision Level：2字节非负整数。Configuration Digest：利用HMAC-MD5算法将域中VLAN和实例的映射关系加密成16字节的摘要。只有MST Configuration Identifier中的四个字段完全相同的，并且互联的交换机，才属于同一个域。</td>
+</tr>
+<tr>
+<td>CIST Internal Root Path Cost</td>
+<td>CIST内部路径开销指从本端口到IST Master交换机的累计路径开销。CIST内部路径开销根据链路带宽计算。</td>
+</tr>
+<tr>
+<td>CIST Bridge Identifier</td>
+<td>CIST的指定交换机ID。</td>
+</tr>
+<tr>
+<td>CIST Remaining Hops</td>
+<td>BPDU报文在CIST中的剩余跳数。</td>
+</tr>
+<tr>
+<td>MSTI Configuration Messages (may be absent)</td>
+<td>MSTI配置信息。每个MSTI的配置信息占16 bytes，如果有n个MSTI就占用n×16bytes。单个MSTI Configuration Messages的字段说明如下：MSTI Flags：MSTI标志。MSTI Regional Root Identifier：MSTI域根交换机ID。MSTI Internal Root Path Cost：MSTI内部路径开销指从本端口到MSTI域根交换机的累计路径开销。MSTI内部路径开销根据链路带宽计算。MSTI Bridge Priority：本交换机在MSTI中的指定交换机的优先级。MSTI Port Priority：本交换机在MSTI中的指定端口的优先级。MSTI Remaining Hops：BPDU报文在MSTI中的剩余跳数。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="MSTP报文抓包示例："><a href="#MSTP报文抓包示例：" class="headerlink" title="MSTP报文抓包示例："></a>MSTP报文抓包示例：</h3><p><img src="/2017/11/29/MSTP多区域生成树协议/MST BPDU.png" alt="MST BPDU"></p>
+<p><center>图：MST BPDU包示例<center></center></center></p>
+<h3 id="MSTP报文格式可配置："><a href="#MSTP报文格式可配置：" class="headerlink" title="MSTP报文格式可配置："></a>MSTP报文格式可配置：</h3><p>目前MSTP的BPDU报文存在两种格式：</p>
+<ul>
+<li>dot1s：IEEE802.1s规定的报文格式。</li>
+<li>legacy：私有协议报文格式。</li>
+</ul>
+<p>如果端口收发报文格式为默认支持dot1s或者legacy，这样就存在一个缺点：需要人工识别对端的BPDU报文格式，然后手工配置命令来决定支持哪种格式。人工识别报文格式比较困难，且一旦配置错误，就有可能导致MSTP计算错误，出现环路。</p>
+<p>华为技术有限公司采用的端口收发MSTP报文格式可配置（stp compliance）功能，能够实现对BPDU报文格式的自适应：</p>
+<ul>
+<li>auto</li>
+<li>dot1s</li>
+<li>legacy</li>
+</ul>
+<p>这样报文收发不但支持dot1s和legacy格式，还能通过auto方式根据收到的BPDU报文格式自动切换端口支持的BPDU报文格式，使报文格式与对端匹配。在自适应的情况下，端口初始支持dot1s格式，收到报文后，格式则和收到的报文格式保持一致。</p>
+<h3 id="每个Hello-Time时间内端口最多能发送BPDU的报文数可配置："><a href="#每个Hello-Time时间内端口最多能发送BPDU的报文数可配置：" class="headerlink" title="每个Hello Time时间内端口最多能发送BPDU的报文数可配置："></a>每个Hello Time时间内端口最多能发送BPDU的报文数可配置：</h3><p>Hello Time用于生成树协议定时发送配置消息维护生成树的稳定。如果交换设备在一段时间内没有收到BPDU报文，则会由于消息超时而对生成树进行重新计算。</p>
+<p>当交换设备成为根交换设备时，该交换设备会按照该设置值为时间间隔发送BPDU报文。非根交换设备采用根交换设备所设置的Hello Time时间值。</p>
+<p>华为技术有限公司数据通信设备提供的每个Hello Time时间内端口最多能够发送的BPDU报文个数可配置（Max Transmitted BPDU Number in Hello Time is Configurable）功能，可以设定当前端口在Hello Time时间内配置BPDU的最大发送数目。</p>
+<p>用户配置的数值越大，表示每Hello Time时间内发送的报文数越多。适当的设置该值可以限制端口每Hello Time时间内能发送的BPDU数目，防止在网络拓扑动荡时，BPDU占用过多的带宽资源。</p>
+<h2 id="MSTP拓扑计算："><a href="#MSTP拓扑计算：" class="headerlink" title="MSTP拓扑计算："></a>MSTP拓扑计算：</h2><p>MSTP可以将整个二层网络划分为多个MST域，各个域之间通过计算生成CST。域内则通过计算生成多棵生成树，每棵生成树都被称为是一个多生成树实例。其中实例0被称为IST，其他的多生成树实例为MSTI。MSTP同STP一样，使用配置消息进行生成树的计算，只是配置消息中携带的是设备上MSTP的配置信息。</p>
+<h3 id="优先级向量："><a href="#优先级向量：" class="headerlink" title="优先级向量："></a>优先级向量：</h3><p>MSTI和CIST都是根据优先级向量来计算的，这些优先级向量信息都包含在MST BPDU中。各交换设备互相交换MST BPDU来生成MSTI和CIST。</p>
+<ul>
+<li><p>优先级向量简介</p>
+<ul>
+<li><p>参与CIST计算的优先级向量为：</p>
+<p>{ 根交换设备ID，外部路径开销，域根ID，内部路径开销，指定交换设备ID，指定端口ID，接收端口ID }</p>
+</li>
+<li><p>参与MSTI计算的优先级向量为：</p>
+<p>{ 域根ID，内部路径开销，指定交换设备ID，指定端口ID，接收端口ID }</p>
+</li>
+</ul>
+<p>括号中的向量的优先级从左到右依次递减。</p>
+</li>
+</ul>
+<p><strong>向量说明：</strong></p>
+<table>
+<thead>
+<tr>
+<th>向量名</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>根交换设备ID</td>
+<td>根交换设备ID用于选择CIST中的根交换设备。根交换设备ID = Priority(16bits) + MAC(48bits)。其中Priority为MSTI0的优先级。</td>
+</tr>
+<tr>
+<td>外部路径开销（ERPC）</td>
+<td>从CIST的域根到达总根的路径开销。MST域内所有交换设备上保存的外部路径开销相同。若CIST根交换设备在域中，则域内所有交换设备上保存的外部路径开销为0。</td>
+</tr>
+<tr>
+<td>域根ID</td>
+<td>域根ID用于选择MSTI中的域根。域根ID = Priority(16bits) + MAC(48bits)。其中Priority为MSTI0的优先级。</td>
+</tr>
+<tr>
+<td>内部路径开销（IRPC）</td>
+<td>本桥到达域根的路径开销。域边缘端口保存的内部路径开销大于非域边缘端口保存的内部路径开销。</td>
+</tr>
+<tr>
+<td>指定交换设备ID</td>
+<td>CIST或MSTI实例的指定交换设备是本桥通往域根的最邻近的上游桥。如果本桥就是总根或域根，则指定交换设备为自己。</td>
+</tr>
+<tr>
+<td>指定端口ID</td>
+<td>指定交换设备上同本设备上根端口相连的端口。Port ID = Priority(4位) + 端口号（12位）。端口优先级必须是16的整数倍。</td>
+</tr>
+<tr>
+<td>接收端口ID</td>
+<td>接收到BPDU报文的端口。Port ID = Priority(4位) + 端口号（12位）。端口优先级必须是16的整数倍。</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>比较原则</p>
+<p>同一向量比较，值最小的向量具有最高优先级。</p>
+<p>优先级向量比较原则如下。</p>
+<ol>
+<li>首先，比较根交换设备ID。</li>
+<li>如果根交换设备ID相同，再比较外部路径开销。</li>
+<li>如果外部路径开销相同，再比较域根ID。</li>
+<li>如果域根ID仍然相同，再比较内部路径开销。</li>
+<li>如果内部路径仍然相同，再比较指定交换设备ID。</li>
+<li>如果指定交换设备ID仍然相同，再比较指定端口ID。</li>
+<li>如果指定端口ID还相同，再比较接收端口ID。</li>
+</ol>
+<p>如果端口接收到的BPDU内包含的配置消息优于端口上保存的配置消息，则端口上原来保存的配置消息被新收到的配置消息替代。端口同时更新交换设备保存的全局配置消息。反之，新收到的BPDU被丢弃。</p>
+</li>
+</ul>
+<h3 id="CIST中端口角色的选举："><a href="#CIST中端口角色的选举：" class="headerlink" title="CIST中端口角色的选举："></a>CIST中端口角色的选举：</h3><p>1、比价CIST的总根ID，越小越优。<br>2、比较CIST到达总根的ERPC，越小越优。<br>3、比较CIST域根的BID，越小越优。<br>4、比较CIST到达域根的IPRC，越小越优。<br>5、比较CIST中BPDU报文发送者的BID，越小越优。<br>6、比较CIST中BPDU报文发送者的PID，越小越优。<br>7、比较CIST中BPDU报文接收者的PID，越小越优。</p>
+<h3 id="CIST的计算："><a href="#CIST的计算：" class="headerlink" title="CIST的计算："></a>CIST的计算：</h3><p>经过比较配置消息后，在整个网络中选择一个优先级最高的交换设备作为CIST的树根。在每个MST域内MSTP通过计算生成IST；同时MSTP将每个MST域作为单台交换设备对待，通过计算在MST域间生成CST。CST和IST构成了整个交换设备网络的CIST。</p>
+<h3 id="MSTI的计算："><a href="#MSTI的计算：" class="headerlink" title="MSTI的计算："></a>MSTI的计算：</h3><p>在MST域内，MSTP根据VLAN和生成树实例的映射关系，针对不同的VLAN生成不同的生成树实例。每棵生成树独立进行计算，计算过程与STP计算生成树的过程类似。</p>
+<p><strong>MSTI的特点：</strong></p>
+<ul>
+<li>每个MSTI独立计算自己的生成树，互不干扰。</li>
+<li>每个MSTI的生成树计算方法与STP基本相同。</li>
+<li>每个MSTI的生成树可以有不同的根，不同的拓扑。</li>
+<li>每个MSTI在自己的生成树内发送BPDU。</li>
+<li>每个MSTI的拓扑通过命令配置决定。</li>
+<li>每个端口在不同MSTI上的生成树参数可以不同。</li>
+<li>每个端口在不同MSTI上的角色、状态可以不同。</li>
+</ul>
+<ul>
+<li>在MST域内，沿着其对应的MSTI转发。</li>
+<li>在MST域间，沿着CST转发。</li>
+</ul>
+<h3 id="MSTP对拓扑变化的处理："><a href="#MSTP对拓扑变化的处理：" class="headerlink" title="MSTP对拓扑变化的处理："></a>MSTP对拓扑变化的处理：</h3><p>MSTP拓扑变化处理与RSTP拓扑变化处理过程类似。</p>
+<p>在RSTP中检测拓扑是否发生变化只有一个标准：一个非边缘端口迁移到Forwarding状态。</p>
+<ul>
+<li><p>为本交换设备的所有非边缘指定端口启动一个TC While Timer，该计时器值是Hello Time的两倍。</p>
+<p>在这个时间内，清空所有端口上学习到的MAC地址。</p>
+<p>同时，由非边缘端口向外发送RST BPDU，其中TC置位。一旦TC While Timer超时，则停止发送RST BPDU。</p>
+</li>
+<li><p>其他交换设备接收到RST BPDU后，清空所有端口学习到MAC地址，除了收到RST BPDU的端口。然后也为自己所有的非边缘指定端口和根端口启动TC While Timer，重复上述过程。</p>
+</li>
+</ul>
+<p>如此，网络中就会产生RST BPDU的泛洪。</p>
+<h2 id="MSTP快速收敛机制："><a href="#MSTP快速收敛机制：" class="headerlink" title="MSTP快速收敛机制："></a>MSTP快速收敛机制：</h2><p>MSTP支持普通方式和增强方式两种P/A（Proposal/Agreement）机制：</p>
+<ul>
+<li><p>普通方式</p>
+<p>MSTP支持普通方式的P/A机制实现与RSTP支持的P/A机制实现相同。</p>
+</li>
+<li><p>增强方式</p>
+</li>
+</ul>
+<p><img src="/2017/11/29/MSTP多区域生成树协议/增强方式.png" alt="增强方式"></p>
+<p><center>图：增加方式的P/A机制<center></center></center></p>
+<p>在MSTP中，P/A机制工作过程如下：</p>
+<ul>
+<li>上游设备发送Proposal报文，请求进行快速迁移。下游设备接收到后，把与上游设备相连的端口设置为根端口，并阻塞所有非边缘端口。</li>
+<li>上游设备继续发送Agreement报文。下游设备接收到后，根端口转为Forwarding状态。</li>
+<li>下游设备回应Agreement报文。上游设备接收到后，把与下游设备相连的端口设置为指定端口，指定端口进入Forwarding状态。</li>
+</ul>
+<p>缺省情况下，华为数据通信设备使用增强的快速迁移机制。如果华为数据通信设备和其他制造商的设备进行互通，而其他制造商的设备P/A机制使用普通的快速迁移机制，此时，可在华为数据通信设备上通过设置P/A机制为普通的快速迁移机制，从而实现华为数据通信设备和其他制造商的设备进行互通。</p>
+<h2 id="MSTP多进程："><a href="#MSTP多进程：" class="headerlink" title="MSTP多进程："></a>MSTP多进程：</h2><p>MSTP多进程是基于MSTP协议的增强性技术。此技术可将二层交换设备上的端口绑定到不同的进程中，并以进程为单位进行MSTP协议计算，不在同一个进程内的端口不参与此进程中的MSTP协议计算，从而实现各个进程内的生成树计算相互独立，互不影响。</p>
+<p>MSTP多进程机制并不只限于MSTP协议，RSTP和STP协议同样适用。</p>
+<h3 id="优势："><a href="#优势：" class="headerlink" title="优势："></a>优势：</h3><p>通过部署MSTP多进程可实现如下：</p>
+<ul>
+<li><p>极大地提升了在不同组网条件下生成树协议的可部署性。</p>
+<p>为了保证运行不同类型生成树协议的网络可靠运行，可将不同类型的生成树协议划分到不同的进程中，不同进程对应的网络进行独立的生成树协议计算。</p>
+</li>
+<li><p>增强了组网的可靠性，对于大量的二层接入设备，可减少单台设备故障对整个网络的冲击。</p>
+<p>通过进程隔离不同的拓扑计算，即某台设备故障只影响其所在的进程对应的拓扑，不会影响其他进程拓扑计算。</p>
+</li>
+<li><p>网络扩容时，可减少网络管理者维护量，从而提升了用户运维管理的方便性。</p>
+<p>当网络扩容时，只需要划分新的进程与原有网络对接，不需要调整原有网络的MSTP进程配置。如果是某个进程中进行了设备扩容，此时也只需要针对扩容的进程进行修改，而不需要调整其他进程中的配置。</p>
+</li>
+<li><p>实现二层端口分割管理</p>
+<p>每个MSTP进程可以管理设备上的部分端口，即设备的二层端口资源被多个MSTP进程分割管理，每个MSTP进程上均可运行标准的MSTP。</p>
+<p>​</p>
+</li>
+</ul>
+<h1 id="MSTP配置"><a href="#MSTP配置" class="headerlink" title="MSTP配置"></a>MSTP配置</h1><h2 id="配置MSTP基本功能："><a href="#配置MSTP基本功能：" class="headerlink" title="配置MSTP基本功能："></a>配置MSTP基本功能：</h2><h3 id="配置MSTP的工作模式："><a href="#配置MSTP的工作模式：" class="headerlink" title="配置MSTP的工作模式："></a>配置MSTP的工作模式：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">stp mode mstp <span class="comment">//配置交换设备的MSTP模式</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>因为STP和MSTP不能互相识别报文，而MSTP和RSTP可以互相识别报文，所以若工作在MSTP工作模式下，交换设备会设置所有和运行STP的交换设备直接相连的端口工作在STP模式下，其他端口工作在MSTP模式下，实现运行不同生成树协议的设备之间的互通。</p>
+</blockquote>
+<h3 id="配置MST域并激活："><a href="#配置MST域并激活：" class="headerlink" title="配置MST域并激活："></a>配置MST域并激活：</h3><p>当两台交换设备的以下配置都相同时，这两台交换设备属于同一个MST域。</p>
+<ul>
+<li>MST域的域名。</li>
+<li>多生成树实例和VLAN的映射关系。</li>
+<li>MST域的修订级别。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">stp region-configuration <span class="comment">//进入MST域视图</span></span><br><span class="line">region-name name <span class="comment">//配置MST域的域名</span></span><br><span class="line">instance <span class="number">1</span> vlan <span class="number">2</span> to <span class="number">3</span> <span class="comment">//配置多生成树的实例与VLAN映射关系</span></span><br><span class="line">vlan-mapping modulo modulo <span class="comment">//配置多生成树实例和VLAN按照缺省算法自动分配映射关系。缺省情况下，MST域内所有的VLAN都映射到生成树实例0。</span></span><br><span class="line">revision-level level <span class="comment">//配置MST域的MSTP修订级别</span></span><br><span class="line"><span class="comment">//缺省情况下，MST域的MSTP修订级别为0。</span></span><br><span class="line"><span class="comment">//MSTP是标准协议，各厂商设备的MSTP修订级别一般都默认为0。如果某厂商的设备不为0，为保持MST域内计算，在部署MSTP时，需要将各设备的MSTP修订级别修改为一致。</span></span><br><span class="line">active region-configuration <span class="comment">//激活MST域的配置</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置根桥和备份根桥："><a href="#配置根桥和备份根桥：" class="headerlink" title="配置根桥和备份根桥："></a>配置根桥和备份根桥：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stp instance <span class="number">0</span> root primary <span class="comment">//配置当前设备为根桥设备。 </span></span><br><span class="line">stp instance <span class="number">0</span> root secondary<span class="comment">//配置当前交换设备为备份根桥设备。</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置交换设备在指定实例中的优先级；"><a href="#配置交换设备在指定实例中的优先级；" class="headerlink" title="配置交换设备在指定实例中的优先级；"></a>配置交换设备在指定实例中的优先级；</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stp instance <span class="number">0</span> priority <span class="number">32768</span> </span><br><span class="line"><span class="comment">//配置交换设备在指定生成树实例中的优先级。</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置端口在指定生成树实例中的路径开销："><a href="#配置端口在指定生成树实例中的路径开销：" class="headerlink" title="配置端口在指定生成树实例中的路径开销："></a>配置端口在指定生成树实例中的路径开销：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">stp pathcost-standard &#123; dot1d<span class="number">-1998</span> | dot1t | legacy &#125;</span><br><span class="line"><span class="comment">//配置端口路径开销计算方法。 缺省情况下，路径开销的计算方法为IEEE 802.1t（dot1t）标准方法。</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//同一网络内所有交换设备的端口路径开销应使用相同的计算方法。</span></span><br><span class="line"></span><br><span class="line">stp instacne <span class="number">0</span> cost cost <span class="comment">//设置当前端口在指定生成树实例中的路径开销值。</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>配置端口路径开销计算方法为<strong>legacy</strong>时，参数<em>cost</em>取值范围是1～200000。</li>
+</ul>
+<ul>
+<li>配置端口路径开销计算方法为<strong>dot1d-1998</strong>时，参数<em>cost</em>取值范围是1～65535。</li>
+<li>配置端口路径开销计算方法为<strong>dot1t</strong>时，参数<em>cost</em>取值范围是1～200000000。</li>
+</ul>
+<h3 id="配置端口在指定生成树实例中的优先级："><a href="#配置端口在指定生成树实例中的优先级：" class="headerlink" title="配置端口在指定生成树实例中的优先级："></a>配置端口在指定生成树实例中的优先级：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stp instance <span class="number">0</span> port priority <span class="number">128</span></span><br><span class="line">  <span class="comment">//配置端口在指定生成树实例中的优先级。</span></span><br></pre></td></tr></table></figure>
+<p>缺省情况下，端口的优先级数值为128。</p>
+<p>优先级数值的取值范围是0～240，步长为16。</p>
+<h2 id="配置端口收发MSTP下一的报文格式："><a href="#配置端口收发MSTP下一的报文格式：" class="headerlink" title="配置端口收发MSTP下一的报文格式："></a>配置端口收发MSTP下一的报文格式：</h2><p>MSTP协议报文存在两种格式，一种为dot1s，即IEEE802.1s规定的报文格式，另一种为legacy，是一种私有报文格式。</p>
+<p>配置时，可以指定报文的格式，也可以配置MSTP协议报文格式自适应的功能，即根据收到的MSTP协议报文格式自动切换端口支持的MSTP协议报文格式，使报文格式与对端匹配。</p>
+<p>stp compliance { auto | dot1s  legacy } 配置端口协议报文格式。 </p>
+<p>stp config-digest-snoop //使能端口上配置摘要监听功能。</p>
+<h1 id="MSTP配置举例："><a href="#MSTP配置举例：" class="headerlink" title="MSTP配置举例："></a>MSTP配置举例：</h1><p>如下图，按要求配置各个区域。防止出现环路。</p>
+<p><img src="/2017/11/29/MSTP多区域生成树协议/MSTP实验拓扑.png" alt="MSTP实验拓扑"></p>
+<h2 id="配置文件："><a href="#配置文件：" class="headerlink" title="配置文件："></a>配置文件：</h2><p>SW1：SW2和3与SW1类似。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">&lt;SW1&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW1</span><br><span class="line">#</span><br><span class="line">vlan batch 2 to 20</span><br><span class="line">#</span><br><span class="line">stp instance 0 root primary</span><br><span class="line">stp instance 1 root primary</span><br><span class="line">stp instance 2 root secondary</span><br><span class="line">#</span><br><span class="line">stp region-configuration</span><br><span class="line"> region-name HCNA</span><br><span class="line"> revision-level 1</span><br><span class="line"> instance 1 vlan 1 to 10</span><br><span class="line"> instance 2 vlan 11 to 20</span><br><span class="line"> active region-configuration</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/0/1</span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan 2 to 20</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/0/2</span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan 2 to 20</span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p>SW4：SW5和6配置和SW4配置类似：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">&lt;SW4&gt;dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW4</span><br><span class="line">#</span><br><span class="line">vlan batch <span class="number">2</span> to <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">stp instance <span class="number">1</span> root primary</span><br><span class="line">stp instance <span class="number">2</span> root secondary</span><br><span class="line">#</span><br><span class="line">stp region-configuration</span><br><span class="line"> region-name HCNP</span><br><span class="line"> revision-level <span class="number">2</span></span><br><span class="line"> instance <span class="number">1</span> vlan <span class="number">1</span> to <span class="number">10</span></span><br><span class="line"> instance <span class="number">2</span> vlan <span class="number">11</span> to <span class="number">20</span></span><br><span class="line"> active region-configuration</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">2</span> to <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">2</span> to <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">2</span> to <span class="number">20</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p>SW7：8,9的配置和7的配置类似：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[SW7]dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW7</span><br><span class="line">#</span><br><span class="line">vlan batch <span class="number">2</span> to <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">stp instance <span class="number">1</span> root primary</span><br><span class="line">stp instance <span class="number">2</span> root secondary</span><br><span class="line">#</span><br><span class="line">stp region-configuration</span><br><span class="line"> region-name HCIE</span><br><span class="line"> instance <span class="number">1</span> vlan <span class="number">1</span> to <span class="number">10</span></span><br><span class="line"> instance <span class="number">2</span> vlan <span class="number">11</span> to <span class="number">20</span></span><br><span class="line"> active region-configuration</span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">2</span> to <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">2</span> to <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> port link-type trunk</span><br><span class="line"> port trunk allow-pass vlan <span class="number">2</span> to <span class="number">20</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<h2 id="查看MSTP状态："><a href="#查看MSTP状态：" class="headerlink" title="查看MSTP状态："></a>查看MSTP状态：</h2><p><img src="/2017/11/29/MSTP多区域生成树协议/SW4STP端口状态.png" alt="SW4STP端口状态"></p>
+<p><center>图：SW4各端口在不同示例下的状态<center></center></center></p>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/" title="MSTP多区域生成树协议">https://cshihong.github.io/2017/11/29/MSTP多区域生成树协议/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/交换基础/" rel="tag"># 交换基础</a>
+          
+            <a href="/tags/STP/" rel="tag"># STP</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/29/RSTP快速生成树协议/" rel="next" title="RSTP快速生成树协议">
+                <i class="fa fa-chevron-left"></i> RSTP快速生成树协议
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/12/09/DHCP/" rel="prev" title="DHCP">
+                DHCP <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MSTP简介"><span class="nav-number">1.</span> <span class="nav-text">MSTP简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目的："><span class="nav-number">1.1.</span> <span class="nav-text">目的：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MSTP原理描述"><span class="nav-number">2.</span> <span class="nav-text">MSTP原理描述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#STP-RSTP的缺陷："><span class="nav-number">2.1.</span> <span class="nav-text">STP/RSTP的缺陷：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MSTP对STP和RSTP的改进："><span class="nav-number">2.2.</span> <span class="nav-text">MSTP对STP和RSTP的改进：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MSTP基本概念："><span class="nav-number">2.3.</span> <span class="nav-text">MSTP基本概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#端口角色："><span class="nav-number">2.4.</span> <span class="nav-text">端口角色：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#端口状态："><span class="nav-number">2.5.</span> <span class="nav-text">端口状态：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MSPT报文："><span class="nav-number">2.6.</span> <span class="nav-text">MSPT报文：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MSTP帧格式："><span class="nav-number">2.6.1.</span> <span class="nav-text">MSTP帧格式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MSTP-报文字段解释："><span class="nav-number">2.6.2.</span> <span class="nav-text">MSTP 报文字段解释：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MSTP报文抓包示例："><span class="nav-number">2.6.3.</span> <span class="nav-text">MSTP报文抓包示例：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MSTP报文格式可配置："><span class="nav-number">2.6.4.</span> <span class="nav-text">MSTP报文格式可配置：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#每个Hello-Time时间内端口最多能发送BPDU的报文数可配置："><span class="nav-number">2.6.5.</span> <span class="nav-text">每个Hello Time时间内端口最多能发送BPDU的报文数可配置：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MSTP拓扑计算："><span class="nav-number">2.7.</span> <span class="nav-text">MSTP拓扑计算：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优先级向量："><span class="nav-number">2.7.1.</span> <span class="nav-text">优先级向量：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CIST中端口角色的选举："><span class="nav-number">2.7.2.</span> <span class="nav-text">CIST中端口角色的选举：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CIST的计算："><span class="nav-number">2.7.3.</span> <span class="nav-text">CIST的计算：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MSTI的计算："><span class="nav-number">2.7.4.</span> <span class="nav-text">MSTI的计算：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MSTP对拓扑变化的处理："><span class="nav-number">2.7.5.</span> <span class="nav-text">MSTP对拓扑变化的处理：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MSTP快速收敛机制："><span class="nav-number">2.8.</span> <span class="nav-text">MSTP快速收敛机制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MSTP多进程："><span class="nav-number">2.9.</span> <span class="nav-text">MSTP多进程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优势："><span class="nav-number">2.9.1.</span> <span class="nav-text">优势：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MSTP配置"><span class="nav-number">3.</span> <span class="nav-text">MSTP配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置MSTP基本功能："><span class="nav-number">3.1.</span> <span class="nav-text">配置MSTP基本功能：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置MSTP的工作模式："><span class="nav-number">3.1.1.</span> <span class="nav-text">配置MSTP的工作模式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置MST域并激活："><span class="nav-number">3.1.2.</span> <span class="nav-text">配置MST域并激活：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置根桥和备份根桥："><span class="nav-number">3.1.3.</span> <span class="nav-text">配置根桥和备份根桥：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置交换设备在指定实例中的优先级；"><span class="nav-number">3.1.4.</span> <span class="nav-text">配置交换设备在指定实例中的优先级；</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置端口在指定生成树实例中的路径开销："><span class="nav-number">3.1.5.</span> <span class="nav-text">配置端口在指定生成树实例中的路径开销：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置端口在指定生成树实例中的优先级："><span class="nav-number">3.1.6.</span> <span class="nav-text">配置端口在指定生成树实例中的优先级：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置端口收发MSTP下一的报文格式："><span class="nav-number">3.2.</span> <span class="nav-text">配置端口收发MSTP下一的报文格式：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MSTP配置举例："><span class="nav-number">4.</span> <span class="nav-text">MSTP配置举例：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件："><span class="nav-number">4.1.</span> <span class="nav-text">配置文件：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查看MSTP状态："><span class="nav-number">4.2.</span> <span class="nav-text">查看MSTP状态：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2017/11/29/MSTP多区域生成树协议/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

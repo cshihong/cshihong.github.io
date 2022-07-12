@@ -1,0 +1,2408 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="链路聚合简介以太网链路聚合Eth-Trunk简称链路聚合，它通过将多条以太网物理链路捆绑在一起成为一条逻辑链路，从而实现增加链路带宽的目的。同时，这些捆绑在一起的链路通过相互间的动态备份，可以有效地提高链路的可靠性。 目的：随着网络规模不断扩大，用户对骨干链路的带宽和可靠性提出越来越高的要求。在传统技术中，常用更换高速率的接口板或更换支持高速率接口板的设备的方式来增加带宽，但这种方案需要付出高额的">
+<meta name="keywords" content="交换基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="链路聚合Eth-Trunk">
+<meta property="og:url" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="链路聚合简介以太网链路聚合Eth-Trunk简称链路聚合，它通过将多条以太网物理链路捆绑在一起成为一条逻辑链路，从而实现增加链路带宽的目的。同时，这些捆绑在一起的链路通过相互间的动态备份，可以有效地提高链路的可靠性。 目的：随着网络规模不断扩大，用户对骨干链路的带宽和可靠性提出越来越高的要求。在传统技术中，常用更换高速率的接口板或更换支持高速率接口板的设备的方式来增加带宽，但这种方案需要付出高额的">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/LacpDu报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/建立过程第一步.gif">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/第二步.gif">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/抢占.gif">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/配置手工负载模式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/手工负载模式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/LACP模式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/LACP配置结果.png">
+<meta property="og:updated_time" content="2019-08-25T01:54:38.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="链路聚合Eth-Trunk">
+<meta name="twitter:description" content="链路聚合简介以太网链路聚合Eth-Trunk简称链路聚合，它通过将多条以太网物理链路捆绑在一起成为一条逻辑链路，从而实现增加链路带宽的目的。同时，这些捆绑在一起的链路通过相互间的动态备份，可以有效地提高链路的可靠性。 目的：随着网络规模不断扩大，用户对骨干链路的带宽和可靠性提出越来越高的要求。在传统技术中，常用更换高速率的接口板或更换支持高速率接口板的设备的方式来增加带宽，但这种方案需要付出高额的">
+<meta name="twitter:image" content="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/LacpDu报文格式.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>链路聚合Eth-Trunk | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">链路聚合Eth-Trunk
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-11-21 22:36:02" itemprop="dateCreated datePublished" datetime="2017-11-21T22:36:02+08:00">2017-11-21</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:54:38" itemprop="dateModified" datetime="2019-08-25T09:54:38+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 6,622</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 24</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="链路聚合简介"><a href="#链路聚合简介" class="headerlink" title="链路聚合简介"></a>链路聚合简介</h1><p>以太网链路聚合Eth-Trunk简称链路聚合，它通过将多条以太网物理链路捆绑在一起成为一条逻辑链路，从而实现增加链路带宽的目的。同时，这些捆绑在一起的链路通过相互间的动态备份，可以有效地提高链路的可靠性。</p>
+<h2 id="目的："><a href="#目的：" class="headerlink" title="目的："></a>目的：</h2><p>随着网络规模不断扩大，用户对骨干链路的带宽和可靠性提出越来越高的要求。在传统技术中，常用更换高速率的接口板或更换支持高速率接口板的设备的方式来增加带宽，但这种方案需要付出高额的费用，而且不够灵活。</p>
+<p>采用链路聚合技术可以在不进行硬件升级的条件下，通过将多个物理接口捆绑为一个逻辑接口，达到增加链路带宽的目的。在实现增大带宽目的的同时，链路聚合采用备份链路的机制，可以有效的提高设备之间链路的可靠性。</p>
+<h2 id="链路聚合主要有以下三个优势："><a href="#链路聚合主要有以下三个优势：" class="headerlink" title="链路聚合主要有以下三个优势："></a>链路聚合主要有以下三个优势：</h2><ul>
+<li><p>增加带宽</p>
+<p>链路聚合接口的最大带宽可以达到各成员接口带宽之和。</p>
+</li>
+<li><p>提高可靠性</p>
+<p>当某条活动链路出现故障时，流量可以切换到其他可用的成员链路上，从而提高链路聚合接口的可靠性。</p>
+</li>
+<li><p>负载分担</p>
+<p>在一个链路聚合组内，可以实现在各成员活动链路上的负载分担。</p>
+</li>
+</ul>
+<h1 id="原理描述"><a href="#原理描述" class="headerlink" title="原理描述"></a>原理描述</h1><h2 id="基本概念："><a href="#基本概念：" class="headerlink" title="基本概念："></a>基本概念：</h2><p>如在两个设备之间通过三条以太网物理链路相连，将这三条链路捆绑在一起，就成为了一条逻辑链路。这条逻辑链路的最大带宽等于原先三条以太网物理链路的带宽总和，从而达到了增加链路带宽的目的；同时，这三条以太网物理链路相互备份，有效地提高了链路的可靠性。</p>
+<h3 id="链路聚合的一些基本概念"><a href="#链路聚合的一些基本概念" class="headerlink" title="链路聚合的一些基本概念:"></a>链路聚合的一些基本概念:</h3><ul>
+<li><p>链路聚合组和链路聚合接口</p>
+<p>链路聚合组LAG（Link Aggregation Group）是指将若干条以太链路捆绑在一起所形成的逻辑链路。</p>
+<p>每个聚合组唯一对应着一个逻辑接口，这个逻辑接口称之为链路聚合接口或Eth-Trunk接口。链路聚合接口可以作为普通的以太网接口来使用，与普通以太网接口的差别在于：转发的时候链路聚合组需要从成员接口中选择一个或多个接口来进行数据转发。</p>
+</li>
+<li><p>成员接口和成员链路</p>
+<p>组成Eth-Trunk接口的各个物理接口称为成员接口。成员接口对应的链路称为成员链路。</p>
+</li>
+<li><p>活动接口和非活动接口、活动链路和非活动链路</p>
+<p>链路聚合组的成员接口存在活动接口和非活动接口两种。转发数据的接口称为活动接口，不转发数据的接口称为非活动接口。</p>
+<p>活动接口对应的链路称为活动链路，非活动接口对应的链路称为非活动链路。</p>
+</li>
+<li><p>活动接口数上限阈值</p>
+<p>设置活动接口数上限阈值的目的是在保证带宽的情况下提高网络的可靠性。当前活动链路数目达到上限阈值时，再向Eth-Trunk中添加成员接口，不会增加Eth-Trunk活动接口的数目，超过上限阈值的链路状态将被置为Down，作为备份链路。</p>
+<p>例如，有8条无故障链路在一个Eth-Trunk内，每条链路都能提供1G的带宽，现在最多需要5G的带宽，那么上限阈值就可以设为5或者更大的值。其他的链路就自动进入备份状态以提高网络的可靠性。</p>
+<p><strong>注：手工负载分担模式链路聚合不支持活动接口数上限阈值的配置。</strong></p>
+</li>
+</ul>
+<ul>
+<li><p>活动接口数下限阈值</p>
+<p>设置活动接口数下限阈值是为了保证最小带宽，当前活动链路数目小于下限阈值时，Eth-Trunk接口的状态转为Down。</p>
+<p>例如，每条物理链路能提供1G的带宽，现在最小需要2G的带宽，那么活动接口数下限阈值必须要大于等于2。</p>
+</li>
+<li><p>链路聚合模式</p>
+<p>链路聚合模式分为手工模式和LACP模式两种</p>
+</li>
+</ul>
+<h3 id="两种链路聚合模式比较："><a href="#两种链路聚合模式比较：" class="headerlink" title="两种链路聚合模式比较："></a>两种链路聚合模式比较：</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>手工模式</th>
+<th>LACP模式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定义</td>
+<td>Eth-Trunk的建立、成员接口的加入由手工配置，没有链路聚合控制协议的参与。</td>
+<td>Eth-Trunk的建立是基于LACP协议的，LACP为交换数据的设备提供一种标准的协商方式，以供系统根据自身配置自动形成聚合链路并启动聚合链路收发数据。聚合链路形成以后，负责维护链路状态。在聚合条件发生变化时，自动调整或解散链路聚合。</td>
+</tr>
+<tr>
+<td>设备是否需要支持LACP协议</td>
+<td>不需要</td>
+<td>需要</td>
+</tr>
+<tr>
+<td>数据转发</td>
+<td>一般情况下，所有链路都是活动链路。所有活动链路均参与数据转发。如果某条活动链路故障，链路聚合组自动在剩余的活动链路中分担流量。</td>
+<td>一般情况下，部分链路是活动链路。所有活动链路均参与数据转发。如果某条活动链路故障，链路聚合组自动在非活动链路中选择一条链路作为活动链路，参与数据转发的链路数目不变。</td>
+</tr>
+<tr>
+<td>是否支持跨设备的链路聚合</td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>检测故障</td>
+<td>只能检测到同一聚合组内的成员链路有断路等有限故障，但是无法检测到链路故障、链路错连等故障。</td>
+<td>不仅能够检测到同一聚合组内的成员链路有断路等有限故障，还可以检测到链路故障、链路错连等故障。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="设备支持的链路聚合方式"><a href="#设备支持的链路聚合方式" class="headerlink" title="设备支持的链路聚合方式:"></a>设备支持的链路聚合方式:</h3><ul>
+<li>同一设备：是指链路聚合时，同一聚合组的成员接口分布在同一设备。</li>
+<li>堆叠设备：是指在堆叠场景下，成员接口分部在堆叠的各个成员设备上。</li>
+<li>跨设备：是指E-Trunk基于LACP（单台设备链路聚合的标准）进行了扩展，能够实现多台设备间的链路聚合。</li>
+</ul>
+<h2 id="手工模式链路聚合："><a href="#手工模式链路聚合：" class="headerlink" title="手工模式链路聚合："></a>手工模式链路聚合：</h2><p>根据是否启用链路聚合控制协议LACP，链路聚合分为手工模式和LACP模式。</p>
+<p>手工模式下，Eth-Trunk的建立、成员接口的加入由手工配置，没有链路聚合控制协议LACP的参与。当需要在两个直连设备之间提供一个较大的链路带宽而设备又不支持LACP协议时，可以使用手工模式。<strong>手工模式可以实现增加带宽、提高可靠性和负载分担的目的。</strong></p>
+<h2 id="LACP模式链路聚合："><a href="#LACP模式链路聚合：" class="headerlink" title="LACP模式链路聚合："></a>LACP模式链路聚合：</h2><p>作为链路聚合技术，手工负载分担模式Eth-Trunk可以完成多个物理接口聚合成一个Eth-Trunk口来提高带宽，同时能够检测到同一聚合组内的成员链路有断路等有限故障，但是无法检测到链路层故障、链路错连等故障。</p>
+<p>为了提高Eth-Trunk的容错性，并且能提供备份功能，保证成员链路的高可靠性，出现了链路聚合控制协议LACP（Link Aggregation Control Protocol），LACP模式就是采用LACP的一种链路聚合模式。</p>
+<p>LACP为交换数据的设备提供一种标准的协商方式，以供设备根据自身配置自动形成聚合链路并启动聚合链路收发数据。聚合链路形成以后，LACP负责维护链路状态，在聚合条件发生变化时，自动调整或解散链路聚合。</p>
+<h3 id="基本概念：-1"><a href="#基本概念：-1" class="headerlink" title="基本概念："></a>基本概念：</h3><ul>
+<li><p>系统LACP优先级</p>
+<p>系统LACP优先级是为了区分两端设备优先级的高低而配置的参数。LACP模式下，两端设备所选择的活动接口必须保持一致，否则链路聚合组就无法建立。此时可以使其中一端具有更高的优先级，另一端根据高优先级的一端来选择活动接口即可。系统LACP优先级值越小优先级越高。</p>
+</li>
+<li><p>接口LACP优先级</p>
+<p>接口LACP优先级是为了区别同一个Eth-Trunk中的不同接口被选为活动接口的优先程度，<strong>优先级高的接口</strong>将优先被选为活动接口。<strong>接口LACP优先级值越小，优先级越高。</strong></p>
+</li>
+<li><p>成员接口间M:N备份</p>
+<p>LACP模式链路聚合由LACP确定聚合组中的活动和非活动链路，又称为M:N模式，即M条活动链路与N条备份链路的模式。这种模式提供了更高的链路可靠性，并且可以在M条链路中实现不同方式的负载均衡。</p>
+</li>
+</ul>
+<h3 id="LACP模式实现原理："><a href="#LACP模式实现原理：" class="headerlink" title="LACP模式实现原理："></a>LACP模式实现原理：</h3><p>基于IEEE802.3ad标准的LACP是一种实现链路动态聚合与解聚合的协议。LACP通过链路聚合控制协议数据单元LACPDU（Link Aggregation Control Protocol Data Unit）与对端交互信息。</p>
+<p>在LACP模式的Eth-Trunk中加入成员接口后，这些接口将通过发送LACPDU向对端通告自己的系统优先级、MAC地址、接口优先级、接口号和操作Key等信息。对端接收到这些信息后，将这些信息与自身接口所保存的信息比较，用以选择能够聚合的接口，双方对哪些接口能够成为活动接口达成一致，确定活动链路。</p>
+<h3 id="LACPDU报文："><a href="#LACPDU报文：" class="headerlink" title="LACPDU报文："></a>LACPDU报文：</h3><p><img src="/2017/11/21/链路聚合Eth-Trunk/LacpDu报文格式.png" alt="LacpDu报文格式"></p>
+<p><center>图：LACPDU报文格式<center></center></center></p>
+<p> <strong>报文字段说明：</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Destination Address</td>
+<td>6字节</td>
+<td>目的MAC地址，是一个组播地址（01-80-C2-00-00-02）</td>
+</tr>
+<tr>
+<td>Source Address</td>
+<td>6字节</td>
+<td>源MAC地址，发送端口的MAC地址</td>
+</tr>
+<tr>
+<td>Length/Type</td>
+<td>2字节</td>
+<td>协议类型：0x8809</td>
+</tr>
+<tr>
+<td>Subtype</td>
+<td>1字节</td>
+<td>报文子类型：0x01，说明是LACP报文</td>
+</tr>
+<tr>
+<td>Version Number</td>
+<td>1字节</td>
+<td>协议版本号：0x01</td>
+</tr>
+<tr>
+<td>TLV_type</td>
+<td>1字节</td>
+<td>0x00代表Terminator字段0x01代表Actor字段0x02代表Partner字段0x03代表Collector字段</td>
+</tr>
+<tr>
+<td>Actor_Information_Length</td>
+<td>1字节</td>
+<td>actor信息字段长度，为20字节</td>
+</tr>
+<tr>
+<td>Actor_Port</td>
+<td>2字节</td>
+<td>端口号，根据算法生成，由接口所在的槽位号、子卡号和端口号决定</td>
+</tr>
+<tr>
+<td>Actor_State</td>
+<td>1字节</td>
+<td>本端状态信息：LACP_Activity：代表链路所在的聚合组参与LACP协商的方式。主动的LACP被编码为1，主动方式下会主动发送LACPDU报文给对方，被动方式不会主动发送协商报文，除非收到协商报文才会参与。LACP_Timeout：代表链路接收LACPDU报文的周期，有两种，快周期1s和慢周期30s，超时时间为周期的3倍。短超时被编码为1，长超时被编码为0。Aggregation：标识该链路能否被聚合组聚合。如果编码为0，该链路被认为是独立的，不能被聚合，即，这个链路只能作为一个个体链路运行。Synchronization：代表该链路是否已被分配到一个正确的链路聚合组，如果该链路已经关联了一个兼容的聚合器，那么该链路聚合组的识别与系统ID和被发送的运行Key信息是一致的。编码为0，代表链路当前不在正确的聚合里。Collecting：帧的收集使能位，假如编码为1，表示在这个链路上进来的帧的收集是明确使能的；即收集当前被使能，并且不期望在没有管理变化或接收协议信息变化的情况下被禁止。其它情况下这个值编码为0。Distributing：帧的分配使能位，假如编码为0，意味着在这个链路上的外出帧的分配被明确禁止，并且不期望在没有管理变化或接收协议信息变化的情况下被使能。其它情况下这个值编码为1。Default：诊断调试时使用，编码为1，代表接收到的对端的信息是管理配置的。假如编码为0，正在使用的运行伙伴信息在接收到的LACPDU里。该值不被正常LACP协议使用，仅用于诊断协议问题。Expired：诊断调试时使用，编码为1，代表本端的接收机是处于EXPIRED超时状态；假如编码为0，本端接收状态机处于正常状态。该值不被正常LACP协议使用，仅用于诊断协议问题。</td>
+</tr>
+<tr>
+<td>Actor_System_Priority</td>
+<td>2字节</td>
+<td>本端系统优先级，可以设置，默认情况下为32768</td>
+</tr>
+<tr>
+<td>Actor_System</td>
+<td>6字节</td>
+<td>系统ID，本端系统的MAC地址</td>
+</tr>
+<tr>
+<td>Actor_key</td>
+<td>2字节</td>
+<td>端口KEY值，系统根据端口的配置生成，是端口能否成为聚合组中的一员的关 键因素，影响Key值得因素有trunk ID、接口的速率和双工模式</td>
+</tr>
+<tr>
+<td>Actor_Port_Priority</td>
+<td>2字节</td>
+<td>接口优先级，可以配置，默认为0x8000</td>
+</tr>
+<tr>
+<td>Reserved</td>
+<td>3字节</td>
+<td>保留字段，可用于功能调试以及扩展</td>
+</tr>
+<tr>
+<td>Partner_Information_Length</td>
+<td>1字节</td>
+<td>Partner信息字段长度。Partner字段代表了链路接口接收到对端的系统信息、接口信息和状态信息，与actor字段含义一致。在协商最开始未收到对端信息时，partner字段填充0，接收到对端信息后会把收到的对端信息补充到partner字段当中。</td>
+</tr>
+<tr>
+<td>Partner_Port</td>
+<td>2字节</td>
+<td>对端端口号</td>
+</tr>
+<tr>
+<td>Partner_State</td>
+<td>2字节</td>
+<td>对端状态信息</td>
+</tr>
+<tr>
+<td>Partner_System_Priority</td>
+<td>2字节</td>
+<td>对端系统优先级</td>
+</tr>
+<tr>
+<td>Partner_System</td>
+<td>6字节</td>
+<td>对端系统ID，对端系统的MAC地址</td>
+</tr>
+<tr>
+<td>Partner_key</td>
+<td>2字节</td>
+<td>对端端口KEY值</td>
+</tr>
+<tr>
+<td>Partner_Port_Priority</td>
+<td>2字节</td>
+<td>对端接口优先级</td>
+</tr>
+<tr>
+<td>Reserved</td>
+<td>2字节</td>
+<td>保留字段</td>
+</tr>
+<tr>
+<td>Collector_Information_Length</td>
+<td>1字节</td>
+<td>Collector信息字段长度：0x10</td>
+</tr>
+<tr>
+<td>CollectorMaxDelay</td>
+<td>2字节</td>
+<td>最大延时：默认情况下为0xffff</td>
+</tr>
+<tr>
+<td>Reserved</td>
+<td>12字节</td>
+<td>保留字段</td>
+</tr>
+<tr>
+<td>Terminator_Length</td>
+<td>1字节</td>
+<td>Terminator信息字段长度：0x00</td>
+</tr>
+<tr>
+<td>Reserved</td>
+<td>50字节</td>
+<td>保留字段，全置0</td>
+</tr>
+<tr>
+<td>FCS</td>
+<td>4字节</td>
+<td>用于帧内后续字节差错的循环冗余检验（也称为FCS或帧检验序列）。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>抓包示例：</strong></p>
+<p><img src="/2017/11/21/链路聚合Eth-Trunk/抓包.png" alt="抓包"></p>
+<p><center>图：LACP报文抓包示例<center></center></center></p>
+<h3 id="LACP模式Eth-Trunk建立过程如下："><a href="#LACP模式Eth-Trunk建立过程如下：" class="headerlink" title="LACP模式Eth-Trunk建立过程如下："></a>LACP模式Eth-Trunk建立过程如下：</h3><ol>
+<li><p>两端互相发送LACPDU报文。</p>
+<p>如下图所示，在DeviceA和DeviceB上创建Eth-Trunk并配置为LACP模式，然后向Eth-Trunk中手工加入成员接口。此时成员接口上便启用了LACP协议，两端互发LACPDU报文。<img src="/2017/11/21/链路聚合Eth-Trunk/建立过程第一步.gif" alt="建立过程第一步"></p>
+</li>
+<li><p>确定主动端和活动链路。</p>
+<p>如下图所示，两端设备均会收到对端发来的LACPDU报文。以DeviceB为例，当DeviceB收到DeviceA发送的报文时，DeviceB会查看并记录对端信息，然后比较系统优先级字段，如果DeviceA的系统优先级高于本端的系统优先级，则确定DeviceA为LACP主动端。如果DeviceA和DeviceB的系统优先级相同，比较两端设备的MAC地址，确定MAC地址小的一端为LACP主动端。</p>
+<p>选出主动端后，两端都会以主动端的接口优先级来选择活动接口，两端设备选择了一致的活动接口，活动链路组便可以建立起来，从这些活动链路中以负载分担的方式转发数据。</p>
+<p> <img src="/2017/11/21/链路聚合Eth-Trunk/第二步.gif" alt="第二步"></p>
+</li>
+<li><p>LACP抢占：</p>
+<p>使能LACP抢占功能后，聚合组会始终保持高优先级的接口作为活动接口的状态。</p>
+<p><img src="/2017/11/21/链路聚合Eth-Trunk/抢占.gif" alt="抢占"></p>
+<p><center>图：抢占功能演示<center></center></center></p>
+</li>
+</ol>
+<h3 id="以下两种情况需要使能LAXP的抢占功能："><a href="#以下两种情况需要使能LAXP的抢占功能：" class="headerlink" title="以下两种情况需要使能LAXP的抢占功能："></a>以下两种情况需要使能LAXP的抢占功能：</h3><ol>
+<li>Port1接口出现故障而后又恢复了正常。当接口Port1出现故障时被Port3所取代，如果在Eth-Trunk接口下未使能LACP抢占功能，则故障恢复时Port1将处于备份状态；如果使能了LACP抢占功能，当Port1故障恢复时，由于接口优先级比Port3高，将重新成为活动接口，Port3再次成为备份接口。 </li>
+<li>如果希望Port3接口替换Port1、Port2中的一个接口成为活动接口，可以使能了LACP抢占功能，并配置Port3的接口LACP优先级较高。如果没有使能LACP抢占功能，即使将备份接口的优先级调整为高于当前活动接口的优先级，系统也不会进行重新选择活动接口的过程，不切换活动接口。 </li>
+</ol>
+<h3 id="LACP抢占延时："><a href="#LACP抢占延时：" class="headerlink" title="LACP抢占延时："></a>LACP抢占延时：</h3><p>抢占延时是LACP抢占发生时，处于备用状态的链路将会等待一段时间后再切换到转发状态。配置抢占延时是为了避免由于某些链路状态频繁变化而导致Eth-Trunk数据传输不稳定的情况。</p>
+<h3 id="活动链路与非活动链路的切换："><a href="#活动链路与非活动链路的切换：" class="headerlink" title="活动链路与非活动链路的切换："></a>活动链路与非活动链路的切换：</h3><p>LACP模式链路聚合组两端设备中任何一端检测到以下事件，都会触发聚合组的链路切换：</p>
+<ul>
+<li>链路Down事件。</li>
+<li>以太网OAM检测到链路失效。</li>
+<li>LACP协议发现链路故障。</li>
+<li>接口不可用。</li>
+<li>在使能了LACP抢占功能的前提下，更改备份接口的优先级高于当前活动接口的优先级。</li>
+</ul>
+<p>当满足上述切换条件其中之一时，按照如下步骤进行切换：</p>
+<ol>
+<li>关闭故障链路。</li>
+<li>从N条备份链路中选择优先级最高的链路接替活动链路中的故障链路。</li>
+<li>优先级最高的备份链路转为活动状态并转发数据，完成切换。</li>
+</ol>
+<h2 id="链路聚合负载分担方式："><a href="#链路聚合负载分担方式：" class="headerlink" title="链路聚合负载分担方式："></a>链路聚合负载分担方式：</h2><h3 id="背景："><a href="#背景：" class="headerlink" title="背景："></a>背景：</h3><p>数据流是指一组具有某个或某些相同属性的数据包。这些属性有源MAC地址、目的MAC地址、源IP地址、目的IP地址、TCP/UDP的源端口号、TCP/UDP的目的端口号等。</p>
+<p>对于负载分担，可以分为<strong>逐包的负载分担</strong>和<strong>逐流的负载分担</strong>。</p>
+<ul>
+<li><p>逐包的负载分担</p>
+<p>在使用Eth-Trunk转发数据时，由于聚合组两端设备之间有多条物理链路，就会产生同一数据流的第一个数据帧在一条物理链路上传输，而第二个数据帧在另外一条物理链路上传输的情况。这样一来同一数据流的第二个数据帧就有可能比第一个数据帧先到达对端设备，从而产生接收数据包乱序的情况。</p>
+</li>
+<li><p>逐流的负载分担</p>
+<p>这种机制把数据帧中的地址通过HASH算法生成HASH-KEY值，然后根据这个数值在Eth-Trunk转发表中寻找对应的出接口，不同的MAC或IP地址HASH得出的HASH-KEY值不同，从而出接口也就不同，这样既保证了同一数据流的帧在同一条物理链路转发，又实现了流量在聚合组内各物理链路上的负载分担。逐流负载分担能保证包的顺序，但不能保证带宽利用率。</p>
+</li>
+</ul>
+<blockquote>
+<p>注：目前AR系列路由器仅支持逐流的负载分担。</p>
+</blockquote>
+<h3 id="转发原理："><a href="#转发原理：" class="headerlink" title="转发原理："></a>转发原理：</h3><p>Eth-Trunk位于MAC与LLC子层之间，属于数据链路层。</p>
+<p>Eth-Trunk模块内部维护一张转发表，这张表由以下两项组成。</p>
+<ul>
+<li><p>HASH-KEY值</p>
+<p>HASH-KEY值是根据数据包的MAC地址或IP地址等，经HASH算法计算得出。</p>
+</li>
+<li><p>接口号</p>
+<p>Eth-Trunk转发表表项分布和设备每个Eth-Trunk支持加入的成员接口数量相关，不同的HASH-KEY值对应不同的出接口。</p>
+</li>
+</ul>
+<p>Eth-Trunk模块根据转发表转发数据帧的过程如下：</p>
+<ol>
+<li>Eth-Trunk模块从MAC子层接收到一个数据帧后，根据负载分担方式提取数据帧的源MAC地址/IP地址或目的MAC地址/IP地址。</li>
+<li>根据HASH算法进行计算，得到HASH-KEY值。</li>
+<li>Eth-Trunk模块根据HASH-KEY值在转发表中查找对应的接口，把数据帧从该接口发送出去。</li>
+</ol>
+<h3 id="负载分担方式："><a href="#负载分担方式：" class="headerlink" title="负载分担方式："></a>负载分担方式：</h3><p>为了避免数据包乱序情况的发生，Eth-Trunk采用逐流负载分担的机制，其中如何转发数据则由于选择不同的负载分担方式而有所差别。</p>
+<p>负载分担的方式主要包括以下几种，用户可以根据具体应用选择不同的负载分担方式。</p>
+<ul>
+<li>根据报文的源MAC地址进行负载分担</li>
+<li>根据报文的目的MAC地址进行负载分担</li>
+<li>根据报文的源IP地址进行负载分担</li>
+<li>根据报文的目的IP地址进行负载分担</li>
+<li>根据报文的源MAC地址和目的MAC地址进行负载分担</li>
+<li>根据报文的源IP地址和目的IP地址进行负载分担</li>
+</ul>
+<p>配置负载分担方式时，请注意：</p>
+<ul>
+<li><p>负载分担方式只在流量的出接口上生效，如果发现各入接口的流量不均衡，请修改上行出接口的负载分担方式。</p>
+</li>
+<li><p>尽量将数据流通过负载分担在所有活动链路上传输，避免数据流仅在一条链路上传输，造成流量拥堵，影响业务正常运行。</p>
+<p>例如，数据报文的目的MAC和IP地址只有一个，则应选择根据报文的源MAC和IP地址进行负载分担，如果选择根据报文的目的MAC和IP地址进行负载分担则会造成流量只在一条链路上传输，造成流量拥堵。</p>
+</li>
+</ul>
+<h1 id="配置注意事项："><a href="#配置注意事项：" class="headerlink" title="配置注意事项："></a>配置注意事项：</h1><h2 id="链路聚合前："><a href="#链路聚合前：" class="headerlink" title="链路聚合前："></a>链路聚合前：</h2><ul>
+<li><p>成员接口不能配置某些业务，例如成员接口不能修改接口类型、不能配置静态MAC地址。</p>
+</li>
+<li><p>Eth-Trunk接口不能嵌套，即Eth-Trunk接口的成员接口不能是Eth-Trunk接口。</p>
+</li>
+<li><p>一个Eth-Trunk接口中的成员接口必须是以太网类型和速率相同的接口。</p>
+<p>以太网类型和速率不同的接口不能加入同一个Eth-Trunk接口，如GE接口和FE接口不能加入同一个Eth-Trunk接口，GE电接口和GE光接口不能加入同一个Eth-Trunk接口。</p>
+</li>
+<li><p>如果本端设备接口加入了Eth-Trunk，与该接口直连的对端接口也必须加入Eth-Trunk，两端才能正常通信。</p>
+</li>
+<li><p>两台设备对接时需要保证两端设备上链路聚合的模式一致。</p>
+</li>
+</ul>
+<h2 id="链路聚合后："><a href="#链路聚合后：" class="headerlink" title="链路聚合后："></a>链路聚合后：</h2><ul>
+<li>一个以太网接口只能加入到一个Eth-Trunk接口，如果需要加入其它Eth-Trunk接口，必须先退出原来的Eth-Trunk接口。</li>
+<li>当成员接口加入Eth-Trunk后，学习MAC地址或ARP地址时是按照Eth-Trunk来学习的，而不是按照成员接口来学习。</li>
+<li>删除聚合组时需要先删除聚合组中的成员接口。</li>
+</ul>
+<h3 id="缺省配置："><a href="#缺省配置：" class="headerlink" title="缺省配置："></a>缺省配置：</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>缺省值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>链路聚合模式</td>
+<td>手工负载分担模式</td>
+</tr>
+<tr>
+<td>活动接口数上限阈值</td>
+<td>8</td>
+</tr>
+<tr>
+<td>活动接口数下限阈值</td>
+<td>1</td>
+</tr>
+<tr>
+<td>系统LACP优先级</td>
+<td>32768</td>
+</tr>
+<tr>
+<td>接口LACP优先级</td>
+<td>32768</td>
+</tr>
+<tr>
+<td>LACP抢占</td>
+<td>去使能</td>
+</tr>
+<tr>
+<td>LACP抢占等待时间</td>
+<td>30s</td>
+</tr>
+<tr>
+<td>接收LACP报文超时时间</td>
+<td>90s</td>
+</tr>
+</tbody>
+</table>
+<h1 id="链路聚合配置命令行"><a href="#链路聚合配置命令行" class="headerlink" title="链路聚合配置命令行"></a>链路聚合配置命令行</h1><h2 id="配置手工负载分担模式："><a href="#配置手工负载分担模式：" class="headerlink" title="配置手工负载分担模式："></a>配置手工负载分担模式：</h2><p>如下图，交换机1和2都有VLAN10,20.通过在两个交换机之间配置链路聚合提高链路带宽，以及增加一定的可靠性。</p>
+<p><img src="/2017/11/21/链路聚合Eth-Trunk/配置手工负载模式.png" alt="配置手工负载模式"></p>
+<p><center>图:配置手工负载模式<center></center></center></p>
+<h3 id="配置命令行："><a href="#配置命令行：" class="headerlink" title="配置命令行："></a>配置命令行：</h3><p>两个交换机配置相同</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">[SW1]dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW1</span><br><span class="line">#</span><br><span class="line">vlan batch <span class="number">10</span> <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">interface Eth-Trunk1</span><br><span class="line"> port link-type trunk </span><br><span class="line"> port trunk allow-pass vlan <span class="number">10</span> <span class="number">20</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> eth-trunk <span class="number">1</span> <span class="comment">//加入Eth-trunk接口</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> eth-trunk <span class="number">1</span> <span class="comment">//加入Eth-trunk接口</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> eth-trunk <span class="number">1</span> <span class="comment">//加入Eth-trunk接口</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p>执行：<strong>display eth-trunk 1</strong>，查看配置结果：</p>
+<p><img src="/2017/11/21/链路聚合Eth-Trunk/手工负载模式.png" alt="手工负载模式"></p>
+<p><center>图：手工负载模式配置情况<center></center></center></p>
+<h2 id="配置LACP模式链路聚合："><a href="#配置LACP模式链路聚合：" class="headerlink" title="配置LACP模式链路聚合："></a>配置LACP模式链路聚合：</h2><p>如下图，在两台设备上配置LACP模式链路聚合组，提高两设备之间的带宽与可靠性，具体要求如下：</p>
+<ul>
+<li>两条活动链路具有负载分担的能力。</li>
+<li>两设备间的链路具有一条冗余备份链路，当活动链路出现故障链路时，备份链路替代故障链路，保持数据传输的可靠性。</li>
+</ul>
+<p><img src="/2017/11/21/链路聚合Eth-Trunk/LACP模式.png" alt="LACP模式"></p>
+<p><center>图：LACP模式<center></center></center></p>
+<h3 id="配置命令行：-1"><a href="#配置命令行：-1" class="headerlink" title="配置命令行："></a>配置命令行：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line">[SW3]dis current-configuration </span><br><span class="line">#</span><br><span class="line">sysname SW3</span><br><span class="line">#</span><br><span class="line">lacp priority <span class="number">100</span></span><br><span class="line"><span class="comment">//配置系统LACP优先级</span></span><br><span class="line">#</span><br><span class="line">interface Eth-Trunk1</span><br><span class="line"><span class="comment">//创建eth-trunk接口</span></span><br><span class="line"> mode lacp-<span class="keyword">static</span></span><br><span class="line"><span class="comment">//配置链路聚合模式为LACP模式</span></span><br><span class="line"> least active-linknumber <span class="number">2</span></span><br><span class="line"><span class="comment">//配置链路聚合活动接口数下限阈值 </span></span><br><span class="line"> max bandwidth-affected-linknumber <span class="number">3</span></span><br><span class="line"><span class="comment">//配置带宽计算的端口数量</span></span><br><span class="line"> load-balance dst-ip</span><br><span class="line"><span class="comment">//配置负载分担方式</span></span><br><span class="line"> lacp timeout fast</span><br><span class="line"><span class="comment">//配置当前接口接收LACP协议报文的超时时间</span></span><br><span class="line"> lacp preempt enable</span><br><span class="line"><span class="comment">//使能当前Eth-Trunk接口的LACP抢占功能</span></span><br><span class="line"> max active-linknumber <span class="number">2</span></span><br><span class="line"><span class="comment">//配置链路聚合活动接口数上限阈值</span></span><br><span class="line"> lacp preempt delay <span class="number">20</span></span><br><span class="line"><span class="comment">//配置当前Eth-Trunk接口的LACP抢占等待时间</span></span><br><span class="line"><span class="comment">//配置为fast，对端发送LACP报文的周期为1秒。</span></span><br><span class="line"><span class="comment">//配置为slow，对端发送LACP报文的周期为30秒。</span></span><br><span class="line"><span class="comment">//LACP协议报文的超时时间为LACP报文发送周期的3倍</span></span><br><span class="line"> lacp selected speed</span><br><span class="line"><span class="comment">//更改LACP模式Eth-Trunk依据接口速率来选择活动接口</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">1</span></span><br><span class="line"> eth-trunk <span class="number">1</span> <span class="comment">//加入Eth-trunk接口</span></span><br><span class="line"> lacp priority <span class="number">100</span></span><br><span class="line"><span class="comment">//配置当前接口的LACP优先级</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">2</span></span><br><span class="line"> eth-trunk <span class="number">1</span></span><br><span class="line">#</span><br><span class="line">interface GigabitEthernet0/<span class="number">0</span>/<span class="number">3</span></span><br><span class="line"> eth-trunk <span class="number">1</span></span><br><span class="line">#</span><br></pre></td></tr></table></figure>
+<p>配置结果：</p>
+<p><img src="/2017/11/21/链路聚合Eth-Trunk/LACP配置结果.png" alt="LACP配置结果"></p>
+<p><center>图：：LACP配置结果<center></center></center></p>
+<h2 id="其他常用命令："><a href="#其他常用命令：" class="headerlink" title="其他常用命令："></a>其他常用命令：</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">trunkport interface gi <span class="number">0</span>/<span class="number">0</span>/<span class="number">1</span> to <span class="number">0</span>/<span class="number">0</span>/<span class="number">3</span> </span><br><span class="line"><span class="comment">//将多个接口同时加上eth-turnk接口中</span></span><br><span class="line"></span><br><span class="line">display eth-trunk  [ trunk-id [ interface interface-type interface-number | verbose ] ]</span><br><span class="line"><span class="comment">//查看Eth-Trunk接口的配置信息</span></span><br><span class="line">  </span><br><span class="line">display lacp statistics eth-trunk <span class="number">1</span></span><br><span class="line"><span class="comment">//查看LACP模式下LACP报文收发统计信息</span></span><br><span class="line">  </span><br><span class="line">display interface eth-trunk <span class="number">1</span> </span><br><span class="line"><span class="comment">//查看eth-trunk接口的状态信息</span></span><br><span class="line">  </span><br><span class="line">display trunkmembership eth-trunk <span class="number">1</span> </span><br><span class="line"><span class="comment">//查看eth-trunk的成员接口信息</span></span><br><span class="line">  </span><br><span class="line">reset lacp statistics eth-trunk <span class="number">1</span></span><br><span class="line"><span class="comment">//清除LACP收发报文的统计信息</span></span><br><span class="line">  </span><br><span class="line">reset lacp error packet statistics</span><br><span class="line"><span class="comment">//清除LACP错误报文的统计信息</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/" title="链路聚合Eth-Trunk">https://cshihong.github.io/2017/11/21/链路聚合Eth-Trunk/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/交换基础/" rel="tag"># 交换基础</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/19/QinQ基础知识/" rel="next" title="QinQ基础知识">
+                <i class="fa fa-chevron-left"></i> QinQ基础知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/24/二叉树的基本操作/" rel="prev" title="二叉树的基本操作">
+                二叉树的基本操作 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#链路聚合简介"><span class="nav-number">1.</span> <span class="nav-text">链路聚合简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目的："><span class="nav-number">1.1.</span> <span class="nav-text">目的：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#链路聚合主要有以下三个优势："><span class="nav-number">1.2.</span> <span class="nav-text">链路聚合主要有以下三个优势：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原理描述"><span class="nav-number">2.</span> <span class="nav-text">原理描述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本概念："><span class="nav-number">2.1.</span> <span class="nav-text">基本概念：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#链路聚合的一些基本概念"><span class="nav-number">2.1.1.</span> <span class="nav-text">链路聚合的一些基本概念:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#两种链路聚合模式比较："><span class="nav-number">2.1.2.</span> <span class="nav-text">两种链路聚合模式比较：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设备支持的链路聚合方式"><span class="nav-number">2.1.3.</span> <span class="nav-text">设备支持的链路聚合方式:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#手工模式链路聚合："><span class="nav-number">2.2.</span> <span class="nav-text">手工模式链路聚合：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LACP模式链路聚合："><span class="nav-number">2.3.</span> <span class="nav-text">LACP模式链路聚合：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念：-1"><span class="nav-number">2.3.1.</span> <span class="nav-text">基本概念：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LACP模式实现原理："><span class="nav-number">2.3.2.</span> <span class="nav-text">LACP模式实现原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LACPDU报文："><span class="nav-number">2.3.3.</span> <span class="nav-text">LACPDU报文：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LACP模式Eth-Trunk建立过程如下："><span class="nav-number">2.3.4.</span> <span class="nav-text">LACP模式Eth-Trunk建立过程如下：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#以下两种情况需要使能LAXP的抢占功能："><span class="nav-number">2.3.5.</span> <span class="nav-text">以下两种情况需要使能LAXP的抢占功能：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LACP抢占延时："><span class="nav-number">2.3.6.</span> <span class="nav-text">LACP抢占延时：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#活动链路与非活动链路的切换："><span class="nav-number">2.3.7.</span> <span class="nav-text">活动链路与非活动链路的切换：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#链路聚合负载分担方式："><span class="nav-number">2.4.</span> <span class="nav-text">链路聚合负载分担方式：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景："><span class="nav-number">2.4.1.</span> <span class="nav-text">背景：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#转发原理："><span class="nav-number">2.4.2.</span> <span class="nav-text">转发原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#负载分担方式："><span class="nav-number">2.4.3.</span> <span class="nav-text">负载分担方式：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置注意事项："><span class="nav-number">3.</span> <span class="nav-text">配置注意事项：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#链路聚合前："><span class="nav-number">3.1.</span> <span class="nav-text">链路聚合前：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#链路聚合后："><span class="nav-number">3.2.</span> <span class="nav-text">链路聚合后：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#缺省配置："><span class="nav-number">3.2.1.</span> <span class="nav-text">缺省配置：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#链路聚合配置命令行"><span class="nav-number">4.</span> <span class="nav-text">链路聚合配置命令行</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置手工负载分担模式："><span class="nav-number">4.1.</span> <span class="nav-text">配置手工负载分担模式：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置命令行："><span class="nav-number">4.1.1.</span> <span class="nav-text">配置命令行：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置LACP模式链路聚合："><span class="nav-number">4.2.</span> <span class="nav-text">配置LACP模式链路聚合：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置命令行：-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">配置命令行：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#其他常用命令："><span class="nav-number">4.3.</span> <span class="nav-text">其他常用命令：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2017/11/21/链路聚合Eth-Trunk/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

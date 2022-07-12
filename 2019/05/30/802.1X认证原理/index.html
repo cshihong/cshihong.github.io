@@ -1,0 +1,2134 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="802.1X(dot1x)技术简介802.1X认证，又称为EAPOE（Extensible Authentication Protocol Over Ethernet）认证，主要目的是为了解决局域网用户接入认证问题。 802.1X认证时采用了RADIUS协议的一种认证方式，典型的C/S结构，包括终端、RADIUS客户端和RADIUS服务器。 802.1x简介：IEEE802 LAN/WAN委员会为">
+<meta name="keywords" content="准入控制技术">
+<meta property="og:type" content="article">
+<meta property="og:title" content="802.1X认证原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="802.1X(dot1x)技术简介802.1X认证，又称为EAPOE（Extensible Authentication Protocol Over Ethernet）认证，主要目的是为了解决局域网用户接入认证问题。 802.1X认证时采用了RADIUS协议的一种认证方式，典型的C/S结构，包括终端、RADIUS客户端和RADIUS服务器。 802.1x简介：IEEE802 LAN/WAN委员会为">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/EAP终结.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/EAP.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/对比.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/认证流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/dot1x.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/3.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/4.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/5.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/6.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/7.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/8.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/9.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/10.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/11.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/12.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/13.png">
+<meta property="og:updated_time" content="2019-05-30T14:55:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="802.1X认证原理">
+<meta name="twitter:description" content="802.1X(dot1x)技术简介802.1X认证，又称为EAPOE（Extensible Authentication Protocol Over Ethernet）认证，主要目的是为了解决局域网用户接入认证问题。 802.1X认证时采用了RADIUS协议的一种认证方式，典型的C/S结构，包括终端、RADIUS客户端和RADIUS服务器。 802.1x简介：IEEE802 LAN/WAN委员会为">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/05/30/802.1X认证原理/EAP终结.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/05/30/802.1X认证原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>802.1X认证原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/05/30/802.1X认证原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">802.1X认证原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-30 09:27:02 / 修改时间：22:55:46" itemprop="dateCreated datePublished" datetime="2019-05-30T09:27:02+08:00">2019-05-30</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 2,553</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 9</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="802-1X-dot1x-技术简介"><a href="#802-1X-dot1x-技术简介" class="headerlink" title="802.1X(dot1x)技术简介"></a>802.1X(dot1x)技术简介</h1><p>802.1X认证，又称为EAPOE（Extensible Authentication Protocol Over Ethernet）认证，主要目的是为了解决局域网用户接入认证问题。</p>
+<p>802.1X认证时采用了RADIUS协议的一种认证方式，典型的C/S结构，包括终端、RADIUS客户端和RADIUS服务器。</p>
+<h2 id="802-1x简介："><a href="#802-1x简介：" class="headerlink" title="802.1x简介："></a>802.1x简介：</h2><p>IEEE802 LAN/WAN委员会为解决无线局域网网络安全问题，提出了802.1X协议。后来，802.1X协议作为局域网接口的一个普通接入控制机制在以太网中被广泛应用，<strong>主要解决以太网内认证和安全方面的问题。</strong></p>
+<p>802.1X协议是一种<strong>基于接口</strong>的网络接入控制协议。“基于接口的网络接入控制”是指，在局域网接入设备的接口这一级，接入设备通过认证来控制用户对网络资源的访问。</p>
+<h2 id="802-1X认证的特点："><a href="#802-1X认证的特点：" class="headerlink" title="802.1X认证的特点："></a>802.1X认证的特点：</h2><ul>
+<li>安全性高，认证控制点可部署在网络接入层或汇聚层。</li>
+<li>需要使用802.1x认证客户端或操作系统自带的802.1X客户端。使用AnyOffice时可以根据终端检查结果规格隔离于和后域。</li>
+<li>技术成熟，被广泛应用于各类型园区网员工接入。</li>
+</ul>
+<h2 id="802-1X认证应用场景："><a href="#802-1X认证应用场景：" class="headerlink" title="802.1X认证应用场景："></a>802.1X认证应用场景：</h2><ul>
+<li>有线接入层：安全性最高，设备管理复杂。</li>
+<li>有线汇聚层：安全性中高，设备少，管理方便。</li>
+<li>无线接入：安全性高，设备少，管理方便。</li>
+</ul>
+<h2 id="802-1X系统架构："><a href="#802-1X系统架构：" class="headerlink" title="802.1X系统架构："></a>802.1X系统架构：</h2><p>802.1X系统为典型的Client/Server结构，包括三个实体：客户端、接入设备和认证服务器。</p>
+<ul>
+<li>客户端是位于局域网段一端的一个实体，由该链路另一端的接入设备对其进行认证。客户端一般为一个用户终端设备，用户可以通过启动客户端软件发起802.1X认证。客户端必须支持局域网上的可扩展认证协议EAPOL（Extensible Authentication Protocol over LAN）。</li>
+<li>接入设备是位于局域网段一端的另一个实体，对所连接的客户端进行认证。接入设备通常为支持802.1X协议的网络设备，它为客户端提供接入局域网的接口。</li>
+<li>认证服务器是为接入设备提供认证服务的实体。认证服务器用于对用户进行认证、授权和计费，通常为RADIUS服务器。</li>
+</ul>
+<h2 id="802-1X基本概念："><a href="#802-1X基本概念：" class="headerlink" title="802.1X基本概念："></a>802.1X基本概念：</h2><p>认证模式：</p>
+<ul>
+<li>基于接口</li>
+<li>基于MAC</li>
+</ul>
+<p>认证方式：</p>
+<ul>
+<li>EAP终结</li>
+<li>EAP透传</li>
+</ul>
+<p>端口控制方式：</p>
+<ul>
+<li>自动识别(auto)：表示端口初始状态为非授权状态，仅允许EAPOL报文收发，不允许用户访问网络资源；如果认证通过，则端口切换到授权状态，允许用户访问网络资源。这也是最常见的情况。</li>
+<li>强制授权（<strong>authorized-force</strong>）：表示端口始终处于授权状态，允许用户不经认证授权即可访问网络资源。</li>
+<li>强制非授权（<strong>unauthorized-force</strong>）：表示端口始终处于非授权状态，不允许用户进行认证。设备端不对通过该端口接入的客户端提供认证服务。</li>
+</ul>
+<h2 id="认证触发方式："><a href="#认证触发方式：" class="headerlink" title="认证触发方式："></a>认证触发方式：</h2><p><strong>802.1X的认证过程可以由客户端主动发起，也可以由接入设备发起</strong>。设备支持的认证触发方式包括以下两种。</p>
+<ol>
+<li><strong>客户端主动触发方式</strong>：用户主动开启客户端输用户名和密码向接入设备发送EAP报文来触发认证。<strong>支持组播方式和广播方式。</strong></li>
+<li><strong>接入设备主动触发方式</strong>：接入设备在接收到用户终端发送的DHCP/ARP报文后，主动触发用户终端自动弹出客户端界面，用户输入用户名和密码即可启动认证。<strong>支持组播触发和单播触发。</strong></li>
+</ol>
+<h2 id="认证方式："><a href="#认证方式：" class="headerlink" title="认证方式："></a>认证方式：</h2><p>802.1X认证系统使用可扩展认证协议EAP（Extensible Authentication Protocol）来实现客户端、接入设备和认证服务器之间认证信息的交换，各实体之间EAP协议报文的交互形式如下。</p>
+<ol>
+<li><p>在客户端与接入设备之间，EAP协议报文使用EAPOL封装格式，并直接承载于LAN环境中。</p>
+</li>
+<li><p>在接入设备与认证服务器（以RADIUS服务器为例）之间，EAP协议报文可以使用以下两种方式进行交互。</p>
+<ul>
+<li><p>EAP中继（EAP透传）：</p>
+<p><img src="/2019/05/30/802.1X认证原理/EAP终结.png" alt="EAP终结"></p>
+<p>EAP协议报文由接入设备进行中继，设备将EAP报文使用EAPOR（EAP over RADIUS）封装格式承载于RADIUS协议中，发送给RADIUS服务器进行认证。该认证方式的优点是：设备处理简单，可支持多种类型的EAP认证方法，例如MD5-Challenge、EAP-TLS、PEAP等，但要求RADIUS服务器端支持相应的认证方法。</p>
+</li>
+<li><p>EAP终结：</p>
+<p><img src="/2019/05/30/802.1X认证原理/EAP.png" alt="EAP"></p>
+<p><strong>EAP协议报文由接入设备进行终结</strong>，设备将客户端认证信息封装在标准RADIUS报文中，与服务器之间采用密码验证协议PAP（Password Authentication Protocol）或质询握手验证协议CHAP（Challenge Handshake Authentication Protocol）方式进行认证。该认证方式的优点是：现有的RADIUS服务器基本均可支持PAP和CHAP认证，无需升级服务器，但设备处理较为复杂，且不能支持除MD5-Challenge之外的其它EAP认证方法。</p>
+</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>设备支持如下EAP协议：EAP-TLS、EAP-TTLS、EAP-PAP、EAP-CHAP（EAP-MD5）和EAP-PEAP。</p>
+</blockquote>
+<h2 id="802-1X协议对比："><a href="#802-1X协议对比：" class="headerlink" title="802.1X协议对比："></a>802.1X协议对比：</h2><p><img src="/2019/05/30/802.1X认证原理/对比.png" alt="对比"></p>
+<h1 id="802-1X认证原理"><a href="#802-1X认证原理" class="headerlink" title="802.1X认证原理"></a>802.1X认证原理</h1><h2 id="认证流程："><a href="#认证流程：" class="headerlink" title="认证流程："></a>认证流程：</h2><p>对于EAP中继方式，802.1X认证流程如下图所示：</p>
+<p><img src="/2019/05/30/802.1X认证原理/认证流程.png" alt="认证流程"></p>
+<center>图：EAP中继方式的802.1X认证流程</center>
+
+
+
+<p><strong>在第5步中，如果采用的是EAP-MD5认证，则处理方式方式如下：</strong></p>
+<p>认证服务器收到接入设备转发的用户名信息后，按照如下方式对其密码进行验证。</p>
+<ol>
+<li>认证服务器将用户名信息与数据库中的用户名列表进行对比，找到该用户名对应的密码信息。</li>
+<li>认证服务器用随机生成的一个MD5 Challenge对密码进行加密处理，并将此MD5 Challenge通过接入设备发送给客户端。</li>
+<li>客户端收到由接入设备转发的MD5 Challenge后，用该Challenge对密码部分进行加密处理，之后将加密后的密码通过接入设备发送到认证服务器。</li>
+<li>认证服务器将收到的已加密的密码信息和本地经过加密运算后的密码信息进行对比。如果相同，则认为该用户为合法用户；如果不同，则认为该用户为非法用户。</li>
+</ol>
+<p>EAP终结方式与EAP中继方式的认证流程相比，不同之处在于步骤4和5。对于EAP终结方式，当接入设备将客户端发送的用户名信息发送给认证服务器时，会随机生成一个MD5 Challenge并发送给客户端（<strong>MD5 Challenge由接入设备生成而非认证服务器生成</strong>）。之后接入设备会把用户名、MD5 Challenge和客户端加密后的密码信息一起送给认证服务器，进行相关的认证处理。</p>
+<h2 id="802-1X认证结果："><a href="#802-1X认证结果：" class="headerlink" title="802.1X认证结果："></a>802.1X认证结果：</h2><blockquote>
+<p><strong>802.1X认证的结果在于端口状态的改变，而不涉及IP地址协商和分配问题。它是各种认证技术中最简化的实现方案，但是需要用户终端安装有802.1X客户端软件。</strong></p>
+</blockquote>
+<blockquote>
+<p>如果使用客户端认证，必须让终端用户在认证前能够获取并安装客户端软件。推广AnyOffice等认证客户端的方法：</p>
+<ol>
+<li>如果已部署AD域服务器，可以通过AD自动推送安装，用户无感知。</li>
+<li>如果未部署AD域服务器，需要用主动访问文件服务器/网站，下载安装。</li>
+</ol>
+</blockquote>
+<h2 id="使用802-1x注意事项："><a href="#使用802-1x注意事项：" class="headerlink" title="使用802.1x注意事项："></a>使用802.1x注意事项：</h2><ul>
+<li><p>目前只支持在二层物理接口、WLAN VAP模板下启用802.1x功能。</p>
+</li>
+<li><p>使用EAP中继认证方式，必须确保RADIUS服务器支持对应的EAP认证方法。</p>
+</li>
+<li><p>如果FW和用户之间存在二层交换机，则需要在二层交换机上<strong>启用802.1x认证报文透传功能</strong>，否则用户无法认证成功。</p>
+<p><strong>l2protocol-tunnel user-defined-protocol 802.1x enable</strong></p>
+</li>
+<li><p>802.1x不支持虚拟化和IPv6。</p>
+</li>
+</ul>
+<h1 id="802-1X配置思路"><a href="#802-1X配置思路" class="headerlink" title="802.1X配置思路"></a>802.1X配置思路</h1><h2 id="交换机部分配置思路："><a href="#交换机部分配置思路：" class="headerlink" title="交换机部分配置思路："></a>交换机部分配置思路：</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">交换机部分： </span><br><span class="line">第一步： 定义radius服务和AAA</span><br><span class="line">定义radius</span><br><span class="line">radius-server template dot1x_radius_server-------------定义radius服务器模板</span><br><span class="line"> radius-server shared-key simple Huawei@<span class="number">123</span>------------联动服务器设置密码</span><br><span class="line"> radius-server authentication <span class="number">192.168</span>.1.100 <span class="number">1812</span> -----------设置认证的端口</span><br><span class="line"> radius-server accounting <span class="number">192.168</span>.1.100 <span class="number">1813</span>----------------设置计费的端口</span><br><span class="line">radius-server authorization <span class="number">192.168</span>.1.100 shared-key simple Huawei@<span class="number">123</span>------授权可选 </span><br><span class="line"></span><br><span class="line">aaa</span><br><span class="line"> authentication-scheme dot1x_auth</span><br><span class="line">  authentication-mode radius              </span><br><span class="line"> accounting-scheme dot1x_acco</span><br><span class="line">  accounting-mode radius</span><br><span class="line"> domain <span class="keyword">default</span></span><br><span class="line">  authentication-scheme dot1x_auth</span><br><span class="line">  accounting-scheme dot1x_acco</span><br><span class="line">  radius-server  dot1x_radius_server</span><br><span class="line"></span><br><span class="line">第二步：配置dot1x</span><br><span class="line">dot1x  enable ------------全局开启dot1x功能</span><br><span class="line"></span><br><span class="line">dot1x authentication-method eap  ---------dot1x认证方法eap</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span>  xxx</span><br><span class="line">dot1x enable  ----------开启dot1x</span><br></pre></td></tr></table></figure>
+<h2 id="AC部分配置思路："><a href="#AC部分配置思路：" class="headerlink" title="AC部分配置思路："></a>AC部分配置思路：</h2><ol>
+<li><p>设备管理<br>添加radius认证 </p>
+</li>
+<li><p>用户管理<br>创建用户名和密码</p>
+</li>
+<li><p>认证规则<br>调用准入控制组（具体是那个交换机 ）</p>
+</li>
+<li><p>授权规则<br>A. 动态策略元素（动态ACL）</p>
+<p>B. 授权结果，调用动态ACL</p>
+<p>C. 授权规则，调用 授权结果，调用认证部门</p>
+</li>
+</ol>
+<h1 id="Dot1x配置示例"><a href="#Dot1x配置示例" class="headerlink" title="Dot1x配置示例"></a>Dot1x配置示例</h1><h2 id="配置要求："><a href="#配置要求：" class="headerlink" title="配置要求："></a>配置要求：</h2><p>SW1开启Dot1x功能，对Inside_PC实施准入控制，认证通过后，能访问trust、dmz、untrust区域的网络。</p>
+<p><img src="/2019/05/30/802.1X认证原理/dot1x.png" alt="dot1x"></p>
+<h2 id="交换机配置："><a href="#交换机配置：" class="headerlink" title="交换机配置："></a>交换机配置：</h2><p><img src="/2019/05/30/802.1X认证原理/1.png" alt="1"></p>
+<p>然后在接口开启dot1x。</p>
+<h2 id="AC配置："><a href="#AC配置：" class="headerlink" title="AC配置："></a>AC配置：</h2><ol>
+<li><p>添加认证设备</p>
+<p><img src="/2019/05/30/802.1X认证原理/3.png" alt="3"></p>
+</li>
+<li><p>新建dot1x认证部门、用户、账号。</p>
+<p><img src="/2019/05/30/802.1X认证原理/4.png" alt="4"></p>
+</li>
+<li><p>配置认证规则：</p>
+<p><img src="/2019/05/30/802.1X认证原理/5.png" alt="5"></p>
+</li>
+<li><p>配置动态ACL</p>
+<p><img src="/2019/05/30/802.1X认证原理/6.png" alt="6"></p>
+</li>
+<li><p>配置授权结果：</p>
+<p><img src="/2019/05/30/802.1X认证原理/7.png" alt="7"></p>
+</li>
+<li><p>配置授权规则：</p>
+<p><img src="/2019/05/30/802.1X认证原理/8.png" alt="8"></p>
+</li>
+</ol>
+<h2 id="检查测试："><a href="#检查测试：" class="headerlink" title="检查测试："></a>检查测试：</h2><p>在交换机上进行dot1x认证测试：</p>
+<p><img src="/2019/05/30/802.1X认证原理/9.png" alt="9"></p>
+<hr>
+<p>SW上Dot1x状态：</p>
+<p><img src="/2019/05/30/802.1X认证原理/10.png" alt="10"></p>
+<hr>
+<p>未认证前测试：</p>
+<p><img src="/2019/05/30/802.1X认证原理/11.png" alt="11"></p>
+<hr>
+<p>Dot1x认证成功后测试：</p>
+<p><img src="/2019/05/30/802.1X认证原理/12.png" alt="12"></p>
+<hr>
+<p>认证交换机上接入用户状态：</p>
+<p><img src="/2019/05/30/802.1X认证原理/13.png" alt="13"></p>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/05/30/802.1X认证原理/" title="802.1X认证原理">https://cshihong.github.io/2019/05/30/802.1X认证原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/准入控制技术/" rel="tag"># 准入控制技术</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/16/二层攻击防范技术/" rel="next" title="二层攻击防范技术">
+                <i class="fa fa-chevron-left"></i> 二层攻击防范技术
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/30/Portal认证原理/" rel="prev" title="Portal认证原理">
+                Portal认证原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#802-1X-dot1x-技术简介"><span class="nav-number">1.</span> <span class="nav-text">802.1X(dot1x)技术简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#802-1x简介："><span class="nav-number">1.1.</span> <span class="nav-text">802.1x简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#802-1X认证的特点："><span class="nav-number">1.2.</span> <span class="nav-text">802.1X认证的特点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#802-1X认证应用场景："><span class="nav-number">1.3.</span> <span class="nav-text">802.1X认证应用场景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#802-1X系统架构："><span class="nav-number">1.4.</span> <span class="nav-text">802.1X系统架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#802-1X基本概念："><span class="nav-number">1.5.</span> <span class="nav-text">802.1X基本概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#认证触发方式："><span class="nav-number">1.6.</span> <span class="nav-text">认证触发方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#认证方式："><span class="nav-number">1.7.</span> <span class="nav-text">认证方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#802-1X协议对比："><span class="nav-number">1.8.</span> <span class="nav-text">802.1X协议对比：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#802-1X认证原理"><span class="nav-number">2.</span> <span class="nav-text">802.1X认证原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#认证流程："><span class="nav-number">2.1.</span> <span class="nav-text">认证流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#802-1X认证结果："><span class="nav-number">2.2.</span> <span class="nav-text">802.1X认证结果：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用802-1x注意事项："><span class="nav-number">2.3.</span> <span class="nav-text">使用802.1x注意事项：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#802-1X配置思路"><span class="nav-number">3.</span> <span class="nav-text">802.1X配置思路</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#交换机部分配置思路："><span class="nav-number">3.1.</span> <span class="nav-text">交换机部分配置思路：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AC部分配置思路："><span class="nav-number">3.2.</span> <span class="nav-text">AC部分配置思路：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dot1x配置示例"><span class="nav-number">4.</span> <span class="nav-text">Dot1x配置示例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置要求："><span class="nav-number">4.1.</span> <span class="nav-text">配置要求：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#交换机配置："><span class="nav-number">4.2.</span> <span class="nav-text">交换机配置：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AC配置："><span class="nav-number">4.3.</span> <span class="nav-text">AC配置：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检查测试："><span class="nav-number">4.4.</span> <span class="nav-text">检查测试：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/05/30/802.1X认证原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="BGP简介边界网关协议BGP（Border Gateway Protocol）是一种实现自治系统AS（Autonomous System）之间的路由可达，并选择最佳路由的距离矢量路由协议。 MP-BGP是对BGP-4进行了扩展，来达到在不同网络中应用的目的，BGP-4原有的消息机制和路由机制并没有改变。MP-BGP在IPv6单播网络上的应用称为BGP4+，在IPv4组播网络上的应用称为MBGP（M">
+<meta name="keywords" content="BGP,路由基础">
+<meta property="og:type" content="article">
+<meta property="og:title" content="BGP基础知识">
+<meta property="og:url" content="https://cshihong.github.io/2018/01/23/BGP基础知识/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="BGP简介边界网关协议BGP（Border Gateway Protocol）是一种实现自治系统AS（Autonomous System）之间的路由可达，并选择最佳路由的距离矢量路由协议。 MP-BGP是对BGP-4进行了扩展，来达到在不同网络中应用的目的，BGP-4原有的消息机制和路由机制并没有改变。MP-BGP在IPv6单播网络上的应用称为BGP4+，在IPv4组播网络上的应用称为MBGP（M">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/01/23/BGP基础知识/BGP.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/01/23/BGP基础知识/团体属性.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/01/23/BGP基础知识/路由反射器.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/01/23/BGP基础知识/分级路由反射器.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/01/23/BGP基础知识/同级路由反射器.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/01/23/BGP基础知识/联盟示意图.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/01/23/BGP基础知识/路由衰减.png">
+<meta property="og:updated_time" content="2018-05-24T10:08:50.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="BGP基础知识">
+<meta name="twitter:description" content="BGP简介边界网关协议BGP（Border Gateway Protocol）是一种实现自治系统AS（Autonomous System）之间的路由可达，并选择最佳路由的距离矢量路由协议。 MP-BGP是对BGP-4进行了扩展，来达到在不同网络中应用的目的，BGP-4原有的消息机制和路由机制并没有改变。MP-BGP在IPv6单播网络上的应用称为BGP4+，在IPv4组播网络上的应用称为MBGP（M">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/01/23/BGP基础知识/BGP.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/01/23/BGP基础知识/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>BGP基础知识 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/01/23/BGP基础知识/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">BGP基础知识
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-01-23 18:38:43" itemprop="dateCreated datePublished" datetime="2018-01-23T18:38:43+08:00">2018-01-23</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-05-24 18:08:50" itemprop="dateModified" datetime="2018-05-24T18:08:50+08:00">2018-05-24</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 8,833</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 32</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="BGP简介"><a href="#BGP简介" class="headerlink" title="BGP简介"></a>BGP简介</h1><p>边界网关协议BGP（Border Gateway Protocol）是一种实现自治系统AS（Autonomous System）之间的路由可达，并选择最佳路由的距离矢量路由协议。</p>
+<p>MP-BGP是对BGP-4进行了扩展，来达到在不同网络中应用的目的，BGP-4原有的消息机制和路由机制并没有改变。MP-BGP在IPv6单播网络上的应用称为BGP4+，在IPv4组播网络上的应用称为MBGP（Multicast BGP）。</p>
+<h2 id="目的："><a href="#目的：" class="headerlink" title="目的："></a>目的：</h2><p>为方便管理规模不断扩大的网络，网络被分成了不同的自治系统。1982年，外部网关协议EGP（Exterior Gateway Protocol）被用于实现在AS之间动态交换路由信息。但是EGP设计得比较简单，只发布网络可达的路由信息，而不对路由信息进行优选，同时也没有考虑环路避免等问题，很快就无法满足网络管理的要求。</p>
+<p>BGP是为取代最初的EGP而设计的另一种外部网关协议。不同于最初的EGP，BGP能够进行路由优选、避免路由环路、更高效率的传递路由和维护大量的路由信息。</p>
+<p>虽然BGP用于在AS之间传递路由信息，但并不是所有AS之间传递路由信息都需要运行BGP。比如在数据中心上行的连入Internet的出口上，为了避免Internet海量路由对数据中心内部网络的影响，设备采用静态路由代替BGP与外部网络通信。</p>
+<h2 id="BGP的优点："><a href="#BGP的优点：" class="headerlink" title="BGP的优点："></a>BGP的优点：</h2><p>BGP从多方面保证了网络的安全性、灵活性、稳定性、可靠性和高效性。</p>
+<ul>
+<li>BGP采用认证和GTSM的方式，保证了网络的安全性。</li>
+<li>BGP提供了丰富的路由策略，能够灵活的进行路由选路，并且能指导邻居按策略发布路由。</li>
+<li>BGP提供了路由聚合和路由衰减功能由于防止路由震荡，有效提高了网络的稳定性。</li>
+<li>BGP使用TCP作为其传输层协议（目的端口号179），并支持与BGP与BFD联动、BGP Tracking和BGP GR和NSR，提高了网络的可靠性。</li>
+<li>在邻居数目多、路由量大且大部分邻居具有相同出口的策略的场景下，BGP使用按组打包技术极大的提高了BGP打包发包性能。</li>
+</ul>
+<h1 id="BGP原理描述"><a href="#BGP原理描述" class="headerlink" title="BGP原理描述"></a>BGP原理描述</h1><h2 id="BGP基本概念："><a href="#BGP基本概念：" class="headerlink" title="BGP基本概念："></a>BGP基本概念：</h2><h3 id="自治系统ASAutonomous-System："><a href="#自治系统ASAutonomous-System：" class="headerlink" title="自治系统ASAutonomous System："></a>自治系统ASAutonomous System：</h3><p>AS是指在一个实体管辖下的拥有相同选路策略的IP网络。BGP网络中的每个AS都被分配一个唯一的AS号，用于区分不同的AS。AS号分为2字节AS号和4字节AS号，其中2字节AS号的范围为1至65535，4字节AS号的范围为1至4294967295。支持4字节AS号的设备能够与支持2字节AS号的设备兼容。</p>
+<h3 id="BGP分类："><a href="#BGP分类：" class="headerlink" title="BGP分类："></a>BGP分类：</h3><p>BGP按照运行方式分为EBGP（External/Exterior BGP）和IBGP（Internal/Interior BGP）。</p>
+<ul>
+<li>EBGP：运行于不同AS之间的BGP称为EBGP。为了防止AS间产生环路，当BGP设备接收EBGP对等体发送的路由时，会将带有本地AS号的路由丢弃。</li>
+<li>IBGP：运行于同一AS内部的BGP称为IBGP。为了防止AS内产生环路，BGP设备不将从IBGP对等体学到的路由通告给其他IBGP对等体，并与所有IBGP对等体建立全连接。为了解决IBGP对等体的连接数量太多的问题，BGP设计了路由反射器和BGP联盟。</li>
+</ul>
+<h3 id="BGP报文交互中的角色："><a href="#BGP报文交互中的角色：" class="headerlink" title="BGP报文交互中的角色："></a>BGP报文交互中的角色：</h3><p>BGP报文交互中分为Speaker和Peer两种角色。</p>
+<ul>
+<li>Speaker：发送BGP报文的设备称为BGP发言者（Speaker），它接收或产生新的报文信息，并发布（Advertise）给其它BGP Speaker。</li>
+<li>Peer：相互交换报文的Speaker之间互称对等体（Peer）。若干相关的对等体可以构成对等体组（Peer Group）。</li>
+</ul>
+<h3 id="BGP的路由器号（Router-ID）："><a href="#BGP的路由器号（Router-ID）：" class="headerlink" title="BGP的路由器号（Router ID）："></a>BGP的路由器号（Router ID）：</h3><p>BGP的Router ID是一个用于标识BGP设备的32位值，通常是IPv4地址的形式，在BGP会话建立时发送的Open报文中携带。对等体之间建立BGP会话时，每个BGP设备都必须有唯一的Router ID，否则对等体之间不能建立BGP连接。</p>
+<p>BGP的Router ID在BGP网络中必须是唯一的，可以采用手工配置，也可以让设备自动选取。缺省情况下，BGP选择设备上的Loopback接口的IPv4地址作为BGP的Router ID。如果设备上没有配置Loopback接口，系统会选择接口中最大的IPv4地址作为BGP的Router ID。一旦选出Router ID，除非发生接口地址删除等事件，否则即使配置了更大的地址，也保持原来的Router ID。</p>
+<h2 id="BGP工作原理："><a href="#BGP工作原理：" class="headerlink" title="BGP工作原理："></a>BGP工作原理：</h2><p>BGP对等体的建立、更新和删除等交互过程主要有5种报文、6种状态机和5个原则。</p>
+<h3 id="BGP的报文："><a href="#BGP的报文：" class="headerlink" title="BGP的报文："></a>BGP的报文：</h3><p>BGP对等体间通过以下5种报文进行交互，其中Keepalive报文为周期性发送，其余报文为触发式发送：</p>
+<ul>
+<li>Open报文：用于建立BGP对等体连接。</li>
+<li>Update报文：用于在对等体之间交换路由信息。</li>
+<li>Notification报文：用于中断BGP连接。</li>
+<li>Keepalive报文：用于保持BGP连接。</li>
+<li>Route-refresh报文：用于在改变路由策略后请求对等体重新发送路由信息。只有支持路由刷新（Route-refresh）能力的BGP设备会发送和响应此报文。</li>
+</ul>
+<h3 id="BGP状态机："><a href="#BGP状态机：" class="headerlink" title="BGP状态机："></a>BGP状态机：</h3><p>BGP对等体的交互过程中存在6种状态机：空闲（Idle）、连接（Connect）、活跃（Active）、Open报文已发送（OpenSent）、Open报文已确认（OpenConfirm）和连接已建立（Established）。在BGP对等体建立的过程中，通常可见的3个状态是：Idle、Active和Established。</p>
+<p><img src="/2018/01/23/BGP基础知识/BGP.png" alt="BGP"></p>
+<p><center>图：BGP对等体交互过程<center></center></center></p>
+<ol>
+<li>Idle状态是BGP初始状态。在Idle状态下，BGP拒绝邻居发送的连接请求。只有在收到本设备的Start事件后，BGP才开始尝试和其它BGP对等体进行TCP连接，并转至Connect状态。</li>
+<li>在Connect状态下，BGP启动连接重传定时器（Connect Retry），等待TCP完成连接。</li>
+</ol>
+<ul>
+<li>如果TCP连接成功，那么BGP向对等体发送Open报文，并转至OpenSent状态。</li>
+<li>如果TCP连接失败，那么BGP转至Active状态。</li>
+<li>如果连接重传定时器超时，BGP仍没有收到BGP对等体的响应，那么BGP继续尝试和其它BGP对等体进行TCP连接，停留在Connect状态。</li>
+</ul>
+<ol start="3">
+<li>在Active状态下，BGP总是在试图建立TCP连接。</li>
+</ol>
+<ul>
+<li>如果TCP连接成功，那么BGP向对等体发送Open报文，关闭连接重传定时器，并转至OpenSent状态。</li>
+<li>如果TCP连接失败，那么BGP停留在Active状态。</li>
+<li>如果连接重传定时器超时，BGP仍没有收到BGP对等体的响应，那么BGP转至Connect状态。</li>
+</ul>
+<ol start="4">
+<li>在OpenSent状态下，BGP等待对等体的Open报文，并对收到的Open报文中的AS号、版本号、认证码等进行检查。</li>
+</ol>
+<ul>
+<li>如果收到的Open报文正确，那么BGP发送Keepalive报文，并转至OpenConfirm状态。</li>
+<li>如果发现收到的Open报文有错误，那么BGP发送Notification报文给对等体，并转至Idle状态。</li>
+</ul>
+<ol start="5">
+<li>在OpenConfirm状态下，BGP等待Keepalive或Notification报文。如果收到Keepalive报文，则转至Established状态，如果收到Notification报文，则转至Idle状态。</li>
+<li>在Established状态下，BGP可以和对等体交换Update、Keepalive、Route-refresh报文和Notification报文。</li>
+</ol>
+<ul>
+<li>如果收到正确的Update或Keepalive报文，那么BGP就认为对端处于正常运行状态，将保持BGP连接。</li>
+<li>如果收到错误的Update或Keepalive报文，那么BGP发送Notification报文通知对端，并转至Idle状态。</li>
+<li>Route-refresh报文不会改变BGP状态。</li>
+<li>如果收到Notification报文，那么BGP转至Idle状态。</li>
+<li>如果收到TCP拆链通知，那么BGP断开连接，转至Idle状态。</li>
+</ul>
+<h3 id="BGP对等体之间的交互原则："><a href="#BGP对等体之间的交互原则：" class="headerlink" title="BGP对等体之间的交互原则："></a>BGP对等体之间的交互原则：</h3><p>BGP设备将最优路由加入BGP路由表，形成BGP路由。BGP设备与对等体建立邻居关系后，采取以下交互原则：</p>
+<ul>
+<li>从IBGP对等体获得的BGP路由，BGP设备只发布给它的EBGP对等体。</li>
+<li>从EBGP对等体获得的BGP路由，BGP设备发布给它所有EBGP和IBGP对等体。</li>
+<li>当存在多条到达同一目的地址的有效路由时，BGP设备只将最优路由发布给对等体。</li>
+<li>路由更新时，BGP设备只发送更新的BGP路由。</li>
+<li>所有对等体发送的路由，BGP设备都会接收。</li>
+</ul>
+<h2 id="BGP与IGP交互："><a href="#BGP与IGP交互：" class="headerlink" title="BGP与IGP交互："></a>BGP与IGP交互：</h2><p>BGP与IGP在设备中使用不同的路由表，为了实现不同AS间相互通讯，BGP需要与IGP进行交互，即BGP路由表和IGP路由表相互引入。</p>
+<h3 id="BGP引入IGP路由："><a href="#BGP引入IGP路由：" class="headerlink" title="BGP引入IGP路由："></a>BGP引入IGP路由：</h3><p>BGP协议本身不发现路由，因此需要将其他路由引入到BGP路由表，实现AS间的路由互通。当一个AS需要将路由发布给其他AS时，AS边缘路由器会在BGP路由表中引入IGP的路由。为了更好的规划网络，BGP在引入IGP的路由时，可以使用路由策略进行路由过滤和路由属性设置，也可以设置MED值指导EBGP对等体判断流量进入AS时选路。</p>
+<p>BGP引入路由时支持Import和Network两种方式：</p>
+<ul>
+<li>Import方式是按协议类型，将RIP、OSPF、ISIS等协议的路由引入到BGP路由表中。为了保证引入的IGP路由的有效性，Import方式还可以引入静态路由和直连路由。</li>
+<li>Network方式是逐条将IP路由表中已经存在的路由引入到BGP路由表中，比Import方式更精确。</li>
+</ul>
+<h3 id="IGP引入BGP路由："><a href="#IGP引入BGP路由：" class="headerlink" title="IGP引入BGP路由："></a>IGP引入BGP路由：</h3><p>当一个AS需要引入其他AS的路由时，AS边缘路由器会在IGP路由表中引入BGP的路由。为了避免大量BGP路由对AS内设备造成影响，当IGP引入BGP路由时，可以使用路由策略，进行路由过滤和路由属性设置。</p>
+<h2 id="BGP安全性："><a href="#BGP安全性：" class="headerlink" title="BGP安全性："></a>BGP安全性：</h2><p>BGP使用认证和通用TTL安全保护机制GTSM（Generalized TTL Security Mechanism）两个方法保证BGP对等体间的交互安全。</p>
+<h3 id="BGP认证："><a href="#BGP认证：" class="headerlink" title="BGP认证："></a>BGP认证：</h3><p>BGP认证分为MD5认证和Keychain认证，对BGP对等体关系进行认证是提高安全性的有效手段。MD5认证只能为TCP连接设置认证密码，而Keychain认证除了可以为TCP连接设置认证密码外，还可以对BGP协议报文进行认证。</p>
+<h3 id="BGP-GTSM："><a href="#BGP-GTSM：" class="headerlink" title="BGP GTSM："></a>BGP GTSM：</h3><p>BGP GTSM检测IP报文头中的TTL（time-to-live）值是否在一个预先设置好的特定范围内，并对不符合TTL值范围的报文进行允许通过或丢弃的操作，从而实现了保护IP层以上业务，增强系统安全性的目的。</p>
+<p>例如将IBGP对等体的报文的TTL的范围设为254至255。当攻击者模拟合法的BGP协议报文，对设备不断的发送报文进行攻击时，TTL值必然小于254。如果没有使能BGP GTSM功能，设备收到这些报文后，发现是发送给本机的报文，会直接上送控制层面处理。这时将会因为控制层面处理大量攻击报文，导致设备CPU占用率高，系统异常繁忙。如果使能BGP GTSM功能，系统会对所有BGP报文的TTL值进行检查，丢弃TTL值小于254的攻击报文，从而避免了因网络攻击报文导致CPU占用率高的问题。</p>
+<h2 id="BGP的路由优选规则和负载分担："><a href="#BGP的路由优选规则和负载分担：" class="headerlink" title="BGP的路由优选规则和负载分担："></a>BGP的路由优选规则和负载分担：</h2><p>在BGP路由表中，到达同一目的地可能存在多条路由。此时BGP会选择其中一条路由作为最佳路由，并只把此路由发送给其对等体。BGP为了选出最佳路由，会根据BGP的路由优选规则依次比较这些路由的BGP属性。</p>
+<h3 id="BGP属性："><a href="#BGP属性：" class="headerlink" title="BGP属性："></a>BGP属性：</h3><p>路由属性是对路由的特定描述，所有的BGP路由属性都可以分为以下4类，常见BGP属性类型所示：</p>
+<ul>
+<li>公认必须遵循（Well-known mandatory）：所有BGP设备都可以识别此类属性，且必须存在于Update报文中。如果缺少这类属性，路由信息就会出错。</li>
+<li>公认任意（Well-known discretionary）：所有BGP设备都可以识别此类属性，但不要求必须存在于Update报文中，即就算缺少这类属性，路由信息也不会出错。</li>
+<li>可选过渡（Optional transitive）：BGP设备可以不识别此类属性，如果BGP设备不识别此类属性，但它仍然会接收这类属性，并通告给其他对等体。</li>
+<li>可选非过渡（Optional non-transitive）：BGP设备可以不识别此类属性，如果BGP设备不识别此类属性，则会被忽略该属性，且不会通告给其他对等体。</li>
+</ul>
+<p>BGP常见属性类型：</p>
+<table>
+<thead>
+<tr>
+<th>属性名</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Origin属性</td>
+<td>公认必须遵循</td>
+</tr>
+<tr>
+<td>AS_Path属性</td>
+<td>公认必须遵循</td>
+</tr>
+<tr>
+<td>Next_Hop属性</td>
+<td>公认必须遵循</td>
+</tr>
+<tr>
+<td>Local_Pref属性</td>
+<td>公认任意</td>
+</tr>
+<tr>
+<td>MED属性</td>
+<td>可选非过渡</td>
+</tr>
+<tr>
+<td>团体属性</td>
+<td>可选过渡</td>
+</tr>
+<tr>
+<td>Originator_ID属性</td>
+<td>可选非过渡</td>
+</tr>
+<tr>
+<td>Cluster_List属性</td>
+<td>可选非过渡</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Origin属性："><a href="#Origin属性：" class="headerlink" title="Origin属性："></a>Origin属性：</h4><p>Origin属性用来定义路径信息的来源，标记一条路由是怎么成为BGP路由的。它有以下3种类型：</p>
+<ul>
+<li>IGP：具有最高的优先级。通过<strong>network</strong>命令注入到BGP路由表的路由，其Origin属性为IGP。</li>
+<li>EGP：优先级次之。通过EGP得到的路由信息，其Origin属性为EGP。</li>
+<li>Incomplete：优先级最低。通过其他方式学习到的路由信息。比如BGP通过<strong>import-route</strong>命令引入的路由，其Origin属性为Incomplete。</li>
+</ul>
+<h4 id="AS-Path属性："><a href="#AS-Path属性：" class="headerlink" title="AS_Path属性："></a>AS_Path属性：</h4><p>AS_Path属性按矢量顺序记录了某条路由从本地到目的地址所要经过的所有AS编号。在接收路由时，设备如果发现AS_Path列表中有本AS号，则不接收该路由，从而避免了AS间的路由环路。</p>
+<p>当BGP Speaker传播自身引入的路由时：</p>
+<ul>
+<li>当BGP Speaker将这条路由通告到EBGP对等体时，便会在Update报文中创建一个携带本地AS号的AS_Path列表。</li>
+<li>当BGP Speaker将这条路由通告给IBGP对等体时，便会在Update报文中创建一个空的AS_Path列表。</li>
+</ul>
+<p>当BGP Speaker传播从其他BGP Speaker的Update报文中学习到的路由时：</p>
+<ul>
+<li>当BGP Speaker将这条路由通告给EBGP对等体时，便会把本地AS编号添加在AS_Path列表的最前面（最左面）。收到此路由的BGP设备根据AS_Path属性就可以知道去目的地址所要经过的AS。离本地AS最近的相邻AS号排在前面，其他AS号按顺序依次排列。</li>
+<li>当BGP Speaker将这条路由通告给IBGP对等体时，不会改变这条路由相关的AS_Path属性。</li>
+</ul>
+<h4 id="Next-hop属性："><a href="#Next-hop属性：" class="headerlink" title="Next_hop属性："></a>Next_hop属性：</h4><p>Next_Hop属性记录了路由的下一跳信息。BGP的下一跳属性和IGP的有所不同，不一定就是邻居设备的IP地址。通常情况下，Next_Hop属性遵循下面的规则：</p>
+<ul>
+<li>BGP Speaker在向EBGP对等体发布某条路由时，会把该路由信息的下一跳属性设置为本地与对端建立BGP邻居关系的接口地址。</li>
+<li>BGP Speaker将本地始发路由发布给IBGP对等体时，会把该路由信息的下一跳属性设置为本地与对端建立BGP邻居关系的接口地址。</li>
+<li>BGP Speaker在向IBGP对等体发布从EBGP对等体学来的路由时，并不改变该路由信息的下一跳属性。</li>
+</ul>
+<h4 id="Local-pref属性："><a href="#Local-pref属性：" class="headerlink" title="Local_pref属性："></a>Local_pref属性：</h4><p>Local_Pref属性表明路由器的BGP优先级，用于判断流量离开AS时的最佳路由。当BGP的设备通过不同的IBGP对等体得到目的地址相同但下一跳不同的多条路由时，将优先选择Local_Pref属性值较高的路由。Local_Pref属性仅在IBGP对等体之间有效，不通告给其他AS。Local_Pref属性可以手动配置，如果路由没有配置Local_Pref属性，BGP选路时将该路由的Local_Pref值按缺省值100来处理。</p>
+<h4 id="MED属性："><a href="#MED属性：" class="headerlink" title="MED属性："></a>MED属性：</h4><p>MED（Multi-Exit Discriminator）属性用于判断流量进入AS时的最佳路由，当一个运行BGP的设备通过不同的EBGP对等体得到目的地址相同但下一跳不同的多条路由时，在其它条件相同的情况下，将优先选择MED值较小者作为最佳路由。</p>
+<p>MED属性仅在相邻两个AS之间传递，收到此属性的AS一方不会再将其通告给任何其他第三方AS。MED属性可以手动配置，如果路由没有配置MED属性，BGP选路时将该路由的MED值按缺省值0来处理。</p>
+<h4 id="团体属性："><a href="#团体属性：" class="headerlink" title="团体属性："></a>团体属性：</h4><p>团体属性（Community）用于标识具有相同特征的BGP路由，使路由策略的应用更加灵活，同时降低了维护管理的难度。</p>
+<p>团体属性分为自定义团体属性和公认团体属性。公认团体属性如下所示：</p>
+<p><img src="/2018/01/23/BGP基础知识/团体属性.png" alt="团体属性"></p>
+<h4 id="Originator-ID属性和Cluster-List属性："><a href="#Originator-ID属性和Cluster-List属性：" class="headerlink" title="Originator_ID属性和Cluster_List属性："></a>Originator_ID属性和Cluster_List属性：</h4><p>Originator_ID属性和Cluster_List属性用于解决路由反射器场景中的环路问题。</p>
+<h3 id="BGP选择路由的策略："><a href="#BGP选择路由的策略：" class="headerlink" title="BGP选择路由的策略："></a>BGP选择路由的策略：</h3><p>当到达同一目的地存在多条路由时，BGP依次对比下列属性来选择路由：</p>
+<ol>
+<li><p>优选协议首选值（PrefVal）最高的路由。</p>
+<p>协议首选值（PrefVal）是华为设备的特有属性，该属性仅在本地有效。</p>
+</li>
+<li><p>优选本地优先级（Local_Pref）最高的路由。</p>
+<p>如果路由没有本地优先级，BGP选路时将该路由按缺省的本地优先级100来处理。</p>
+</li>
+<li><p>依次优选手动聚合路由、自动聚合路由、<strong>network</strong>命令引入的路由、<strong>import-route</strong>命令引入的路由、从对等体学习的路由。</p>
+</li>
+<li><p>优选AS路径（AS_Path）最短的路由。</p>
+</li>
+<li><p>依次优选Origin类型为IGP、EGP、Incomplete的路由。</p>
+</li>
+<li><p>对于来自同一AS的路由，优选MED值最低的路由。</p>
+</li>
+<li><p>依次优选EBGP路由、IBGP路由、LocalCross路由、RemoteCross路由。</p>
+<p>PE上某个VPN实例的VPNv4路由的ERT匹配其他VPN实例的IRT后复制到该VPN实例，称为LocalCross；从远端PE学习到的VPNv4路由的ERT匹配某个VPN实例的IRT后复制到该VPN实例，称为RemoteCross。</p>
+</li>
+<li><p>优选到BGP下一跳IGP度量值（metric）最小的路由。</p>
+</li>
+<li><p>优选Cluster_List最短的路由。</p>
+</li>
+<li><p>优选Router ID最小的设备发布的路由。</p>
+</li>
+<li><p>优选从具有最小IP Address的对等体学来的路由。</p>
+</li>
+</ol>
+<h3 id="BGP负载分担："><a href="#BGP负载分担：" class="headerlink" title="BGP负载分担："></a>BGP负载分担：</h3><p>当到达同一目的地址存在多条等价路由时，可以通过BGP等价负载分担实现均衡流量的目的。形成BGP等价负载分担的条件是“BGP选择路由的策略”的1至8条规则中需要比较的属性完全相同。</p>
+<h2 id="路由反射器："><a href="#路由反射器：" class="headerlink" title="路由反射器："></a>路由反射器：</h2><p>为保证IBGP对等体之间的连通性，需要在IBGP对等体之间建立全连接关系。假设在一个AS内部有n台设备，那么建立的IBGP连接数就为n(n-1)/2。当设备数目很多时，设备配置将十分复杂，而且配置后网络资源和CPU资源的消耗都很大。在IBGP对等体间使用路由反射器可以解决以上问题。</p>
+<h3 id="路由反射器相关角色："><a href="#路由反射器相关角色：" class="headerlink" title="路由反射器相关角色："></a>路由反射器相关角色：</h3><p>在一个AS内部关于路由反射器有以下几种角色：</p>
+<ul>
+<li>路由反射器RR（Route Reflector）：允许把从IBGP对等体学到的路由反射到其他IBGP对等体的BGP设备，类似OSPF网络中的DR。</li>
+<li>客户机（Client）：与RR形成反射邻居关系的IBGP设备。在AS内部客户机只需要与RR直连。</li>
+<li>非客户机（Non-Client）：既不是RR也不是客户机的IBGP设备。在AS内部非客户机与RR之间，以及所有的非客户机之间仍然必须建立全连接关系。</li>
+<li>始发者（Originator）：在AS内部始发路由的设备。Originator_ID属性用于防止集群内产生路由环路。</li>
+<li>集群（Cluster）：路由反射器及其客户机的集合。Cluster_List属性用于防止集群间产生路由环路。</li>
+</ul>
+<h3 id="路由反射器原理："><a href="#路由反射器原理：" class="headerlink" title="路由反射器原理："></a>路由反射器原理：</h3><p>同一集群内的客户机只需要与该集群的RR直接交换路由信息，因此客户机只需要与RR之间建立IBGP连接，不需要与其他客户机建立IBGP连接，从而减少了IBGP连接数量。</p>
+<p>RR突破了“从IBGP对等体获得的BGP路由，BGP设备只发布给它的EBGP对等体。”的限制，并采用独有的Cluster_List属性和Originator_ID属性防止路由环路。RR向IBGP邻居发布路由规则如下：</p>
+<ul>
+<li>从非客户机学到的路由，发布给所有客户机。</li>
+<li>从客户机学到的路由，发布给所有非客户机和客户机（发起此路由的客户机除外）。</li>
+<li>从EBGP对等体学到的路由，发布给所有的非客户机和客户机。</li>
+</ul>
+<h3 id="Cluster-List属性："><a href="#Cluster-List属性：" class="headerlink" title="Cluster_List属性："></a>Cluster_List属性：</h3><p>路由反射器和它的客户机组成一个集群（Cluster），使用AS内唯一的Cluster ID作为标识。为了防止集群间产生路由环路，路由反射器使用Cluster_List属性，记录路由经过的所有集群的Cluster ID。</p>
+<ul>
+<li>当一条路由第一次被RR反射的时候，RR会把本地Cluster ID添加到Cluster List的前面。如果没有Cluster_List属性，RR就创建一个。</li>
+<li>当RR接收到一条更新路由时，RR会检查Cluster List。如果Cluster List中已经有本地Cluster ID，丢弃该路由；如果没有本地Cluster ID，将其加入Cluster List，然后反射该更新路由。</li>
+</ul>
+<h3 id="Originator-ID属性"><a href="#Originator-ID属性" class="headerlink" title="Originator_ID属性"></a>Originator_ID属性</h3><p>Originator ID由RR产生，使用的Router ID的值标识路由的始发者，用于防止集群内产生路由环路。</p>
+<ul>
+<li>当一条路由第一次被RR反射的时候，RR将Originator_ID属性加入这条路由，标识这条路由的发起设备。如果一条路由中已经存在了Originator_ID属性，则RR将不会创建新的Originator_ID属性。</li>
+<li>当设备接收到这条路由的时候，将比较收到的Originator ID和本地的Router ID，如果两个ID相同，则不接收此路由。</li>
+</ul>
+<h3 id="备份路由反射器："><a href="#备份路由反射器：" class="headerlink" title="备份路由反射器："></a>备份路由反射器：</h3><p>为增加网络的可靠性，防止单点故障对网络造成影响，有时需要在一个集群中配置一个以上的RR。由于RR打破了从IBGP对等体收到的路由不能传递给其他IBGP对等体的限制，所以同一集群内的RR之间中可能存在环路。这时，该集群中的所有RR必须使用相同的Cluster ID，以避免RR之间的路由环路。</p>
+<p><img src="/2018/01/23/BGP基础知识/路由反射器.png" alt="路由反射器"></p>
+<p><center>图：备份路由反射器<center></center></center></p>
+<p>如上图，路由反射器RR1和RR2在同一个集群内，配置了相同的Cluster ID。</p>
+<ul>
+<li>当客户机Client1从EBGP对等体接收到一条更新路由，它将通过IBGP向RR1和RR2通告这条路由。</li>
+<li>RR1和RR2在接收到该更新路由后，将本地Cluster ID添加到Cluster List前面，然后向其他的客户机（Client2、Client3）反射，同时相互反射。</li>
+<li>RR1和RR2在接收到该反射路由后，检查Cluster List，发现自己的Cluster ID已经包含在Cluster List中。于是RR1和RR2丢弃该更新路由，从而避免了路由环路。</li>
+</ul>
+<h3 id="多集群路由反射器："><a href="#多集群路由反射器：" class="headerlink" title="多集群路由反射器："></a>多集群路由反射器：</h3><p>一个AS中可以存在多个集群，各个集群的RR之间建立IBGP对等体。当RR所处的网络层不同时，可以将较低网络层次的RR配成客户机，形成分级RR。当RR所处的网络层相同时，可以将不同集群的RR全连接，形成同级RR。</p>
+<p><strong>分级路由反射器：</strong></p>
+<p><img src="/2018/01/23/BGP基础知识/分级路由反射器.png" alt="分级路由反射器"></p>
+<p><center>图：分级路由反射器<center></center></center></p>
+<p>在实际的RR部署中，常用的是分级RR的场景。如上图，ISP为AS100提供Internet路由。AS100内部分为两个集群，其中Cluster1内的四台设备是核心路由器，采用备份RR的形式保证可靠性。</p>
+<p>同级路由反射器：</p>
+<p><img src="/2018/01/23/BGP基础知识/同级路由反射器.png" alt="同级路由反射器"></p>
+<p><center>图：同级路由反射器<center></center></center></p>
+<p>如上图，一个骨干网被分成多个集群。各集群的RR互为非客户机关系，并建立全连接。此时虽然每个客户机只与所在集群的RR建立IBGP连接，但所有RR和客户机都能收到全部路由信息。</p>
+<h2 id="BGP联盟："><a href="#BGP联盟：" class="headerlink" title="BGP联盟："></a>BGP联盟：</h2><p>解决AS内部的IBGP网络连接激增问题，除了使用路由反射器之外，还可以使用联盟（Confederation）。联盟将一个AS划分为若干个子AS。每个子AS内部建立IBGP全连接关系，子AS之间建立联盟EBGP连接关系，但联盟外部AS仍认为联盟是一个AS。配置联盟后，原AS号将作为每个路由器的联盟ID。</p>
+<p>这样有两个好处：</p>
+<ol>
+<li>一是可以保留原有的IBGP属性，包括Local Preference属性、MED属性和NEXT_HOP属性等；</li>
+<li>二是联盟相关的属性在传出联盟时会自动被删除，即管理员无需在联盟的出口处配置过滤子AS号等信息的操作。</li>
+</ol>
+<p><img src="/2018/01/23/BGP基础知识/联盟示意图.png" alt="联盟示意图"></p>
+<p><center>图：联盟示意图<center></center></center></p>
+<p>如上图所示：AS100使用联盟后被划分为3个子AS：AS65001、AS65002和AS65003，使用AS100作为联盟ID。此时IBGP的连接数量从10条减少到4条，不仅简化了设备的配置，也减轻了网络和CPU的负担。而AS100外的BGP设备因为仅知道AS100的存在，并不知道AS100内部的联盟关系，所以不会增加CPU的负担。</p>
+<p>路由反射器和联盟的比较：</p>
+<table>
+<thead>
+<tr>
+<th>路由反射器</th>
+<th>联盟</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>不需要更改现有的网络拓扑，兼容性好。</td>
+<td>需要改变逻辑拓扑。</td>
+</tr>
+<tr>
+<td>配置方便，只需要对作为反射器的设备进行配置，客户机并不需要知道自己是客户机。</td>
+<td>所有设备需要重新进行配置。</td>
+</tr>
+<tr>
+<td>集群与集群之间仍然需要全连接。</td>
+<td>联盟的子AS之间是特殊的EBGP连接，不需要全连接。</td>
+</tr>
+<tr>
+<td>适用于中、大规模网络。</td>
+<td>适用于大规模网络。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="路由聚合："><a href="#路由聚合：" class="headerlink" title="路由聚合："></a>路由聚合：</h2><p>在大规模的网络中，BGP路由表十分庞大，给设备造成了很大的负担，同时使发生路由振荡的几率也大大增加，影响网络的稳定性。</p>
+<p>路由聚合是将多条路由合并的机制，它通过只向对等体发送聚合后的路由而不发送所有的具体路由的方法，减小路由表的规模。并且被聚合的路由如果发生路由振荡，也不再对网络造成影响，从而提高了网络的稳定性。</p>
+<p>BGP在IPv4网络中支持自动聚合和手动聚合两种方式，而IPv6网络中仅支持手动聚合方式：</p>
+<ul>
+<li>自动聚合：对BGP引入的路由进行聚合。配置自动聚合后，BGP将按照自然网段聚合路由（例如非自然网段A类地址10.1.1.1/24和10.2.1.1/24将聚合为自然网段A类地址10.0.0.0/8），并且BGP向对等体只发送聚合后的路由。</li>
+<li>手动聚合：对BGP本地路由表中存在的路由进行聚合。手动聚合可以控制聚合路由的属性，以及决定是否发布具体路由。</li>
+</ul>
+<p>为了避免路由聚合可能引起的路由环路，BGP设计了AS_Set属性。AS_Set属性是一种无序的AS_Path属性，标明聚合路由所经过的AS号。当聚合路由重新进入AS_Set属性中列出的任何一个AS时，BGP将会检测到自己的AS号在聚合路由的AS_Set属性中，于是会丢弃该聚合路由，从而避免了路由环路的形成。</p>
+<h2 id="路由衰减："><a href="#路由衰减：" class="headerlink" title="路由衰减："></a>路由衰减：</h2><p>当BGP应用于复杂的网络环境时，路由振荡十分频繁。为了防止频繁的路由振荡带来的不利影响，BGP使用路由衰减来抑制不稳定的路由。</p>
+<p>路由振荡指路由表中添加一条路由后，该路由又被撤销的过程。当发生路由振荡时，设备就会向邻居发布路由更新，收到更新报文的设备需要重新计算路由并修改路由表。所以频繁的路由振荡会消耗大量的带宽资源和CPU资源，严重时会影响到网络的正常工作。</p>
+<p><img src="/2018/01/23/BGP基础知识/路由衰减.png" alt="路由衰减"></p>
+<p><center>图：BGP衰减示意图<center></center></center></p>
+<p>路由衰减使用惩罚值（Penalty value）来衡量一条路由的稳定性，惩罚值越高说明路由越不稳定。如上图所示，路由每发生一次振荡，BGP便会给此路由增加1000的惩罚值，其余时间惩罚值会慢慢下降。当惩罚值超过抑制阈值（suppress value）时，此路由被抑制，不加入到路由表中，也不再向其他BGP对等体发布更新报文。被抑制的路由每经过一段时间，惩罚值便会减少一半，这个时间称为半衰期（half-life）。当惩罚值降到再使用阈值（reuse value）时，此路由变为可用并被加入到路由表中，同时向其他BGP对等体发布更新报文。从路由被抑制到路由恢复可用的时间称为抑制时间（suppress time）。</p>
+<p>路由衰减只对EBGP路由起作用，对IBGP路由不起作用。这是因为IBGP路由可能含有本AS的路由，而IGP网络要求AS内部路由表尽可能一致。如果路由衰减对IBGP路由起作用，那么当不同设备的衰减参数不一致时，将会导致路由表不一致。</p>
+<h2 id="BGP与BFD联动："><a href="#BGP与BFD联动：" class="headerlink" title="BGP与BFD联动："></a>BGP与BFD联动：</h2><p>BGP协议通过周期性的向对等体发送报文来实现邻居检测机制。但这种机制检测到故障所需时间比较长，超过1秒钟。当数据的传输速度达到Gbit/s级别时，这种机制的检测时间将导致大量数据丢失，无法满足网络高可靠性的需求。BGP与BFD （Bidirectional  Forwarding Detection）联动可以利用BFD的毫秒级快速检测机制解决上述问题。</p>
+<h2 id="BGP-Rracking："><a href="#BGP-Rracking：" class="headerlink" title="BGP Rracking："></a>BGP Rracking：</h2><p>BGP Tracking可以为BGP提供快速的链路故障检测，加速BGP网络的收敛速度。当使能了BGP Tracking功能的BGP对等体之间的链路发生故障时，BGP Tracking将快速感知到达邻居的路由的不可达，并由路由管理模块通知到BGP，从而实现快速收敛。</p>
+<p>与BFD特性相比，BGP Tracking配置简单，只需在本地配置而不需要全网配置。但是由于BGP Tracking是路由层面的感知方式，而BFD是链路层面的感知方式，所以BGP Tracking收敛速度比BFD慢，不适用于对收敛时间要求较高的语音等业务。</p>
+<h2 id="BGP-GR："><a href="#BGP-GR：" class="headerlink" title="BGP GR："></a>BGP GR：</h2><p>BGP的平滑重启GR（Graceful Restart）作为高可靠性的解决方案，其根本目的都是为了保证用户业务在设备故障的时候不受影响或者影响最小。 </p>
+<p>BGP GR技术保证了在设备重启或者主备倒换过程中转发层面能够继续指导数据的转发，同时控制层面邻居关系的重建以及路由计算等动作不会影响转发层面的功能，从而避免了路由震荡引发的业务中断，提高了整网的可靠性。 </p>
+<p>GR相关概念：</p>
+<ul>
+<li>GR Restarter：指由管理员触发或故障触发后，以GR方式重启的设备。</li>
+<li>GR Helper：GR Restarter的邻居，协助GR Restarter进行GR的设备。</li>
+<li>GR Time：是GR Helper检测到GR Restarter重启或者主备倒换后，保持转发信息不删除的时间。</li>
+</ul>
+<p>BGP GR的过程是：</p>
+<ol>
+<li>利用BGP的能力协商机制，GR Restarter和GR Helper了解彼此的GR能力，建立有GR能力的会话。</li>
+<li>当GR Helper检查到GR Restarter重启或者主备倒换后，不删除和GR Restarter相关的路由和转发表项，也不通知其他邻居，而是等待重建BGP连接。</li>
+<li>GR Restarter在GR Time超时前与重启前的所有GR Helper新建立好邻居关系。</li>
+</ol>
+<h2 id="BGP-ORF："><a href="#BGP-ORF：" class="headerlink" title="BGP ORF："></a>BGP ORF：</h2><p>RFC5291、RFC5292规定了BGP基于前缀的ORF（Outbound Route Filtering）能力，能将本端设备配置的基于前缀的入口策略通过路由刷新报文发送给BGP邻居。BGP邻居根据这些策略构造出口策略，在路由发送时对路由进行过滤。这样不仅避免了本端设备接收大量无用的路由，降低了本端设备的CPU使用率，还有效减少了BGP邻居的配置工作，降低了链路带宽的占用率。</p>
+<h2 id="BGP按组打包："><a href="#BGP按组打包：" class="headerlink" title="BGP按组打包："></a>BGP按组打包：</h2><p>目前现网路由表的快速增长，以及网络拓扑的复杂性导致BGP需要支持更多的邻居。特别是一些邻居数目多且路由量大的场景下，针对路由器需要给大量的BGP邻居发送路由，且大部分邻居具有相同出口策略的特点，要求较高的打包发包性能。</p>
+<p>按组打包技术将所有拥有共同出口策略的BGP邻居当作是一个打包组。这样每条待发送路由只被打包一次然后发给组内的所有邻居，使打包效率指数级提升。例如，一个反射器有100个客户机，有10万条路由需要反射。如果按照每个邻居分别打包的方式，反射器RR在向100个客户机发送路由的时候，所有路由被打包的总次数是10万×100。而按组打包技术将这个过程变为10万×1，性能相当于提升了100倍。</p>
+<h2 id="MP-BGP："><a href="#MP-BGP：" class="headerlink" title="MP-BGP："></a>MP-BGP：</h2><p>传统的BGP-4只能管理IPv4单播路由信息，对于使用其它网络层协议（如IPv6、组播等）的应用，在跨AS传播时就受到一定限制。BGP多协议扩展MP-BGP（MultiProtocol BGP）就是为了提供对多种网络层协议的支持，对BGP-4进行的扩展。目前的MP-BGP标准是RFC4760，使用扩展属性和地址族来实现对IPv6、组播和VPN相关内容的支持，BGP协议原有的报文机制和路由机制并没有改变。</p>
+<p>MP-BGP对IPv6单播网络的支持特性称为BGP4+，对IPv4组播网络的支持特性称为MBGP（Multicast BGP）。MP-BGP为IPv6单播网络和IPv4组播网络建立独立的拓扑结构，并将路由信息储存在独立的路由表中，保持单播IPv4网络、单播IPv6网络和组播网络之间路由信息相互隔离，也就实现了用单独的路由策略维护各自网络的路由。</p>
+<h3 id="扩展属性"><a href="#扩展属性" class="headerlink" title="扩展属性"></a>扩展属性</h3><p>BGP使用的报文中，与IPv4相关的三处信息都由Update报文携带，这三处信息分别是：NLRI字段、Next_Hop属性、Aggregator属性。</p>
+<p>为实现对多种网络层协议的支持，BGP需要将网络层协议的信息反映到NLRI及Next_Hop。因此MP-BGP引入了两个新的可选非过渡路径属性：</p>
+<ul>
+<li>MP_REACH_NLRI：Multiprotocol Reachable NLRI，多协议可达NLRI。用于发布可达路由及下一跳信息。</li>
+<li>MP_UNREACH_NLRI：Multiprotocol Unreachable NLRI，多协议不可达NLRI。用于撤销不可达路由。</li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/01/23/BGP基础知识/" title="BGP基础知识">https://cshihong.github.io/2018/01/23/BGP基础知识/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/BGP/" rel="tag"># BGP</a>
+          
+            <a href="/tags/路由基础/" rel="tag"># 路由基础</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/23/BGP报文类型/" rel="next" title="BGP报文类型">
+                <i class="fa fa-chevron-left"></i> BGP报文类型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/23/BGP命令行配置/" rel="prev" title="BGP命令行配置">
+                BGP命令行配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#BGP简介"><span class="nav-number">1.</span> <span class="nav-text">BGP简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目的："><span class="nav-number">1.1.</span> <span class="nav-text">目的：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP的优点："><span class="nav-number">1.2.</span> <span class="nav-text">BGP的优点：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BGP原理描述"><span class="nav-number">2.</span> <span class="nav-text">BGP原理描述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP基本概念："><span class="nav-number">2.1.</span> <span class="nav-text">BGP基本概念：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#自治系统ASAutonomous-System："><span class="nav-number">2.1.1.</span> <span class="nav-text">自治系统ASAutonomous System：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP分类："><span class="nav-number">2.1.2.</span> <span class="nav-text">BGP分类：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP报文交互中的角色："><span class="nav-number">2.1.3.</span> <span class="nav-text">BGP报文交互中的角色：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP的路由器号（Router-ID）："><span class="nav-number">2.1.4.</span> <span class="nav-text">BGP的路由器号（Router ID）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP工作原理："><span class="nav-number">2.2.</span> <span class="nav-text">BGP工作原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP的报文："><span class="nav-number">2.2.1.</span> <span class="nav-text">BGP的报文：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP状态机："><span class="nav-number">2.2.2.</span> <span class="nav-text">BGP状态机：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP对等体之间的交互原则："><span class="nav-number">2.2.3.</span> <span class="nav-text">BGP对等体之间的交互原则：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP与IGP交互："><span class="nav-number">2.3.</span> <span class="nav-text">BGP与IGP交互：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP引入IGP路由："><span class="nav-number">2.3.1.</span> <span class="nav-text">BGP引入IGP路由：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IGP引入BGP路由："><span class="nav-number">2.3.2.</span> <span class="nav-text">IGP引入BGP路由：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP安全性："><span class="nav-number">2.4.</span> <span class="nav-text">BGP安全性：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP认证："><span class="nav-number">2.4.1.</span> <span class="nav-text">BGP认证：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP-GTSM："><span class="nav-number">2.4.2.</span> <span class="nav-text">BGP GTSM：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP的路由优选规则和负载分担："><span class="nav-number">2.5.</span> <span class="nav-text">BGP的路由优选规则和负载分担：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP属性："><span class="nav-number">2.5.1.</span> <span class="nav-text">BGP属性：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Origin属性："><span class="nav-number">2.5.1.1.</span> <span class="nav-text">Origin属性：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AS-Path属性："><span class="nav-number">2.5.1.2.</span> <span class="nav-text">AS_Path属性：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Next-hop属性："><span class="nav-number">2.5.1.3.</span> <span class="nav-text">Next_hop属性：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Local-pref属性："><span class="nav-number">2.5.1.4.</span> <span class="nav-text">Local_pref属性：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MED属性："><span class="nav-number">2.5.1.5.</span> <span class="nav-text">MED属性：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#团体属性："><span class="nav-number">2.5.1.6.</span> <span class="nav-text">团体属性：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Originator-ID属性和Cluster-List属性："><span class="nav-number">2.5.1.7.</span> <span class="nav-text">Originator_ID属性和Cluster_List属性：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP选择路由的策略："><span class="nav-number">2.5.2.</span> <span class="nav-text">BGP选择路由的策略：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP负载分担："><span class="nav-number">2.5.3.</span> <span class="nav-text">BGP负载分担：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由反射器："><span class="nav-number">2.6.</span> <span class="nav-text">路由反射器：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#路由反射器相关角色："><span class="nav-number">2.6.1.</span> <span class="nav-text">路由反射器相关角色：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#路由反射器原理："><span class="nav-number">2.6.2.</span> <span class="nav-text">路由反射器原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cluster-List属性："><span class="nav-number">2.6.3.</span> <span class="nav-text">Cluster_List属性：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Originator-ID属性"><span class="nav-number">2.6.4.</span> <span class="nav-text">Originator_ID属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份路由反射器："><span class="nav-number">2.6.5.</span> <span class="nav-text">备份路由反射器：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多集群路由反射器："><span class="nav-number">2.6.6.</span> <span class="nav-text">多集群路由反射器：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP联盟："><span class="nav-number">2.7.</span> <span class="nav-text">BGP联盟：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由聚合："><span class="nav-number">2.8.</span> <span class="nav-text">路由聚合：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由衰减："><span class="nav-number">2.9.</span> <span class="nav-text">路由衰减：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP与BFD联动："><span class="nav-number">2.10.</span> <span class="nav-text">BGP与BFD联动：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP-Rracking："><span class="nav-number">2.11.</span> <span class="nav-text">BGP Rracking：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP-GR："><span class="nav-number">2.12.</span> <span class="nav-text">BGP GR：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP-ORF："><span class="nav-number">2.13.</span> <span class="nav-text">BGP ORF：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BGP按组打包："><span class="nav-number">2.14.</span> <span class="nav-text">BGP按组打包：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MP-BGP："><span class="nav-number">2.15.</span> <span class="nav-text">MP-BGP：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#扩展属性"><span class="nav-number">2.15.1.</span> <span class="nav-text">扩展属性</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/01/23/BGP基础知识/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

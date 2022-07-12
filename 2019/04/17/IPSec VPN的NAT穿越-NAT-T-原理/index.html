@@ -1,0 +1,2122 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="IPSec NAT 穿越简介IPSec NAT穿越的场景：本质上解决ESP协议无法提供转换端口，插入UDP 4500端口 有以下两种场景，需要进行进行NAT穿越。  场景一、FW既做IPSEC网关，又做NAT转换 此种场景下，是当运营商给客户的动态分配的私网地址情况下，FW需要穿越运营商的nat。 IPSEC网关与NAT在同一台设备 ，如果运营商给分配的是公网地址，需要做NAT旁路(NAT豁免）">
+<meta name="keywords" content="IPSec VPN,VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IPSec VPN的NAT穿越(NAT-T)原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="IPSec NAT 穿越简介IPSec NAT穿越的场景：本质上解决ESP协议无法提供转换端口，插入UDP 4500端口 有以下两种场景，需要进行进行NAT穿越。  场景一、FW既做IPSEC网关，又做NAT转换 此种场景下，是当运营商给客户的动态分配的私网地址情况下，FW需要穿越运营商的nat。 IPSEC网关与NAT在同一台设备 ，如果运营商给分配的是公网地址，需要做NAT旁路(NAT豁免）">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/传输封装.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/隧道封装.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/ant.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/main_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/main——2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/main_3.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/udp.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/v2_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/v2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/安全策略.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/状态.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/fw%20sa.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/fw2.png">
+<meta property="og:updated_time" content="2019-04-18T03:44:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPSec VPN的NAT穿越(NAT-T)原理">
+<meta name="twitter:description" content="IPSec NAT 穿越简介IPSec NAT穿越的场景：本质上解决ESP协议无法提供转换端口，插入UDP 4500端口 有以下两种场景，需要进行进行NAT穿越。  场景一、FW既做IPSEC网关，又做NAT转换 此种场景下，是当运营商给客户的动态分配的私网地址情况下，FW需要穿越运营商的nat。 IPSEC网关与NAT在同一台设备 ，如果运营商给分配的是公网地址，需要做NAT旁路(NAT豁免）">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/04/17/IPSec%20VPN的NAT穿越-NAT-T-原理/传输封装.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>IPSec VPN的NAT穿越(NAT-T)原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">IPSec VPN的NAT穿越(NAT-T)原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-17 09:49:38" itemprop="dateCreated datePublished" datetime="2019-04-17T09:49:38+08:00">2019-04-17</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-18 11:44:10" itemprop="dateModified" datetime="2019-04-18T11:44:10+08:00">2019-04-18</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 2,101</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 8</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="IPSec-NAT-穿越简介"><a href="#IPSec-NAT-穿越简介" class="headerlink" title="IPSec NAT 穿越简介"></a>IPSec NAT 穿越简介</h1><h2 id="IPSec-NAT穿越的场景："><a href="#IPSec-NAT穿越的场景：" class="headerlink" title="IPSec NAT穿越的场景："></a>IPSec NAT穿越的场景：</h2><p>本质上解决ESP协议无法提供转换端口，插入UDP 4500端口</p>
+<p>有以下两种场景，需要进行进行NAT穿越。</p>
+<ul>
+<li><p>场景一、FW既做IPSEC网关，又做NAT转换</p>
+<p>此种场景下，是当运营商给客户的动态分配的私网地址情况下，FW需要穿越运营商的nat。</p>
+<p>IPSEC网关与NAT在同一台设备 ，如果运营商给分配的是公网地址，需要做NAT旁路(NAT豁免）</p>
+</li>
+<li><p>场景二、FW处于内部只做IPSEC网关，前面有专门的设备做NAT(可以FW也可以ROUTER）</p>
+</li>
+</ul>
+<h2 id="IPSec的封装协议分析："><a href="#IPSec的封装协议分析：" class="headerlink" title="IPSec的封装协议分析："></a>IPSec的封装协议分析：</h2><p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/传输封装.png" alt="传输封装"></p>
+<center>图：传输模式下AH和ESP的封装</center>
+
+
+<p>如上图，在传输模式下，AH认证整个IP报文，当经过NAT转化后，肯定会认证不成功。在ESP封装下，虽然认证访问不包括IP头，但是因为通过nat后，nat修改了外层IP地址，由于TCP/UDP校验和的计算包含IP源目地址，所以TCP/UDP的校验和需要更新，但是现在TCP/UDP已经被ESP加密，中间路由器无法更新TCP/UDP的校验和，所以TCP的校验和检查最终会失败。</p>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/隧道封装.png" alt="隧道封装"></p>
+<center>图：隧道模式下AH和ESP的封装</center>
+
+
+<p>如上图，在隧道模式下，AH认证整个IP头部，包括新生成的IP头，这种情况当经过nat后， IP地址发送变化，也肯定不能认证成功。在ESP的封装下，ESP的认证范围是从ESP头部到ESP尾部。当通过nat时，改变的仅仅是外层IP头部，而内层TCP校验和因为内层IP头不变，所以校验会成功。但是也仅仅是可以通过nat的一对一的转化，即不能转化端口号。因为端口是加密的。</p>
+<p><strong>总结：</strong></p>
+<ul>
+<li><strong>AH的传输模式和隧道模式都不支持NAT穿越</strong></li>
+<li><strong>ESP传输模式也是不支持的</strong> </li>
+<li><strong>ESP隧道模式默认只支持一对一NAT转换，不支持PAT</strong></li>
+</ul>
+<h2 id="解决方案："><a href="#解决方案：" class="headerlink" title="解决方案："></a>解决方案：</h2><p><strong>NAT-T技术，即在IP和ESP报文之间插入一个8个字节UDP头部(端口号默认为4500）</strong></p>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/ant.png" alt="ant"></p>
+<center> 图：NAT-T技术原理</center>
+
+
+<h2 id="关键NAT-T的3个问题："><a href="#关键NAT-T的3个问题：" class="headerlink" title="关键NAT-T的3个问题："></a>关键NAT-T的3个问题：</h2><ol>
+<li><p><strong>IPSEC网关如何知道自己是否支持NAT-T？</strong> </p>
+<p>决定双方是否支持NAT-T和判断peers之间是否有NAT存在的任务在IKEv1的第一阶段完成，NAT-T能力探测使用IKEv1第一阶段1-2个包交换来实现，双方互相交换NAT-T的Vendor ID来表示本段是否支持NAT-T。</p>
+</li>
+<li><p><strong>IPSEC网关如何判定经过NAT的设备？</strong>  </p>
+<p>为了决定Peers之间是否有NAT存在，Peer会发送一个hash负载（源目IP和端口计算），如果双方计算的hash和接受的hash值匹配，那么Peers之间就没有NAT存在（就采用ESP封装），如果hash值不同，那么Peers就需要使用NAT-T技术封装穿越NAT。</p>
+<p>hash负载也叫作NAT-D负载，在主模式中的3-4个包发送，在野蛮模式的2-3个包中发送。</p>
+<p>IKEV1通过3-4个包的NAT-D参数来判定<br>通过源IP源端口, 目的IP 目的端口算HASH值</p>
+<p>如果HASH值相同，说明没有经过NAT，如果HASH值不等，说明经过了NAT</p>
+</li>
+<li><p><strong>什么时候添加UDP的端口？</strong></p>
+<p>如果确定了经过nat，就在IKEV1的通过5 6的时候，增加 UDP 4500端口</p>
+</li>
+</ol>
+<h2 id="IKEv1的NAT穿越协商过程："><a href="#IKEv1的NAT穿越协商过程：" class="headerlink" title="IKEv1的NAT穿越协商过程："></a><strong>IKEv1的NAT穿越协商过程：</strong></h2><p>IKEv1的NAT穿越场景中，需要在IKEv1阶段1协商中对NAT执行两种探测：</p>
+<ul>
+<li><p>探测是否支持NAT穿越（NAT-T能力）。</p>
+<p>IKEv1使用VID载荷来确定是否支持NAT穿越。</p>
+</li>
+<li><p>探测在网络中是否存在NAT网关。</p>
+<p>IKEv1使用NAT-D载荷探测两个IKE对等体之间是否存在NAT网关以及存在的位置（即谁在NAT网关的后面）。</p>
+</li>
+</ul>
+<p>由于NAT网关会改变IKE UDP的源端口，所以响应方必须能处理源端口不是500的IKE报文。</p>
+<p><strong>IKEv1主模式NAT-T协商过程：</strong></p>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/main_1.png" alt="main_1"></p>
+<center> 图：IKEv1主模式下第一个包中携带支持的nat-t参数</center>
+
+
+<p>消息①：发起方在IKE消息中插入VID载荷来告知对方自己支持NAT穿越。</p>
+<hr>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/main——2.png" alt="main——2"></p>
+<center> 图：IKEv1主模式下第二个包中携带双方都支持nat-t参数</center>
+
+
+<p>消息②：响应方在IKE消息中插入VID载荷表明自己支持NAT-T能力.</p>
+<p>若双方发的IKEv1消息中都包含该载荷，说明双方都支持NAT-T，协商继续，否则终止。从而可以协商出是否支持NAT-T功能。</p>
+<hr>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/main_3.png" alt="main_3"></p>
+<center>图：IKEv1主模式第3个包，携带NAT-D参数</center>
+
+
+<p>消息3：相应方插入了两个NAT-D载荷。第一个NAT-D载荷包含IKE对等体的IP地址和端口的Hash值，第二个NAT-D载荷包含本端的IP地址和端口的Hash值，接收方也计算这两个Hash值，两方计算的哪个Hash值不相等，表明哪个设备在NAT网关后面。</p>
+<hr>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/udp.png" alt="udp"></p>
+<p>完成NAT-T检测和NAT网关探测后，如果发现NAT网关，则后续UDP报文端口号修改为4500。</p>
+<p>当前UDP封装的是ISAKMP消息，此处增加了一个non-ESP marker（为4个值为0的字节），以示跟封装ESP报文有区别。</p>
+<p>IKEv1阶段2的SA协商时，需确认是否使用NAT穿越以及NAT穿越的封装模式：UDP-Encapsulated-tunnel和UDP-Encapsulated-transport。确认后，后续传输的ESP报文将都采用UDP封装（AH协议不支持NAT穿越，故只能封装ESP报文）。UDP封装ESP报文时，没有non-ESP marker字段，该位置为SPI，为非0字节。</p>
+<h2 id="IKEv2判断是否支持NAT-T协商过程："><a href="#IKEv2判断是否支持NAT-T协商过程：" class="headerlink" title="IKEv2判断是否支持NAT-T协商过程："></a><strong>IKEv2判断是否支持NAT-T协商过程：</strong></h2><p>KEv2的NAT穿越场景中，IKE协商的发起方和响应方在IKE_SA_INIT交换中增加两个N载荷（在Ni和Nr载荷之后），一个消息类型为NAT_DETECTION_SOURCE_IP，标识发起方的IP地址；另一个消息类型为NAT_DETECTION_DESTINATION_IP，标识响应方的IP地址。</p>
+<p>IKEv2的NAT穿越协商过程如下：</p>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/过程.png" alt="过程"></p>
+<center>图：IKEv2下NAT-T协商过程</center>
+
+<hr>
+<p><strong>IKEv2报文协商NAT-T过程</strong></p>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/v2_1.png" alt="v2_1"></p>
+<center> 图：IKEv2第1个包，携带两个Notify负载</center>
+
+
+<p>消息①、②：在IKE消息中插入两个N载荷，第一个N载荷包含本端的IP地址和端口的Hash值，第二个N载荷包含IKE对等体的IP地址和端口的Hash值，响应方也计算这两个Hash值，两方计算的哪个Hash值不相等，表明哪个设备在NAT网关后面。</p>
+<hr>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/v2.png" alt="v2"></p>
+<center> 图：IKEv2第3个包，采用UDP4500封装</center>
+
+
+<p>消息③、④：完成IKE_SA_INIT后，如果发现NAT设备，则后续UDP报文端口号修改为4500。</p>
+<blockquote>
+<p><strong>两端必须都开启NAT穿越功能，才能保证IKE协商成功。</strong></p>
+</blockquote>
+<h1 id="IPSec-NAT-T实验配置"><a href="#IPSec-NAT-T实验配置" class="headerlink" title="IPSec NAT-T实验配置"></a>IPSec NAT-T实验配置</h1><p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/拓扑.png" alt="拓扑"></p>
+<center>图：NAT-T实验拓扑图</center>
+
+
+<p><strong>配置思路：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">阶段一：</span><br><span class="line">ike proposal <span class="number">10</span></span><br><span class="line"> authentication-algorithm sha2-<span class="number">256</span></span><br><span class="line"> integrity-algorithm aes-xcbc-<span class="number">96</span> hmac-sha2-<span class="number">256</span></span><br><span class="line">#</span><br><span class="line">ike peer  <span class="number">10</span>             </span><br><span class="line"> pre-shared-key Huawei@<span class="number">123</span></span><br><span class="line"> ike-proposal <span class="number">10</span></span><br><span class="line"></span><br><span class="line">阶段二： </span><br><span class="line">acl number <span class="number">3000</span></span><br><span class="line"> rule <span class="number">5</span> permit ip source <span class="number">10.1</span>.1.0 <span class="number">0.0</span>.0.255 destination <span class="number">10.1</span>.2.0 <span class="number">0.0</span>.0.255</span><br><span class="line"></span><br><span class="line">ipsec proposal  <span class="number">10</span></span><br><span class="line"> encapsulation-mode auto</span><br><span class="line"> esp authentication-algorithm sha2-<span class="number">256</span></span><br><span class="line"></span><br><span class="line">ipsec policy-template <span class="number">10</span> ipsec_temp</span><br><span class="line"> security acl <span class="number">3000</span></span><br><span class="line"> ike-peer <span class="number">10</span></span><br><span class="line"> proposal  <span class="number">10</span></span><br><span class="line"></span><br><span class="line">ipsec policy ipsec_policy  <span class="number">100</span>   isakmp template  ipsec_temp</span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GigabitEthernet0</span>/0/2</span></span><br><span class="line"><span class="class"> <span class="title">ipsec</span> <span class="title">policy</span> <span class="title">ipsec_policy</span> </span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">对端配置：</span></span><br><span class="line">阶段一: </span><br><span class="line"></span><br><span class="line">ike proposal <span class="number">10</span></span><br><span class="line"> authentication-algorithm sha2-<span class="number">256</span></span><br><span class="line"> integrity-algorithm aes-xcbc-<span class="number">96</span> hmac-sha2-<span class="number">256</span></span><br><span class="line">#</span><br><span class="line">ike peer  <span class="number">10</span>                </span><br><span class="line"> pre-shared-key Huawei@<span class="number">123</span></span><br><span class="line"> ike-proposal <span class="number">10</span></span><br><span class="line"> remote-address <span class="number">202.100</span>.1.10</span><br><span class="line"></span><br><span class="line">阶段二：</span><br><span class="line">acl number <span class="number">3000</span></span><br><span class="line"> rule <span class="number">5</span> permit ip source <span class="number">10.1</span>.2.0 <span class="number">0.0</span>.0.255 destination <span class="number">10.1</span>.1.0 <span class="number">0.0</span>.0.255</span><br><span class="line"></span><br><span class="line">#</span><br><span class="line">ipsec proposal <span class="number">10</span> </span><br><span class="line"> encapsulation-mode auto</span><br><span class="line"> esp authentication-algorithm sha2-<span class="number">256</span></span><br><span class="line">#</span><br><span class="line">ipsec policy ipsec_policy  <span class="number">100</span> isakmp</span><br><span class="line"> security acl <span class="number">3000</span></span><br><span class="line"> ike-peer <span class="number">10</span></span><br><span class="line"> proposal <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GigabitEthernet0</span>/0/2</span></span><br><span class="line"><span class="class"> <span class="title">ipsec</span> <span class="title">policy</span> <span class="title">ipsec_policy</span></span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意： IKEV2默认开启NAT-T功能<br>默认华为防火墙NAT-T 无论在IKEV1还是IKEV2都是默认开启的。</p>
+<p>开启命令：<br>nat traversal<br>关闭命令NAT-T<br>ike-peer fw2<br>undo nat traversal </p>
+</blockquote>
+<hr>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/安全策略.png" alt="安全策略"></p>
+<center>图：FW2的安全策略配置</center>
+
+
+<p><strong>测试与检查：</strong></p>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/状态.png" alt="状态"></p>
+<center>图：IPSec协商状态</center>
+
+<hr>
+<p><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/fw sa.png" alt="fw sa"></p>
+<center>图：FW1的IPSec SA状态，因为FW1不知道对端地址，所以需要采用模板方式</center><br>—<br><br><img src="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/fw2.png" alt="fw2"><br><br><center> 图：FW2 的IPSec SA状态，作为IPSec的发起方</center>
+
+<hr>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//通过查看会话表，从而证明走的是udp4500端口</span></span><br><span class="line">&lt;FW2&gt;display firewall session table  </span><br><span class="line"> Current Total Sessions : <span class="number">2</span></span><br><span class="line">  udp  VPN:<span class="keyword">public</span> --&gt; <span class="keyword">public</span> <span class="number">10.1</span>.21.10:<span class="number">4500</span>--&gt;<span class="number">202.100</span>.1.10:<span class="number">4500</span></span><br><span class="line">   <span class="comment">//用的是udp的4500端口</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/" title="IPSec VPN的NAT穿越(NAT-T)原理">https://cshihong.github.io/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/IPSec-VPN/" rel="tag"># IPSec VPN</a>
+          
+            <a href="/tags/VPN/" rel="tag"># VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/15/数字证书PKI原理/" rel="next" title="数字证书PKI原理">
+                <i class="fa fa-chevron-left"></i> 数字证书PKI原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/17/IPSec的高可靠性/" rel="prev" title="IPSec的高可靠性">
+                IPSec的高可靠性 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#IPSec-NAT-穿越简介"><span class="nav-number">1.</span> <span class="nav-text">IPSec NAT 穿越简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IPSec-NAT穿越的场景："><span class="nav-number">1.1.</span> <span class="nav-text">IPSec NAT穿越的场景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPSec的封装协议分析："><span class="nav-number">1.2.</span> <span class="nav-text">IPSec的封装协议分析：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案："><span class="nav-number">1.3.</span> <span class="nav-text">解决方案：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关键NAT-T的3个问题："><span class="nav-number">1.4.</span> <span class="nav-text">关键NAT-T的3个问题：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKEv1的NAT穿越协商过程："><span class="nav-number">1.5.</span> <span class="nav-text">IKEv1的NAT穿越协商过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKEv2判断是否支持NAT-T协商过程："><span class="nav-number">1.6.</span> <span class="nav-text">IKEv2判断是否支持NAT-T协商过程：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IPSec-NAT-T实验配置"><span class="nav-number">2.</span> <span class="nav-text">IPSec NAT-T实验配置</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

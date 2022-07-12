@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="MPLS简介多协议标签交换MPLS（Multiprotocol Label Switching）是一种IP（Internet Protocol）骨干网技术。MPLS在无连接的IP网络上引入面向连接的标签交换概念，将第三层路由技术和第二层交换技术相结合，充分发挥了IP路由的灵活性和二层交换的简捷性。 MPLS起源于IPv4（Internet Protocol version 4），其核心技术可扩展到">
+<meta name="keywords" content="MPLS VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MPLS基础">
+<meta property="og:url" content="https://cshihong.github.io/2018/02/22/MPLS基础/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="MPLS简介多协议标签交换MPLS（Multiprotocol Label Switching）是一种IP（Internet Protocol）骨干网技术。MPLS在无连接的IP网络上引入面向连接的标签交换概念，将第三层路由技术和第二层交换技术相结合，充分发挥了IP路由的灵活性和二层交换的简捷性。 MPLS起源于IPv4（Internet Protocol version 4），其核心技术可扩展到">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/MPLS网络结构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/MPLS体系结构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/MPLS标签.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/MPLS报文抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/动态LSP建立过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/MPLS的转发过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/详细转发过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/uniform模式.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/Pipe模式.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/MPLS网络.png">
+<meta property="og:updated_time" content="2019-08-25T01:50:42.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MPLS基础">
+<meta name="twitter:description" content="MPLS简介多协议标签交换MPLS（Multiprotocol Label Switching）是一种IP（Internet Protocol）骨干网技术。MPLS在无连接的IP网络上引入面向连接的标签交换概念，将第三层路由技术和第二层交换技术相结合，充分发挥了IP路由的灵活性和二层交换的简捷性。 MPLS起源于IPv4（Internet Protocol version 4），其核心技术可扩展到">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/02/22/MPLS基础/MPLS网络结构.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/02/22/MPLS基础/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MPLS基础 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/02/22/MPLS基础/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">MPLS基础
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-02-22 22:54:32" itemprop="dateCreated datePublished" datetime="2018-02-22T22:54:32+08:00">2018-02-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:50:42" itemprop="dateModified" datetime="2019-08-25T09:50:42+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,384</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 20</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="MPLS简介"><a href="#MPLS简介" class="headerlink" title="MPLS简介"></a>MPLS简介</h1><p>多协议标签交换MPLS（Multiprotocol Label Switching）是一种IP（Internet Protocol）骨干网技术。MPLS在无连接的IP网络上引入面向连接的标签交换概念，将第三层路由技术和第二层交换技术相结合，充分发挥了IP路由的灵活性和二层交换的简捷性。</p>
+<p>MPLS起源于IPv4（Internet Protocol version 4），其核心技术可扩展到多种网络协议，包括IPv6（Internet Protocol version 6）、IPX（Internet Packet Exchange）和CLNP（Connectionless Network Protocol）等。MPLS中的“Multiprotocol”指的就是支持多种网络协议。</p>
+<p>由此可见，MPLS并不是一种业务或者应用，它实际上是一种隧道技术。这种技术不仅支持多种高层协议与业务，而且在一定程度上可以保证信息传输的安全性。</p>
+<h1 id="MPLS基本结构"><a href="#MPLS基本结构" class="headerlink" title="MPLS基本结构"></a>MPLS基本结构</h1><h2 id="网络结构"><a href="#网络结构" class="headerlink" title="网络结构"></a>网络结构</h2><p>MPLS网络的典型结构如下图所示。MPLS基于标签进行转发，下图中进行MPLS标签交换和报文转发的网络设备称为标签交换路由器LSR（Label Switching Router）；由LSR构成的网络区域称为MPLS域（MPLS Domain）。位于MPLS域边缘、连接其他网络的LSR称为边缘路由器LER（Label Edge Router），区域内部的LSR称为核心LSR（Core LSR）。</p>
+<p><img src="/2018/02/22/MPLS基础/MPLS网络结构.png" alt="MPLS网络结构"></p>
+<p><center>图：MPLS网络结构图<center></center></center></p>
+<p>IP报文进入MPLS网络时，MPLS入口的LER分析IP报文的内容并且为这些IP报文添加合适的标签，所有MPLS网络中的LSR根据标签转发数据。当该IP报文离开MPLS网络时，标签由出口LER弹出。</p>
+<p>IP报文在MPLS网络中经过的路径称为标签交换路径LSP（Label Switched Path）。LSP是一个单向路径，与数据流的方向一致。</p>
+<p>如上图，LSP的入口LER称为入节点（Ingress）；位于LSP中间的LSR称为中间节点（Transit）；LSP的出口LER称为出节点（Egress）。一条LSP可以有0个、1个或多个中间节点，但有且只有一个入节点和一个出节点。</p>
+<p>根据LSP的方向，MPLS报文由Ingress发往Egress，则Ingress是Transit的上游节点，Transit是Ingress的下游节点。同理，Transit是Egress上游节点，Egress是Transit的下游节点。</p>
+<h2 id="体系结构："><a href="#体系结构：" class="headerlink" title="体系结构："></a>体系结构：</h2><p>MPLS的体系结构如下图所示，它由控制平面（Control Plane）和转发平面（Forwarding Plane）组成。</p>
+<p><img src="/2018/02/22/MPLS基础/MPLS体系结构.png" alt="MPLS体系结构"></p>
+<p><center>图：MPLS体系结构图<center></center></center></p>
+<ul>
+<li>控制平面：负责产生和维护路由信息以及标签信息。<ul>
+<li>路由信息表RIB（Routing Information Base）：由IP路由协议（IP Routing Protocol）生成，用于选择路由。</li>
+<li>标签分发协议LDP（Label Distribution Protocol）：负责标签的分配、标签转发信息表的建立、标签交换路径的建立、拆除等工作。</li>
+<li>标签信息表LIB（Label Information Base）：由标签分发协议生成，用于管理标签信息。</li>
+</ul>
+</li>
+<li>转发平面：即数据平面（Data Plane），负责普通IP报文的转发以及带MPLS标签报文的转发。<ul>
+<li>转发信息表FIB（Forwarding Information Base）：从RIB提取必要的路由信息生成，负责普通IP报文的转发。</li>
+<li>标签转发信息表LFIB（Label Forwarding Information Base）：简称标签转发表，由标签分发协议在LSR上建立LFIB，负责带MPLS标签报文的转发。</li>
+</ul>
+</li>
+</ul>
+<h1 id="MPLS标签"><a href="#MPLS标签" class="headerlink" title="MPLS标签"></a>MPLS标签</h1><h2 id="转发等价类："><a href="#转发等价类：" class="headerlink" title="转发等价类："></a>转发等价类：</h2><p>MPLS将具有相同特征的报文归为一类，称为转发等价类FEC（Forwarding Equivalence Class）。属于相同FEC的报文在转发过程中被LSR以相同方式处理。</p>
+<p>FEC可以根据源地址、目的地址、源端口、目的端口、VPN等要素进行划分。例如，在传统的采用最长匹配算法的IP转发中，到同一条路由的所有报文就是一个转发等价类。</p>
+<h2 id="标签："><a href="#标签：" class="headerlink" title="标签："></a>标签：</h2><p>标签（Label）是一个短而定长的、只具有本地意义的标识符，用于唯一标识一个分组所属的FEC。在某些情况下，例如要进行负载分担，对应一个FEC可能会有多个入标签，但是一台设备上，一个标签只能代表一个FEC。</p>
+<p>MPLS报文与普通的IP报文相比增加了MPLS标签信息，MPLS标签的长度为4个字节。MPLS标签封装在链路层和网络层之间，可以支持任意的链路层协议。MPLS标签的封装结构如下图所示：</p>
+<p><img src="/2018/02/22/MPLS基础/MPLS标签.png" alt="MPLS标签"></p>
+<p><center>图：MPLS标签封装结构<center></center></center></p>
+<p>标签共有4个字段：</p>
+<ul>
+<li>Label：20bit，标签值域。</li>
+<li>Exp：3bit，用于扩展。现在通常用做CoS（Class of Service），当设备阻塞时，优先发送优先级高的报文。</li>
+<li>S：1bit，栈底标识。MPLS支持多层标签，即标签嵌套。S值为1时表明为最底层标签。</li>
+<li>TTL：8bit，和IP报文中的TTL（Time To Live）意义相同。</li>
+</ul>
+<ul>
+<li>TTL：8bit，和IP报文中的TTL（Time To Live）意义相同。</li>
+</ul>
+<p>标签栈（Label Stack）是指标签的排序集合。靠近二层首部的标签称为栈顶MPLS标签或外层MPLS标签（Outer MPLS label）；靠近IP首部的标签称为栈底MPLS标签或内层MPLS标签（Inner MPLS label）。理论上，MPLS标签可以无限嵌套。目前MPLS标签嵌套主要应用在MPLS VPN、TE FRR（Traffic Engineering Fast ReRoute）中。</p>
+<p>标签栈按后进先出方式组织标签，从栈顶开始处理标签。</p>
+<h3 id="MPLS报文抓包示例："><a href="#MPLS报文抓包示例：" class="headerlink" title="MPLS报文抓包示例："></a>MPLS报文抓包示例：</h3><p><img src="/2018/02/22/MPLS基础/MPLS报文抓包.png" alt="MPLS报文抓包"></p>
+<p><center>图：MPLS报文抓包示例<center></center></center></p>
+<h2 id="标签空间："><a href="#标签空间：" class="headerlink" title="标签空间："></a>标签空间：</h2><p>标签空间就是指标签的取值范围。标签空间划分如下：</p>
+<ul>
+<li>0～15：特殊标签。</li>
+</ul>
+<ul>
+<li>16～1023：静态LSP和静态CR-LSP（Constraint-based Routed Label Switched Path）共享的标签空间。</li>
+<li>1024及以上：LDP、RSVP-TE（Resource Reservation Protocol-Traffic Engineering）、MP-BGP（MultiProtocol Border Gateway Protocol）等动态信令协议的标签空间。</li>
+</ul>
+<p><strong>特殊标签表：</strong></p>
+<table>
+<thead>
+<tr>
+<th>标签值</th>
+<th>含义</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>IPv4 Explicit NULL Label</td>
+<td>表示该标签必须被弹出（即标签被剥掉），且报文的转发必须基于IPv4。如果出节点分配给倒数第二跳节点的标签值为0，则倒数第二跳LSR需要将值为0的标签正常压入报文标签值顶部，转发给最后一跳。最后一跳发现报文携带的标签值为0，则将标签弹出。</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Router Alert Label</td>
+<td>只有出现在非栈底时才有效。类似于IP报文的“Router Alert Option”字段，节点收到Router Alert Label时，需要将其送往本地软件模块进一步处理。实际报文转发由下一层标签决定。如果报文需要继续转发，则节点需要将Router Alert Label压回标签栈顶。</td>
+</tr>
+<tr>
+<td>2</td>
+<td>IPv6 Explicit NULL Label</td>
+<td>表示该标签必须被弹出，且报文的转发必须基于IPv6。如果出节点分配给倒数第二跳节点的标签值为2，则倒数第二跳节点需要将值为2的标签正常压入报文标签值顶部，转发给最后一跳。最后一跳发现报文携带的标签值为2，则直接将标签弹出。</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Implicit NULL Label</td>
+<td>倒数第二跳LSR进行标签交换时，如果发现交换后的标签值为3，则将标签弹出，并将报文发给最后一跳。最后一跳收到该报文直接进行IP转发或下一层标签转发。</td>
+</tr>
+<tr>
+<td>4～13</td>
+<td>保留</td>
+<td>-</td>
+</tr>
+<tr>
+<td>14</td>
+<td>OAM Router Alert Label</td>
+<td>MPLS OAM（Operation Administration &amp; Maintenance）通过发送OAM报文检测和通告LSP故障。OAM报文使用MPLS承载。OAM报文对于Transit LSR和倒数第二跳LSR（penultimate LSR）是透明的。</td>
+</tr>
+<tr>
+<td>15</td>
+<td>保留</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<h1 id="LSP的建立"><a href="#LSP的建立" class="headerlink" title="LSP的建立"></a>LSP的建立</h1><p>MPLS需要为报文事先分配好标签，建立一条LSP，才能进行报文转发。LSP分为静态LSP和动态LSP两种。</p>
+<h2 id="静态LSP的建立："><a href="#静态LSP的建立：" class="headerlink" title="静态LSP的建立："></a>静态LSP的建立：</h2><p>静态LSP是用户通过手工为各个转发等价类分配标签而建立的。由于静态LSP各节点上不能相互感知到整个LSP的情况，因此静态LSP是一个本地的概念。</p>
+<p>静态LSP不使用标签发布协议，不需要交互控制报文，因此消耗资源比较小，适用于拓扑结构简单并且稳定的小型网络。但通过静态方式分配标签建立的LSP不能根据网络拓扑变化动态调整，需要管理员干预。</p>
+<p>配置静态LSP时，管理员需要为各LSR手工分配标签，需要遵循的原则是：前一节点出标签的值等于下一个节点入标签的值。</p>
+<h2 id="动态LSP的建立："><a href="#动态LSP的建立：" class="headerlink" title="动态LSP的建立："></a>动态LSP的建立：</h2><p><strong>动态LSP的标签发布协议</strong></p>
+<p>动态LSP通过标签发布协议动态建立。标签发布协议是MPLS的控制协议（也可称为信令协议），负责FEC的分类、标签的分发以及LSP的建立和维护等一系列操作。 </p>
+<p><strong>动态LSP的基本建立过程</strong></p>
+<p>标签由下游LSR分配，按从下游到上游的方向分发。如下图，由下游LSR在IP路由表的基础上进行FEC的划分，并根据FEC分配标签，通告给上游的LSR，以便建立标签转发表和LSP。</p>
+<p><img src="/2018/02/22/MPLS基础/动态LSP建立过程.png" alt="动态LSP建立过程"></p>
+<p><center>图：动态LSP的基本建立过程<center></center></center></p>
+<h1 id="MPLS转发"><a href="#MPLS转发" class="headerlink" title="MPLS转发"></a>MPLS转发</h1><h2 id="MPLS基本转发过程："><a href="#MPLS基本转发过程：" class="headerlink" title="MPLS基本转发过程："></a>MPLS基本转发过程：</h2><h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><p>在MPLS基本转发过程中涉及的相关概念如下：</p>
+<p>标签操作类型包括标签压入（Push）、标签交换（Swap）和标签弹出（Pop），它们是标签转发的基本动作。</p>
+<ul>
+<li><p>Push：当IP报文进入MPLS域时，MPLS边界设备在报文二层首部和IP首部之间插入一个新标签；或者MPLS中间设备根据需要，在标签栈顶增加一个新的标签（即标签嵌套封装）。</p>
+</li>
+<li><p>Swap：当报文在MPLS域内转发时，根据标签转发表，用下一跳分配的标签，替换MPLS报文的栈顶标签。</p>
+</li>
+<li><p>Pop：当报文离开MPLS域时，将MPLS报文的标签剥掉。</p>
+<p>在最后一跳节点，标签已经没有使用价值。这种情况下，可以利用倒数第二跳弹出特性PHP（Penultimate Hop Popping），在倒数第二跳节点处将标签弹出，减少最后一跳的负担。最后一跳节点直接进行IP转发或者下一层标签转发。</p>
+<p>默认情况下，设备支持PHP特性，支持PHP的Egress节点分配给倒数第二跳节点的标签值为3。</p>
+</li>
+</ul>
+<h3 id="基本转发过程："><a href="#基本转发过程：" class="headerlink" title="基本转发过程："></a>基本转发过程：</h3><p>以支持PHP的LSP为例，说明MPLS基本转发过程。</p>
+<p><img src="/2018/02/22/MPLS基础/MPLS的转发过程.png" alt="MPLS的转发过程"></p>
+<p><center>图：MPLS基本转发过程<center></center></center></p>
+<p>如上图所示，MPLS标签已分发完成，建立了一条LSP，其目的地址为4.4.4.2/32。则MPLS基本转发过程如下：</p>
+<ol>
+<li>Ingress节点收到目的地址为4.4.4.2的IP报文，压入标签Z并转发。</li>
+<li>Transit节点收到该标签报文，进行标签交换，将标签Z换成标签Y。</li>
+<li>倒数第二跳Transit节点收到带标签Y的报文。因为Egress分给它的标签值为3，所以进行PHP操作，弹出标签Y并转发报文。从倒数第二跳转发给Egress的报文以IP报文形式传输。</li>
+<li>Egress节点收到该IP报文，将其转发给目的地4.4.4.2/32。</li>
+</ol>
+<h2 id="MPLS详细转发过程："><a href="#MPLS详细转发过程：" class="headerlink" title="MPLS详细转发过程："></a>MPLS详细转发过程：</h2><h3 id="基本概念："><a href="#基本概念：" class="headerlink" title="基本概念："></a>基本概念：</h3><p>在MPLS详细转发过程中涉及的相关概念如下：</p>
+<ul>
+<li><p>Tunnel ID</p>
+<p>为了给使用隧道的上层应用（如VPN、路由管理）提供统一的接口，系统自动为隧道分配了一个ID，也称为Tunnel ID。该Tunnel ID的长度为32比特，只是本地有效。</p>
+</li>
+<li><p>NHLFE</p>
+<p>下一跳标签转发表项NHLFE（Next Hop Label Forwarding Entry）用于指导MPLS报文的转发。</p>
+<p>NHLFE包括：Tunnel ID、出接口、下一跳、出标签、标签操作类型等信息。</p>
+<p>FEC到一组NHLFE的映射称为FTN（FEC-to-NHLFE）。通过查看FIB表中Tunnel ID值不为0x0的表项，能够获得FTN的详细信息。FTN只在Ingress存在。</p>
+</li>
+<li><p>ILM</p>
+<p>入标签到一组下一跳标签转发表项的映射称为入标签映射ILM（Incoming Label Map）。</p>
+<p>ILM包括：Tunnel ID、入标签、入接口、标签操作类型等信息。</p>
+<p>ILM在Transit节点的作用是将标签和NHLFE绑定。通过标签索引ILM表，就相当于使用目的IP地址查询FIB，能够得到所有的标签转发信息。</p>
+</li>
+</ul>
+<h3 id="详细转发过程："><a href="#详细转发过程：" class="headerlink" title="详细转发过程："></a>详细转发过程：</h3><p><img src="/2018/02/22/MPLS基础/详细转发过程.png" alt="详细转发过程"></p>
+<p><center>图：MPLS详细转发过程<center></center></center></p>
+<p>MPLS的详细转发过程如上图所示：</p>
+<p>当IP报文进入MPLS域时，首先查看FIB表，检查目的IP地址对应的Tunnel ID值是否为0x0。</p>
+<ul>
+<li>如果Tunnel ID值为0x0，则进入正常的IP转发流程。</li>
+<li>如果Tunnel ID值不为0x0，则进入MPLS转发流程。</li>
+</ul>
+<p>在MPLS转发过程中，FIB、ILM和NHLFE表项是通过Tunnel ID关联的。</p>
+<ul>
+<li>Ingress的处理：通过查询FIB表和NHLFE表指导报文的转发。<ol>
+<li>查看FIB表，根据目的IP地址找到对应的Tunnel ID。</li>
+<li>根据FIB表的Tunnel ID找到对应的NHLFE表项，将FIB表项和NHLFE表项关联起来。</li>
+<li>查看NHLFE表项，可以得到出接口、下一跳、出标签和标签操作类型。</li>
+<li>在IP报文中压入出标签，同时处理TTL，然后将封装好的MPLS报文发送给下一跳。</li>
+</ol>
+</li>
+</ul>
+<ul>
+<li>Transit的处理：通过查询ILM表和NHLFE表指导MPLS报文的转发。<ol>
+<li>根据MPLS的标签值查看对应的ILM表，可以得到Tunnel ID。</li>
+<li>根据ILM表的Tunnel ID找到对应的NHLFE表项。</li>
+<li>查看NHLFE表项，可以得到出接口、下一跳、出标签和标签操作类型。</li>
+<li>MPLS报文的处理方式根据不同的标签值而不同。<ul>
+<li>如果标签值&gt;＝16，则用新标签替换MPLS报文中的旧标签，同时处理TTL，然后将替换完标签的MPLS报文发送给下一跳。</li>
+<li>如果标签值为3，则直接弹出标签，同时处理TTL，然后进行IP转发或下一层标签转发。</li>
+</ul>
+</li>
+</ol>
+</li>
+<li>Egress的处理：通过查询ILM表指导MPLS报文的转发或查询路由表指导IP报文转发。<ul>
+<li>如果Egress收到IP报文，则查看路由表，进行IP转发。</li>
+<li>如果Egress收到MPLS报文，则查看ILM表获得标签操作类型，同时处理TTL。<ul>
+<li>如果标签中的栈底标识S=1，表明该标签是栈底标签，直接进行IP转发。</li>
+<li>如果标签中的栈底标识S=0，表明还有下一层标签，继续进行下一层标签转发。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="MPLS对TTL的处理："><a href="#MPLS对TTL的处理：" class="headerlink" title="MPLS对TTL的处理："></a>MPLS对TTL的处理：</h2><p>MPLS对TTL的处理包括MPLS对TTL的处理模式和ICMP响应报文这两个方面。</p>
+<h3 id="MPLS对TTL的处理模式："><a href="#MPLS对TTL的处理模式：" class="headerlink" title="MPLS对TTL的处理模式："></a>MPLS对TTL的处理模式：</h3><p>MPLS标签中包含一个8比特的TTL字段，其含义与IP头中的TTL域相同。MPLS对TTL的处理除了用于防止产生路由环路外，也用于实现Traceroute功能。</p>
+<p>RFC3443中定义了两种MPLS对TTL的处理模式：Uniform和Pipe。缺省情况下，MPLS对TTL的处理模式为Uniform。</p>
+<ul>
+<li><p><strong>Uniform模式</strong></p>
+<p>IP报文经过MPLS网络时，在入节点，IP TTL减1映射到MPLS TTL字段，此后报文在MPLS网络中按照标准的TTL处理方式处理。在出节点将MPLS TTL减1后映射到IP TTL字段。如下图所示：</p>
+<p><img src="/2018/02/22/MPLS基础/uniform模式.png" alt="uniform模式"></p>
+<p><center>图：Uniform模式下入方向TTL的处理<center></center></center></p>
+</li>
+<li><p><strong>Pipe模式</strong></p>
+<p>在入节点，IP TTL值减1，MPLS TTL字段为固定值，此后报文在MPLS网络中按照标准的TTL处理方式处理。在出节点会将IP TTL字段的值减1。即IP分组经过MPLS网络时，无论经过多少跳，IP TTL只在入节点和出节点分别减1。如下图所示：</p>
+<p><img src="/2018/02/22/MPLS基础/Pipe模式.png" alt="Pipe模式"></p>
+<p><center>图：Pipe模式下入方向TTL的处理<center></center></center></p>
+</li>
+<li><p>在MPLS VPN应用中，出于网络安全的考虑，需要隐藏MPLS骨干网络的结构，这种情况下，对于私网报文，Ingress上使用Pipe模式。</p>
+</li>
+</ul>
+<h3 id="ICMP响应报文："><a href="#ICMP响应报文：" class="headerlink" title="ICMP响应报文："></a>ICMP响应报文：</h3><p>在MPLS网络中，当LSR收到TTL为1的含有标签的MPLS报文时，LSR生成ICMP的TTL超时消息。</p>
+<ul>
+<li>如果LSR上存在到达报文发送者的路由，则可以通过IP路由，直接向发送者回应TTL超时消息。</li>
+<li>如果LSR上不存在到达报文发送者的路由，则ICMP响应报文将按照LSP继续传送，到达LSP出节点后，由Egress节点将该消息返回给发送者。</li>
+</ul>
+<p>通常情况下，收到的MPLS报文只带一层标签时，LSR可以采用第一种方式回应TTL超时消息；收到的MPLS报文包含多层标签时，LSR采用第二种方式回应TTL超时消息。</p>
+<p>但是，在MPLS VPN中，ASBR（Autonomous System Boundary Router，自治系统边界路由器）和HoVPN组网应用中的SPE（Superstratum PE or Sevice Provider-end PE，上层PE或运营商侧PE），接收到的承载VPN报文的MPLS报文可能只有一层标签，此时，这些设备上并不存在到达报文发送者的路由，则采用第二种方法回应TTL超时消息。</p>
+<h1 id="LSP连通性检测"><a href="#LSP连通性检测" class="headerlink" title="LSP连通性检测"></a>LSP连通性检测</h1><p>在MPLS网络中，如果通过LSP转发数据失败，负责建立LSP的MPLS控制平面将无法检测到这种错误，加大了网络维护的难度。MPLS Ping/MPLS Tracert为用户提供了发现LSP错误、并及时定位失效节点的机制。</p>
+<p>MPLS Ping主要用于检查LSP的连通性。MPLS Tracert在检查LSP的连通性的同时，还可以分析网络什么地方发生了故障。类似于普通IP的Ping/Tracert，MPLS Ping/MPLS Tracert使用MPLS回显请求（Echo Request）报文和MPLS回显应答（Echo Reply）报文检测LSP的可用性。这两种消息都以UDP报文格式发送，其中Echo Request的UDP端口号为3503，该端口号只有使能MPLS功能的设备才能识别。</p>
+<p>MPLS Echo Request中携带需要检测的FEC信息，和其他属于此FEC的报文一样沿LSP发送，从而实现对LSP的检测。MPLS Echo Request报文通过MPLS转发给目的端，而MPLS Echo Reply报文则通过IP转发给源端。另外为了防止LSP断路时Echo Request进行IP转发，从而保证LSP的连通性测试，将Echo Request消息的IP头中目的地址设置为127.0.0.1/8（本机环回地址），IP头中的TTL值为1。</p>
+<h2 id="MPLS-Ping："><a href="#MPLS-Ping：" class="headerlink" title="MPLS Ping："></a>MPLS Ping：</h2><p><img src="/2018/02/22/MPLS基础/MPLS网络.png" alt="MPLS网络"></p>
+<p><center>图：MPLS网络<center></center></center></p>
+<p>如上图，LSR_1上建立了一条目的地为LSR_4的LSP。从LSR_1对该LSP进行MPLS Ping时的处理如下： </p>
+<ol>
+<li>LSR_1查找该LSP是否存在（对于TE隧道，查找Tunnel接口是否存在且CR-LSP是否建立成功）。如果不存在，返回错误信息，停止Ping。如果存在，则继续进行以下操作。</li>
+<li>LSR_1构造MPLS Echo Request报文，IP头中的目的地址为127.0.0.1/8，IP头中的TTL值为1，同时将4.4.4.4填入Echo Request报文中的目的FEC中。然后查找相应的LSP，压入LSP的标签，将报文发送给LSR_2。 </li>
+<li>中间节点LSR_2和LSR_3对MPLS Echo Request报文进行普通MPLS转发。如果中间节点MPLS转发失败，则中间节点返回带有错误码的MPLS Echo Reply报文。</li>
+<li>当MPLS转发路径无故障，则MPLS Echo Request报文到达LSP的出节点LSR_4。然后检查目的FEC中包含的目的地址4.4.4.4是否为自己的Loopback接口地址，以此来确认LSR_4是该FEC的真正出口后，返回正确的MPLS Echo Reply报文。至此整个MPLS Ping过程结束。</li>
+</ol>
+<h2 id="MPLS-Tracert"><a href="#MPLS-Tracert" class="headerlink" title="MPLS Tracert:"></a>MPLS Tracert:</h2><p>从LSR_1对4.4.4.4/32进行MPLS Tracert时的处理如下： </p>
+<ol>
+<li>LSR_1检查LSP是否存在（对于TE隧道，查找Tunnel接口是否存在且CR-LSP是否建立成功）。如果不存在，返回错误信息，停止Tracert，否则继续进行如下处理。</li>
+<li>LSR_1构造MPLS Echo Request报文，IP头中的目的地址为127.0.0.1/8，同时将4.4.4.4填入MPLS Echo Request报文中的目的FEC中，然后查找相应的LSP，压入LSP的标签并且将MPLS TTL设置为1，将报文发送给LSR_2。此MPLS Echo Request报文中包含Downstream Mapping TLV（用来携带LSP在当前节点的下游信息，主要包括下一跳地址、出标签等）。</li>
+<li>LSR_2收到LSR_1发送来的报文后，将MPLS Echo Request中MPLS TTL减1为0后发现TTL超时，然后LSR_2需要检查是否存在该LSP，同时检查报文中Downstream Mapping TLV的下一跳地址、出标签是否正确，如果两项检查都正确，返回正确的MPLS Echo Reply报文，并且报文中必须携带LSR_2本身的包含下一跳和出标签的Downstream Mapping TLV给LSR_1。如果检查有不正确，则返回错误的MPLS Echo Reply报文。</li>
+<li>LSR_1收到正确的MPLS Echo Reply报文后再次发送MPLS Echo Request报文，报文的封装方式跟步骤2类似，只是将LSP标签的MPLS TTL设置为2，此时的MPLS Echo Request报文中的Downstream Mapping TLV是从MPLS Echo Reply报文中复制过来的。然后LSR_2收到该报文后进行普通MPLS转发。LSR_3收到此报文，标签的TTL超时，跟步骤3同样的处理方式后返回MPLS Echo Reply报文。</li>
+<li>LSR_1收到正确的MPLS Echo Reply报文后重复步骤4把LSP标签的MPLS TTL设置为3，复制Downstream Mapping TLV后发送MPLS Echo Request报文。LSR_2和LSR_3对该报文进行普通MPLS转发。LSR_4收到此报文，重复步骤3处理方式对报文进行处理，同时检查目的FEC中包含的目的IP 4.4.4.4为自己的Loopback接口地址，以此来发现已经是该LSP的出节点，因此返回不带下游信息的MPLS Echo Reply报文，至此整个MPLS Tracert过程结束。</li>
+</ol>
+<p>通过上述步骤中返回携带下游信息的MPLS Echo Reply报文，在LSR_1上就获取了该LSP沿途每一个节点信息。</p>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/02/22/MPLS基础/" title="MPLS基础">https://cshihong.github.io/2018/02/22/MPLS基础/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/MPLS-VPN/" rel="tag"># MPLS VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/18/IGMP-Snooping/" rel="next" title="IGMP Snooping">
+                <i class="fa fa-chevron-left"></i> IGMP Snooping
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/23/MPLS-LDP基础/" rel="prev" title="MPLS LDP基础">
+                MPLS LDP基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MPLS简介"><span class="nav-number">1.</span> <span class="nav-text">MPLS简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MPLS基本结构"><span class="nav-number">2.</span> <span class="nav-text">MPLS基本结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#网络结构"><span class="nav-number">2.1.</span> <span class="nav-text">网络结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#体系结构："><span class="nav-number">2.2.</span> <span class="nav-text">体系结构：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MPLS标签"><span class="nav-number">3.</span> <span class="nav-text">MPLS标签</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#转发等价类："><span class="nav-number">3.1.</span> <span class="nav-text">转发等价类：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标签："><span class="nav-number">3.2.</span> <span class="nav-text">标签：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MPLS报文抓包示例："><span class="nav-number">3.2.1.</span> <span class="nav-text">MPLS报文抓包示例：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#标签空间："><span class="nav-number">3.3.</span> <span class="nav-text">标签空间：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LSP的建立"><span class="nav-number">4.</span> <span class="nav-text">LSP的建立</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#静态LSP的建立："><span class="nav-number">4.1.</span> <span class="nav-text">静态LSP的建立：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态LSP的建立："><span class="nav-number">4.2.</span> <span class="nav-text">动态LSP的建立：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MPLS转发"><span class="nav-number">5.</span> <span class="nav-text">MPLS转发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MPLS基本转发过程："><span class="nav-number">5.1.</span> <span class="nav-text">MPLS基本转发过程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念"><span class="nav-number">5.1.1.</span> <span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本转发过程："><span class="nav-number">5.1.2.</span> <span class="nav-text">基本转发过程：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MPLS详细转发过程："><span class="nav-number">5.2.</span> <span class="nav-text">MPLS详细转发过程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念："><span class="nav-number">5.2.1.</span> <span class="nav-text">基本概念：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#详细转发过程："><span class="nav-number">5.2.2.</span> <span class="nav-text">详细转发过程：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MPLS对TTL的处理："><span class="nav-number">5.3.</span> <span class="nav-text">MPLS对TTL的处理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MPLS对TTL的处理模式："><span class="nav-number">5.3.1.</span> <span class="nav-text">MPLS对TTL的处理模式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ICMP响应报文："><span class="nav-number">5.3.2.</span> <span class="nav-text">ICMP响应报文：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LSP连通性检测"><span class="nav-number">6.</span> <span class="nav-text">LSP连通性检测</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MPLS-Ping："><span class="nav-number">6.1.</span> <span class="nav-text">MPLS Ping：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MPLS-Tracert"><span class="nav-number">6.2.</span> <span class="nav-text">MPLS Tracert:</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/02/22/MPLS基础/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

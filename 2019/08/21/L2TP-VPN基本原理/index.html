@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="L2TP VPN简介L2TP基本概念：L2TP（Layer 2 Tunneling Protocol） VPN是一种用于承载PPP报文的隧道技术，该技术主要应用在远程办公场景中为出差员工远程访问企业内网资源提供接入服务。 目的：L2TP VPN技术出现以后，使用L2TP VPN隧道“承载”PPP报文在Internet上传输成为了解决上述问题的一种途径。无论出差员工是通过传统拨号方式接入Intern">
+<meta name="keywords" content="VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="L2TP VPN基本原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="L2TP VPN简介L2TP基本概念：L2TP（Layer 2 Tunneling Protocol） VPN是一种用于承载PPP报文的隧道技术，该技术主要应用在远程办公场景中为出差员工远程访问企业内网资源提供接入服务。 目的：L2TP VPN技术出现以后，使用L2TP VPN隧道“承载”PPP报文在Internet上传输成为了解决上述问题的一种途径。无论出差员工是通过传统拨号方式接入Intern">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/nas-inititated.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/LAC自动拨号.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/Client-Initiated.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/s1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/s2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/s3.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/h1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/h2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/h3.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/f1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/f2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/f3.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/对比.png">
+<meta property="og:updated_time" content="2019-08-23T01:12:10.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="L2TP VPN基本原理">
+<meta name="twitter:description" content="L2TP VPN简介L2TP基本概念：L2TP（Layer 2 Tunneling Protocol） VPN是一种用于承载PPP报文的隧道技术，该技术主要应用在远程办公场景中为出差员工远程访问企业内网资源提供接入服务。 目的：L2TP VPN技术出现以后，使用L2TP VPN隧道“承载”PPP报文在Internet上传输成为了解决上述问题的一种途径。无论出差员工是通过传统拨号方式接入Intern">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/nas-inititated.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>L2TP VPN基本原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">L2TP VPN基本原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-08-21 21:01:48" itemprop="dateCreated datePublished" datetime="2019-08-21T21:01:48+08:00">2019-08-21</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-23 09:12:10" itemprop="dateModified" datetime="2019-08-23T09:12:10+08:00">2019-08-23</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 5,331</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 19</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="L2TP-VPN简介"><a href="#L2TP-VPN简介" class="headerlink" title="L2TP VPN简介"></a>L2TP VPN简介</h1><h2 id="L2TP基本概念："><a href="#L2TP基本概念：" class="headerlink" title="L2TP基本概念："></a>L2TP基本概念：</h2><p>L2TP（Layer 2 Tunneling Protocol） VPN是一种用于承载PPP报文的隧道技术，该技术主要应用在远程办公场景中为出差员工远程访问企业内网资源提供接入服务。</p>
+<h2 id="目的："><a href="#目的：" class="headerlink" title="目的："></a>目的：</h2><p>L2TP VPN技术出现以后，使用L2TP VPN隧道“承载”PPP报文在Internet上传输成为了解决上述问题的一种途径。无论出差员工是通过传统拨号方式接入Internet，还是通过以太网方式接入Internet，L2TP VPN都可以向其提供远程接入服务。</p>
+<h2 id="L2TP-VPN的优点："><a href="#L2TP-VPN的优点：" class="headerlink" title="L2TP VPN的优点："></a>L2TP VPN的优点：</h2><ul>
+<li><p>身份验证机制</p>
+<p>支持本地认证。</p>
+<p>支持Radius服务器等认证方式</p>
+</li>
+<li><p>多协议传输</p>
+<p>L2TP传输PPP数据包，PPP本身可以传输多协议，而不仅仅是IP可以在PPP数据包内封装多种协议</p>
+</li>
+<li><p>计费认证地址分配</p>
+<p>可在LAC和LNS两处同时计费，即ISP处（用于产生账单）及企业网关（用于付费及审计）。L2TP能够提供数据传输的出入包数、字节数以及连接的起始、结束时间等计费数据，可根据这些数据方便地进行网络计费</p>
+<p>LNS可放置于企业网的USG之后，对远端用户地址进行动态分配和管理，可支持私有地址应用</p>
+</li>
+<li><p>不受NAT限制穿越</p>
+</li>
+<li><p>支持远程接入</p>
+</li>
+<li><p>灵活的身份验证及时以及高度的安全性</p>
+<p>L2TP协议本身并不提供连接的安全性，但它可以依赖于PPP提供的认证（CHAP、PAP等），因此具有PP所具有的所有安全特性。</p>
+</li>
+<li><p>L2TP隧道可以与IPSec结合，使通过L2TP所传输的数据更难被攻击。</p>
+<p>可根据特定的网络安全要求，在L2TP之上采用通道加密技术、端对端数据加密或应用层数据加密等方案来提高数据的安全性。</p>
+</li>
+<li><p>可靠性</p>
+<p>L2TP协议支持备份LNS，当一个主LNS不可达之后，LAC可以重新与备份LNS建立连接，增加了VPN服务的可靠性和容错性</p>
+</li>
+</ul>
+<h1 id="L2TP-VPN的原理"><a href="#L2TP-VPN的原理" class="headerlink" title="L2TP VPN的原理"></a>L2TP VPN的原理</h1><h2 id="L2TP-VPN的主要应用场景："><a href="#L2TP-VPN的主要应用场景：" class="headerlink" title="L2TP VPN的主要应用场景："></a>L2TP VPN的主要应用场景：</h2><p>LAC和LNS介绍：</p>
+<p>LAC是附属在交换网络上的具有PPP端系统和L2TP协议处理能力的设备，主要用于为PPP类型的用户提供接入服务<br>LAC位于LNS和用户之间，用于在LNS和用户之间传递信息包，它把用户收到的信息包按照L2TP协议进行封装并送往LNS，同时也将从LNS收到的信息包进行解封装并送往用户。LAC与用户之间采用本地连接或PPP链路，VPDN应用中通常为PPP链路。</p>
+<p>LNS既是PPP端系统，又是L2TP协议的服务器端，通常作为一个企业内部网的边缘设备。<br>LNS作为L2TP隧道的另一侧端点，是LAC的对端设备 ，是LAC进行隧道传输的PPP会话的逻辑终止端点。通过在公网中建立LAC隧道，将用户的PPP连接的另一端由原来的LAC在逻辑上延伸了企业网内部的LNS。</p>
+<p><strong>L2TP VPN主要有三种应用场景。</strong>分别是：</p>
+<ol>
+<li><p><strong>NAS-Initiated场景（拨号用户访问企业内网）</strong></p>
+<blockquote>
+<p>NAS（Network Access Server）:是运营商用来向拨号用户提供PPP/PPPoE接入服务的服务器，拨号用户通过NAS访问外部网络。</p>
+<p>LNS（L2TP Network Server）是企业总部的出口网关。</p>
+</blockquote>
+<p>用户通过PPPoE拨入LAC（L2TP Access Concentrator），触发LAC和LNS之间建立隧道。接入用户地址由LNS分配，对接入用户的认证可由LAC侧的代理完成，也可两侧都对接入用户做认证。当所有L2TP用户都下线时，隧道自动拆除以节省资源，直至再有用户接入时，重新建立隧道。</p>
+<p>此组网适用于分支机构用户向总部发起连接，且一般用于分支机构的用户不经常访问企业总部的情况。</p>
+<p><img src="/2019/08/21/L2TP-VPN基本原理/nas-inititated.png" alt="nas-inititated"></p>
+<center>图：NAS-Initiated VPN隧道组网图</center>
+</li>
+<li><p><strong>LAC自动拨号</strong></p>
+<p>LAC与LNS之间建立一条<strong>永久性</strong>L2TP会话。客户端不用PPP拨号，而通过IP连接即可在隧道中传输数据。</p>
+<p>用户通过配置触发建立LAC与LNS之间的永久性L2TP会话。LAC使用存储在本地的用户名和LNS建立一个永久存在的L2TP隧道，此时的L2TP隧道就相当于一个物理连接。用户与LAC之间的连接就不受限于PPP连接，而只需IP连接，LAC即可将用户的IP报文转发到LNS。</p>
+<p>这种组网也适用于分支机构接入总部，用于分支机构员工访问总部频率较高的情况。与NAS-Initiated VPN场景相比：</p>
+<ul>
+<li>分支机构员工感知不到隧道存在，不需要使用用户名接入。LAC为分支机构的多个用户提供L2TP服务，免去了每个用户使用L2TP都需要先拨号的麻烦。</li>
+<li>这种组网下，LNS只对LAC进行认证。其缺点为：分支机构用户只要能够连接LAC即可使用L2TP隧道接入总部，而不需被认证。存在一定的安全隐患。此时用户接入总部以通过设备的用户认证功能对接入总部的用户进行认证，从而提高安全性。</li>
+</ul>
+<p><img src="/2019/08/21/L2TP-VPN基本原理/LAC自动拨号.png" alt="LAC自动拨号"></p>
+<center>图：LAC自动拨号组网示例</center>
+</li>
+<li><p><strong>Client-Initiated场景（移动办公用户访问企业内网）</strong></p>
+<p>直接由接入用户（可为支持L2TP协议的PC）发起连接。此时接入用户可直接向LNS发起隧道连接请求，无需再经过一个单独的LAC设备。接入用户地址的分配由LNS来完成。</p>
+<p>由于LNS端需要为每个远程用户建立一条隧道，与NAS-Initiated VPN场景相比，LNS端配置更复杂一些。与其他两种场景相比，其优点在于接入用户不受地域限制。</p>
+<p>此场景适用于出差员工使用PC、手机等移动设备接入总部服务器，实现移动办公。</p>
+<p><img src="/2019/08/21/L2TP-VPN基本原理/Client-Initiated.png" alt="Client-Initiated"></p>
+<center>图：Client-Initiated组网示意图</center>
+
+</li>
+</ol>
+<h2 id="隧道和会话建立原理："><a href="#隧道和会话建立原理：" class="headerlink" title="隧道和会话建立原理："></a>隧道和会话建立原理：</h2><h3 id="隧道和会话的概念："><a href="#隧道和会话的概念：" class="headerlink" title="隧道和会话的概念："></a>隧道和会话的概念：</h3><p>在LNS和LAC对之间存在着两种类型的连接。</p>
+<p><strong>隧道（Tunnel）连接</strong>：它定义了互相通信的两个实体LNS和LAC。</p>
+<ul>
+<li><p>在一对LAC和LNS之间可以建立多条隧道。隧道由一个控制连接和至少一个会话组成。</p>
+</li>
+<li><p>L2TP首先需要建立L2TP隧道，然后在L2TP隧道上建立会话连接，最后建立PPP连接。所有的L2TP需要承载的数据信息都是在PPP连接中进行传递的。</p>
+</li>
+</ul>
+<p><strong>会话（Session）连接</strong>：它复用在隧道连接之上，用于表示承载隧道连接中的每个PPP连接过程。</p>
+<ul>
+<li>会话是有方向的，从LAC向LNS发起的会话叫做Incoming会话，从LNS向LAC发起的会话叫做Outgoing会话。</li>
+</ul>
+<p><strong>隧道和会话的关系：</strong></p>
+<ul>
+<li><p>NAS-Initiated VPN场景中，一对LAC和LNS的链接可以存在多条隧道；一条隧道中可承载多条会话。即：多个用户可以共用一条隧道。</p>
+<p><img src="/2019/08/21/L2TP-VPN基本原理/s1.png" alt="s1"></p>
+</li>
+<li><p>LAC自动拨号场景中，<strong>LAC和LNS建立永久的隧道。且仅承载一条永久的L2TP会话和PPP连接。</strong></p>
+<p><img src="/2019/08/21/L2TP-VPN基本原理/s2.png" alt="s2"></p>
+</li>
+<li><p>Client-Initiated VPN场景中，每个接入用户和LNS之间均建立一条隧道；每条隧道中仅承载一台L2TP会话和PPP连接。</p>
+<p><img src="/2019/08/21/L2TP-VPN基本原理/s3.png" alt="s3"></p>
+</li>
+</ul>
+<h3 id="控制消息和数据消息："><a href="#控制消息和数据消息：" class="headerlink" title="控制消息和数据消息："></a>控制消息和数据消息：</h3><p><strong>控制消息：</strong>控制消息用于隧道和会话连接的建立、维护以及传输控制；位于隧道和会话建立过程中。控制消息的传输是可靠传输，并且支持对控制消息的流量控制和拥塞控制；主要的控制消息包括控制报文、会话报文等。</p>
+<p><strong>控制报文用于建立和拆除、维持隧道</strong>，主要包括：</p>
+<ul>
+<li>SCCRQ（Start-Control-Connection-Request）：控制连接发启请求。由LAC或者LNS向对端发送，用来初始化LAC和LNS之间的隧道，开始隧道的建立过程。NGFW的应用场景中，一般都是由LAC向LNS发起请求。</li>
+<li>SCCRP（Start-Control-Connection-Reply）：表示接受了对端的连接请求，隧道的建立过程可以继续。</li>
+<li>SCCCN（Start-Control-Connection-Connected）：对SCCRP的回应，完成隧道的建立。</li>
+<li>StopCCN（Stop-Control-Connection-Notification）：由LAC或者LNS发出，通知对端隧道将要停止，控制连接将要关闭。另外，所有活动的会话都会被清除。</li>
+<li>HELLO：隧道保活控制消息。L2TP使用Hello报文来检测隧道的连通性。LAC和LNS定时向对端发送Hello报文，如果在一段时间内未收到Hello报文的应答，隧道将被清除。</li>
+</ul>
+<p><strong>会话报文用于建立和拆除会话</strong>，主要包括：</p>
+<ul>
+<li>ICRQ（Incoming-Call-Request）：当LAC检测到有用户拨入电话的时候，向LNS发送ICRQ，请求在已经建立的隧道中建立会话。</li>
+<li>ICRP（Incoming-Call-Reply）：用来回应ICRQ，表示ICRQ成功，LNS也会在ICRP中标识L2TP会话必要的参数。</li>
+<li>ICCN（Incoming-Call-Connected）：用来回应ICRP，L2TP会话建立完成。</li>
+<li>CDN（Call-Disconnect-Notify）：由LAC或者LNS发出，通知对端会话将要停止。</li>
+</ul>
+<p><strong>数据消息</strong>：用于承载用户的PPP连接数据报文，并在隧道上进行传输。数据消息的传输是不可靠传输，若数据报文丢失，不予重传。不支持对数据消息的流量控制和拥塞控制。</p>
+<h3 id="NAS-Initiated-VPN隧道和会话建立过程："><a href="#NAS-Initiated-VPN隧道和会话建立过程：" class="headerlink" title="NAS-Initiated VPN隧道和会话建立过程："></a>NAS-Initiated VPN隧道和会话建立过程：</h3><p><img src="/2019/08/21/L2TP-VPN基本原理/h1.png" alt="h1"></p>
+<center>图：NAS-Initiated VPN隧道和会话建立过程</center>
+
+<ol>
+<li><p>建立PPPoE连接</p>
+</li>
+<li><p>LAC对用户进行认证。</p>
+</li>
+<li><p>建立L2TP隧道</p>
+<p>L2TP数据以UDP报文形式发送。L2TP注册了UDP端口1701，但是这个端口仅用于初始的隧道建立过程。L2TP隧道发起方（LAC）任选一个空闲端口（未必是1701）向接收方（LNS）的1701端口发送报文；LNS收到报文后，使用1701端口给LAC的指定端口回送报文。至此，双方的端口选定，并在隧道保持连通的时间段内不再改变。</p>
+<ol>
+<li><p>LAC检查用户的LCP协商中的认证信息（Domain、Username等），查找能够匹配的L2TP组，根据L2TP组的配置对某个LNS进行L2TP呼叫建立L2TP隧道。如果此时LAC发现L2TP隧道已经建立，则LAC发起会话连接，否则首先建立L2TP隧道。</p>
+</li>
+<li><p>LAC端向指定的LNS发送CHAP challenge信息，LNS回送该challenge响应消息CHAP response，并发送LNS侧的CHAP challenge，LAC返回该challenge的响应消息CHAP response。</p>
+<p>LAC和LNS之间通过SCCRQ、SCCRP和SCCCN消息完成L2TP隧道的建立，并且双方都知道对方的Tunnel ID等信息，后续的数据报文都会添加Peer的Tunnel ID信息，这样接收者就可以知道收到的L2TP报文属于本地的哪个隧道。</p>
+</li>
+</ol>
+</li>
+<li><p>建立L2TP会话</p>
+<p>LAC和LNS使用ICRQ、ICRP和ICCN消息建立L2TP会话，这些消息都在前面建立的L2TP隧道中传递，并且都会添加隧道对端的Tunnel ID信息。</p>
+<p>在ICCN消息中，LAC端将用户CHAP response、response identifier和PPP协商参数传送给LNS，以便后续LNS与用户建立PPP连接。</p>
+</li>
+<li><p>LNS根据用户名、密码等信息对用户进行认证。</p>
+</li>
+<li><p>LNS对用户进行二次认证（可选）</p>
+</li>
+<li><p>LNS对用户在此认证（可选）</p>
+</li>
+<li><p>用户与LNS之间建立PPP连接。</p>
+<p>完成了L2TP会话以后，LAC会将Client的相关PPP参数通过L2TP会话转发给LNS，LNS和用户进行PPP的认证。</p>
+<p>LNS向用户分配地址然后建立PPP连接，注意此时的PPP连接在用户和LNS之间建立，并不是在LAC和LNS之间。</p>
+<p>此时的LAC也保持着和用户的PPP连接，用于将来自LNS的L2TP数据报文解封装以后通过PPP连接传递给Client。</p>
+</li>
+<li><p>用户访问内网资源。</p>
+</li>
+</ol>
+<h3 id="LAC自动拨号隧道和会话的建立："><a href="#LAC自动拨号隧道和会话的建立：" class="headerlink" title="LAC自动拨号隧道和会话的建立："></a>LAC自动拨号隧道和会话的建立：</h3><p>与触发建立隧道的方式不同，LAC自动拨号场景是无需触发的永久隧道。一旦配置完毕，即可建立永久隧道，并承载唯一的一条永久会话。LAC为LNS的唯一的客户端。</p>
+<p><img src="/2019/08/21/L2TP-VPN基本原理/h2.png" alt="h2"></p>
+<center>图：LAC自动拨号的隧道和会话建立过程</center>
+
+<h3 id="Client-Initiated-VPN隧道和会话的建立："><a href="#Client-Initiated-VPN隧道和会话的建立：" class="headerlink" title="Client-Initiated VPN隧道和会话的建立："></a>Client-Initiated VPN隧道和会话的建立：</h3><p>Client-Initiated VPN场景下，隧道建立过程与NAS-Initiated VPN相似。与NAS-Initiated VPN场景相比，Client-Initiated VPN场景相当于将Client和LAC合为了一个整体。</p>
+<p><img src="/2019/08/21/L2TP-VPN基本原理/h3.png" alt="h3"></p>
+<center>图：Client-Initiated VPN隧道和会话建立过程</center>
+
+<h2 id="L2TP-VPN的报文封装："><a href="#L2TP-VPN的报文封装：" class="headerlink" title="L2TP VPN的报文封装："></a>L2TP VPN的报文封装：</h2><h3 id="NAS-Initiated-VPN组网数据封装过程："><a href="#NAS-Initiated-VPN组网数据封装过程：" class="headerlink" title="NAS-Initiated VPN组网数据封装过程："></a>NAS-Initiated VPN组网数据封装过程：</h3><p><img src="/2019/08/21/L2TP-VPN基本原理/f1.png" alt="f1"></p>
+<center>图：NAS-Initiated VPN场景组网报文封装过程</center>
+
+<p>NAS-Initiated VPN组网中，接入用户访问内网服务器时：</p>
+<ol>
+<li>当隧道和会话均建立完成后，接入用户已获取LNS分配的地址，并用此地址来访问内网服务器。</li>
+<li>接入用户向LAC发起PPPoE拨号，为数据添加私有IP、PPP报文头和PPPoE报文头，并添加太网头后，发送给LAC。</li>
+<li>LAC收到报文后，依次剥离以太网头、PPPoE报文头，并对报文依次封装L2TP报文头、UDP报文头，并添加公网IP，发送给LNS。</li>
+<li>LNS收到报文后，首先对报文进行L2TP解封装，依次剥离公网IP、UDP报文头、L2TP报文头。之后进行PPP解封装，剥离PPP报文头。最后添加以太网头，并根据私有IP的目的地址将报文发送给内网服务器。</li>
+<li>服务器接收报文后，获取报文数据，并将响应报文发送给LNS。</li>
+</ol>
+<h3 id="LAC自动拨号组网数据封装过程："><a href="#LAC自动拨号组网数据封装过程：" class="headerlink" title="LAC自动拨号组网数据封装过程："></a>LAC自动拨号组网数据封装过程：</h3><p><img src="/2019/08/21/L2TP-VPN基本原理/f2.png" alt="f2"></p>
+<center>图：LAC自动拨号场景组网报文封装过程</center>
+
+<p>LAC自动拨号组网中，PPP封装和L2TP封装仅限于LAC和LNS之间的报文交互。</p>
+<h3 id="Client-Initiated-VPN组网数据封装过程："><a href="#Client-Initiated-VPN组网数据封装过程：" class="headerlink" title="Client-Initiated VPN组网数据封装过程："></a>Client-Initiated VPN组网数据封装过程：</h3><p><img src="/2019/08/21/L2TP-VPN基本原理/f3.png" alt="f3"></p>
+<center>图：Client-Initiated VPN场景组网报文封装过程</center>
+
+<h2 id="L2TP-VPN的认证："><a href="#L2TP-VPN的认证：" class="headerlink" title="L2TP VPN的认证："></a>L2TP VPN的认证：</h2><p>L2TP支持使用PAP和CHAP两种方式进行PPP认证。</p>
+<h3 id="VT（Virtual-Template）接口："><a href="#VT（Virtual-Template）接口：" class="headerlink" title="VT（Virtual-Template）接口："></a><strong>VT（Virtual-Template）接口：</strong></h3><p>PPP、Ethernet都是二层协议，它们之间不能直接互相承载。当用户配置PPPoE等二层协议时，这些<strong>二层协议之间需要通过虚拟访问接口VA（Virtual-Access）进行通信</strong>。前面已经提到，L2TP中会使用PPPoE协议。VT接口是用于配置虚拟访问接口的模板。在L2TP会话连接建立之后，LAC、LNS均需要创建虚拟访问接口用于和对端（即用户）交换数据。此时，系统将按照用户的配置，选择VT接口，根据该模板的配置参数（包括接口IP地址、PPP认证方式等）动态地创建虚拟访问接口。</p>
+<p>命令行配置中，VT接口下可选择CHAP或PAP认证方式来对用户进行PPP认证。Web配置中不支持手工配置认证方式，系统优先选择CHAP方式，其次选择PAP方式。</p>
+<h3 id="LAC自主拨号场景："><a href="#LAC自主拨号场景：" class="headerlink" title="LAC自主拨号场景："></a>LAC自主拨号场景：</h3><p>LAC自主拨号场景中，LAC侧不对用户进行认证，只在LNS侧对LAC配置的用户进行PPP认证（PAP或CHAP）。在命令行配置中，体现在VT接口下配置的PPP认证方式。</p>
+<h3 id="Client-Initiated-VPN场景："><a href="#Client-Initiated-VPN场景：" class="headerlink" title="Client-Initiated VPN场景："></a>Client-Initiated VPN场景：</h3><p>Client-Initiated VPN场景中，在LNS侧对用户进行PPP认证（PAP或CHAP）。在命令行配置中，体现在VT接口下配置的PPP认证方式。</p>
+<h3 id="NAS-Initiated-VPN场景："><a href="#NAS-Initiated-VPN场景：" class="headerlink" title="NAS-Initiated VPN场景："></a>NAS-Initiated VPN场景：</h3><p>NAS-Initiated VPN场景中，L2TP可对用户进行两次PPP认证：第一次发生在LAC侧，第二次发生在LNS侧。只有一种情况LNS侧不对接入用户进行二次认证：启用LCP重协商后，不在相应的VT接口上配置认证。这时，用户只在LAC侧接受一次认证。</p>
+<p>另外，不论对于LAC或LNS，如果其配置的用户认证方式为“不认证”，则不论VT接口中使用何种认证方式，都不对用户进行认证。</p>
+<p>以下对于认证方式的描述都是基于配置的用户认证方式不为“不认证”的情况。</p>
+<ul>
+<li><p>LAC端认证方式</p>
+<p>LAC端可对用户进行PAP或CHAP认证。在命令行配置中，使用VT接口下配置的PPP认证方式。</p>
+</li>
+<li><p>LNS端认证方式</p>
+<p>LNS对用户的认证方式除由PPP认证方式决定外，还取决于配置的L2TP认证方式。L2TP认证方式有三种：代理认证、强制CHAP认证和LCP重协商。其中，LCP重协商的优先级最高，代理认证优先级最低。</p>
+<ul>
+<li><p>LCP重协商</p>
+<p>如果需要在LNS侧进行比LAC侧更严格的认证，或者LNS侧需要直接从用户获取某些信息（当LNS与LAC是不同厂商的设备时可能发生这种情况），则可以配置LNS与用户间进行LCP重协商。LCP重协商使用相应VT接口配置的认证方式。此时将忽略LAC侧的代理认证信息。</p>
+</li>
+<li><p>强制CHAP认证</p>
+<p>如果只配置强制CHAP认证，则LNS对用户进行CHAP认证，如果认证不通过，会话就不能建立成功。</p>
+</li>
+<li><p>代理认证</p>
+<p>代理认证就是LAC将它从用户得到的所有认证信息及LAC配置的认证方式传给LNS，LNS会利用这些信息和LAC端传来的认证方式对用户进行认证。</p>
+<p>NAS-Initiated VPN中，在PPP会话开始时，用户先和LAC进行PPP协商。若协商通过，则由LAC初始化L2TP隧道连接，并将用户信息、认证信息等传递给LNS，由LNS根据收到的代理认证信息判断用户是否合法。</p>
+<p>代理认证与VT接口的PPP认证方式的关系：</p>
+<ul>
+<li>LNS的PPP认证方式不能比LAC复杂。例如，如果LAC端配置的认证方式为PAP，而LNS配置的PPP认证方式为CHAP，则由于LNS要求的CHAP认证级别高于LAC能够提供的PAP认证，认证将无法通过，会话也就不能正确建立。</li>
+<li>其他情况下，如果LNS与LAC的认证方式不一致，LNS将采用LAC发送过来的认证方式进行协商，忽略VT接口配置的认证方式。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h1 id="三种组网模式的对比"><a href="#三种组网模式的对比" class="headerlink" title="三种组网模式的对比"></a>三种组网模式的对比</h1><h2 id="三种组网对比："><a href="#三种组网对比：" class="headerlink" title="三种组网对比："></a>三种组网对比：</h2><p><img src="/2019/08/21/L2TP-VPN基本原理/对比.png" alt="对比"></p>
+<ul>
+<li>Client-Initiated VPN：其优点在于接入用户不受地域限制。此场景适用于员工使用PC、手机等移动设备接入总部服务器，实现移动办公。</li>
+<li>NAS-Initiated VPN：接入用户（PC）通过PPPoE拨入LAC，由LAC通过Internet向LNS发起建立隧道连接请求。接入用户地址由LNS分配，对接入用户的认证可由LAC侧代理完成，也可两侧都对接入用户做认证。当所有L2TP用户都下线时，隧道自动拆除以节省资源，直至再有用户接入时，重新建立隧道。此组网适用于分支机构用户向总部发起连接，且一般用于分支机构的用户不经常访问企业总部的情况。</li>
+<li>LAC-Auto：分支机构员工感知不到隧道存在，不需要使用用户接入。LAC为分支机构的多个用户提供L2TP服务，免去了每个用户使用L2TP都需要先拔号的麻烦<br>这种组网下，LNS只对LAC进行认证。其缺点为：分支机构用户只要能够连接LAC即可使用L2TP隧道接入总部，而不需被认证。存在一定的安全隐患。此时用户接入总部以通过设备的用户认证功能对接入总部的用户进行认证，从而提高安全性</li>
+</ul>
+<h2 id="L2TP和PPTP区别："><a href="#L2TP和PPTP区别：" class="headerlink" title="L2TP和PPTP区别："></a><strong>L2TP和PPTP区别：</strong></h2><ul>
+<li>L2TP：公有协议、UDP1701、支持隧道验证，支持多个协议，多个隧道，压缩字节，支持三种模式</li>
+<li>PPTP：私有协议、TCP1723、不支持隧道验证，只支持IP、只支持点到点</li>
+</ul>
+<p><strong>PPTP：</strong></p>
+<p>点对点隧道协议（PPTP）是由包括Microsoft和3com等公司组成的PPTP论坛开发的，一种点对点隧道协议，基于拔号使用的PPP协议使用PAP或CHAP之类的加密算法，或者使用Microsoft的点对点加密算法MPPE。</p>
+<p><strong>L2TP：</strong></p>
+<p>第二层隧道协议（L2TP）是IETF基于L2F（Cisco的2层转发协议）开发的PPTP后续版本，是一种工业标准Internet隧道协议。</p>
+<p>两者的主要区别主要有以下几点：</p>
+<ol>
+<li>PPTP只能在两端间建立单一隧道，L2TP支持在两端点间使用多隧道，这样可以针对不同的用户创建不同的服务质量</li>
+<li>L2TP可以提供隧道验证机制，而PPTP不能提供这样的机制，但当L2TP或PPTP与IPSec共同使用时，可以由IPSec提供隧道验证，不需要在第二层协议上提供隧道验证机制</li>
+<li>PPTP要求互联网络为IP网络，而L2TP只要求隧道媒介提供面向数据包的点对点连接，L2TP可以在IP（使用UDP），FR，ATM，x.25网络上使用</li>
+<li>L2TP可以提供包头压缩。当压缩包头时，系统开销（voerhead）占用4个字节，而PPTP协议下要占用6个字节</li>
+</ol>
+<p><strong>L2TP什么情况下需要强制认证？</strong></p>
+<blockquote>
+<p>在NAS模式下。且LNS不信任LAC，配置了强制认证的情况下</p>
+</blockquote>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档。</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/" title="L2TP VPN基本原理">https://cshihong.github.io/2019/08/21/L2TP-VPN基本原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/VPN/" rel="tag"># VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/18/IPS与IDS部署场景/" rel="next" title="IPS与IDS部署场景">
+                <i class="fa fa-chevron-left"></i> IPS与IDS部署场景
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/21/【转载】如何成为优秀的网络安全工程师/" rel="prev" title="【转载】如何成为优秀的网络安全工程师">
+                【转载】如何成为优秀的网络安全工程师 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#L2TP-VPN简介"><span class="nav-number">1.</span> <span class="nav-text">L2TP VPN简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#L2TP基本概念："><span class="nav-number">1.1.</span> <span class="nav-text">L2TP基本概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目的："><span class="nav-number">1.2.</span> <span class="nav-text">目的：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#L2TP-VPN的优点："><span class="nav-number">1.3.</span> <span class="nav-text">L2TP VPN的优点：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#L2TP-VPN的原理"><span class="nav-number">2.</span> <span class="nav-text">L2TP VPN的原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#L2TP-VPN的主要应用场景："><span class="nav-number">2.1.</span> <span class="nav-text">L2TP VPN的主要应用场景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#隧道和会话建立原理："><span class="nav-number">2.2.</span> <span class="nav-text">隧道和会话建立原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#隧道和会话的概念："><span class="nav-number">2.2.1.</span> <span class="nav-text">隧道和会话的概念：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#控制消息和数据消息："><span class="nav-number">2.2.2.</span> <span class="nav-text">控制消息和数据消息：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NAS-Initiated-VPN隧道和会话建立过程："><span class="nav-number">2.2.3.</span> <span class="nav-text">NAS-Initiated VPN隧道和会话建立过程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LAC自动拨号隧道和会话的建立："><span class="nav-number">2.2.4.</span> <span class="nav-text">LAC自动拨号隧道和会话的建立：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Client-Initiated-VPN隧道和会话的建立："><span class="nav-number">2.2.5.</span> <span class="nav-text">Client-Initiated VPN隧道和会话的建立：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#L2TP-VPN的报文封装："><span class="nav-number">2.3.</span> <span class="nav-text">L2TP VPN的报文封装：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NAS-Initiated-VPN组网数据封装过程："><span class="nav-number">2.3.1.</span> <span class="nav-text">NAS-Initiated VPN组网数据封装过程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LAC自动拨号组网数据封装过程："><span class="nav-number">2.3.2.</span> <span class="nav-text">LAC自动拨号组网数据封装过程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Client-Initiated-VPN组网数据封装过程："><span class="nav-number">2.3.3.</span> <span class="nav-text">Client-Initiated VPN组网数据封装过程：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#L2TP-VPN的认证："><span class="nav-number">2.4.</span> <span class="nav-text">L2TP VPN的认证：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#VT（Virtual-Template）接口："><span class="nav-number">2.4.1.</span> <span class="nav-text">VT（Virtual-Template）接口：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LAC自主拨号场景："><span class="nav-number">2.4.2.</span> <span class="nav-text">LAC自主拨号场景：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Client-Initiated-VPN场景："><span class="nav-number">2.4.3.</span> <span class="nav-text">Client-Initiated VPN场景：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NAS-Initiated-VPN场景："><span class="nav-number">2.4.4.</span> <span class="nav-text">NAS-Initiated VPN场景：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三种组网模式的对比"><span class="nav-number">3.</span> <span class="nav-text">三种组网模式的对比</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#三种组网对比："><span class="nav-number">3.1.</span> <span class="nav-text">三种组网对比：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#L2TP和PPTP区别："><span class="nav-number">3.2.</span> <span class="nav-text">L2TP和PPTP区别：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/08/21/L2TP-VPN基本原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

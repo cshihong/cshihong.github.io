@@ -1,0 +1,2140 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="SACG技术简介什么是SACG认证？SACG认证（华为私有）：使用防火墙作为接入控制设备，对用户接入网络进行身份认证和安全检查。部署在数据中心或网络出口位置，方便维护。适用于大中型园区，网络环境复杂，对网络安全要求适中的场景。 SACG是指设备通过在SACG认证系统中承担SACG的角色，协助SACG认证系统实现内网终端用户的安全控制。 SACG准入，是Controller和和防火墙配合实现的用户准">
+<meta name="keywords" content="准入控制技术">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SACG认证原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/05/30/SACG认证原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="SACG技术简介什么是SACG认证？SACG认证（华为私有）：使用防火墙作为接入控制设备，对用户接入网络进行身份认证和安全检查。部署在数据中心或网络出口位置，方便维护。适用于大中型园区，网络环境复杂，对网络安全要求适中的场景。 SACG是指设备通过在SACG认证系统中承担SACG的角色，协助SACG认证系统实现内网终端用户的安全控制。 SACG准入，是Controller和和防火墙配合实现的用户准">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/sacg.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/原理.gif">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/3.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/4.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/5.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/6.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/7.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/8.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/9.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/10.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/11.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/12.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/13.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/14.png">
+<meta property="og:updated_time" content="2019-05-30T14:32:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SACG认证原理">
+<meta name="twitter:description" content="SACG技术简介什么是SACG认证？SACG认证（华为私有）：使用防火墙作为接入控制设备，对用户接入网络进行身份认证和安全检查。部署在数据中心或网络出口位置，方便维护。适用于大中型园区，网络环境复杂，对网络安全要求适中的场景。 SACG是指设备通过在SACG认证系统中承担SACG的角色，协助SACG认证系统实现内网终端用户的安全控制。 SACG准入，是Controller和和防火墙配合实现的用户准">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/05/30/SACG认证原理/sacg.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/05/30/SACG认证原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>SACG认证原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/05/30/SACG认证原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">SACG认证原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-30 09:27:56 / 修改时间：22:32:24" itemprop="dateCreated datePublished" datetime="2019-05-30T09:27:56+08:00">2019-05-30</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 2,790</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 10</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="SACG技术简介"><a href="#SACG技术简介" class="headerlink" title="SACG技术简介"></a>SACG技术简介</h1><h2 id="什么是SACG认证？"><a href="#什么是SACG认证？" class="headerlink" title="什么是SACG认证？"></a>什么是SACG认证？</h2><p>SACG认证（华为私有）：使用防火墙作为接入控制设备，对用户接入网络进行身份认证和安全检查。部署在数据中心或网络出口位置，方便维护。适用于大中型园区，网络环境复杂，对网络安全要求适中的场景。</p>
+<p>SACG是指设备通过在SACG认证系统中承担SACG的角色，协助SACG认证系统实现内网终端用户的安全控制。</p>
+<p>SACG准入，是Controller和和防火墙配合实现的用户准入控制，主要针对的是有线网络，并且不改造网络架构的常见，实现对有线网络接入用户的准入控制。<strong>本质上是通过防火墙上的ACL来控制用户的权限。</strong></p>
+<h2 id="SACG基本概念："><a href="#SACG基本概念：" class="headerlink" title="SACG基本概念："></a>SACG基本概念：</h2><p><img src="/2019/05/30/SACG认证原理/sacg.png" alt="sacg"></p>
+<ul>
+<li><p>认证前域：在身份认证前，终端用户只能访问认证前域的网络资源。</p>
+</li>
+<li><p>隔离域：身份认证通过单安全检查未通过，终端用户可以访问认证前域和隔离域的网络资源。</p>
+</li>
+<li><p>认证后域：身份认证和安全检查均通过，终端用户可以访问认证前域和认证后域的网络资源。</p>
+<p>如果终端用户使用Web客户端认证，则只进行身份认证，不进行安全检查。</p>
+</li>
+</ul>
+<p>它将网络划分为以下几类区域：</p>
+<ul>
+<li><p>用户域</p>
+<p>所有接入企业内网的终端设备，例如台式机、便携机以及通过Internet接入的出差员工、驻外机构、合作伙伴等。</p>
+</li>
+<li><p>网络域</p>
+<p>进行流量转发的网络设备所组成的域，承载业务流量，实现各网络的互联。SACG就部署在这个域中。</p>
+</li>
+<li><p>认证前域</p>
+<p>认证前域是终端设备在完成认证之前可以访问的区域。该区域主要用于对终端设备和用户进行认证、授权、策略管理、补丁下发等。SACG联动方案的中大部分组件都部署在该区域中。</p>
+</li>
+<li><p>受控域</p>
+<p>受控域是终端在完成认证之后才可以访问的区域。包括两种：</p>
+<ul>
+<li><p>隔离域</p>
+<p>隔离域是指在终端用户通过了身份认证但未通过授权时可以访问的区域。通常将能够帮助终端用户消除安全隐患的相关资源（如补丁服务器、防病毒服务器等）部署在本区域。</p>
+</li>
+<li><p>认证后域</p>
+<p>认证后域是企业真正的核心资源所在的区域，终端设备和用户都必须进行认证和授权之后才能访问自己的权限相对应的安全区域。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="SACG认证特点："><a href="#SACG认证特点：" class="headerlink" title="SACG认证特点："></a>SACG认证特点：</h2><ul>
+<li>支持身份认证和安全检查，可以根据安全检查结果规划隔离域和认证后域。</li>
+<li>安全性相对于802.1X低，只能用于有线接入，一般用于大中型企业。</li>
+<li>支持逃生通道，支持客户端类型有Web、AnyOffice、Web Agent。</li>
+<li>通常要求部署NAC客户端。</li>
+</ul>
+<p>SACG约束：</p>
+<ul>
+<li>SACG不支持对哑铃终端实施控制，该方案不适用于终端区域使用IP Phone的场景。（只支持AnyOffice，web认证）</li>
+<li>如果网络中实施了IP电话，则需要把SACG部署在数据中心前，避免因为SACG隔离了IP Phone的流量。</li>
+<li>SACG设备不支持MPLS VPN网络。</li>
+<li>SACG设备不支持侧挂在PE/P节点。</li>
+</ul>
+<h2 id="SACG应用场景："><a href="#SACG应用场景：" class="headerlink" title="SACG应用场景："></a>SACG应用场景：</h2><ul>
+<li><p>旁路部署（华为推荐）：不改变当前网络，但需要额外的防火墙作为认证控制设备；支持逃生通道，SC故障时保证业务不中断，可靠性高。</p>
+<p>核心层交换机旁路部署SACG网关，通过策略路由将用户上的流量引流到SACG网关进行控制.</p>
+</li>
+<li><p>直路部署：同时使用防火墙的安全防护和SACG接入控制功能；不支持逃生通道，SC故障时业务中断，可靠性低。</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>旁路部署会存在来回路径不一致的常见，所以需要关闭硬件SACG（FW）状态检测功能</strong><br> undo firewall session link-state check</p>
+</blockquote>
+<h1 id="SACG认证原理"><a href="#SACG认证原理" class="headerlink" title="SACG认证原理"></a>SACG认证原理</h1><h2 id="SACG本质通过ACL控制："><a href="#SACG本质通过ACL控制：" class="headerlink" title="SACG本质通过ACL控制："></a>SACG本质通过ACL控制：</h2><p>通过在SACG上配置Controller联动功能，将SACG上的ACL3009~3999作为接纳Controller下发控制策略的容器，这901条ACL分别对应ID号为0~900的901种角色，每种角色对应Controller系统中的一个受控域。</p>
+<p>其中ACL3099对应角色0，是所有接入用户的缺省角色，可以用来允许未经认真的用户访问认证前域。剩余的ACL3000~3999对应1~900号角色，这些角色是由Controller系统下发的普通角色。</p>
+<p>受控域与FW上的ACL的对应关系：每一个受控域对应FW上的两个ACL，奇数号对应Deny规则，偶数号对应Permit规则。</p>
+<p>隔离域常用的控制方式：只允许访问受控域列表中的资源，其他资源全部不允许访问。</p>
+<p>认证后域常用的控制方式：禁止访问受控域列表中的资源，其他的资源全部允许访问。</p>
+<h2 id="SACG接入控制认证流程："><a href="#SACG接入控制认证流程：" class="headerlink" title="SACG接入控制认证流程："></a>SACG接入控制认证流程：</h2><p>SACG准入包括三个实体：客户端、设备端（SACG）和认证服务器。</p>
+<p>一个终端设备接入后，通过SACG向Controller服务器发起认证请求，认证通过后，Controller服务器将该终端设备的IP地址以及对应的角色信息发给SACG。</p>
+<p><img src="/2019/05/30/SACG认证原理/流程.png" alt="流程"></p>
+<center>图：SACG接入控制流程</center>
+
+<ol>
+<li><p>SACG向Agile Controller-Campus请求同步认证前域的规则、隔离域的规则和认证后域的规则，把规则转换为ACL。管理员配置完交换机、防火墙的接口，防火墙安全策略后，防火墙定期（<strong>每10分钟</strong>）主动向Agile Controller-Campus发起连接请求，因此在配置防火墙时需要允许Local安全区域（防火墙自身）访问Agile Controller-Campus所在的安全区域。</p>
+</li>
+<li><p>连接成功后Agile Controller-Campus向防火墙下发配置的认证前域、隔离域和认证后域的规则。</p>
+</li>
+<li><p>终端用户在AnyOffice或其他客户端输入帐号密码发起身份认证请求。若终端用户未安装AnyOffice则向终端用户推送在防火墙上配置的URL链接（Web或Web Agent），方便终端用户通过Web页面进行身份认证。</p>
+</li>
+<li><p>Agile Controller-Campus返回认证结果，如果认证失败，那么终端用户只能访问认证前域的资源。</p>
+</li>
+<li><p>终端用户身份认证成功后，向</p>
+<p>Agile Controller-Campus</p>
+<p>发起安全认证请求。</p>
+<p>终端用户通过AnyOffice从业务控制器下载并执行安全策略以进行安全检查，并将安全检查结果上报Agile Controller-Campus。</p>
+<p>所谓安全认证是指在终端用户通过身份认证后，AnyOffice将从业务控制器接收并执行管理员配置的策略及执行参数，如果未发现终端主机存在严重违规，则表明终端主机通过安全认证。通过安全认证的终端用户允许访问认证后域，访问权限的大小受限于管理员在业务控制器配置的受控域。</p>
+</li>
+<li><p>Agile Controller-Campus</p>
+<p>根据安全检查结果，通知SACG将终端用户的IP切换至对应的域。</p>
+<ul>
+<li>如果安全检查通过，Agile Controller-Campus通知SACG将终端用户的IP地址切换至认证后域。</li>
+<li>如果安全检查不通过，Agile Controller-Campus通知SACG将终端用户的IP地址切换至隔离域。</li>
+</ul>
+</li>
+<li><p>SACG将终端用户的IP地址切换至对应的域，并将执行结果返回至Agile Controller-Campus。</p>
+</li>
+<li><p>Agile Controller-Campus将服务器端策略与终端本地策略比较，如果策略不一致，则将最新的安全策略下发给客户端；如果策略一致，则不执行下发策略操作，返回给客户端响应报文。</p>
+</li>
+<li><p>终端用户访问网络，当报文经过SACG时，SACG将使用认证域对应的ACL限制终端用户能够访问的网络资源。</p>
+</li>
+</ol>
+<h2 id="SACG认证过程："><a href="#SACG认证过程：" class="headerlink" title="SACG认证过程："></a>SACG认证过程：</h2><p><img src="/2019/05/30/SACG认证原理/原理.gif" alt="原理"></p>
+<center>图：SACG认证过程动态图</center>
+
+<ul>
+<li>如果终端IP地址未通过身份认证，SACG将会使用认证前域对应的ACL对报文进行处理。该条ACL与管理员在SM上配置的认证前域相对应，终端用户只能访问认证前域的网络资源。</li>
+<li>如果终端IP地址已经通过身份认证，但未通过安全检查，SACG将该报文从认证前域切换至隔离域，并根据隔离域对应的ACL对报文进行处理，终端用户可以访问认证前域和隔离域的网络资源。</li>
+<li>如果终端IP地址同时通过身份认证和安全检查，SACG将该报文从认证前域或隔离域切换至认证后域，并根据认证后域对应的ACL对报文进行处理，终端用户可以访问认证前域和认证后域的网络资源。</li>
+</ul>
+<h1 id="部署SACG认证配置思路"><a href="#部署SACG认证配置思路" class="headerlink" title="部署SACG认证配置思路"></a>部署SACG认证配置思路</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">配置步骤： </span><br><span class="line">第一步：基本配置 </span><br><span class="line">路由  策略  </span><br><span class="line">第二步：重定向流量</span><br><span class="line">SW1</span><br><span class="line">acl number <span class="number">3000</span></span><br><span class="line"> rule <span class="number">5</span> permit ip source <span class="number">10.1</span>.2.0 <span class="number">0.0</span>.0.255</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Ethernet0</span>/0/9</span></span><br><span class="line"><span class="class"> <span class="title">traffic</span>-<span class="title">redirect</span> <span class="title">inbound</span> <span class="title">acl</span> 3000 <span class="title">ip</span>-<span class="title">nexthop</span> 10.1.3.10 </span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">第三步：关闭硬件<span class="title">SACG</span>（<span class="title">FW</span>）状态检测功能</span></span><br><span class="line"><span class="class"> <span class="title">undo</span> <span class="title">firewall</span> <span class="title">session</span> <span class="title">link</span>-<span class="title">state</span> <span class="title">check</span>  </span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">第四步：配置<span class="title">AC</span></span></span><br><span class="line"><span class="class">1. 创建硬件<span class="title">SACG</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">2. 定义认证前域</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">3. 受控域</span></span><br><span class="line"><span class="class">隔离域</span></span><br><span class="line"><span class="class">后域</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">4.分别各自调用</span></span><br><span class="line"><span class="class">隔离域调用隔离域</span></span><br><span class="line"><span class="class">后域调用后域</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">5. 创建<span class="title">SACG</span>策略</span></span><br><span class="line"><span class="class">把隔离和后域都调用</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">6. 创建用户组，用户用户名和密码</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">7. 用户组对应策略</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">第五步：防火墙<span class="title">S</span></span></span><br><span class="line"><span class="class">配置与<span class="title">TSM</span>联动</span></span><br><span class="line"><span class="class">1.开启功能</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">2.联动<span class="title">AC</span>的硬件<span class="title">SACG</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">3.联动关联</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">第六步：使用<span class="title">PC</span>的 <span class="title">Anyoffice</span>测试</span></span><br></pre></td></tr></table></figure>
+<h1 id="SACG配置示例"><a href="#SACG配置示例" class="headerlink" title="SACG配置示例"></a>SACG配置示例</h1><h2 id="配置拓扑如下："><a href="#配置拓扑如下：" class="headerlink" title="配置拓扑如下："></a>配置拓扑如下：</h2><p><img src="/2019/05/30/SACG认证原理/拓扑.png" alt="拓扑"></p>
+<center>图：SACG配置拓扑</center>
+
+<p>要求： 配置SACG，认证前域为192.168.1.100/32，隔离域为192.168.1.1/32，认证后域为202.100.1.10/24以及10.1.0.0/16.</p>
+<h2 id="SW1配置；"><a href="#SW1配置；" class="headerlink" title="SW1配置；"></a>SW1配置；</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">acl number <span class="number">3000</span></span><br><span class="line"> rule <span class="number">5</span> permit ip source <span class="number">10.1</span>.2.0 <span class="number">0.0</span>.0.255</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Ethernet0</span>/0/9</span></span><br><span class="line"><span class="class"> <span class="title">traffic</span>-<span class="title">redirect</span> <span class="title">inbound</span> <span class="title">acl</span> 3000 <span class="title">ip</span>-<span class="title">nexthop</span> 10.1.3.10</span></span><br></pre></td></tr></table></figure>
+<h2 id="AC上配置："><a href="#AC上配置：" class="headerlink" title="AC上配置："></a>AC上配置：</h2><ol>
+<li><p>AC上配置与FW联动</p>
+<p><img src="/2019/05/30/SACG认证原理/1.png" alt="1"></p>
+</li>
+<li><p>.配置前域、受控域</p>
+<p><img src="/2019/05/30/SACG认证原理/2.png" alt="2"></p>
+</li>
+<li><p>配置部门、用户、账号</p>
+<p><img src="/2019/05/30/SACG认证原理/3.png" alt="3"></p>
+</li>
+<li><p>配置SACG策略组</p>
+<p><img src="/2019/05/30/SACG认证原理/4.png" alt="4"></p>
+</li>
+</ol>
+<h2 id="FW与AC联动配置："><a href="#FW与AC联动配置：" class="headerlink" title="FW与AC联动配置："></a>FW与AC联动配置：</h2><ol>
+<li><p>TSM联动</p>
+<p><img src="/2019/05/30/SACG认证原理/5.png" alt="5"></p>
+</li>
+<li><p>域间应用联动策略</p>
+<p><img src="/2019/05/30/SACG认证原理/6.png" alt="6"></p>
+</li>
+<li><p>安全策略</p>
+<p><img src="/2019/05/30/SACG认证原理/7.png" alt="7"></p>
+</li>
+</ol>
+<h2 id="检查测试："><a href="#检查测试：" class="headerlink" title="检查测试："></a>检查测试：</h2><p>SACG与AC联动信息：</p>
+<p><img src="/2019/05/30/SACG认证原理/8.png" alt="8"></p>
+<hr>
+<p>SACG获得的角色列表：</p>
+<p><img src="/2019/05/30/SACG认证原理/9.png" alt="9"></p>
+<p><img src="/2019/05/30/SACG认证原理/10.png" alt="10"></p>
+<hr>
+<p>未认证前，只能访问认证前域:</p>
+<p><img src="/2019/05/30/SACG认证原理/11.png" alt="11"></p>
+<hr>
+<p>认证后：认证后可以访问认证后域。隔离域只有配置终端安全策略检查才会出现。</p>
+<p><img src="/2019/05/30/SACG认证原理/12.png" alt="12"></p>
+<hr>
+<p>SACG上在线用户：</p>
+<p><img src="/2019/05/30/SACG认证原理/13.png" alt="13"></p>
+<p>角色6拿到的授权列表：</p>
+<p><img src="/2019/05/30/SACG认证原理/14.png" alt="14"></p>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/05/30/SACG认证原理/" title="SACG认证原理">https://cshihong.github.io/2019/05/30/SACG认证原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/准入控制技术/" rel="tag"># 准入控制技术</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/30/Portal认证原理/" rel="next" title="Portal认证原理">
+                <i class="fa fa-chevron-left"></i> Portal认证原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/30/MAC认证和MAC旁路认证/" rel="prev" title="MAC认证和MAC旁路认证">
+                MAC认证和MAC旁路认证 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SACG技术简介"><span class="nav-number">1.</span> <span class="nav-text">SACG技术简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是SACG认证？"><span class="nav-number">1.1.</span> <span class="nav-text">什么是SACG认证？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SACG基本概念："><span class="nav-number">1.2.</span> <span class="nav-text">SACG基本概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SACG认证特点："><span class="nav-number">1.3.</span> <span class="nav-text">SACG认证特点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SACG应用场景："><span class="nav-number">1.4.</span> <span class="nav-text">SACG应用场景：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SACG认证原理"><span class="nav-number">2.</span> <span class="nav-text">SACG认证原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SACG本质通过ACL控制："><span class="nav-number">2.1.</span> <span class="nav-text">SACG本质通过ACL控制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SACG接入控制认证流程："><span class="nav-number">2.2.</span> <span class="nav-text">SACG接入控制认证流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SACG认证过程："><span class="nav-number">2.3.</span> <span class="nav-text">SACG认证过程：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#部署SACG认证配置思路"><span class="nav-number">3.</span> <span class="nav-text">部署SACG认证配置思路</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SACG配置示例"><span class="nav-number">4.</span> <span class="nav-text">SACG配置示例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置拓扑如下："><span class="nav-number">4.1.</span> <span class="nav-text">配置拓扑如下：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SW1配置；"><span class="nav-number">4.2.</span> <span class="nav-text">SW1配置；</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AC上配置："><span class="nav-number">4.3.</span> <span class="nav-text">AC上配置：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FW与AC联动配置："><span class="nav-number">4.4.</span> <span class="nav-text">FW与AC联动配置：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检查测试："><span class="nav-number">4.5.</span> <span class="nav-text">检查测试：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/05/30/SACG认证原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

@@ -1,0 +1,2230 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="配置OSPF的基本功能创建OSPF进程：一台路由器如果要运行OSPF协议，必须存在Router ID。路由器的Router ID是一个32比特无符号整数，是一台路由器在自治系统中的唯一标识。为保证OSPF运行的稳定性，在进行网络规划时应该确定Router ID的划分并手工配置。 12345ospf [ process-id | router-id router-id | vpn-instance">
+<meta name="keywords" content="路由基础,OSPF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OSPF命令行配置">
+<meta property="og:url" content="https://cshihong.github.io/2017/10/20/OSPF命令行配置/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="配置OSPF的基本功能创建OSPF进程：一台路由器如果要运行OSPF协议，必须存在Router ID。路由器的Router ID是一个32比特无符号整数，是一台路由器在自治系统中的唯一标识。为保证OSPF运行的稳定性，在进行网络规划时应该确定Router ID的划分并手工配置。 12345ospf [ process-id | router-id router-id | vpn-instance">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-04-12T10:52:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OSPF命令行配置">
+<meta name="twitter:description" content="配置OSPF的基本功能创建OSPF进程：一台路由器如果要运行OSPF协议，必须存在Router ID。路由器的Router ID是一个32比特无符号整数，是一台路由器在自治系统中的唯一标识。为保证OSPF运行的稳定性，在进行网络规划时应该确定Router ID的划分并手工配置。 12345ospf [ process-id | router-id router-id | vpn-instance">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2017/10/20/OSPF命令行配置/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>OSPF命令行配置 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2017/10/20/OSPF命令行配置/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">OSPF命令行配置
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-10-20 13:51:24" itemprop="dateCreated datePublished" datetime="2017-10-20T13:51:24+08:00">2017-10-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-04-12 18:52:34" itemprop="dateModified" datetime="2018-04-12T18:52:34+08:00">2018-04-12</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 6,825</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 26</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="配置OSPF的基本功能"><a href="#配置OSPF的基本功能" class="headerlink" title="配置OSPF的基本功能"></a>配置OSPF的基本功能</h2><h3 id="创建OSPF进程："><a href="#创建OSPF进程：" class="headerlink" title="创建OSPF进程："></a>创建OSPF进程：</h3><p>一台路由器如果要运行OSPF协议，必须存在Router ID。路由器的Router ID是一个32比特无符号整数，是一台路由器在自治系统中的唯一标识。为保证OSPF运行的稳定性，在进行网络规划时应该确定Router ID的划分并手工配置。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ospf [ process-id | router-id router-id | vpn-instance vpn-instance-name </span><br><span class="line"><span class="comment">//启动OSPF进程，进入OSPF视图</span></span><br><span class="line"></span><br><span class="line">例如：ospf <span class="number">1</span> router-id <span class="number">1.1</span><span class="number">.1</span><span class="number">.1</span></span><br><span class="line"><span class="comment">//创建opsf进程1，并设置router-id为1.1.1.1</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><p><em>process-id</em>为进程号，缺省值为1。</p>
+<p>路由器支持OSPF多进程，可以根据业务类型划分不同的进程。进程号是本地概念，不影响与其它路由器之间的报文交换。因此，不同的路由器之间，即使进程号不同也可以进行报文交换。</p>
+</li>
+</ul>
+<ul>
+<li><p><strong>router-id</strong> <em>router-id</em>为路由器的ID号。</p>
+<p>缺省情况下，路由器系统会从当前接口的IP地址中自动选取一个最大值作为Router ID。手动配置Router ID时，必须保证自治系统中任意两台Router ID都不相同。通常的做法是将Router ID配置为与该设备某个接口的IP地址一致</p>
+</li>
+<li><blockquote>
+<p>说明： </p>
+<p>每个OSPF进程的Router ID要保证在OSPF网络中唯一，否则会导致邻居不能正常建立、路由信息不正确的问题。建议在OSPF设备上单独为每个OSPF进程配置全网唯一的Router ID。</p>
+</blockquote>
+</li>
+<li><p><strong>vpn-instance</strong> <em>vpn-instance-name</em>表示VPN实例。</p>
+<p>如果指定了VPN实例，那么此OSPF进程属于指定的VPN实例，如果未指定则属于公网实例。</p>
+</li>
+</ul>
+<h3 id="创建OSPF区域："><a href="#创建OSPF区域：" class="headerlink" title="创建OSPF区域："></a>创建OSPF区域：</h3><p>区域是从逻辑上将设备划分为不同的组，每个组用区域号（Area<br>ID）来标识。区域的边界是设备，而不是链路。一个网段（链路）只能属于一个区域，或者说每个运行OSPF的接口必须指明属于哪一个区域。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[OSPF进程下] area area-id</span><br><span class="line"><span class="comment">//创建并进入ospf区域视图</span></span><br></pre></td></tr></table></figure>
+<h3 id="宣告OSPF网段："><a href="#宣告OSPF网段：" class="headerlink" title="宣告OSPF网段："></a>宣告OSPF网段：</h3><p>创建OSPF进程后，还需要配置区域所包含的网段。一个网段只能属于一个区域，或者说每个运行OSPF协议的接口必须指明属于某一个特定的区域。该处的网段是指运行OSPF协议接口的IP地址所在的网段。</p>
+<p>OSPF需要对接收到的Hello报文做网络掩码检查，当接收到的Hello报文中携带的网络掩码和本设备不一致时，则丢弃这个Hello报文，即不能建立邻居关系。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">宣告OSPF网段有两种方法：</span><br><span class="line"></span><br><span class="line"><span class="comment">//1、区域下宣告</span></span><br><span class="line">[区域视图下] network ip-address wildcard-mask</span><br><span class="line"><span class="comment">//配置区域所包含的网段</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//2.接口下宣告</span></span><br><span class="line">[接口视图下] ospf enable [process-id] area [area-id]</span><br><span class="line"><span class="comment">//在接口上使能OSPF。</span></span><br></pre></td></tr></table></figure>
+<h3 id="创建虚连接："><a href="#创建虚连接：" class="headerlink" title="创建虚连接："></a>创建虚连接：</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[OSPF区域视图下] vlink 1.1.1.1</span><br><span class="line">//创建并配置虚连接</span><br></pre></td></tr></table></figure>
+<h3 id="OSPF检查配置结果："><a href="#OSPF检查配置结果：" class="headerlink" title="OSPF检查配置结果："></a>OSPF检查配置结果：</h3><ul>
+<li>在任意视图下执行display ospf  [process-id] perr命令，查看OSPF邻居的信息。</li>
+<li>在任意视图下执行display ospf  [process-id]  <strong>interface</strong>命令，查看OSPF接口的信息。</li>
+<li>在任意视图下执行display ospf  [process-id]  <strong>routing</strong>命令，查看OSPF路由表的信息。</li>
+<li>在任意视图下执行display ospf  [process-id]  <strong>lsdb</strong>命令，查看OSPF的LSDB信息。</li>
+<li>使用display ospf[ <em>process-id</em> ] <strong>brief</strong>命令查看OSPF的概要信息。</li>
+<li>使用display ospf [process-id] error 查看ospf错误信息</li>
+</ul>
+<h2 id="配置OSPF邻居或邻接的会话参数"><a href="#配置OSPF邻居或邻接的会话参数" class="headerlink" title="配置OSPF邻居或邻接的会话参数"></a>配置OSPF邻居或邻接的会话参数</h2><h3 id="配置OPSF报文重传限制："><a href="#配置OPSF报文重传限制：" class="headerlink" title="配置OPSF报文重传限制："></a>配置OPSF报文重传限制：</h3><p>OSPF路由器发送完DD报文、LSU报文、LSR报文，这三种报文后，若没有在规定时间内收到相应的LSAck报文，会再次重传。当达到限定报文重传次数后，本端就断开和对方的邻接关系。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[AR1-ospf<span class="number">-1</span>]retransmission-limit ?</span><br><span class="line">  INTEGER&lt;<span class="number">2</span><span class="number">-255</span>&gt;  The Number of Retransmission Limitation</span><br><span class="line"> <span class="comment">//配置OSPF重传限制功能</span></span><br><span class="line"> <span class="comment">//缺省情况下，不使能此功能。最大重传限制数的缺省值是30。</span></span><br></pre></td></tr></table></figure>
+<h3 id="使能在DD报文中填充接口的实际MTU"><a href="#使能在DD报文中填充接口的实际MTU" class="headerlink" title="使能在DD报文中填充接口的实际MTU"></a>使能在DD报文中填充接口的实际MTU</h3><p>建立虚连接后，不同的设备制造商可能会使用不同的MTU缺省设置。为了保证一致，应该设置接口发送DD报文时MTU值为缺省值0。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[AR1-GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span>]ospf mtu-enable </span><br><span class="line"><span class="comment">//使能接口发送DD报文时填充MTU值，同时还会检查邻居DD报文所携带的MTU是否超过本端的MTU值。 </span></span><br><span class="line"></span><br><span class="line"><span class="comment">//缺省情况下，接口发送DD报文的MTU值为0。</span></span><br></pre></td></tr></table></figure>
+<p><strong>注意：当配置DD报文MTU值后，会引起邻居关系的从新建立。</strong></p>
+<h2 id="配置OSPF在不同网络类型中的属性"><a href="#配置OSPF在不同网络类型中的属性" class="headerlink" title="配置OSPF在不同网络类型中的属性"></a>配置OSPF在不同网络类型中的属性</h2><h3 id="OSPF的网络类型和特点"><a href="#OSPF的网络类型和特点" class="headerlink" title="OSPF的网络类型和特点:"></a>OSPF的网络类型和特点:</h3><table>
+<thead>
+<tr>
+<th>网络类型</th>
+<th>特点</th>
+<th>缺省选择</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>广播类型（Broadcast）</td>
+<td>在该类型的网络中，通常以组播形式发送Hello报文、LSU报文和LSAck报文，以单播形式发送DD报文和LSR报文。</td>
+<td>当链路层协议是Ethernet、FDDI时，缺省情况下，OSPF认为网络类型是Broadcast。</td>
+</tr>
+<tr>
+<td>NBMA类型（Non-broadcast multiple access）</td>
+<td>在该类型的网络中，以单播形式发送Hello报文、DD报文、LSR报文、LSU报文、LSAck报文。NBMA网络必须是全连通的，即网络中任意两台路由器之间都必须直接可达。</td>
+<td>当链路层协议是ATM时，缺省情况下，OSPF认为网络类型是NBMA。</td>
+</tr>
+<tr>
+<td>点到点P2P类型（point-to-point）</td>
+<td>在该类型的网络中，以组播形式发送Hello报文、DD报文、LSR报文、LSU报文、LSAck报文。</td>
+<td>当链路层协议是PPP、HDLC和LAPB时，缺省情况下，OSPF认为网络类型是P2P。</td>
+</tr>
+<tr>
+<td>点到多点P2MP类型（Point-to-Multipoint）</td>
+<td>在该类型的网络中：以组播形式发送Hello报文，以单播形式发送DD报文、LSR报文、LSU报文、LSAck报文。</td>
+<td>没有一种链路层协议会被缺省的认为是P2MP类型，P2MP必须是由其他的网络类型强制更改的。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="配置OSPF路由的收敛优先级："><a href="#配置OSPF路由的收敛优先级：" class="headerlink" title="配置OSPF路由的收敛优先级："></a>配置OSPF路由的收敛优先级：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[进程视图下] prefix-priority &#123; critical | high | medium &#125; ip-prefix ip-prefix-name</span><br><span class="line"><span class="comment">//配置OSPF路由的收敛优先级。</span></span><br></pre></td></tr></table></figure>
+<p>配置OSPF路由的收敛优先级后，OSPF路由可以按照优先级来计算和泛洪LSA、同步LSDB，从而提高路由收敛速度。当一个LSA满足多个策略优先级时，最高优先级生效。OSPF依次按区域内路由、区域间路由、自治系统外部路由顺序进行LSA计算，该命令可以计算OSPF的收敛优先级。收敛<strong>优先级的优先级顺序为：critical&gt;high&gt;medium&gt;low。</strong>为了加速处理高优先级的LSA，泛洪过程中，需要按照优先级将相应的LSA分别存放在对应的critical、high、medium和low的队列中。</p>
+<p>注：该命令仅在公网配置时有效</p>
+<h3 id="配置接口发送Hello报文的时间间隔："><a href="#配置接口发送Hello报文的时间间隔：" class="headerlink" title="配置接口发送Hello报文的时间间隔："></a>配置接口发送Hello报文的时间间隔：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span>]ospf timer hello <span class="number">10</span> </span><br><span class="line"><span class="comment">//配置接口发送hello报文的时间间隔</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>缺省情况下，P2P、Broadcast类型接口发送Hello报文的时间间隔的值为10秒；P2MP、NBMA类型接口发送Hello报文的时间间隔的值为30秒；且同一接口上邻居失效时间是Hello间隔时间的4倍。</p>
+</blockquote>
+<h3 id="配置相邻邻居失效的时间"><a href="#配置相邻邻居失效的时间" class="headerlink" title="配置相邻邻居失效的时间:"></a>配置相邻邻居失效的时间:</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span>]ospf timer dead <span class="number">40</span></span><br><span class="line"><span class="comment">//配置相邻邻居失效的时间</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>缺省情况下，P2P、Broadcast类型接口的OSPF邻居失效时间为40秒，P2MP、NBMA类型接口的OSPF邻居失效时间为120秒；且同一接口上失效时间是Hello间隔时间的4倍。</p>
+<p>建议配置的失效时间大于20秒。如果失效的时间小于20秒，可能会造成邻居会话的中断。</p>
+<p>修改了网络类型后，Hello与Dead定时器都将恢复缺省值。</p>
+</blockquote>
+<h3 id="配置Smart-discover："><a href="#配置Smart-discover：" class="headerlink" title="配置Smart-discover："></a>配置Smart-discover：</h3><p>路由器的邻居状态或者多址网络（广播型或NBMA）上的DR、BDR发生变化时，需要等到Hello定时器到时才会向邻居发送Hello报文，影响了设备间建立邻居的速度。通过配置Smart-discover，网络中邻居状态，或者DR、BDR发生变化时，设备不必等到Hello定时器到就可以立刻主动的向邻居发送Hello报文。从而提高建立邻居的速度，达到网络快速收敛的目的。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span>]ospf smart-discover </span><br><span class="line"><span class="comment">//配置接口的Smart-discover功能</span></span><br></pre></td></tr></table></figure>
+<h3 id="配置更新LSA的时间间隔"><a href="#配置更新LSA的时间间隔" class="headerlink" title="配置更新LSA的时间间隔:"></a>配置更新LSA的时间间隔:</h3><p>OSPF协议规定<strong>LSA的更新时间间隔5秒</strong>，是为了防止网络连接或者路由频繁动荡引起的过多占用网络带宽和设备资源。</p>
+<p>在网络相对稳定、对路由收敛时间要求较高的组网环境中，可以指定LSA的更新时间间隔为0来取消LSA的更新时间间隔，使得拓扑或者路由的变化可以立即通过LSA发布到网络中，从而加快网络中路由的收敛速度。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-ospf<span class="number">-1</span>]lsa-originate-interval &#123; <span class="number">0</span> | &#123; intelligent-timer max-interval start-interval hold-interval | other-type interval &#125; </span><br><span class="line">  <span class="comment">//配置LSA的更新时间间隔</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>intelligent-timer</strong>表示通过智能定时器设置OSPF Router LSA和Network LSA的更新间隔时间。</li>
+</ul>
+<ul>
+<li><em>max-interval</em>为更新OSPF LSA的最长间隔时间，单位是毫秒。</li>
+<li><em>start-interval</em>为更新OSPF LSA的初始间隔时间，单位是毫秒。</li>
+<li><em>hold-interval</em>为更新OSPF LSA的基数间隔时间，单位是毫秒。</li>
+<li><strong>other-type</strong> <em>interval</em>表示设置除OSPF Router LSA和Network LSA外LSA的更新间隔时间。</li>
+</ul>
+<blockquote>
+<p>缺省情况下，使能智能定时器intelligent-timer。使能智能定时器后，更新LSA的最长间隔时间的缺省值为5000毫秒、初始间隔时间的缺省值为500毫秒、基数间隔时间的缺省值为1000毫秒（以毫秒为单位的时间间隔）</p>
+</blockquote>
+<h3 id="配置接收LSA的时间间隔："><a href="#配置接收LSA的时间间隔：" class="headerlink" title="配置接收LSA的时间间隔："></a>配置接收LSA的时间间隔：</h3><p>OSPF协议规定LSA的接收时间间隔1秒，是为了防止网络连接或者路由频繁动荡引起的过多占用网络带宽和设备资源。</p>
+<p>在网络相对稳定、对路由收敛时间要求较高的组网环境中，可以指定LSA的接收时间间隔为0来取消LSA的接收时间间隔，使得拓扑或者路由的变化可以立即通过LSA发布到网络中，从而加快网络中路由的收敛速度。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-ospf<span class="number">-1</span>] lsa-arrival-interval &#123; interval | intelligent-timer max-interval start-interval hold-interval &#125;</span><br><span class="line"><span class="comment">//配置LSA接收的时间间隔。</span></span><br></pre></td></tr></table></figure>
+<p>在网络相对稳定、对路由收敛时间要求较高的组网环境中，可以指定LSA被接收的时间间隔为0，使得拓扑或者路由的变化能够立即被感知到。</p>
+<blockquote>
+<p>缺省情况下，使能智能定时器intelligent-timer。使能智能定时器后，接收LSA的最长间隔时间的缺省值为1000毫秒、初始间隔时间的缺省值为500毫秒、基数间隔时间的缺省值为500毫秒（以毫秒为单位的时间间隔）。</p>
+</blockquote>
+<h3 id="配置SPF计算时间间隔："><a href="#配置SPF计算时间间隔：" class="headerlink" title="配置SPF计算时间间隔："></a>配置SPF计算时间间隔：</h3><p>当OSPF的链路状态数据库（LSDB）发生改变时，需要重新计算最短路径。如果网络频繁变化，由于不断的计算最短路径，会占用大量系统资源，影响设备的效率。通过配置智能定时器intelligent-timer，设置合理的SPF计算的间隔时间，可以避免占用过多的路由器内存和带宽资源。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-ospf<span class="number">-1</span>]spf-schedule-interval &#123; interval1 | intelligent-timer max-interval start-interval hold-interval | millisecond interval2 &#125;</span><br><span class="line"><span class="comment">//设置SPF计算间隔。</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>interval1</strong>为OSPF的SPF计算间隔时间，单位是毫秒。</li>
+</ul>
+<ul>
+<li><strong>intelligent-timer</strong>表示通过智能定时器设置OSPF SPF计算的间隔时间。</li>
+<li><em>max-interval</em>为OSPF SPF计算的最长间隔时间，单位是毫秒。</li>
+<li><em>start-interval</em>为OSPF SPF计算的初始间隔时间，单位是毫秒。</li>
+<li><em>hold-interval</em>为OSPF SPF计算的基数间隔时间，单位是毫秒。</li>
+<li><strong>millisecond</strong> <em>interval2</em>表示OSPF的SPF计算间隔时间，单位是毫秒。</li>
+</ul>
+<blockquote>
+<p>缺省情况下，使能智能定时器intelligent-timer，SPF计算的最长间隔时间为10000毫秒、初始间隔时间为500毫秒、基数间隔时间为1000毫秒（以毫秒为单位的时间间隔）。</p>
+</blockquote>
+<h2 id="提高OPSF网络的稳定性"><a href="#提高OPSF网络的稳定性" class="headerlink" title="提高OPSF网络的稳定性"></a>提高OPSF网络的稳定性</h2><h3 id="配置OSPF的协议优先级："><a href="#配置OSPF的协议优先级：" class="headerlink" title="配置OSPF的协议优先级："></a>配置OSPF的协议优先级：</h3><p>由于路由器上可能同时运行多个动态路由协议，就存在各个路由协议之间路由信息共享和选择的问题。系统为每一种路由协议设置一个优先级。在不同协议发现同一条路由时，优先级高的路由将被优选。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-ospf<span class="number">-1</span>]preference [ ase ] &#123; preference | route-policy route-policy-name &#125; </span><br><span class="line"><span class="comment">//配置OSPF协议的优先级。</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>ase</strong>表示设置AS-External路由的优先级。</li>
+</ul>
+<ul>
+<li><em>preference</em>表示OSPF协议路由的优先级。优先级的值越小，其实际的优先程度越高。</li>
+<li><strong>route-policy</strong> <em>route-policy-name</em>表示对特定的路由通过路由策略设置优先级。</li>
+</ul>
+<blockquote>
+<p>缺省情况下，OSPF路由的优先级为10。当指定ASE时，缺省优先级为150。</p>
+</blockquote>
+<h3 id="配置接口传送LSA的延迟时间："><a href="#配置接口传送LSA的延迟时间：" class="headerlink" title="配置接口传送LSA的延迟时间："></a>配置接口传送LSA的延迟时间：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[AR1-GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span>]ospf trans-delay ?</span><br><span class="line">   INTEGER&lt;<span class="number">1</span><span class="number">-500</span>&gt;  Second(s)</span><br><span class="line"> <span class="comment">//配置接口传送LSA的延迟时间。</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>缺省情况下，传输延迟时间为1秒。</p>
+</blockquote>
+<h3 id="配置邻接路由器重传LSA的间隔："><a href="#配置邻接路由器重传LSA的间隔：" class="headerlink" title="配置邻接路由器重传LSA的间隔："></a>配置邻接路由器重传LSA的间隔：</h3><p>当一台路由器向它的邻居发送一条LSA后，需要等到对方的确认报文。若在重传间隔时间内没有收到对方的确认报文，就会向邻居重传这条LSA。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[AR1-GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span>]ospf timer retransmit ?</span><br><span class="line">  INTEGER&lt;<span class="number">1</span><span class="number">-3600</span>&gt;  Second(s)</span><br><span class="line"><span class="comment">//设置邻接路由器重传LSA的间隔</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>缺省情况下，重传间隔时间为5秒。</p>
+</blockquote>
+<h3 id="配置Stub路由器："><a href="#配置Stub路由器：" class="headerlink" title="配置Stub路由器："></a>配置Stub路由器：</h3><p>配置Stub路由器是一种特殊的路由选路，配置了stub router的路径不被优选。实现方法是将度量值设为最大（65535），尽量避免数据从此路由器转发。用于保护此路由器链路，通常使用在升级等维护操作的场景。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[AR1-ospf<span class="number">-1</span>]stub-router on-startup ?</span><br><span class="line">  INTEGER&lt;<span class="number">5</span><span class="number">-65535</span>&gt; </span><br><span class="line"><span class="comment">//配置Stub路由器。</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>缺省情况下，没有路由器为Stub路由器。 </p>
+<p>如果配置了Stub路由器，缺省情况下，路由器保持为Stub路由器的时间间隔是500秒。</p>
+</blockquote>
+<h3 id="禁止OSPF接口发送和接收协议报文"><a href="#禁止OSPF接口发送和接收协议报文" class="headerlink" title="禁止OSPF接口发送和接收协议报文:"></a>禁止OSPF接口发送和接收协议报文:</h3><p>当用户希望本地OSPF路由信息不被其他网络中的设备获得，并且本地设备不接收网络中其他设备发布的路由更新信息的时候，可以通过配置禁止OSPF接口发送和接收协议报文来实现。</p>
+<p>禁止OSPF接口发送和接收协议报文后，该接口的直连路由仍可以发布出去，但接口的Hello报文将被阻塞，无法通过此接口与相邻设备建立邻居关系。这样可以增强OSPF的组网适应能力，减少系统资源的消耗。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-ospf<span class="number">-1</span>]silent-interface &#123; all | interface-type interface-number &#125;</span><br><span class="line"><span class="comment">//禁止OSPF接口发送和接收协议报文。</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>缺省情况下，允许OSPF接口发送和接收协议报文。</p>
+<p>可以在不同的OSPF进程中，禁止同一个接口发送和接收OSPF报文，但[<strong>silent-interface</strong>]命令只对本进程已经使能的OSPF接口起作用，对其它进程的接口不起作用。</p>
+</blockquote>
+<h2 id="提高OPSF安全性"><a href="#提高OPSF安全性" class="headerlink" title="提高OPSF安全性"></a>提高OPSF安全性</h2><h3 id="配置OSPF区域验证方式："><a href="#配置OSPF区域验证方式：" class="headerlink" title="配置OSPF区域验证方式："></a>配置OSPF区域验证方式：</h3><p>使用区域验证时，一个区域中所有的路由器在该区域下的验证模式和口令必须一致。例如，在Area0内所有路由器上配置验证模式为简单验证，口令为abc。</p>
+<blockquote>
+<p>注意：  </p>
+<p>在配置区域认证模式时，如果使用<strong>plain</strong>选项，密码将以明文形式保存在配置文件中，存在安全隐患。建议使用<strong>cipher</strong>选项，将密码加密保存。 </p>
+<p>Simple、MD5和HMAC-MD5密文验证模式存在安全风险，推荐使用HMAC-SHA256密文验证模式。</p>
+</blockquote>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[AR1-ospf<span class="number">-1</span>-area<span class="number">-0.0</span><span class="number">.0</span><span class="number">.0</span>]authentication-mode &#123; md5 | hmac-md5 | hmac-sha256 &#125; [ key-id &#123; plain plain-text | [ cipher ] cipher-text &#125; ]</span><br><span class="line"><span class="comment">//配置OSPF区域的验证模式。</span></span><br><span class="line"></span><br><span class="line">[AR1-ospf<span class="number">-1</span>-area<span class="number">-0.0</span><span class="number">.0</span><span class="number">.0</span>] authentication-mode keychain keychain-name</span><br><span class="line"><span class="comment">//配置OSPF区域的Keychain验证模式。</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p> 说明： </p>
+<p> 使用Keychain验证模式，需要在系统视图下配置Keychain信息。必须保证本端ActiveSendKey和对端ActiveRecvKey的<strong>key-id</strong>、<strong>algorithm</strong>、<strong>key-string</strong>相同，才能建立OSPF邻居。</p>
+</blockquote>
+<h3 id="配置OSPF接口验证方式："><a href="#配置OSPF接口验证方式：" class="headerlink" title="配置OSPF接口验证方式："></a>配置OSPF接口验证方式：</h3><p>接口验证方式用于在相邻的路由器之间设置验证模式和口令，优先级高于区域验证方式。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[AR1-GigabitEthernet0/<span class="number">0</span>/<span class="number">0</span>]ospf authentication-mode  &#123; md5 | hmac-md5 | hmac-sha256 &#125; [ key-id &#123; plain plain-text | [ cipher ] cipher-text &#125; ]</span><br><span class="line"><span class="comment">//配置OSPF接口的验证模式。</span></span><br></pre></td></tr></table></figure>
+<h2 id="维护OSPF"><a href="#维护OSPF" class="headerlink" title="维护OSPF"></a>维护OSPF</h2><h3 id="清除OSPF："><a href="#清除OSPF：" class="headerlink" title="清除OSPF："></a>清除OSPF：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;AR1&gt;reset ospf  [ process-id ] counters [ neighbor [ interface-type interface-number ] [ router-id ] ]</span><br><span class="line"><span class="comment">//命令清除OSPF计数器</span></span><br><span class="line">  </span><br><span class="line"><span class="comment">//counters表示用来将OSPF计数器清零。</span></span><br><span class="line"><span class="comment">//neighbor表示指定接口上邻居的信息。</span></span><br></pre></td></tr></table></figure>
+<h3 id="复位OSPF："><a href="#复位OSPF：" class="headerlink" title="复位OSPF："></a>复位OSPF：</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;AR1&gt;reset ospf  [ process-id ] process [ flush-waiting-timer time | graceful-restart ]</span><br><span class="line"><span class="comment">//命令重启OSPF进程。</span></span><br></pre></td></tr></table></figure>
+<h2 id="常见命令："><a href="#常见命令：" class="headerlink" title="常见命令："></a>常见命令：</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br></pre></td><td class="code"><pre><span class="line">asbr-summary <span class="number">10.2</span><span class="number">.0</span><span class="number">.0</span> <span class="number">255.255</span><span class="number">.0</span><span class="number">.0</span> <span class="keyword">not</span>-advertise tag <span class="number">2</span> cost <span class="number">100</span></span><br><span class="line"><span class="comment">//用来设置自治系统边界路由器（ASBR）对OSPF引入的路由进行路由聚合。</span></span><br><span class="line"></span><br><span class="line">display ospf abr-asbr</span><br><span class="line"><span class="comment">//用来显示OSPF的区域边界路由器和自治系统边界路由器信息。</span></span><br><span class="line"></span><br><span class="line">display ospf asbr-summary</span><br><span class="line"><span class="comment">//用来查看OSPF的路由聚合信息。</span></span><br><span class="line"></span><br><span class="line">display ospf bfd session</span><br><span class="line"><span class="comment">//用来查看使能BFD特性邻居的信息。</span></span><br><span class="line"></span><br><span class="line">display ospf cumulative</span><br><span class="line"><span class="comment">//用来显示OSPF的统计信息。</span></span><br><span class="line"></span><br><span class="line">display ospf error</span><br><span class="line"><span class="comment">//用来查看OSPF的错误信息。</span></span><br><span class="line"></span><br><span class="line">display ospf global-statistics</span><br><span class="line"><span class="comment">//用来查看OSPF协议的全局统计信息。如果不指定OSPF进程号，该命令将显示所有OSPF进程的概要信息。</span></span><br><span class="line"></span><br><span class="line">display ospf graceful-restart</span><br><span class="line"><span class="comment">//用来查看OSPF GR的状态信息。</span></span><br><span class="line"></span><br><span class="line">display ospf interface</span><br><span class="line"><span class="comment">//用来显示OSPF的接口信息。</span></span><br><span class="line"></span><br><span class="line">display ospf lsdb</span><br><span class="line"><span class="comment">//用来显示OSPF的链路状态数据库（LSDB）信息。</span></span><br><span class="line"></span><br><span class="line">display ospf mesh-group</span><br><span class="line"><span class="comment">//用来查看OSPF Mesh-Group的概要信息。</span></span><br><span class="line"></span><br><span class="line">display ospf nexthop</span><br><span class="line"><span class="comment">//用来显示OSPF的下一跳信息。</span></span><br><span class="line"></span><br><span class="line">display ospf peer</span><br><span class="line"><span class="comment">//用来显示OSPF中各区域邻居的信息。</span></span><br><span class="line"></span><br><span class="line">display ospf routing</span><br><span class="line"><span class="comment">//命令用来显示OSPF路由表的信息。</span></span><br><span class="line"></span><br><span class="line">display ospf spf-statistics</span><br><span class="line"><span class="comment">//命令用来查看OSPF进程下路由计算的统计信息。</span></span><br><span class="line"></span><br><span class="line">display ospf statistics maxage-lsa</span><br><span class="line"><span class="comment">//命令用来查看达到最大老化时间的Router LSA信息。</span></span><br><span class="line"></span><br><span class="line">display ospf vlink</span><br><span class="line"><span class="comment">//命令用来显示OSPF的虚连接信息。</span></span><br><span class="line"></span><br><span class="line">ospf cost</span><br><span class="line"><span class="comment">//命令用来配置接口上运行OSPF协议所需的开销。</span></span><br><span class="line"></span><br><span class="line">ospf dr-priority</span><br><span class="line"><span class="comment">//命令用来设置接口在选举DR时的优先级。</span></span><br><span class="line"></span><br><span class="line">ospf filter-lsa-out</span><br><span class="line"><span class="comment">//命令用来配置对OSPF接口出方向的LSA进行过滤。</span></span><br><span class="line"></span><br><span class="line">ospf mtu-enable</span><br><span class="line"><span class="comment">//命令用来使能接口在发送DD报文时填MTU值。</span></span><br><span class="line"></span><br><span class="line">ospf network-type</span><br><span class="line"><span class="comment">//命令用来设置OSPF接口的网络类型。</span></span><br><span class="line"></span><br><span class="line">ospf p2mp-mask-ignore</span><br><span class="line"><span class="comment">//命令用来设置在P2MP网络上忽略对网络掩码的检查。</span></span><br><span class="line"></span><br><span class="line">ospf smart-discover</span><br><span class="line"><span class="comment">//命令用来在接口上使能Smart-discover功能。</span></span><br><span class="line"></span><br><span class="line">ospf timer hello</span><br><span class="line"><span class="comment">//命令用来设置接口发送Hello报文的时间间隔。</span></span><br><span class="line"></span><br><span class="line">preference<span class="comment">//命令用来设置OSPF协议路由的优先级。</span></span><br><span class="line"></span><br><span class="line">preference<span class="comment">//命令用来设置OSPF协议路由的优先级。</span></span><br></pre></td></tr></table></figure>
+<h2 id="常见配置错误"><a href="#常见配置错误" class="headerlink" title="常见配置错误"></a>常见配置错误</h2><h3 id="OSPF邻居建立不成功："><a href="#OSPF邻居建立不成功：" class="headerlink" title="OSPF邻居建立不成功："></a>OSPF邻居建立不成功：</h3><ol>
+<li><p>检查邻居两端的接口物理和协议状态是否UP，状态是否稳定，接口是否有丢包，两边互ping大包是否能通。</p>
+<p>若物理接口不Up或是不稳定（有振荡现象），请排查物理链路和链路层协议，确保物理和协议状态都是Up，并且接口无错误计数。</p>
+<p>可以通过ping测试，长ping测试是否存在丢包现象，ping大包（1500字节以上）测试是否存在大包不通的现象。</p>
+</li>
+<li><p>检查链路两端OSPF进程的Router ID是否一致。</p>
+<p>分别在链路两端的设备上执行命令display ospf  [ <em>process-id</em> ] <strong>brief</strong>，查看OSPF进程的Router ID。</p>
+<p>Router ID要保证全网唯一，否则会导致邻居不能正常建立、路由信息不正确的问题。建议在设备上单独为每个OSPF进程配置全网唯一的Router ID。</p>
+<p>如果链路两端OSPF进程的Router ID一致，请在系统视图下执行命令ospf [ <em>process-id</em> ] <strong>router-id</strong> <em>router-id</em>，修改OSPF进程的Router ID以保证不冲突。</p>
+<p>修改OSPF进程的Router ID之后，必须在用户视图下执行命令display ospf [ <em>process-id</em> ] <strong>process</strong>后，新配置的Router ID才会生效。</p>
+</li>
+<li><p>检查链路两端OSPF区域ID是否一致。</p>
+<p>分别在链路两端的设备上执行命令display ospf [ <em>process-id</em> ] <strong>brief</strong>，查看OSPF的区域ID。</p>
+<p>如果链路两端的OSPF区域ID不一致，请在OSPF视图下执行命令area <em>area-id</em>，修改OSPF区域ID以保证一致。</p>
+</li>
+<li><p>检查链接两端OSPF接口的网络类型是否一致。</p>
+<p>分别在链路两端的设备上执行命令display ospf [ <em>process-id</em> ] <strong>interface</strong>，查看OSPF接口的接口类型。</p>
+</li>
+</ol>
+<ul>
+<li>当链路两端的OSPF接口的网络类型一端是广播网而另一端是P2P时，双方仍可以正常的建立起邻居关系，但互相学不到路由信息。</li>
+<li>当链路两端的OSPF接口的网络类型一端是P2MP而另一端是P2P时，双方仍可以正常的建立起邻居关系，但互相学不到路由信息。为了相互学到路由信息，此时需要在链路两端的OSPF接口上配置相同的Hello报文发送间隔和邻居失效时间。</li>
+<li>如果OSPF接口的网络类型不一致，请在运行OSPF协议的接口视图下执行命令ospf network-type { <strong>broadcast</strong> | <strong>nbma</strong> | <strong>p2mp</strong> | <strong>p2p</strong> }，修改OSPF接口的网络类型以保证一致。</li>
+</ul>
+<blockquote>
+<p> 说明： </p>
+<p> 如果链路两端OSPF接口的网络类型都是NBMA，则必须在OSPF视图下执行命令peer <em>ip-address</em> [ <strong>dr-priority</strong> <em>priority</em> ]，配置NBMA网络的OSPF邻居。</p>
+</blockquote>
+<ol start="5">
+<li><p>检查链路两端OSPF接口的IP地址的掩码是否一致。</p>
+<p>分别在链路两端的设备上执行命令display current-configuration <strong>interface</strong> <em>interface-type</em> <em>interface-number</em>，查看OSPF接口的IP地址。</p>
+<p>一般情况下，链路两端的OSPF接口的IP地址的掩码必须一致，否则双方不能正常建立OSPF邻居关系。但在P2MP网络中，可以通过在运行OSPF协议的接口视图下配置命令ospf p2mp-mask-ignore来使设备忽略对网络掩码的检查，从而正常建立OSPF邻居关系。</p>
+<p>如果OSPF接口的IP地址的掩码不一致，请在运行OSPF协议的接口视图下执行命令ip address <em>ip-address</em> { <em>mask</em> | <em>mask-length</em> }，修改OSPF接口的IP地址以保证掩码一致。</p>
+</li>
+<li><p>检查链路两端OSPF接口的IP地址所在网段是否包含在区域内配置的<strong>network</strong>内。</p>
+<p>分别在链路两端的设备上执行命令display current-configuration <strong>interface</strong> <em>interface-type</em> <em>interface-number</em>，查看OSPF接口的IP地址；执行命令display current-configuration <strong>configuration</strong> <strong>ospf</strong>，查看OSPF进程的配置。</p>
+<p>满足下面两个条件，OSPF协议才能在接口上运行：</p>
+</li>
+</ol>
+<ul>
+<li><p>接口的IP地址掩码长度≥<strong>network</strong>命令中的掩码长度。OSPF使用反掩码，例如0.0.0.255表示掩码长度24位。</p>
+</li>
+<li><p>接口的主IP地址必须在<strong>network</strong>命令指定的网段范围之内。</p>
+<p>如果检查发现接口IP地址与配置的<strong>network</strong>不满足上述条件，请在运行OSPF协议的接口视图下执行命令ip address<em>ip-address</em> { <em>mask</em> | <em>mask-length</em> }，修改接口的IP地址；或者在OSPF进程对应的区域视图下执行命令network，修改配置的网段，保证满足上述条件。</p>
+</li>
+</ul>
+<ol start="7">
+<li><p>检查链路两端OSPF接口的DR优先级是否非零。</p>
+<p>分别在链路两端的设备上执行命令display ospf [ <em>process-id</em> ] <strong>interface</strong>，查看OSPF接口的DR优先级。</p>
+<p>对于广播和NBMA类型网络，链路中至少要有一个OSPF接口的DR优先级不为0，这样才能正常选举出DR。否则两边的邻居状态只能达到<strong>2-Way</strong>。</p>
+<p>如果链路两端OSPF接口的DR优先级都为0，请在运行OSPF协议的接口视图下执行命令ospf dr-priority <em>priority</em>，修改OSPF接口的DR优先级以保证至少有一个接口的DR优先级不为0。</p>
+</li>
+</ol>
+<h3 id="OSPF不能发现其他区域的路由："><a href="#OSPF不能发现其他区域的路由：" class="headerlink" title="OSPF不能发现其他区域的路由："></a>OSPF不能发现其他区域的路由：</h3><ol>
+<li><p>检查设备所在区域是否与骨干区域相连。</p>
+<p>在设备所在区域的ABR上执行命令display ospf [ <em>process-id</em> ] <strong>brief</strong>，查看ABR的区域配置信息。</p>
+<p>OSPF规定所有非骨干区域必须与骨干区域保持连通。</p>
+<p>如果ABR上没有配置骨干区域的信息，请在OSPF视图下执行命令area <em>area-id</em>，修改OSPF区域信息以保证ABR上至少有一个接口运行在骨干区域。</p>
+<blockquote>
+<p> 说明： </p>
+<p> 如果因实际组网限制，无法满足所有非骨干区域与骨干区域保持连通的要求，可以通过配置虚连接来满足需求。</p>
+</blockquote>
+</li>
+<li><p>检查设备所在区域是否为Totally Stub区域。</p>
+<p>在设备上执行命令display current-configuration <strong>configuration</strong> <strong>ospf</strong> [ <em>process-id</em> ]，查看OSPF进程的配置信息。</p>
+<p>配置非骨干区域为Stub区域时，如果在ABR上配置时加上了参数<strong>no-summary </strong>（即OSPF区域视图下执行<strong>stub</strong> <strong>no-summary</strong>命令），则将该区域配置成了Totally Stub区域。</p>
+<p>Totally Stub区域，不允许发布自治系统外部路由和区域间的路由，只允许发布区域内路由。</p>
+<ul>
+<li>如果要将该Totally Stub区域恢复为普通区域，则需要在该区域的所有设备的OSPF区域视图下执行命令undo stub。</li>
+<li>如果仅仅是需要将Totally Stub区域改成Stub区域，则需要在该区域的ABR的OSPF区域视图下先执行命令undo stub，然后再执行命令undo。</li>
+</ul>
+</li>
+<li><p>检查设备所在区域是否为Totally NSSA区域。</p>
+<p>在设备上执行命令display current-configuration <strong>configuration</strong> <strong>ospf</strong> [ <em>process-id</em> ]，查看OSPF进程的配置信息。</p>
+<p>配置非骨干区域为NSSA区域时，如果在ABR上配置时加上了参数<strong>no-summary </strong>（即在OSPF区域视图下执行<strong>nssa</strong> <strong>no-summary</strong>命令），则将该区域配置成了Totally NSSA区域。</p>
+<p>Totally NSSA区域不允许发布自治系统外部路由和区域间的路由，只允许发布区域内路由。</p>
+<ul>
+<li>如果要将该Totally NSSA区域恢复为普通区域，则需要在该区域的所有设备的OSPF区域视图下执行命令undo nssa。</li>
+<li>如果仅仅是需要将Totally NSSA区域改成NSSA区域，则需要在该区域的ABR的OSPF区域视图下先执行命令undo nssa，然后再执行命令nssa。</li>
+</ul>
+</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2017/10/20/OSPF命令行配置/" title="OSPF命令行配置">https://cshihong.github.io/2017/10/20/OSPF命令行配置/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/路由基础/" rel="tag"># 路由基础</a>
+          
+            <a href="/tags/OSPF/" rel="tag"># OSPF</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/20/OSPF报文类型/" rel="next" title="OSPF报文类型">
+                <i class="fa fa-chevron-left"></i> OSPF报文类型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/23/数组/" rel="prev" title="数组">
+                数组 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置OSPF的基本功能"><span class="nav-number">1.</span> <span class="nav-text">配置OSPF的基本功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建OSPF进程："><span class="nav-number">1.1.</span> <span class="nav-text">创建OSPF进程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建OSPF区域："><span class="nav-number">1.2.</span> <span class="nav-text">创建OSPF区域：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#宣告OSPF网段："><span class="nav-number">1.3.</span> <span class="nav-text">宣告OSPF网段：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#创建虚连接："><span class="nav-number">1.4.</span> <span class="nav-text">创建虚连接：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF检查配置结果："><span class="nav-number">1.5.</span> <span class="nav-text">OSPF检查配置结果：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置OSPF邻居或邻接的会话参数"><span class="nav-number">2.</span> <span class="nav-text">配置OSPF邻居或邻接的会话参数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置OPSF报文重传限制："><span class="nav-number">2.1.</span> <span class="nav-text">配置OPSF报文重传限制：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使能在DD报文中填充接口的实际MTU"><span class="nav-number">2.2.</span> <span class="nav-text">使能在DD报文中填充接口的实际MTU</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置OSPF在不同网络类型中的属性"><span class="nav-number">3.</span> <span class="nav-text">配置OSPF在不同网络类型中的属性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF的网络类型和特点"><span class="nav-number">3.1.</span> <span class="nav-text">OSPF的网络类型和特点:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置OSPF路由的收敛优先级："><span class="nav-number">3.2.</span> <span class="nav-text">配置OSPF路由的收敛优先级：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置接口发送Hello报文的时间间隔："><span class="nav-number">3.3.</span> <span class="nav-text">配置接口发送Hello报文的时间间隔：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置相邻邻居失效的时间"><span class="nav-number">3.4.</span> <span class="nav-text">配置相邻邻居失效的时间:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Smart-discover："><span class="nav-number">3.5.</span> <span class="nav-text">配置Smart-discover：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置更新LSA的时间间隔"><span class="nav-number">3.6.</span> <span class="nav-text">配置更新LSA的时间间隔:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置接收LSA的时间间隔："><span class="nav-number">3.7.</span> <span class="nav-text">配置接收LSA的时间间隔：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置SPF计算时间间隔："><span class="nav-number">3.8.</span> <span class="nav-text">配置SPF计算时间间隔：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#提高OPSF网络的稳定性"><span class="nav-number">4.</span> <span class="nav-text">提高OPSF网络的稳定性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置OSPF的协议优先级："><span class="nav-number">4.1.</span> <span class="nav-text">配置OSPF的协议优先级：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置接口传送LSA的延迟时间："><span class="nav-number">4.2.</span> <span class="nav-text">配置接口传送LSA的延迟时间：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置邻接路由器重传LSA的间隔："><span class="nav-number">4.3.</span> <span class="nav-text">配置邻接路由器重传LSA的间隔：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置Stub路由器："><span class="nav-number">4.4.</span> <span class="nav-text">配置Stub路由器：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#禁止OSPF接口发送和接收协议报文"><span class="nav-number">4.5.</span> <span class="nav-text">禁止OSPF接口发送和接收协议报文:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#提高OPSF安全性"><span class="nav-number">5.</span> <span class="nav-text">提高OPSF安全性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置OSPF区域验证方式："><span class="nav-number">5.1.</span> <span class="nav-text">配置OSPF区域验证方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置OSPF接口验证方式："><span class="nav-number">5.2.</span> <span class="nav-text">配置OSPF接口验证方式：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#维护OSPF"><span class="nav-number">6.</span> <span class="nav-text">维护OSPF</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#清除OSPF："><span class="nav-number">6.1.</span> <span class="nav-text">清除OSPF：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复位OSPF："><span class="nav-number">6.2.</span> <span class="nav-text">复位OSPF：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见命令："><span class="nav-number">7.</span> <span class="nav-text">常见命令：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见配置错误"><span class="nav-number">8.</span> <span class="nav-text">常见配置错误</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF邻居建立不成功："><span class="nav-number">8.1.</span> <span class="nav-text">OSPF邻居建立不成功：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF不能发现其他区域的路由："><span class="nav-number">8.2.</span> <span class="nav-text">OSPF不能发现其他区域的路由：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2017/10/20/OSPF命令行配置/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

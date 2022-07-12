@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="IKE简介安全联盟SA：定义： 安全联盟是要建立IPSec 隧道的通信双方对隧道参数的约定，包括隧道两端的IP地址、隧道采用的验证方式、验证算法、验证密钥、加密算法、共享密钥以及生命周期等一系列参数。 SA由三元组来唯一标识，这个三元组包括安全参数索引SPI（Security Parameter Index）、目的IP地址和使用的安全协议号（AH或ESP）。其中，SPI是为唯一标识SA而生成的一个">
+<meta name="keywords" content="IPSec VPN,VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IPSec VPN之IKE协议详解">
+<meta property="og:url" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="IKE简介安全联盟SA：定义： 安全联盟是要建立IPSec 隧道的通信双方对隧道参数的约定，包括隧道两端的IP地址、隧道采用的验证方式、验证算法、验证密钥、加密算法、共享密钥以及生命周期等一系列参数。 SA由三元组来唯一标识，这个三元组包括安全参数索引SPI（Security Parameter Index）、目的IP地址和使用的安全协议号（AH或ESP）。其中，SPI是为唯一标识SA而生成的一个">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/ike与ipsec关系.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/IKEv1协商.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/主模式9个包.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/dh算法.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/main_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/main_1_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/main_2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/main_3.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/mian_4.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/main_5.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/main_6.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/阶段二.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/quick_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/IKEv1野蛮模式.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/aggressive抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/agg_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/agg_1_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/agg_2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/agg_2_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/agg_3.png">
+<meta property="og:updated_time" content="2019-04-18T03:49:20.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPSec VPN之IKE协议详解">
+<meta name="twitter:description" content="IKE简介安全联盟SA：定义： 安全联盟是要建立IPSec 隧道的通信双方对隧道参数的约定，包括隧道两端的IP地址、隧道采用的验证方式、验证算法、验证密钥、加密算法、共享密钥以及生命周期等一系列参数。 SA由三元组来唯一标识，这个三元组包括安全参数索引SPI（Security Parameter Index）、目的IP地址和使用的安全协议号（AH或ESP）。其中，SPI是为唯一标识SA而生成的一个">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/ike与ipsec关系.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>IPSec VPN之IKE协议详解 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">IPSec VPN之IKE协议详解
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-03 15:46:25" itemprop="dateCreated datePublished" datetime="2019-04-03T15:46:25+08:00">2019-04-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-18 11:49:20" itemprop="dateModified" datetime="2019-04-18T11:49:20+08:00">2019-04-18</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 6,922</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 26</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="IKE简介"><a href="#IKE简介" class="headerlink" title="IKE简介"></a>IKE简介</h1><h2 id="安全联盟SA："><a href="#安全联盟SA：" class="headerlink" title="安全联盟SA："></a>安全联盟SA：</h2><p><strong>定义：</strong> 安全联盟是要建立IPSec 隧道的通信双方对隧道参数的约定，包括隧道两端的IP地址、隧道采用的验证方式、验证算法、验证密钥、加密算法、共享密钥以及生命周期等一系列参数。</p>
+<p>SA由三元组来<strong>唯一标识</strong>，这个三元组包括安全参数索引SPI（Security Parameter Index）、目的IP地址和使用的安全协议号（AH或ESP）。其中，SPI是为唯一标识SA而生成的一个32位比特的数值，它在AH和ESP头中传输。在手工配置SA时，需要手工指定SPI的取值。使用IKE协商产生SA时，SPI将随机生成。</p>
+<p>SA是单向的逻辑连接，因此两个IPSec对等体之间的双向通信，最少需要建立两个SA来分别对两个方向的数据流进行安全保护。</p>
+<p>SA是IPSec的一个基本组成部分，SA是SADB的一个条目，它包含双方关于IKE和IPSec已经协商完毕的安全信息。</p>
+<ul>
+<li>IKE or ISAKMP SA：双向的，决定了IKE协议处理相关细节</li>
+<li>IPSec SA：单向的，与封装协议相关，决定了具体加密流量的处理方式。</li>
+</ul>
+<p>两种类型的SA都是由IKE协议协商产生的。</p>
+<h2 id="建立IPSec-SA的方式："><a href="#建立IPSec-SA的方式：" class="headerlink" title="建立IPSec SA的方式："></a>建立IPSec SA的方式：</h2><p>有两种方式建立IPSec安全联盟：手工方式和IKE自动协商方式。二者的主要区别为：</p>
+<ul>
+<li><p>密钥生成方式不同</p>
+<p>手工方式下，建立SA所需的全部参数，包括加密、验证密钥，都需要用户手工配置，也只能手工刷新，在中大型网络中，这种方式的密钥管理成本很高；IKE方式下，建立SA需要的加密、验证密钥是通过DH算法生成的，可以动态刷新，因而密钥管理成本低，且安全性较高。</p>
+</li>
+<li><p>生存周期不同</p>
+<p>手工方式建立的SA，一经建立永久存在；IKE方式建立的SA，其生存周期由双方配置的生存周期参数控制。</p>
+</li>
+</ul>
+<h2 id="IKE介绍："><a href="#IKE介绍：" class="headerlink" title="IKE介绍："></a>IKE介绍：</h2><p>IKE是一个复合协议。</p>
+<p>因特网密钥交换IKE（Internet Key Exchange）协议建立在Internet安全联盟和密钥管理协议ISAKMP定义的框架上，是基于UDP（User Datagram Protocol）500 端口号，的应用层协议。</p>
+<p> IKE协商两种SA：</p>
+<ul>
+<li><p>IKE(ISAKMP)  SA (阶段一）</p>
+</li>
+<li><p>IPSEC SA（阶段二） </p>
+</li>
+</ul>
+<p>IKE负责建立和维护IKE SAs 和 IPSec SAs。功能主要体现在如下几个方面：</p>
+<ul>
+<li>对双方进行认证</li>
+<li>交换公共密钥，产生密钥资源，管理密钥</li>
+<li>协商协议参数（封装、加密、验证…..）</li>
+</ul>
+<p>IKE的三个组件：</p>
+<ul>
+<li>SKEME：实现公钥加密认证的机制</li>
+<li>Oakley：基于到达两个对等体间的加密密钥的机制</li>
+<li>ISAKMP：在两个实体间进行分组格式及状态转换的消息交换的体系结构。</li>
+</ul>
+<p><strong>IKE有两个版本:</strong> </p>
+<ul>
+<li>IKEV1 </li>
+<li>IKEV2——-华为默认 </li>
+</ul>
+<h2 id="IKE与IPSec的关系："><a href="#IKE与IPSec的关系：" class="headerlink" title="IKE与IPSec的关系："></a>IKE与IPSec的关系：</h2><p>IKE为IPSec提供了自动协商密钥、建立IPSec安全联盟的服务，能够简化IPSec的使用和管理，大大简化IPSec的配置和维护工作。</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/ike与ipsec关系.png" alt="ike与ipsec关系"></p>
+<center>图：IKE与IPSec的关系图</center>
+
+<p>IKE与IPSec的关系如上图所示，对等体之间建立一个IKE SA完成身份验证和密钥信息交换后，在IKE SA的保护下，根据配置的AH/ESP安全协议等参数协商出一对IPSec SA。此后，对等体间的数据将在IPSec隧道中加密传输。</p>
+<h2 id="IKE的安全机制："><a href="#IKE的安全机制：" class="headerlink" title="IKE的安全机制："></a>IKE的安全机制：</h2><p>IKE具有一套自保护机制，可以在不安全的网络上安全地认证身份、分发密钥、建立IPsec SA：</p>
+<p><strong>身份认证</strong></p>
+<p>身份认证确认通信双方的身份（对等体的IP地址或名称），包括预共享密钥PSK（pre-shared key）认证、数字证书RSA（rsa-signature）认证和数字信封认证。</p>
+<ul>
+<li>在预共享密钥认证中，认证字作为一个输入来产生密钥，通信双方采用共享的密钥对报文进行Hash计算，判断双方的计算结果是否相同。如果相同，则认证通过；否则认证失败。</li>
+<li>在数字证书认证中，通信双方使用CA证书进行数字证书合法性验证，双方各有自己的公钥（网络上传输）和私钥（自己持有）。发送方对原始报文进行Hash计算，并用自己的私钥对报文计算结果进行加密，生成数字签名。接收方使用发送方的公钥对数字签名进行解密，并对报文进行Hash计算，判断计算结果与解密后的结果是否相同。如果相同，则认证通过；否则认证失败。</li>
+<li>在数字信封认证中，发送方首先随机产生一个对称密钥，使用接收方的公钥对此对称密钥进行加密（被公钥加密的对称密钥称为数字信封），发送方用对称密钥加密报文，同时用自己的私钥生成数字签名。接收方用自己的私钥解密数字信封得到对称密钥，再用对称密钥解密报文，同时根据发送方的公钥对数字签名进行解密，验证发送方的数字签名是否正确。如果正确，则认证通过；否则认证失败。</li>
+</ul>
+<p><strong>DH</strong></p>
+<ul>
+<li><p>DH是一种公共密钥交换方法，它用于产生密钥材料，并通过ISAKMP消息在发送和接收设备之间进行密钥材料交换。然后，两端设备各自计算出完全相同的对称密钥。该对称密钥用于计算加密和验证的密钥。在任何时候，通信双方都不交换真正的密钥。DH密钥交换是IKE的精髓所在。</p>
+<p>MD5、SHA1、DES、3DES、AES等算法都可以采用DH算法来共享对称密钥。</p>
+<p>DH使用密钥组定义自己产生的密钥长度。密钥组长度越长，产生的密钥就越强壮。</p>
+<blockquote>
+<p>IKE的精髓在于它永远不在不安全的网络上传送密钥，而是通过一些数据的交换，通信双方最终计算出共享的密钥，并且即使第三方截获了双方用于计算密钥的所有交换数据，也无法计算出真正的密钥。其中的核心技术就是DH（Diffie Hellman）交换技术。</p>
+</blockquote>
+</li>
+</ul>
+<p>PFS</p>
+<ul>
+<li>短暂的一次性密钥系统称为“完善的前向保密“PFS（Perfect Forward Secrecy）</li>
+<li>如果加密系统中有个密钥是所有对称密钥的衍生者（始祖），便不能认为那是一个“完美向前保密”的系统。在这种情况下、一旦破解了跟密钥，便能拿到其他衍生的所有密钥，收那些密钥保护的全部数据都会曝光。</li>
+<li>在IPsec 里，PFS是通过在IPSec SA协商阶段重新进行一个DH交换来实现的。</li>
+<li>完善的前向安全性PFS（Perfect Forward Secrecy）是一种安全特性，指一个密钥被破解，并不影响其他密钥的安全性，因为这些密钥间没有派生关系。IPSec SA的密钥是从IKE SA的密钥导出的，由于一个IKE SA协商生成一对或多对IPSec SA，当IKE的密钥被窃取后，攻击者将可能收集到足够的信息来导出IPSec SA的密钥，PFS通过执行一次额外的DH交换，保证IPSec SA密钥的安全。</li>
+</ul>
+<h2 id="ISAKMP报文格式："><a href="#ISAKMP报文格式：" class="headerlink" title="ISAKMP报文格式："></a>ISAKMP报文格式：</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">   <span class="number">8</span>      <span class="number">12</span>      <span class="number">16</span>              <span class="number">24</span>              <span class="number">32</span></span><br><span class="line"> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span> <span class="number">9</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span> <span class="number">9</span> <span class="number">0</span> <span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span> <span class="number">5</span> <span class="number">6</span> <span class="number">7</span> <span class="number">8</span> <span class="number">9</span> <span class="number">0</span> <span class="number">1</span></span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br><span class="line">!                            发起者                             !</span><br><span class="line">!                      Initiator Cookie                       !</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br><span class="line">!                            应答                               !</span><br><span class="line">!                      Responder Cookie                         !</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br><span class="line">!   下一个载荷  ! MjVer ! MnVer !    交换类型   !     标志      !</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br><span class="line">!                            消息  ID                           !</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br><span class="line">!                             长度                              !</span><br><span class="line">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Initiator Cookie ― Initiator Cookie：启动 SA 建立、SA 通知或 SA 删除的实体 Cookie。 </li>
+<li>Responder Cookie ― Responder Cookie：响应 SA 建立、SA 通知或 SA 删除的实体 Cookie。 </li>
+<li>Next Payload ― 信息中的 Next Payload 字段类型。 </li>
+<li>Major Version ― 使用的 ISAKMP 协议的主要版本。 </li>
+<li>Minor Version ― 使用的 ISAKMP 协议的次要版本。 </li>
+<li>Exchange Type ―</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">表示所用的交换类型。这表示消息和载荷遵循所用的交换顺序。</span><br><span class="line">                        交换类型                值</span><br><span class="line">                         NONE                    <span class="number">0</span></span><br><span class="line">                         Base                    <span class="number">1</span></span><br><span class="line">                         Identity Protection     <span class="number">2</span></span><br><span class="line">                         Authentication Only     <span class="number">3</span></span><br><span class="line">                         Aggressive              <span class="number">4</span></span><br><span class="line">                         Informational           <span class="number">5</span></span><br><span class="line">                         ISAKMP Future Use     <span class="number">6</span> - <span class="number">31</span></span><br><span class="line">                         DOI Specific Use     <span class="number">32</span> - <span class="number">239</span></span><br><span class="line">                         Private Use         <span class="number">240</span> - <span class="number">255</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>Flags ― 为 ISAKMP 交换设置的各种选项。 </li>
+<li>Message ID ― 唯一的信息标识符，用来识别第2阶段的协议状态。 </li>
+<li>Length ― 全部信息（头＋有效载荷）长（八位）。</li>
+</ul>
+<h2 id="IKE的两个阶段："><a href="#IKE的两个阶段：" class="headerlink" title="IKE的两个阶段："></a>IKE的两个阶段：</h2><p>采用IKEv1协商安全联盟主要分为两个阶段：第一阶段，通信双方协商和建立IKE协议本身使用的安全通道，即建立一个IKE SA；第二阶段，利用第一阶段已通过认证和安全保护的安全通道，建立一对用于数据安全传输的IPSec安全联盟。</p>
+<p>IKEv1协商阶段1支持两种协商模式：主模式（Main Mode）和野蛮模式（Aggressive Mode）。</p>
+<p>经典版本的IKEv1有两个阶段：</p>
+<ul>
+<li><p>阶段一 ： IKE SA</p>
+<p>主模式（6个包）</p>
+<p>野蛮模式（3个包）</p>
+</li>
+<li><p>阶段二：IPSec SA</p>
+<p>快速模式（3个包）</p>
+</li>
+</ul>
+<h1 id="详解IKEv1主模式的协商过程"><a href="#详解IKEv1主模式的协商过程" class="headerlink" title="详解IKEv1主模式的协商过程"></a>详解IKEv1主模式的协商过程</h1><h2 id="IKEv1阶段一协商过程："><a href="#IKEv1阶段一协商过程：" class="headerlink" title="IKEv1阶段一协商过程："></a>IKEv1阶段一协商过程：</h2><p>IKEv1的主模式协商：包含了三次双向交换，用到了六条ISAKMP信息。协商过程如下图所示：</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/IKEv1协商.png" alt="IKEv1协商"></p>
+<center>图：IKEv1主模式的协商过程</center>
+
+<hr>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/主模式9个包.png" alt="主模式9个包"></p>
+<center>图：IKEv1主模式协商抓包</center>
+
+<p>IKEv1的协商过程总用用到了9个包。</p>
+<hr>
+<p>这三次交换分别是：</p>
+<ol>
+<li><p>消息①和②用于策略交换</p>
+<p>发起方发送一个或多个IKE安全提议，响应方查找最先匹配的IKE安全提议，并将这个IKE安全提议回应给发起方。匹配的原则为协商双方具有相同的加密算法、认证算法、认证方法和Diffie-Hellman组标识。</p>
+</li>
+<li><p>消息③和④用于密钥信息交换</p>
+<p>双方交换Diffie-Hellman公共值和nonce值，用于IKE SA的认证和加密密钥在这个阶段产生。</p>
+</li>
+<li><p>消息⑤和⑥用于身份和认证信息交换（双方使用生成的密钥发送信息），双方进行身份认证和对整个主模式交换内容的认证。</p>
+</li>
+</ol>
+<blockquote>
+<p>IKE安全提议指IKE协商过程中用到的加密算法、认证算法、Diffie-Hellman组及认证方法等。</p>
+<p>nonce是个随机数，用于保证IKE SA存活和抗重放攻击。</p>
+</blockquote>
+<hr>
+<h2 id="使用预共享秘钥进行身份验证主模式的详细过程："><a href="#使用预共享秘钥进行身份验证主模式的详细过程：" class="headerlink" title="使用预共享秘钥进行身份验证主模式的详细过程："></a>使用预共享秘钥进行身份验证主模式的详细过程：</h2><p>当做一个预共享秘钥认证时，主模式的协商如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">follows:</span><br><span class="line"></span><br><span class="line">             Initiator                        Responder</span><br><span class="line">            ----------                       -----------</span><br><span class="line">       <span class="number">1</span>      HDR, SA             --&gt;</span><br><span class="line">       <span class="number">2</span>                          &lt;--    HDR, SA</span><br><span class="line">       <span class="number">3</span>      HDR, KE, Ni         --&gt;</span><br><span class="line">       <span class="number">4</span>                          &lt;--    HDR, KE, Nr</span><br><span class="line">       <span class="number">5</span>      HDR*, IDii, HASH_I  --&gt;</span><br><span class="line">       <span class="number">6</span>                          &lt;--    HDR*, IDir, HASH_R</span><br></pre></td></tr></table></figure>
+<p><strong>缩写名词的解释：</strong></p>
+<ul>
+<li><p><strong>HDR</strong> ：是ISAKMP的标头。当记为 HDR* 表示该流量被加密。</p>
+</li>
+<li><p><strong>SA：</strong> 是SA带有一个或多个提议的有效载荷。针对多个提议，只回复一个。</p>
+</li>
+<li><p>KE：秘钥交换</p>
+</li>
+<li><p>IDii和IDir——标识，通常要IP地址<br> HASH_I =   prf(SKEYID,K| Ci | Cr| SAi | IDi )<br> HASH_R =  prf(SKEYID, K| Ci | Cr | SAr | IDr )</p>
+</li>
+<li><p>Ni：第一个随机数，用于生成密钥</p>
+</li>
+<li><p>Nr：第二个随机数，用于生成密钥</p>
+</li>
+<li><p>Ni Nr—-代表随机数，通过KE交换素材得到公共的K值</p>
+</li>
+<li><p>K值为推导SKEYID使用</p>
+</li>
+<li><p>HASH值用进行身份数据验证。</p>
+</li>
+<li><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HASH_I = prf(SKEYID, g^xi | g^xr | CKY-I | CKY-R | SAi_b | IDii_b )</span><br><span class="line">HASH_R = prf(SKEYID, g^xr | g^xi | CKY-R | CKY-I | SAi_b | IDir_b )</span><br><span class="line">  <span class="comment">//prf伪随机函数</span></span><br><span class="line">  <span class="comment">//g^xy is the Diffie-Hellman shared secret.</span></span><br><span class="line">  <span class="comment">// CKY-I and CKY-R are the Initiator's cookie and the Responder's cookie, respectively, from the ISAKMP header.</span></span><br><span class="line">   <span class="comment">// SAi_b is the entire body of the SA payload (minus the ISAKMP generic header)-- i.e. the DOI, situation, all proposals and all transforms offered by the Initiator.</span></span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<hr>
+<p><strong>笔记：报文协商参数拆解</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">阶段一: IKE SA	</span><br><span class="line">主模式（<span class="number">6</span>个包）</span><br><span class="line">Initiator                        Responder</span><br><span class="line">             ----------                       -----------</span><br><span class="line">-----------------------------------------------------------</span><br><span class="line">    <span class="number">1</span>-<span class="number">2</span>包，用于安全参数协商（明文）</span><br><span class="line"> </span><br><span class="line">              HDR, SA             --&gt;</span><br><span class="line">              Ci  SAi</span><br><span class="line">                                  &lt;--    HDR, SA</span><br><span class="line"></span><br><span class="line">                                           Ci Cr  SAr</span><br><span class="line"></span><br><span class="line">SA安全联盟(协商各种参数  加密算法   验证算法  验证方式【预共享密钥  数字证书】 DH组  密钥有效期） </span><br><span class="line">HDR拆解为Ci，Cr，分别代表Initiator cookie和Responder Cookie。第一个包Cr为<span class="number">0</span>。</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------</span><br><span class="line"> </span><br><span class="line"><span class="number">3</span>-<span class="number">4</span>个包   交换密钥素材，以及产生密钥(明文）</span><br><span class="line"></span><br><span class="line">              HDR, KE, Ni         --&gt;</span><br><span class="line">              Ci  Cr  K   Ni</span><br><span class="line">                                  &lt;--    HDR, KE, Nr</span><br><span class="line">                                           Ci Cr  k  Nr</span><br><span class="line"> </span><br><span class="line">Ni Nr----代表随机数</span><br><span class="line">通过KE交换素材得到公共的K值</span><br><span class="line"></span><br><span class="line">K值为推导SKEYID使用  K = g^xy</span><br><span class="line">SKEYID ------基准密钥</span><br><span class="line">使用预共享密钥</span><br><span class="line">SKEYID = prf(pre-shared-key, Ni|Nr)</span><br><span class="line"></span><br><span class="line">使用数字证书</span><br><span class="line">SKEYID = prf(Ni | Nr, K) -----基准密钥</span><br><span class="line"></span><br><span class="line"> 通过SKEYID推导三个密钥</span><br><span class="line">   SKEYID_d = prf(SKEYID, K | Ci | Cr | <span class="number">0</span>) -----------推导密钥，衍生密钥</span><br><span class="line">  </span><br><span class="line">   SKEYID_a = prf(SKEYID, SKEYID_d | K | Ci | Cr | <span class="number">1</span>)---------验证密钥</span><br><span class="line">   SKEYID_e = prf(SKEYID, SKEYID_a | K | Ci | Cr | <span class="number">2</span>)---------加密密钥</span><br><span class="line">   </span><br><span class="line">-----------------------------------------------------------</span><br><span class="line"></span><br><span class="line"><span class="number">5</span>-<span class="number">6</span> 两个包    做身份验证 （加密）</span><br><span class="line"></span><br><span class="line">采用预共享密钥<span class="number">5</span> <span class="number">6</span>两个包</span><br><span class="line">   HDR*, IDii, HASH_I  --&gt; </span><br><span class="line">   Ci Cr  </span><br><span class="line">                                  &lt;--    HDR*, IDir, HASH_R</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">IDii和IDir------标识，通常要IP地址</span><br><span class="line"> HASH_I =   prf(SKEYID,K| Ci | Cr| SAi | IDi )</span><br><span class="line"> HASH_R =  prf(SKEYID, K| Ci | Cr | SAr | IDr )</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">采用数字证书的<span class="number">5</span> <span class="number">6</span>两个包</span><br><span class="line"> HDR*, IDii, [ CERT, ] SIG_I --&gt;</span><br><span class="line"></span><br><span class="line">                                    &lt;--    HDR*, IDir, [ CERT, ] SIG_R</span><br><span class="line">                                    </span><br><span class="line">-----------------------------------------------------------------</span><br></pre></td></tr></table></figure>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/dh算法.png" alt="dh算法"></p>
+<center>图：通过DH算法得出密钥</center>
+
+<hr>
+<h3 id="阶段一的第1个包（明文）："><a href="#阶段一的第1个包（明文）：" class="headerlink" title="阶段一的第1个包（明文）："></a>阶段一的第1个包（明文）：</h3><p>第一包的作用是，协商发起发，发送IKE安全提议，给响应方。下图为抓包示例内容：</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/main_1.png" alt="main_1"></p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/main_1_1.png" alt="main_1_1"></p>
+<center>图：主模式的第一个包内容抓包示例</center>
+
+
+<p>首先当两个路由器或防火墙启用IPSEC的时候，我们以其中之一为起点。A-&gt;B，那么A开始发送IKE的数据报文。报文是UDP的类型，封装在端口500里面。</p>
+<p>首先是第一个信息被发送，主要内容是<strong>COOKIE号码，标识一个唯一的IPSEC会话，也有防止重放的功能</strong>。它的建立是通常是基于IP地址，端口的号码，时间和日期等等进行一个散列算法，生成一个8位的随机数。<strong>对方的COOKIE为0</strong>。</p>
+<p><strong>内容还包含一个SA负载，还有提议负载，转换负载。</strong>sa的负载是定位这个ISAKMP是为了IPSEC工作。因为IKE是一个标准的协议，所以在SA负载中通过DOI，解释域，来说明这条消息交换用于IPSEC。</p>
+<p>提议负载的内容包含一个提议号，协议ID，SPI，转换号，其中SPI为0，转换号指向了相应的转换负载</p>
+<p>转换负载的内容是加密的参数，如des，dh算法，存活时间，hash算法等等。</p>
+<h3 id="阶段一的第2个包（明文）："><a href="#阶段一的第2个包（明文）：" class="headerlink" title="阶段一的第2个包（明文）："></a>阶段一的第2个包（明文）：</h3><p>第2个包的作用主要是：通过查找第一个包的安全提议。给发送者回复一个确认的安全提议。下图是第二个包的抓包内容。</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/main_2.png" alt="main_2"></p>
+<center>图：IKEv1主模式协商第二个包抓包</center>
+
+<p>第二个包是响应方响应一个信息，<strong>主要内容就是对方的COOKIE号码，和一个提议和一个策略</strong>，注意，<strong>这个提议和策略是和开始里面的一个对应的，否则，就回一个失败信息。</strong></p>
+<h3 id="阶段一的第3个包（明文）："><a href="#阶段一的第3个包（明文）：" class="headerlink" title="阶段一的第3个包（明文）："></a>阶段一的第3个包（明文）：</h3><p>第三个包的作用：如果发起方接受了安全提议，就给对方发送密钥生成信息，对方用来生成IKE的秘钥。</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/main_3.png" alt="main_3"></p>
+<center>图：IKEv1主模式协商第三个包抓包示例</center>
+
+<p>初始方然后回应第三个信息，内容是自己的公钥，发给对方，注意，此处我的理解是素数已经交换完毕，公钥就是根据自己随机产生的私钥加上素数和一个产生器g三者来产生的。同时传输一个随机数NI。</p>
+<h3 id="阶段一第四个包（明文）："><a href="#阶段一第四个包（明文）：" class="headerlink" title="阶段一第四个包（明文）："></a>阶段一第四个包（明文）：</h3><p>主要作用：协商相应方给协商发起方发送密钥生成信息，使得协议发起方能生成密钥。</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/mian_4.png" alt="mian_4"></p>
+<center>图：IKEv1主模式协商第4个包抓包</center>
+
+<p>接收方回应自己的公钥给初始方。包含一个随机数NR。</p>
+<p>然后双方各自计算出共享的密钥，一共有三个密钥，SKEYID_a，d，e，其中d是根据z=pfs（pre-shared key，cookie_i，cookie_ni，nl|0），其中d用来给第二阶段提供密钥的素材。a用来对IKE的数据进行认证，e用来加密整个IKE协商的数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">K值为推导SKEYID使用 </span><br><span class="line">	SKEYID ------基准密钥</span><br><span class="line">使用预共享密钥</span><br><span class="line"></span><br><span class="line">	SKEYID = prf(pre-shared-key, Ni|Nr)</span><br><span class="line"></span><br><span class="line">使用数字证书</span><br><span class="line">	SKEYID = prf(Ni | Nr, K) </span><br><span class="line"></span><br><span class="line"> 通过SKEYID推导三个密钥</span><br><span class="line"> 	  SKEYID_d = prf(SKEYID, K | Ci | Cr | <span class="number">0</span>) -----------推导密钥</span><br><span class="line">  	 SKEYID_a = prf(SKEYID, SKEYID_d | K | Ci | Cr | <span class="number">1</span>)---------验证密钥,对数据进行验证</span><br><span class="line"> 	  SKEYID_e = prf(SKEYID, SKEYID_a | K | Ci | Cr | <span class="number">2</span>)---------加密密钥</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>当使用预共享密钥认证与主模式时，密钥可以只能通过对等点的IP地址来标识，因为必须使用HASH_I，在启动程序处理IDir之前计算。野蛮模式允许更大范围的预共享密钥标识符被使用。此外，野蛮模式允许双方进行维护多个不同的预共享密钥，并确定正确的密钥一个特定的交换。</p>
+</blockquote>
+<h3 id="阶段一的第5个包（密文）："><a href="#阶段一的第5个包（密文）：" class="headerlink" title="阶段一的第5个包（密文）："></a>阶段一的第5个包（密文）：</h3><p>主要作用：发起方发送身份和验证数据。</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/main_5.png" alt="main_5"></p>
+<center> 图：IKEv1主模式协商第5个包抓包</center>
+
+
+<p>初始方开始继续协商，发送第五个信息，注意，此刻所有的<strong>负载信息是被ekey加密过的</strong>。信息主要包含两个内容，其中之一是标识负载，另一个是散<br>列负载，标识负载的主要内容是包含自己的IP地址，就是我们所谓的ID_I，或者是主机名称。散列负载主要的内容是使用session_a进行的散列计 算，计算的参数有上述的Z，和两端的cookie，pre-share key ，提议，转换集，SA的内容。</p>
+<h3 id="阶段一的第6个包（密文）："><a href="#阶段一的第6个包（密文）：" class="headerlink" title="阶段一的第6个包（密文）："></a>阶段一的第6个包（密文）：</h3><p>主要作用: 协商响应方给发起方发送身份和验证数据。</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/main_6.png" alt="main_6"></p>
+<center> 图：IKEv1主模式协商第6个包抓包</center>
+
+
+<p>然后当接收方收到的时候进行确认，先解密，然后根据ID找到pre-key，然后进行相同的计算，得出散列的值，然后对比接收呼叫。</p>
+<p>总结：在这个过程中，所有的数据都是被封装在UDP 500的端口内进行协商的。</p>
+<h2 id="IKEv1阶段二-快速模式协商过程："><a href="#IKEv1阶段二-快速模式协商过程：" class="headerlink" title="IKEv1阶段二 快速模式协商过程："></a>IKEv1阶段二 快速模式协商过程：</h2><p>IKEv1协商阶段2的目的就是建立用来安全传输数据的IPSec SA，并为数据传输衍生出密钥。这一阶段采用快速模式（Quick Mode）。该模式使用IKEv1协商阶段1中生成的密钥对ISAKMP消息的完整性和身份进行验证，并对ISAKMP消息进行加密，故保证了交换的安全性。</p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/阶段二.png" alt="阶段二"></p>
+<center>图：IKEv1阶段二协商过程</center>
+
+<p><strong>阶段二的快速模式的协商如下：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Initiator                         Responder</span><br><span class="line">  -----------                   -----------</span><br><span class="line">  HDR*, HASH(<span class="number">1</span>), SA, Ni</span><br><span class="line">    [, KE ] [, IDci, IDcr ] --&gt;</span><br><span class="line">                             &lt;--    HDR*, HASH(<span class="number">2</span>), SA, Nr</span><br><span class="line">                                    [, KE ] [, IDci, IDcr ]</span><br><span class="line">     HDR*, HASH(<span class="number">3</span>)       --&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HASH(<span class="number">1</span>) = prf(SKEYID_a, M-ID | SA | Ni [ | KE ] [ | IDci | IDcr )</span><br><span class="line">HASH(<span class="number">2</span>) = prf(SKEYID_a, M-ID | Ni_b | SA | Nr [ | KE ] [ | IDci |</span><br><span class="line">IDcr )</span><br><span class="line">HASH(<span class="number">3</span>) = prf(SKEYID_a, <span class="number">0</span> | M-ID | Ni_b | Nr_b)</span><br></pre></td></tr></table></figure>
+<p>IKEv1协商阶段2通过三条ISAKMP消息完成双方IPSec SA的建立：</p>
+<ol>
+<li><p>协商发起方发送本端的安全参数和身份认证信息。</p>
+<p>安全参数包括被保护的数据流和IPSec安全提议等需要协商的参数。身份认证信息包括第一阶段计算出的密钥和第二阶段产生的密钥材料等，可以再次认证对等体。</p>
+</li>
+<li><p>协商响应方发送确认的安全参数和身份认证信息并生成新的密钥。</p>
+<p>IPSec SA数据传输需要的加密、验证密钥由第一阶段产生的密钥、SPI、协议等参数衍生得出，以保证每个IPSec SA都有自己独一无二的密钥。</p>
+<p>如果启用PSF，则需要再次应用DH算法计算出一个共享密钥，然后参与上述计算，因此在参数协商时要为PFS协商DH密钥组。</p>
+</li>
+<li><p>发送方发送确认信息，确认与响应方可以通信，协商结束。</p>
+</li>
+</ol>
+<hr>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/quick_1.png" alt="quick_1"></p>
+<center>图：快速模式第1个包，第2个包，第3个包都除了加密数据格式都相同</center>
+
+<p>第二阶段，当第一阶段结束后，根据session-d的密钥资源，然后继续进行两次交换：</p>
+<p>第一次交换，首先，判断是否启用了PFS（完美转发安全），如果启用的话，根据pfs中定义的参数继续进 行一个协商。PFS是提议者向接收者提供建议 的属性。如果协商就支持，否则就不支持。它的作用是在快速模式中重新协商DH密钥的属性。这允许使用新的密钥进行ipsec加密，而不是使用第一阶段生产的密钥。</p>
+<p>快速模式只有一次交换，DH交换必须马上发生。不能几次协商了。因此，两端的DH配置必须匹配。</p>
+<p>当执行PFS的时候，再次执行DH算法，然后，重新生产密钥。</p>
+<h2 id="配置感兴趣流时的注意事项："><a href="#配置感兴趣流时的注意事项：" class="headerlink" title="配置感兴趣流时的注意事项："></a>配置感兴趣流时的注意事项：</h2><p>在IKEv1中，双方的感兴趣刘必须互为镜像，不能取交集。而在IKEv2中可以取交集。</p>
+<p>例如：在1.1.1.1/34 —-&gt; 2.2.2.2/32 与 2.2.2.2/32 ——&gt; 1.1.1.1/32 在IKEv1中可以协商。而1.1.1.1/34 —-&gt; 2.2.2.2/32 与 2.2.2.0/24 —-&gt;1.1.1.0/24 在IKEv1中不可以协商，在IKEv2中可以协商成功。</p>
+<blockquote>
+<p><strong>注意：SKEYID-e用来加密包弧ISAMKP的协议的数据，而不是用来保护感兴趣流。</strong></p>
+<p>保护数据流的密钥用的是密钥是：KEYMAT。</p>
+<ul>
+<li><p>无PFS<br>KEYMAT = prf(SKEYID_d, protocol | SPI | Ni_b | Nr_b).</p>
+</li>
+<li><p>有PFS<br> KEYMAT = prf(SKEYID_d, g(qm)^xy | protocol | SPI | Ni_b | Nr_b)</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&gt; If PFS is not needed, and KE payloads are not exchanged, the <span class="keyword">new</span></span><br><span class="line">&gt;    keying material is defined as</span><br><span class="line">&gt; </span><br><span class="line">&gt;        KEYMAT = prf(SKEYID_d, protocol | SPI | Ni_b | Nr_b).</span><br><span class="line">&gt; </span><br><span class="line">&gt;    If PFS is desired and KE payloads were exchanged, the <span class="keyword">new</span> keying</span><br><span class="line">&gt;    material is defined as</span><br><span class="line">&gt; </span><br><span class="line">&gt;        KEYMAT = prf(SKEYID_d, g(qm)^xy | protocol | SPI | Ni_b | Nr_b)</span><br><span class="line">&gt; </span><br><span class="line">&gt;    <span class="function">where <span class="title">g</span><span class="params">(qm)</span>^xy is the shared secret from the ephemeral Diffie-Hellman</span></span><br><span class="line"><span class="function">&gt;    exchange of <span class="keyword">this</span> Quick Mode.</span></span><br><span class="line"><span class="function">&gt;</span></span><br></pre></td></tr></table></figure>
+</blockquote>
+<h1 id="详解IKEv1野蛮模式的协商过程"><a href="#详解IKEv1野蛮模式的协商过程" class="headerlink" title="详解IKEv1野蛮模式的协商过程"></a>详解IKEv1野蛮模式的协商过程</h1><h2 id="野蛮模式协商过程："><a href="#野蛮模式协商过程：" class="headerlink" title="野蛮模式协商过程："></a>野蛮模式协商过程：</h2><p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/IKEv1野蛮模式.png" alt="IKEv1野蛮模式"></p>
+<center>图：野蛮模式协商过程</center>
+
+<hr>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/aggressive抓包.png" alt="aggressive抓包"></p>
+<center>图：野蛮模式协商过程</center>
+
+<hr>
+<p>野蛮模式只用到三条信息：前两条消息①和②用于协商IKE安全提议，交换Diffie-Hellman公共值、必需的辅助信息以及身份信息，并且消息②中还包括响应方发送身份信息供发起方认证，消息③用于响应方认证发起方。</p>
+<hr>
+<h2 id="使用预共享秘钥进行身份验证野蛮模式的详细过程："><a href="#使用预共享秘钥进行身份验证野蛮模式的详细过程：" class="headerlink" title="使用预共享秘钥进行身份验证野蛮模式的详细过程："></a>使用预共享秘钥进行身份验证野蛮模式的详细过程：</h2><p>当做一个预共享秘钥认证时，野蛮模式的协商如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Initiator                        Responder</span><br><span class="line">         -----------                      -----------</span><br><span class="line">          HDR, SA, KE, Ni, IDii --&gt;</span><br><span class="line">                                &lt;--    HDR, SA, KE, Nr, IDir, HASH_R</span><br><span class="line">          HDR, HASH_I           --&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">野蛮模式（3个包）</span><br><span class="line">      Initiator                        Responder</span><br><span class="line">           -----------                      ----------- </span><br><span class="line">第1包-------安全提议（各种协商）  密钥交换素材   随机数  身份ID</span><br><span class="line">            HDR, SA, KE, Ni, IDii --&gt;</span><br><span class="line">                                  &lt;--    HDR, SA, KE, Nr, IDir, HASH_R</span><br><span class="line"></span><br><span class="line">第2包---------安全提议，密钥交换素材  随机数  身份ID  HASH_R</span><br><span class="line"></span><br><span class="line">第3包---------加密的环境</span><br><span class="line">            HDR*, HASH_I           --&gt;</span><br></pre></td></tr></table></figure>
+<hr>
+<p><strong>第一个包报文抓包：</strong></p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/agg_1.png" alt="agg_1"></p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/agg_1_1.png" alt="agg_1_1"></p>
+<center><br>    图：野蛮模式协商第一个包<br></center>
+
+<p>主要携带了安全提议（各种协商）  密钥交换素材   随机数  身份ID等，发送给响应方。</p>
+<hr>
+<h3 id="第二个报文抓包："><a href="#第二个报文抓包：" class="headerlink" title="第二个报文抓包："></a>第二个报文抓包：</h3><p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/agg_2.png" alt="agg_2"></p>
+<p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/agg_2_1.png" alt="agg_2_1"></p>
+<center> 图：野蛮模式协商第二个包</center>
+
+
+<p>第二个包：主要携带确认双方都支持的安全提议，密钥交换素材  随机数  身份ID  HASH_R等，发送给协商发起方。</p>
+<hr>
+<h3 id="第三个包："><a href="#第三个包：" class="headerlink" title="第三个包："></a>第三个包：</h3><p><img src="/2019/04/03/IPSec-VPN之IKE协议详解/agg_3.png" alt="agg_3"></p>
+<center>图：野蛮模式协商第三个包</center>
+
+
+<p>第三个包：的传输过程是加密的。主要用于响应方认证发起方。</p>
+<h1 id="主模式与野蛮模式的区别："><a href="#主模式与野蛮模式的区别：" class="headerlink" title="主模式与野蛮模式的区别："></a>主模式与野蛮模式的区别：</h1><ol>
+<li>交换的消息：主模式为6个包，野蛮模式为3个包，野蛮模式能够更快创建IKE SA</li>
+<li>NAT支持：对预共享密钥认证：主模式不支持NAT转换，而野蛮模式支持。而对于证书方式认证：两种模式都能支持</li>
+<li>对等体标识：主模式只能采用IP地址方式标识对等体；而野蛮模式可以采用IP地址方式或者Name方式标识对等体。这是由于主模式在交换完3、4消息以后，需要使用预共享密钥来计算SKEYID，当一个设备有多个对等体时，必须查找到该对等体对应的预共享密钥，但是由于其对等体的ID信息在消息5、6中才会发送，此时主模式的设备只能使用消息3、4中的IP报文源地址来找到与其对应的预共享密钥；如果主模式采用Name方式，Name信息却包含在消息5、6中，而设备必须在消息5、6之前找到其对等体的预共享密钥，所以就造成了矛盾，无法完成Name方式的标识。<br>而在野蛮模式中，ID消息在消息1、2中就已经发送了，设备可以根据ID信息查找到对应的预共享密钥，从而计算SKEYID。但是由于野蛮模式交换的2个消息没有经过加密，所以ID信息也是明文的，也相应造成了安全隐患。</li>
+<li>提议转换对数量：在野蛮模式中，由于第一个消息就需要交换DH消息，而DH消息本身就决定了采用哪个DH组，这样在提议转换对中就确定了使用哪个DH组，如果第一个消息中包含多个提议转换对，那么这多个转换对的DH组必须相同(和DH消息确定的DH组一致)，否则消息1中只能携带和确定DH组相同的提议转换对。</li>
+<li><p>协商能力：由于野蛮模式交换次数的限制，因此野蛮模式协商能力低于主模式。 </p>
+</li>
+<li><p>主模式常用，野蛮已经不推荐使用,推荐使用模板方式</p>
+</li>
+<li><p>两者之间的协商过程不同</p>
+</li>
+<li><p>场景不同：</p>
+</li>
+</ol>
+<p><strong>野蛮模式的场景：</strong></p>
+<p>与主模式相比，野蛮模式减少了交换信息的数目，提高了协商的速度<strong>，但是没有对身份信息进行加密保护</strong>。虽然野蛮模式不提供身份保护，但它可以满足某些特定的网络环境需求：</p>
+<ul>
+<li>当IPSec隧道中存在NAT设备时，需要启动NAT穿越功能，而NAT转化会改变对等体的IP地址，由于野蛮模式不依赖于IP地址标识身份，使得采用预共享密钥验证方式时，NAT穿越只能在野蛮模式中实现。</li>
+<li>v 如果发起方的IP地址不固定或者无法预知，而双方都希望采用预共享密钥验证方法来创建IKE SA，则只能采用野蛮模式。</li>
+<li>如果发起方已知响应方的策略，或者对响应者的策略有全面的了解，采用野蛮模式能够更快地创建IKE SA。</li>
+</ul>
+<p><strong>主模式场景：</strong></p>
+<blockquote>
+<p><strong>要求两端都是固定IP地址</strong> </p>
+</blockquote>
+<hr>
+<blockquote>
+<p>参考文档：RFC 2409， 华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/" title="IPSec VPN之IKE协议详解">https://cshihong.github.io/2019/04/03/IPSec-VPN之IKE协议详解/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/IPSec-VPN/" rel="tag"># IPSec VPN</a>
+          
+            <a href="/tags/VPN/" rel="tag"># VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/03/IPSec-VPN基本原理/" rel="next" title="IPSec VPN基本原理">
+                <i class="fa fa-chevron-left"></i> IPSec VPN基本原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/09/IPSec-VPN之IKEv2协议详解/" rel="prev" title="IPSec VPN之IKEv2协议详解">
+                IPSec VPN之IKEv2协议详解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#IKE简介"><span class="nav-number">1.</span> <span class="nav-text">IKE简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安全联盟SA："><span class="nav-number">1.1.</span> <span class="nav-text">安全联盟SA：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#建立IPSec-SA的方式："><span class="nav-number">1.2.</span> <span class="nav-text">建立IPSec SA的方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKE介绍："><span class="nav-number">1.3.</span> <span class="nav-text">IKE介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKE与IPSec的关系："><span class="nav-number">1.4.</span> <span class="nav-text">IKE与IPSec的关系：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKE的安全机制："><span class="nav-number">1.5.</span> <span class="nav-text">IKE的安全机制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ISAKMP报文格式："><span class="nav-number">1.6.</span> <span class="nav-text">ISAKMP报文格式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKE的两个阶段："><span class="nav-number">1.7.</span> <span class="nav-text">IKE的两个阶段：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#详解IKEv1主模式的协商过程"><span class="nav-number">2.</span> <span class="nav-text">详解IKEv1主模式的协商过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IKEv1阶段一协商过程："><span class="nav-number">2.1.</span> <span class="nav-text">IKEv1阶段一协商过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用预共享秘钥进行身份验证主模式的详细过程："><span class="nav-number">2.2.</span> <span class="nav-text">使用预共享秘钥进行身份验证主模式的详细过程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#阶段一的第1个包（明文）："><span class="nav-number">2.2.1.</span> <span class="nav-text">阶段一的第1个包（明文）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#阶段一的第2个包（明文）："><span class="nav-number">2.2.2.</span> <span class="nav-text">阶段一的第2个包（明文）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#阶段一的第3个包（明文）："><span class="nav-number">2.2.3.</span> <span class="nav-text">阶段一的第3个包（明文）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#阶段一第四个包（明文）："><span class="nav-number">2.2.4.</span> <span class="nav-text">阶段一第四个包（明文）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#阶段一的第5个包（密文）："><span class="nav-number">2.2.5.</span> <span class="nav-text">阶段一的第5个包（密文）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#阶段一的第6个包（密文）："><span class="nav-number">2.2.6.</span> <span class="nav-text">阶段一的第6个包（密文）：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKEv1阶段二-快速模式协商过程："><span class="nav-number">2.3.</span> <span class="nav-text">IKEv1阶段二 快速模式协商过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置感兴趣流时的注意事项："><span class="nav-number">2.4.</span> <span class="nav-text">配置感兴趣流时的注意事项：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#详解IKEv1野蛮模式的协商过程"><span class="nav-number">3.</span> <span class="nav-text">详解IKEv1野蛮模式的协商过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#野蛮模式协商过程："><span class="nav-number">3.1.</span> <span class="nav-text">野蛮模式协商过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用预共享秘钥进行身份验证野蛮模式的详细过程："><span class="nav-number">3.2.</span> <span class="nav-text">使用预共享秘钥进行身份验证野蛮模式的详细过程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#第二个报文抓包："><span class="nav-number">3.2.1.</span> <span class="nav-text">第二个报文抓包：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第三个包："><span class="nav-number">3.2.2.</span> <span class="nav-text">第三个包：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#主模式与野蛮模式的区别："><span class="nav-number">4.</span> <span class="nav-text">主模式与野蛮模式的区别：</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/04/03/IPSec-VPN之IKE协议详解/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

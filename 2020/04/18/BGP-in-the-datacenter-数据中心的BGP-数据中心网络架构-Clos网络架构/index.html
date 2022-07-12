@@ -1,0 +1,2577 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="数据中心的BGP 说明： 这是最近在学习《BGP in the datacenter》。由于原文是全英文。所以在学习过程中，利用谷歌翻译和网易翻译，再把翻译不通的地方，加上自己理解稍微改了改。在此共享出来，需要的人可以参考参考。 原文链接：https://www.oreilly.com/library/view/bgp-in-the/9781491983416/   前言这本小册子是我在与大大小小">
+<meta name="keywords" content="BGP,数据中心">
+<meta property="og:type" content="article">
+<meta property="og:title" content="(BGP in the datacenter)数据中心的BGP,数据中心网络架构,Clos网络架构">
+<meta property="og:url" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="数据中心的BGP 说明： 这是最近在学习《BGP in the datacenter》。由于原文是全英文。所以在学习过程中，利用谷歌翻译和网易翻译，再把翻译不通的地方，加上自己理解稍微改了改。在此共享出来，需要的人可以参考参考。 原文链接：https://www.oreilly.com/library/view/bgp-in-the/9781491983416/   前言这本小册子是我在与大大小小">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/clos.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/clos-3.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/stp.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/stp-re.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/1-5.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/1-6.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/1-7.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/2-1.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/2-2.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/2-3.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/2-4.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/3-1.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/4-1.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/4-2.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-1.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-2.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-3.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-4.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-5.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-6.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/6-1.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/6-2.png">
+<meta property="og:updated_time" content="2020-04-23T08:07:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="(BGP in the datacenter)数据中心的BGP,数据中心网络架构,Clos网络架构">
+<meta name="twitter:description" content="数据中心的BGP 说明： 这是最近在学习《BGP in the datacenter》。由于原文是全英文。所以在学习过程中，利用谷歌翻译和网易翻译，再把翻译不通的地方，加上自己理解稍微改了改。在此共享出来，需要的人可以参考参考。 原文链接：https://www.oreilly.com/library/view/bgp-in-the/9781491983416/   前言这本小册子是我在与大大小小">
+<meta name="twitter:image" content="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/clos.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>(BGP in the datacenter)数据中心的BGP,数据中心网络架构,Clos网络架构 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">(BGP in the datacenter)数据中心的BGP,数据中心网络架构,Clos网络架构
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-04-18 13:55:10" itemprop="dateCreated datePublished" datetime="2020-04-18T13:55:10+08:00">2020-04-18</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-04-23 16:07:34" itemprop="dateModified" datetime="2020-04-23T16:07:34+08:00">2020-04-23</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/数据中心/" itemprop="url" rel="index"><span itemprop="name">数据中心</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 35,211</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 132</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="数据中心的BGP"><a href="#数据中心的BGP" class="headerlink" title="数据中心的BGP"></a>数据中心的BGP</h1><blockquote>
+<p><strong>说明：</strong></p>
+<p>这是最近在学习《BGP in the datacenter》。由于原文是全英文。所以在学习过程中，利用谷歌翻译和网易翻译，再把翻译不通的地方，加上自己理解稍微改了改。在此共享出来，需要的人可以参考参考。</p>
+<p>原文链接：<a href="https://www.oreilly.com/library/view/bgp-in-the/9781491983416/" target="_blank" rel="noopener">https://www.oreilly.com/library/view/bgp-in-the/9781491983416/</a></p>
+</blockquote>
+<hr>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这本小册子是我在与大大小小的不同客户打交道时经常遇到的问题的结果，这些客户都是在构建现代数据中心的过程中遇到的</p>
+<p>在数据中心的BGP是一个相当奇怪的野兽，有点像那首刺痛的歌的标题，“一个在纽约的英国人”。虽然它进入数据中心是相当意外的，但它迅速成为数据中心部署中首选的路由协议。</p>
+<p>考虑到这本小册子的篇幅有限，这本书的目标对象主要是熟悉网络和BGP基本原理，以及想要了解如何在数据中心部署BGP的的网络工程师。我没有指定任何BGP的高级知识工作经验在特定的路由平台。</p>
+<p>本书的主要目标是把理论和实践结合在一起去部署BGP在数据中心。在继续讨论如何设计BGP适应数据中心之前，我将介绍Clos拓扑的设计和对网络操作的影响。在接下来的两章中，我们将构建一个两层Clos网络的示例配置，这种配置的目的是使简化和自动化。我们开辟了新的思路在这些章节中，比如，无编号的BGP。这本书最后讨论了如何在服务器上部署BGP，以便处理微服务应用程序的构建以及虚拟防火墙和负载均衡服务。尽管我没有在本书中讨论实际的自动化手册，但是GitHub附带的软件可以支持在便携式笔记本上提供虚拟关键供您使用。</p>
+<p>在我撰写本手册以及完成许多其他工作时，真正付出代价的人是我的妻子Shanthala和女儿Maya。 谢谢。 很荣幸与Cumulus Networks的工程师，特别是路由团队一起，在开发和研究想法以使BGP更易于配置和管理。</p>
+<h2 id="本书使用的软件"><a href="#本书使用的软件" class="headerlink" title="本书使用的软件"></a>本书使用的软件</h2><p>目前有许多可用的路由套件，有些是供应商专有的，有些是开源的。我选择了开源FRRouting路由套件作为我的配置示例的基础。它实现了本书中许多创新的讨论。另外，它的配置语言模仿了许多其他传统供应商路由套件，因此你可以很容易地将配置片段翻译成其他实现。</p>
+<p>自动化示例使用了GitHub上的Ansible和Vagrant。Ansible是一个流行的，开放源码的服务器自动化工具，由于它的简单，不需要编程的模型，非常受网络运维者的欢迎。Vagrant是一个流行的开源工具，用于在笔记本上使用vm路由软件镜像去启动网络服务。</p>
+<h1 id="数据中心网络简介"><a href="#数据中心网络简介" class="headerlink" title="数据中心网络简介"></a>数据中心网络简介</h1><p>网络的存在是为了满足应用程序的连通性需求，而应用程序则是为了满足其组织的业务需求。因此，作为网络设计者或操作员，首先必须了解现代数据中心的需求，以及适应数据中心的网络工作拓扑结构。这就是我们旅途的开始。我的目标是让您在本章结束时了解现代数据中心网络的网络设计，考虑到应用程序的需求和操作的规模。</p>
+<p>数据中心比十年前要大得多，应用程序需求与传统的客户机-服务器应用程序有很大的不同，部署速度以秒而不是以天为单位。这改变了网络的设计和部署方式。</p>
+<p>数据中心内最常用的路由协议是边界网关协议(BGP)。数十年来，BGP一直以帮助全球联网系统寻找彼此而闻名。但是，它在单个数据中心中也很有用。BGP是基于标准的，并且受到许多自由和开源软件包的支持。</p>
+<p>随着现代数据中心网络的设计，将BGP部署到数据中心中是很自然的事情。本章是对以下问题的回答:</p>
+<ul>
+<li>现代数据中心网络设计背后的目标是什么?</li>
+<li>这些目标与其他网络(如企业网络和校园网络)有何不同?</li>
+<li>为什么选择BGP作为运行数据中心的路由协议?</li>
+</ul>
+<h2 id="数据中心网络的需求"><a href="#数据中心网络的需求" class="headerlink" title="数据中心网络的需求"></a>数据中心网络的需求</h2><p>现代数据中心主要是由Google和Amazon等Web-scale的需求发展而来的。这些组织构建的应用主要是搜索和云代表的第三波应用程序架构。前两波是单片机应用程序和客户机-服务器体系结构，它们在上世纪末主宰了整个领域。</p>
+<p>第三波应用程序架构的主要三个特点如下：</p>
+<p><strong>1.</strong>      <strong>服务器到服务器通信的增加</strong></p>
+<p>与客户机-服务器体系结构不同，现代数据中心应用程序涉及大量的服务器-服务器通信。C/S体系架构涉及客户端与相当独立的服务器通信，这些服务器要么完全自己处理请求，要么最多与其他少数服务器通信，例如数据库服务器。相比之下，诸如搜索（或更流行的形式，Hadoop）之类的应用程序可以使用数十个或数百个映射器节点和数十个reducer节点。 在云中，客户的虚拟机（VM）可能位于整个网络上的多个节点上，但需要无缝通信。其原因是可变的，从在负载最少的服务器上部署vm到向外扩展服务器负载，再到负载均衡。微服务体系结构是服务器间通信增加的另一个例子。在这个架构中，单个功能被分解成更小的组件，这些组件相互联系在一起，以实现最终的结果。这种架构的前景是，每个模块都可以用于多个应用程序，而且每个模块都可以被增强、修改和更容易地网络，并且独立于其他模块。服务器到服务器的通信通常被称为东西向流量，因为关系图通常描述服务器为并列的关系。相反，局域网络和外部网络之间交换的流量称为南北向流量。</p>
+<p><strong>2.</strong>      <strong>规模</strong></p>
+<p>如果说有一幅图像让人联想起现代数据中心，那绝对是规模:一间巨大的房间里一排排黑暗、嗡嗡作响、闪烁的机器。在过去，几百台服务器代表着一个大的网络，而现在的数据中心在一个物理位置上有几百到十万台服务器。与增加的服务器对服务器通信相结合，这种规模的连接性需求迫使人们重新思考如何构建这样的网络。</p>
+<p><strong>3.</strong>      <strong>弹性</strong></p>
+<p>与依赖可靠网络的旧体系结构不同，现代数据中心应用程序被设计在出现故障下还要工作，认为故障是必然的。其主要目的是将故障的影响限制在尽可能小的范围内。换句话说，必须限制故障的“爆炸半径”。 目标是最终用户体验不受网络或服务器故障的影响。</p>
+<p>   任何现代数据中心网络都必须满足这三个基本的应用需求。多租户网络如公有云或私有云还有一个额外的考虑:快速部署和拆除虚拟网络。 考虑到虚拟机和现在的容器能够以很快的速度部署和卸载，而且，一个用户可以很容易地在云中建立一个新的私有网络，对快速部署的需求变得非常明显。</p>
+<p>传统的网络设计通过部署更大的交换机(和路由器)来扩展以支持更多的设备。这是按比例缩放的模型。但是，这些大型交换机价格昂贵，而且主要用于支持双向冗余。驱动这些大型交换机的软件很复杂，因此比简单的固定形式的factor交换机更容易出现故障。而扩展模型只能扩展到这个程度。任何交换机都不会大到不能坏。所以，当这些较大的交换机失效时，它们的爆炸半径会相当大。由于故障即使不是灾难性的，也可能造成破坏性影响，因此为这些“神盒”提供支持的软件试图通过增加更多的复杂性来减少故障的机会；因此，他们反而更容易失败。并且由于这些盒子中的软件复杂性增加，更改必须放慢，以避免给软件或硬件引入bugs。拒绝这种在可靠性和成本方面如此不令人满意的范例，Web-scale的先驱们选择了一种不同的网络拓扑结构来构建他们的网络。</p>
+<h2 id="Clos网络拓扑"><a href="#Clos网络拓扑" class="headerlink" title="Clos网络拓扑"></a>Clos网络拓扑</h2><p>Web-scale的先驱者选择了一种称为Clos的网络拓扑来构建其数据中心。Clos网络是以其发明者查尔斯•克洛斯(Charles Clos)的名字命名的。克洛斯是一位电话网络工程师，上世纪50年代，他曾试图解决一个类似于Web-scale的先驱们所面临的问题：如何应对电话网络的爆炸性增长。他提出了我们现在称为Clos网络拓扑或架构。</p>
+<p> 图1-1 展示了一个最简单的Clos网络架构。在图中，绿色节点表示交换机，灰色节点表示服务器。在绿色节点当中，最上方的一层是spine（骨干）节点，下面一层是leaf（叶子）节点。Spine节点连接着每一个leaf节点，服务器通过leaf节点接入网络中。每一个leaf节点连接到了每一个spine节点，反之亦然。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/clos.png" alt="clos"></p>
+<p>​                                图 1-1. 一个简单的二层Clos网络结构 </p>
+<p>让我们更详细地研究一下这个设计。首先要注意的是连接的一致性:服务器通常与任何其他服务器之间有三个网络跃点。接下来，节点非常相似:服务器看起来很相似，交换机也是如此。根据现代数据中心应用程序的要求，连接矩阵非常丰富，这使它能够优雅地处理故障。在一个服务器和另一个服务器之间有如此多的链接，一个单一的故障，甚至多个链接故障，都不会导致完全的失去连接。任何链路故障都只会导致带宽的部分损失，而在具有双向冗余的较老的网络体系结构中，这种损失通常要大得多，通常为50%。</p>
+<p>拥有许多链接的另一个后果是任意两个节点之间的带宽相当大。节点之间的带宽可以通过添加更多的spine节点(受交换机容量的限制)来增加。</p>
+<p>为了完善我们的观察，我们注意到端点都连接到leaf节点上，并且spine节点仅充当连接器。 在此模型中，该扩展功能被推出到边缘，而不是被拉到spine中。 这种缩放模型称为横向扩展模型(sacle-out)。</p>
+<p>在这样的一个网络中，您可以很容易的确认服务器的数量。因为这种拓扑结构适合进行一些简单的数学运算。如果我们想要一个非阻塞的架构，即leaf节点和spine节点之间的容量与leaf节点和服务器之间的容量一样大，可以连接的服务器的总数是<em>n</em>2 / 2, n是交换机的端口数量。例如，对于一个64端口的交换机，您能够连接的服务器数据是64 <em> 64 / 2 = 2048台服务器。对于一个128端口的交换机，能连接的服务器数据猛增到 128 </em> 128 / 2 = 9192台。在一个简单的leaf-spine网络中，通常可以连接的服务器数据的一般公式是 n * m / 2,其中n是一个leaf交换机上的端口数量，m是spine交换机上的端口数量。</p>
+<p>事实上，服务器通过低速链路连接到leaf，而交换机通过高速链路互联。一种常见的部署是通过10Gbps链路将服务器连接到leaf交换机，而通过40gbps链接将交换机相互连接。考虑到100 Gbps链接的兴起，一个有前途的部署是使用25 Gbps链接将服务器连接到叶子，使用100 Gbps链接将交换机连接到叶子。</p>
+<p>由于电力限制，大多数网络在一个机架上最多有40台服务器(尽管新的服务器设计正在突破这一限制)。写这篇文章的时候，最常见的高速交换机最多有32个端口(每个端口为40 Gbps或100Gbps)。因此，一个简单的leaf-spine网络最大支持的服务器数量实际是 40 * 32 = 1280台。但是，64端口和128端口版本很快就会出现。</p>
+<p>尽管1280台服务器对于大多数中小企业来说已经足够大了，这种设计是如何让我们拥有成千上万甚至几十万的服务器的呢?</p>
+<h3 id="三层Clos网络"><a href="#三层Clos网络" class="headerlink" title="三层Clos网络"></a>三层Clos网络</h3><p> 图 1-2 描述解决前一节中定义的横向扩展问题的步骤。这就是所谓的三层Clos网络。它只是一堆leaf-spine网络或者二层Clos网络，由另一层spine交换机连接。每个二层Clos网络称为一个pod或cluster，连接所有的pods的第三层spines被称为interpod spine或intercluster spine层。服务器连接的第一层交换机通常被称为top-of-rack（ToR），因为它们通常位于每个机架的顶部。下一层的交换机被称为leaves,最后一层交换机，是连接每个pods，被称为spines。</p>
+<p>​     <img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/clos-3.png" alt="clos-3"></p>
+<p>​                               图 1-2. 三层Clos网络</p>
+<p>在这样的网络中，假设在每一层都使用相同的交换机，可以连接的服务器总数为<em>n</em>3 / 4。例如，假设有64端口交换机，我们得到643  / 4 = 65,536个服务器。假设从上一节得到更实际的交换机端口号和每个机架的服务器，我们可以连接40 <em> 16 </em> 16 = 10240台服务器。</p>
+<p>大型网络运营者通过以下两种方式之一克服了这些基于端口的限制：他们要么购买大型机架的spine交换机，要么把电缆从高速链路中分解为多个低速链路，并利用多spines建立等效容量网络。例如，通常可以将32端口40 Gbps交换机拆分为96端口10 Gbps交换机。这意味着现在可以支持的服务器数量变为40 <em> 48 </em> 96 = 184,320。 一个32端口100 Gbps交换机通常可以分为128个25 Gbps链路，服务器数量更多：40 <em> 64 </em> 128 = 327,680。 在这样的三层网络中，每个ToR连接到64个leaves，每个leaf连接到64个spines。</p>
+<p>这就是Clos网络的本质之美:就像Fractal设计一样，越来越大的部件基本上是由相同的组件组装而成的。Web-scale大的公司会毫不犹豫地使用4层甚至6层的Clos网络，以绕过较小构建块的规模限制。加上商用芯片中越来越大的端口数支持，对更大的数据中心的支持是非常可行的。</p>
+<h3 id="Clos网络的关键副作用"><a href="#Clos网络的关键副作用" class="headerlink" title="Clos网络的关键副作用"></a>Clos网络的关键副作用</h3><p>Web-scale的先驱们并没有依赖于看似可靠的网络交换机，而是在他们的应用程序中构建了弹性，从而使网络做它最擅长的事情:通过一个丰富的、高容量的连接矩阵提供良好的连接。正如我们前面所讨论的，这种高容量和密集的互连降低了故障的爆炸半径。</p>
+<p>使用固定形式的factor交换机导致的结果是有大量光缆需要管理。规模较大的网络运营商都有自己的线缆验证技术。我与人合作编写了一个名为Prescriptive Topology Manager (PTM)的开源项目，该项目负责处理电缆验证。</p>
+<p>固定形式的交换机的另一个后果，是它们会以多种方式失效。大型机架交换机可能会以复杂的方式故障，因为有太多的“移动部件”。简单的故障有助于更简单的排障，更好的是，节省了成本，允许操作员用好的交换机替换掉故障交换机，而不是在生产网络中排除故障。这进一步增强了网络的弹性。</p>
+<p>换句话说，弹性成为一起工作的零件的新特性，而不是每个盒子的特性。仅使用固定形式的交换机构建大型网络也意味着库存管理变得简单。由于任何网络交换机都与其他交换机类似，或者最多有两个变体，所以很容易存储备用设备，并将故障设备替换为工作设备。这使得网络交换机或路由器的库存模型与服务器的库存模型相似。</p>
+<p>这些结果很重要，因为它们影响着网络运营者的日常生活。通常，我们不会将新环境或新选择融入我们思维的方方面面。Clos网络的这些二阶衍生品有助于网络运营者以不同于以往的方式来审视网络的日常管理。</p>
+<h3 id="Clos网络的网络架构"><a href="#Clos网络的网络架构" class="headerlink" title="Clos网络的网络架构"></a>Clos网络的网络架构</h3><p>Clos网络要求与传统部署方式不同的网络体系结构。 这种理解是后续工作的基础，因为它有助于理解数据中心网络中网络操作需要不同的方式，即使网络协议保持不变。</p>
+<p>在传统网络中，我们所称的leaf-spine层被称为网络的接入-汇聚层。第一二层网络使用桥接而不是路由进行连接。桥接使用Spanning Tree Protocol (STP)，该协议将Clos网络的丰富连接矩阵分解为一个无环树。例如，在图1-1中，两层的Clos网络，即使最左边的叶子和最右边的叶子之间有四条路径，STP也只能利用其中的一条。因此，拓扑简化为类似于图1-3所示的拓扑。</p>
+<p>在传统网络中，我们所称的叶-棘层被称为网络的访问汇聚层。前两层网络使用桥接而不是路由进行连接。Bridg‐ing使用生成树协议(STP)，该协议将Clos网络的丰富连接矩阵分解为一个无环树。例如，在图1-1中，两层的Clos网络，即使最左边的叶子和最右边的叶子之间有四条路径，STP也只能利用其中的一条。因此，拓扑简化为类似于图1-3所示的拓<br> 扑。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/stp.png" alt="stp"></p>
+<p>​                                                          图 1-3. 使用STP互联</p>
+<p>​     在链路连接失败的情况下，路径遍历会变得更加低效。例如，如果最左边的leaf和最左边的spine之间的链路故障，则拓扑结构可能如图1-4所示。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/stp-re.png" alt="stp-re"></p>
+<p>​                            图 1-4. 链路故障后的STP</p>
+<p>连接到最左边leaf的服务器和连接到最右边leaf的服务器之间的路径。它在架子之间来反复切换。这是非常低效和非均匀速率的连接。</p>
+<p>另一方面，路由能够利用所有路径，充分利用Clos网络丰富的连接矩阵。路由也可以选择最短路径，或者通过编程选择较长的路径，以获得更好的整体链路利用率。</p>
+<p>因此，第一个结论是，路由最适合Clos 网络工作，而桥接则不适合。</p>
+<p>从桥接到路由的这种转换的一个关键好处是，我们可以摆脱在桥接网络中需要的多个协议，其中许多是专用的。传统的桥接网络通常是运行STP、单向链接检测协议(尽管现在融入了STP)，虚拟局域网络(VLAN)分配协议，单跳路由协议，如主机备用路由协议Host Standby Routing Protocol (HSRP)或虚拟路由器冗余协议Virtual Router Redundancy Protocol (VRRP)，一个路由协议连接多个桥接网络，以及用于路由的单向链路检测协议。就是这样。与第一跳路由器通信的服务器将有一个简单的anycast网关，不需要其他附加协议。</p>
+<p>通过减少网络工作中涉及的协议数量，我们也提高了网络的弹性。有更少的活动部分，因此更少的故障点。现在应该清楚了，Clos网络不仅能够构建高度可伸缩的网络，而且能够构建非常有弹性的网络。</p>
+<h2 id="服务器连接模型"><a href="#服务器连接模型" class="headerlink" title="服务器连接模型"></a>服务器连接模型</h2><p>We-scale公司部署单连接服务器-也就是说，每个服务器都连接到单个leaf接到或ToR。 由于这些公司拥有大量服务器，因此因网络故障而导致整个机架丢失的后果不大。 但是，许多小型网络（包括一些大型企业）由于丢失单个leaf或ToR而无法承受丢失整个服务器机架的风险。 因此，它们是双连接服务器。 每个链接都附加到不同的ToR。 为了简化布线并增加机架移动性，这两个ToR都位于同一机架中。</p>
+<p>当服务器以这种方式进行双连接时，使用供应商专有协议将双链接聚合为单个逻辑链接（在网络术语中称为port channel，在服务器术语中称为bonds）。不同的供应商为此使用了不同的名称。思科将其称为虚拟端口通道Virtual Port Channel（vPC），Cumulus称为CLAG，并将Arista称为多机箱链路聚合协议MultiChassis Link Aggregation Protocol（MLAG）。本质上，服务器认为它通过绑定（bond）（或端口通道port channel）连接到单个交换机。从协议的角度来看，与之相连的两个交换机大多给人一种错觉，即它们是单个交换机。允许主机使用标准的链路聚合控制协议<a href="http://bit.ly/2rXbSYY" target="_blank" rel="noopener">Link Aggrega‐</a> <a href="http://bit.ly/2rXbSYY" target="_blank" rel="noopener">tion Control Protocol</a>（LACP）协议来创建绑定是必需的。 LACP假定链路聚合发生在两个节点之间的链路上，而为了提高可靠性，双连接服务器跨三个节点工作：服务器和它所连接的两个交换机。由于每个多节点LACP协议都是供应商有的，因此无需修改主机即可支持多节点LACP。图1-5显示了带有MLAG的双连接服务器。</p>
+<p>​               <img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/1-5.png" alt="1-5">   </p>
+<p>​                图 1-5. 双连接的port channel</p>
+<h2 id="与外部世界的连接"><a href="#与外部世界的连接" class="headerlink" title="与外部世界的连接"></a>与外部世界的连接</h2><p>​      数据中心如何与外部世界连接?这个问题的答案让很多人感到惊讶。在中型到大型的网络中，这种连接是通过所谓的边界ToRs或边界Pods来实现的。图1-6给出了概述。</p>
+<p> <img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/1-6.png" alt="1-6"></p>
+<p>​            图 1-6. 通过边界pods将Clos网络与外部世界连接起来</p>
+<p>边界Pods或边界leaves的主要优点是它们从外部进入数据中心内部。数据中心内部的路由协议从不与外部世界交互，从而提供了一定的稳定性和安全性。</p>
+<p>然而，较小的网络可能无法专门使用单独的交换机来连接外部世界。这样的网络可能通过spine连接到外部世界。需要注意的重要一点是，所有的spines都连接到互联网，而不是一些。这很重要，因为在Clos拓扑中，所有的spines都是相同的。如果与外部世界的连接仅仅通过一些spines，那么这些spines可能变得拥挤，由于所有出去的流量都经过它们，而不经过其它spines。此外,这将使弹性更脆弱,因为失去的一小部分链路连接到这些特殊的spines意味着要么这些leaves将失去完整的访问外部世界或由于链路故障将大大降低它们<br> 到外部世界的带宽，因此将无法达到最佳状态。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/1-7.png" alt="1-7"></p>
+<p>​                图 1-7. Clos网络通过spines连接到外界</p>
+<h2 id="支持多租户（或者云）"><a href="#支持多租户（或者云）" class="headerlink" title="支持多租户（或者云）"></a>支持多租户（或者云）</h2><p>Clos拓扑还适用于构建支持云的网络，无论是公共的还是私有的。云架构的附加目标如下:</p>
+<ul>
+<li>(Agilty）灵活：考虑到云的典型应用，即客户快速地启动和卸载网络，因此网络能够支持这种模型是至关重要的。</li>
+<li>(Isolation）隔离：一个客户的流量不能被另一个客户看到。</li>
+<li>(Scale)规模：必须支持大量的客户或租户。</li>
+</ul>
+<p>传统的解决方案通过vlan等技术在网络中提供隔离来处理多租户。服务提供商也使用虚拟专用网（VPNs）解决了这个问题。然而服务器虚拟化（VMs）和现在容器的出现，是改变了这种规则。当服务器始终是物理的，或者在服务提供者网络中，VPNs不是在几秒或几分钟内提供的时候，现有的技术是有意义的。但是VMs比任何物理服务器的上线和下线速度都要快，而且更重要的是，在连接到服务器的交换机不知道更改的情况下就会发生这种情况。如果交换机不能检测VMs的上线和下线，从而检测到租户网络，那么交换机参与客户网络的建立和拆除就没有意义了。</p>
+<p>随着虚拟可扩展局域网Virtual eXtensible Local Area Network (VXLAN)和IP-in-IP隧道的出现，云运营商将网络从对这些虚拟网络的了解中解放出来。通过在VXLAN或IP-in-IP隧道中，物理网络继续在隧道报头上对包进行路由，而不考虑内部包的内容。因此，Clos网络可以成为构建云网络的主干。</p>
+<h2 id="现代数据中心设计的运营结果"><a href="#现代数据中心设计的运营结果" class="headerlink" title="现代数据中心设计的运营结果"></a>现代数据中心设计的运营结果</h2><p>现代数据中心设计的选择对数据中心管理有着深远的影响。</p>
+<p>最明显的是，鉴于网络规模庞大，不可能手动管理数据中心。 自动化无非是基本生存的需求。 如果每个建设的模块都是手工制作且独特的，即使不是不切实际，那么自动化要困难得多。必须创建设计模式，以使自动化变得简单且可重复。 此外，在给定规模的情况下，手工制作每个模块会使故障排除成为问题。</p>
+<p>像云这样的多租户网络也需要快速地扩展和拆除虚拟网络。基于VLAN等技术的传统网络设计既不能支持大量的租户，也不能快速地向上或向下扩展。此外，这种快速部署要求实现自动化，可能跨越多个节点。</p>
+<p>不仅是多租户网络，更大的数据中心也要求有能力推出新的机架，并在时间范围内替换失败的节点—规模比传统网络可能的情况小一到两个数量级。因此，运营者需要提出能够实现所有这些功能的解决方案。</p>
+<h2 id="选择路由协议"><a href="#选择路由协议" class="headerlink" title="选择路由协议"></a>选择路由协议</h2><p>显然，开放式最短路径优先Open Shortest Path First（OSPF）或中间系统到中间系统Intermediate System–to–Intermediate System（IS-IS）是路由协议为数据中心供电的理想选择。 它们都是为在企业内部使用而设计的，大多数企业网络运营者都熟悉这些协议的管理，至少熟悉OSPF。 但是，由于缺少多协议支持，OSPF被大多数Web-scale的运营者拒绝。 换句话说，OSPF需要两个单独的协议（同时在名称和基本功能上相似）来支持IPv4和IPv6网络。</p>
+<p>相比之下，IS-IS是一种广受好评的协议，可以同时路由IPv4和IPv6双栈。 但是，好的IS-IS实现很少，限制了管理员的选择。 此外，许多运营者认为，链路状态协议本质上不适合诸如Clos拓扑之类的高度连接的网络。 链路状态协议将链路状态更改传播到了甚至很远的路由器，这些路由器的路径状态由于更改而没有变化。</p>
+<p>BGP进入了这种情况，并实现了其他两个无法提供的功能。 BGP成熟的，可以为Internet提供支持，并且从根本上来说很容易理解（尽管名声相反）。 BGP存在许多成熟且健壮的实现，包括在开源世界中。 与链接状态相比，它不那么健谈，但是支持多协议（即，它本身支持通告IPv4，IPv6，多协议标签交换（MPLS）和VPNs）。 通过一些调整，我们可以使BGP在数据中心中有效地工作。 微软的Azure团队最初负责将BGP应用于数据中心。 目前，我接触的大多数客户都部署了BGP。</p>
+<p>我们旅程的下一部分是了解如何修改BGP的传统部署模型以在数据中心中使用。</p>
+<h1 id="BGP如何应用在数据中心"><a href="#BGP如何应用在数据中心" class="headerlink" title="BGP如何应用在数据中心"></a>BGP如何应用在数据中心</h1><p>在将BGP用于数据中心之前，它主要(如果不除外)用于服务提供商网络。由于BGP的主要用途，运营者不能像在服务提供商世界中使用BGP那样在数据中心中使用BGP。如果您是网络操作员，了解这些差异及其原因对于防止错误配置非常重要。</p>
+<p>数据中心网络的密集连接与管理域之间相对稀疏的连接有很大的不同。因此，在数据中心内部与在数据中心之间存在一组不同的权衡取舍。在服务提供商网络中，稳定性要比快速通知更改更可取。因此，BGP通常会暂缓发送有关更改的通知。在数据中心网络中，运营者希望路由更新尽可能快。另一个例子是，由于BGP的默认设计，行为及其作为路径矢量协议的性质，单条链路故障可能导致大量BGP消息在所有节点之间传递，这是最好的避免方法。第三个示例是当从许多不同的自治系统编号（ASNs）中获知前缀时，BGP构造一条最佳路径的默认行为，因为ASN通常代表一个单独的管理域。但是在数据中心内部，我们希望选择多个路径</p>
+<p>两个人一起提出了一种将BGP放入数据中心的方法。他们的工作记录在RFC 7938中。</p>
+<p>  本章解释了对BGP行为的每一次修改，以及修改的理由。网络运营商在数据中心错误配置BGP以产生有害影响的情况并不少见，因为他们未能理解BGP调整数据中心的动机。</p>
+<h2 id="有多少种路由协议？"><a href="#有多少种路由协议？" class="headerlink" title="有多少种路由协议？"></a>有多少种路由协议？</h2><p>首先，最简单的区别是数据中心内运行的协议数量。 在传统的部署模型中，BGP从另一个路由协议（通常是开放式最短路径优先（OSPF），中间系统到中间系统（IS-IS）或增强的内部网关路由Enhanced Interior Gate‐ way Routing Protocol（EIGRP））中获知要发布的前缀。 它们被称为内部路由协议，因为它们用于控制企业内的路由。 因此，人们认为BGP在数据中心需要另一个路由协议就不足为奇了。 但是，在数据中心中，BGP是内部路由协议，不需要其他路由协议。</p>
+<h2 id="使用IBGP还是EBGP？"><a href="#使用IBGP还是EBGP？" class="headerlink" title="使用IBGP还是EBGP？"></a>使用IBGP还是EBGP？</h2><p>人们问有关数据中心BGP的第一个问题是要使用哪个BGP：<strong>i**</strong>nt<strong>ernal BGP（iBGP）或</strong>external** BGP（eBGP）。 鉴于整个网络都在单个管理域的支持下，iBGP似乎是一个显而易见的答案。 但是，事实并非如此。</p>
+<p>在数据中心，eBGP是最常见的部署模型。 主要原因是eBGP比iBGP更易于理解和部署。 iBGP可能会因为其最佳路径选择算法，是否转发路由以及是否执行前缀属性而感到困惑。 在某些情况下，iBGP的多路径支持也有限制：特别是当路由是由两个不同的节点发布时。 克服此限制是可能的，但是很麻烦。</p>
+<p>与eBGP相比，iBGP更容易使新手感到困惑，因为为了实现所需的行为，需要扩展大量的配置按钮。许多旋钮是新手无法理解的，只会增加他们的不安。</p>
+<p>选择eBGP的一个重要的非技术原因是，与iBGP相比，eBGP有更多功能完整、健壮的实现。多种实现的存在意味着客户可以通过选择eBGP而不是iBGP来避免厂商锁定。这一点在2012中期之前尤其明显，当时iBGP实现有很多漏洞，功能不足，无法在数据中心内运行。</p>
+<h2 id="ASN编号"><a href="#ASN编号" class="headerlink" title="ASN编号"></a>ASN编号</h2><p>自治系统号Autonomous System Number（ASN）是BGP中的基本概念。 每个BGP speaker都必须具有一个ASN。 ASNs用于识别路由环路，确定通往前缀的最佳路径，并将路由策略与网络相关联。 在互联网上，允许每个ASN权威地发布特定的IP前缀。 ASNs有两种形式：两字节版本和更现代的四字节版本。</p>
+<p>ASN编号模型与传统的非数据中心部署中的编号方式不同。本节将介绍数据中心内的路由器如何分配ASN背后的概念。</p>
+<p>如果选择遵循建议的使用eBGP作为协议的最佳实践，那么最明显的ASN编号方案是为每个路由器分配它自己的ASN。这种方法会带来一些问题，我们将在接下来讨论这些问题。但是，让我们首先考虑一下用于ASN的数字。在internet对等网络中，ASN是公开分配的，并且具有众所周知的编号。但是数据中心内的大多数路由器很少会在不同的管理域中与路由器进行对等(除了第一章中描述的边界leaf之外)。因此，数据中心内使用的ASN来自私有ASN号码空间。</p>
+<h3 id="私有ASNs"><a href="#私有ASNs" class="headerlink" title="私有ASNs"></a>私有ASNs</h3><p>私有ASN是指在全球互联网之外使用的ASN。与私有IP地址范围10.0.0.0/8非常相似，私有asn用于不对外公开的网络之间的通信。数据中心就是这种网络的一个例子。</p>
+<p>没有什么可以阻止操作员使用公有的ASNs，但出于两个主要原因，不建议这样做。</p>
+<p>首先是使用公有ASN可能会混淆试图将ASN解码为有意义名称的操作员和工具。 由于运营商知道许多著名的ASNs，因此运营商可能会非常困惑，例如，在数据中心内的某个节点上看到Verizon的ASN时。</p>
+<p>第二个原因是为了避免意外泄露内部BGP信息给外部网络的后果。这可能会对互联网造成严重破坏。例如,如果一个数据中心使用Twitter的ASN，并不小心泄露一个路由信息，而Twitter是AS_PATH的一部分，则表示该数据中心内是可公开访问的路由，网络运营商将对全球范围内大规模劫持一项知名服务的行为负责。 错误的配置是所有网络中断的第一或第二根源，因此通过不使用公有ASN来避免这种情况是一件好事。</p>
+<p>老式的2字节ASN仅可容纳约1023个私有ASN（64512–65534）。 当数据中心网络的路由器数量超过1,023时，会发生什么情况？ 一种方法是展开BGP旋钮工具包，然后寻找称为allowas-in的东西。 另一种方法（更简单的方法）是切换到4字节ASN。 这些新型的ASN支持近9500万个私有ASN（4200000000–4294967294），足以满足当今任何规模的数据中心的需求。 几乎每个传统，新的，专有的或开源的路由套件都支持4字节ASN。</p>
+<h3 id="路径搜索问题"><a href="#路径搜索问题" class="headerlink" title="路径搜索问题"></a>路径搜索问题</h3><p> 回到如何将ASN分配给BGP speaker，最明显的选择是为每个节点分配一个单独的ASN。 但是这种方法会导致路径矢量协议固有的问题。 路径矢量协议遭受距离矢量协议所困扰的一个问题，即无穷计数问题。 尽管我们不能在这里找到所有有关路径搜寻的细节，但是您可以从图2-1所示的简单拓扑中简单地了解问题所在。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/2-1.png" alt="2-1"></p>
+<p>​                图 2-1. 一个解释路径搜索的拓扑示例</p>
+<p>在此拓扑中，所有节点都具有单独的ASN。 现在，从R1的角度考虑前缀为10.1.1.1的可达性。 R2和R3将可达性通告给R1前缀10.1.1.1。 R2为10.1.1.1通告的AS_PATH为[R2，R4]，R3通告的AS_PATH为[R3，R4]。 R1不知道R2和R3自己是如何学习此信息的。 当R1从R2和R3学习到去10.1.1.1的路由时，它选择其中一个作为最佳路径。 由于其本地支持多路径，其转发表将有通过R2和R3达到10.1.1.1的可达性信息，但是在BGP的最佳路径选择中，只有R2或R3中的一个可以获胜。</p>
+<p>让我们假设R3被R1选为去10.1.1.1的最佳路径。R1现在通告它可以通过AS_PATH [R1, R3, R4]到R2达到10.1.1.1。R2接受了通告，但不认为它是达到10.1.1.1的更好的路径，因为它的最佳路径是较短的AS_PATH R4。</p>
+<p>现在，当节点R4死亡时，R2将丢失到10.1.1.1的最佳路径，因此它通过R1、AS_PATH [R1、R3、R4]重新计算其最佳路径，并将此消息发送给R1。R2还向R1发送10.1.1.1的路由撤销消息。当R3的撤销到10.1.1.1路由可达消息到达R1时，R1也撤销路由10.1.1.1，并将撤销的路由发送给R2。由于节点之间交换包的时间和BGP的工作方式，事件的确切顺序可能不像这里所描述的那样，但它是一种近似的方法。</p>
+<p>这个问题的简短版本是:因为一个节点不知道网络中所有其他节点的物理链接状态，所以它不知道该路由是真正消失了(因为在末端的节点自己撤销了)还是可以通过其他路径到达。因此，节点将继续通过其所有其他可用路径来搜寻到达目的地的可达性。 这称为寻路。</p>
+<p>在图2-1的简单拓扑中，这看起来并不是很糟糕。但是，在Clos拓扑结构中，由于其密集的互连，这个简单的问题变得相当重要，因为存在大量额外的消息交换，而且由于错误信息传播的时间超出了必要的时间，导致流量损失增加。</p>
+<h3 id="ASN编号模型"><a href="#ASN编号模型" class="headerlink" title="ASN编号模型"></a>ASN编号模型</h3><p>为了避免路径搜索问题，Clos拓扑中路由器的ASN编号模型如下:</p>
+<ul>
+<li>所有ToR路由器都分配了自己的ASN。</li>
+<li>一个Pod内的leaves有不同的ASN，但是每个Pod内的leaves有一个唯一的ASN。</li>
+<li>Interpod 的spines共用一个ASN。</li>
+</ul>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/2-2.png" alt="2-2"></p>
+<p>​            图 2-2. 在Clos拓扑中进行ASN编号示例</p>
+<p>该编号解决了寻径问题。 在BGP中，ASN是一个邻居知道另一邻居的方式。 在图2-1中，让R2和R3具有相同的ASN。 当R1告诉R2它具有通过R3到达10.1.1.1的路径时，R2完全拒绝了该路径，因为AS_PATH字段包含R3的ASN，与R2相同，这表示路由循环。 因此，当R2和R3失去与R4的连接，并因此失去与10.1.1.1的连接时，发生的唯一消息交换是它们将通告R1撤销去10.1.1.1的路由，并且从所有路由器的转发表中清除了10.1.1.1。 相反，给定图2-2中的编号由于BGP的最佳路径计算中编码了AS_PATH循环检测逻辑，所以leaves和spines将消除替代路径。</p>
+<p>这种形式的ASN编号的一个缺点是路由聚合或汇总是不可能的。要了解原因，请回到图2-1，其中R2和R3具有相同的ASN。让我们进一步假设R2和R3通过直接连接的服务器（图中未显示）从10.1.1.2/32-10.1.1.250/32了解到其他前缀。与宣布将250个前缀(10.1.1.1 - 10.1.1.250)添加到R1不同，R2和R3决定将这些路由聚合在一起，并宣布一条10.1.1.0/24路由到R4。现在，如果R2和R4之间的链接断开，则R2不再具有通往10.1.1.1/32的路径。如前所述，它无法使用路径R1-R3-R4到达10.1.1.1。 R1已计算出两条通过R2和R3到达10.1.1.0/24的路径。如果它接收到发往10.1.1.1的数据包，则很可能选择将其发送到R2，而R2没有到达10.1.1.1的路径。数据包将被R2丢弃，从而导致到10.1.1.1的连接随机丢失。如果R2和R3而不是汇总路由，而是分别发送了250个前缀的整个列表，则当到R4的链接断开时，R2只需要撤消到10.1.1.1的路由，同时保留对其他249条路由的通告。 R1将通过R3正确建立到10.1.1.1的单个可达性；但它通过R2和R3为其他249个前缀维护多个路径。因此，使用该ASN编号方案不可能进行路由汇总。</p>
+<h2 id="最优路径算法"><a href="#最优路径算法" class="headerlink" title="最优路径算法"></a>最优路径算法</h2><p>BGP使用一种算法来计算从一个节点到给定前缀的最佳路径。理解这一点对于理解在BGP路由网络中转发是如何发生的，以及为什么选择某些路径而不选择其他路径是非常重要的。</p>
+<p>当从一个或多个对等点接收到新的Update消息时，将触发BGP的最佳路径选择。实现者可以选择缓冲此算法的触发，为了一次运行将处理所有更新，而不是通过频繁运行算法来快速交换路由。</p>
+<p>OSPF、IS-IS和其他路由协议有一个简单的度量标准，通过它来决定接受哪些路径。边界网关协议有八个!</p>
+<p>虽然我将在本节中全部提到它们，但是只有AS_PATH对于数据中心来说是重要的。</p>
+<p>你可以使用这个简短的记忆短语来记住BGP路径算法:</p>
+<p>   <em>Wise Lip Lovers Apply Oral Medication Every Night</em> <em>（</em>聪明的护唇爱好者每天晚上都要服用口服药物<em>）</em></p>
+<p>​         我是在我的朋友和著名的BGP专家Daniel Walton的演讲中首先听到的。 该词组的实际发明者是思科工程师Denise Fishburne，他很友好，让我在本书中使用了它。 图2-3说明了助记符和实际算法之间的对应关系。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/2-3.png" alt="2-3"></p>
+<p>​                图 2-3. BGP最佳路径选择准则</p>
+<p>对于那些有兴趣了解更多的人，RFC 4271的第9节详细介绍了每个度量。除了这8个参数外，iBGP路由还有更多的匹配标准，但是对这些参数的讨论超出了本书的范围。</p>
+<h2 id="多路径选择"><a href="#多路径选择" class="headerlink" title="多路径选择"></a>多路径选择</h2><p>在紧密连接的网络（如Clos网络）中，路由多路径是构建健壮，可扩展的网络的基本要求。 BGP支持多路径，无论路径成本相等还是成本均等，尽管并非所有实现都支持成本不均等的多路径。 如上一节所述，如果两个路径在八个条件中的每一个相等，则认为它们相等。 其中一个标准是AS_PATH中的AS数字完全匹配，而不仅仅是它们的路径长度相等。这打破了数据中心内两个常见部署方案中的多路径。</p>
+<p> 在第一个部署场景中，可以从不同的ASN中宣布相同的路由，此时服务器是双上联的，每个ToR交换机有单独的ASN，如图2-4所示。在图中，椭圆代表一个bond或port channel;也就是说，这两个链接看起来像是一个到上层协议的高速逻辑链接。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/2-4.png" alt="2-4"></p>
+<p>​                        图 2-4. 服务器双上联</p>
+<p>假设两个leaves都宣告了一个通往10.1.1.0/24的子网路由，这是服务器所连接的网桥的子网。 在这种情况下，每个spine都看到到10.1.1.0/24的路由，一个的AS_PATH为64600，另一个的AS_PATH为64601。根据等价路径的逻辑，BGP不仅要求AS_PATH 长度相同，而且AS_PATH包含相同的ASN列表。 因为这里不是这种情况，所以每个spine都不会是多路径的。 相反，他们只会选择两条路线中的一条。</p>
+<p>在第二种部署方案中，当服务器部署虚拟服务时，多台服务器将宣告对同一虚拟IP地址的可达性。 因为服务器连接到不同的交换机以确保可靠性和可伸缩性，所以spines将再次从多个不同的ASNs接收一条路由，对于这些ASNs，AS_PATH的长度是相同的，但是路径本身内部的特定ASNs却不同。</p>
+<p>解决此问题的方法有多种，但最简单的方法是配置一个修改最佳路径算法的旋钮。 该旋钮称为bestpath as-path multipath-relax。 它的作用很简单：当来自两个不同来源的路由通告中AS_PATH长度相同时，最佳路径算法将跳过对ASN精确匹配的检查，并继续根据下一个条件进行匹配。</p>
+<h2 id="默认计时器导致收敛缓慢"><a href="#默认计时器导致收敛缓慢" class="headerlink" title="默认计时器导致收敛缓慢"></a>默认计时器导致收敛缓慢</h2><p>为避免显式配置每个旋钮，通常的做法是对未指定的参数采用安全，保守的值。 特别是计时器，如果操作员未提供任何特定信息，则默认为默认旋钮。 用最简单的术语来说，计时器控制对等体之间的通信速度。对于BGP，这些计时器默认情况下是针对服务器供应商环境进行调优的，对于这种环境，稳定性优于快速收敛。在数据中心内部，虽然稳定性得到了充分的重视，但快速收敛更为重要</p>
+<p>当发生故障或从故障中恢复(如链接再次可用)时，通常有四个定时器来控制BGP的收敛速度。理解这些计时器是很重要的，因为它们会影响信息在网络中传播的速度，对它们进行调优可以使操作员通过BGP获得与其他内部路由协议(如开放最短路径优先(OSPF))匹配的收敛速度。我们将在以下各节中介绍这些计时器。</p>
+<h3 id="通告间隔（Advertisement-Interval）"><a href="#通告间隔（Advertisement-Interval）" class="headerlink" title="通告间隔（Advertisement Interval）"></a>通告间隔（Advertisement Interval）</h3><p>BGP维护每个邻居的最小间隔。 在此最小间隔窗口内的事件会汇总在一起，并在最小间隔到期时立即发送。 这对于最稳定的代码至关重要，但是在短时间内进行多次更新的情况下，也有助于防止不必要的处理。 对于eBGP对等体，此间隔的默认值为30秒，对于iBGP对等体，默认值为0秒。 但是，对于数据中心等连接紧密的网络，在更新之间等待30秒完全是错误的选择。 0是更合适的选择，因为我们不涉及跨管理域的路由器。 仅此更改就可以使eBGP的收敛时间达到其他IGP协议（例如OSPF）的收敛时间。</p>
+<h3 id="保活和保持计时器（Keepalive-and-Hold-Timers）"><a href="#保活和保持计时器（Keepalive-and-Hold-Timers）" class="headerlink" title="保活和保持计时器（Keepalive and Hold Timers）"></a>保活和保持计时器（Keepalive and Hold Timers）</h3><p>在每个BGP会话中，节点都会向其对等方发送定期的Keepalive消息。 如果对等方在称为保持时间的一段时间内未收到keepalive消息，则对等方将会话声明为无效，断开连接以及在此连接上收到的所有信息，然后尝试重新启动BGP状态机。</p>
+<p>默认情况下，keepalive计时器为60秒，hold计时器为180秒。这意味着节点每分钟为一个会话发送一个keepalive消息。如果对方三分钟内没有看到一个keepalive消息，它就宣告会话结束。默认情况下，对于eBGP会话，其对等点是一个路由的下一跳，如果链接失败，将检测到此情况并立即重置会话。<strong>keepalive和hold</strong>定时器的作用是捕捉任何软件错误，在这些软件错误中，链接是已up的，但是由于错误(例如在布线中)而变成了单向的。一些运营者会启用一种称为双向转发检测<a href="http://bit.ly/2rewRn1" target="_blank" rel="noopener">Bidirectional</a> <a href="http://bit.ly/2rewRn1" target="_blank" rel="noopener">Forwarding Detection</a>（BFD）的协议，在一秒钟内（最多一秒钟）以检测由于电缆问题引起的错误。 但是，要在BGP进程本身中捕获错误，您需要调整这些计时器。</p>
+<p>在数据中心内，三分钟就是一生。在数据中心内配置的最常见的值是keepalive 3s和hold 9s。</p>
+<h3 id="连接计时器（Connect-Timer）"><a href="#连接计时器（Connect-Timer）" class="headerlink" title="连接计时器（Connect Timer）"></a>连接计时器（Connect Timer）</h3><p>这是四个计时器中最不重要的一个。当BGP尝试连接某个对等节点，但由于各种原因失败时，它将等待一段时间再尝试连接。这个周期默认为60秒。换句话说，如果BGP不能与其同伴建立会话，它将等待一分钟，然后尝试再次建立会话。当链路从故障中恢复或节点启动时，这可能会延迟会话重建。</p>
+<h2 id="数据中心的默认配置"><a href="#数据中心的默认配置" class="headerlink" title="数据中心的默认配置"></a>数据中心的默认配置</h2><p>当跨越管理和信任边界时，最好显式地配置所有相关信息。此外，考虑到两个独立企业的不同期望，BGP几乎没有任何假设，每个旋钮都需要显式配置。</p>
+<p>当BGP被用于数据中心时，BGP的这些方面都没有被修改。需要修改的不是协议本身，而是它的配置方式。每一个必须配置的旋钮都会在新手和中级专业人员的头脑中引起恐惧(或者至少可能引起混乱)。即使是那些精通BGP的人，也会因为BGP所需要的工作量而感到需要不断与时俱进。</p>
+<p>避免所有这些问题的一个好方法是设置良好的默认设置，这样用户就不需要知道他们不关心的旋钮。许多专用路由套件中的BGP实现起源于服务提供者领域，因此通常不提供这种选项。对于面向数据中心的开源路由套件(如FRRouting)，默认配置使用户不必显式地配置许多选项。</p>
+<p>好的默认设置还使配置的大小更易于管理，使您更容易查看配置并确保没有错误。随着您的组织越来越熟悉数据中心中的BGP，合理的默认配置可以为可靠的自动化提供基础。</p>
+<p>这是BGP的FRRouting中的默认设置。 我认为这些设置是数据中心中BGP的最佳实践。 这些是我遇到的几乎每个生产数据中心都使用过的设置。</p>
+<ul>
+<li>启用iBGP和eBGP多路径</li>
+<li>路由通告间隔设置为0</li>
+<li>Keepalive和Hold计时器设置为3s和9s</li>
+<li>启动日志记录邻居状态的变化</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本章介绍了使BGP适应数据中心的基本概念，例如使用eBGP作为默认部署模型以及配置ASN的逻辑。 在接下来的两个章节中，我们将在本章中学到的知识应用于在Clos拓扑中配置节点。</p>
+<h1 id="构建可自动化的BGP配置"><a href="#构建可自动化的BGP配置" class="headerlink" title="构建可自动化的BGP配置"></a>构建可自动化的BGP配置</h1><p>仅仅学习如何配置BGP是不够的。网络操作员还需要知道如何将此配置的部署自动化。</p>
+<p>如第13页的“现代数据中心设计的操作后果”中所述，数据中心自动化的口头禅很简单：自动化或消亡。 如果无法自动化基础架构—网络是基础架构的基本组成部分—您将变得效率低下，无法实现业务目标。 结果，业务要么萎缩，要么发展以改善其基础架构。</p>
+<p>在本章中，我们将开始构建自动BGP配置的过程。 我们不会使用Ansible之类的任何特定工具来显示自动化，因为站点对这些工具的使用情况各不相同，并且每个站点都有自己的语法和语义，应该使用自己的文档。 相反，我们将重点放在BGP上。</p>
+<h2 id="自动化配置的基础知识"><a href="#自动化配置的基础知识" class="headerlink" title="自动化配置的基础知识"></a>自动化配置的基础知识</h2><p>当有模型时，自动化是可能的。如果我们找不到模型，那么自动化就变得非常困难，即使不是不可能。 配置BGP没什么不同。 我们必须在BGP配置中寻找模型，以便我们可以使它们自动化。 但是，仅检测模型是不够的。 模行必须健壮，以便更改不会变得危险。 我们还必须避免重复。 在接下来的部分中，我们将详细研究这两个问题，并了解如何消除它们。</p>
+<h2 id="数据中心网络示例"><a href="#数据中心网络示例" class="headerlink" title="数据中心网络示例"></a>数据中心网络示例</h2><p> 在本书的其余大部分内容中，我们将使用图3-1中的拓扑来说明如何使用BGP。 这种拓扑结构很好地代表了大多数数据中心网络。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/3-1.png" alt="3-1"></p>
+<p>​                图 3-1 数据中心网络架构示例</p>
+<p>在我们的网络中,我们配置如下:</p>
+<ul>
+<li>Leaves，leaf01到leaf04.</li>
+<li>Spines，spine01到spine02.</li>
+<li>Exit leaves,exit01到exit02</li>
+<li>Servers, server01到server04</li>
+</ul>
+<p>除服务器外，列出的所有设备均列为路由器，并且使用的路由协议为BGP。</p>
+<p>注意：提醒一下:我们使用的拓扑是Clos网络，所以leaf和spine点都是路由器，如第一章所述。</p>
+<p><strong>本书使用的接口名称</strong></p>
+<p>接口名是特定于每个路由平台的。Arista、Cisco、Cumulus和Juniper都有自己的接口命名方法。在本书中，我使用了在Cumulus  Linux上使用的接口名称。这些端口被命名为swpX，其中swp代表switchport。因此，在图3-1中，server01的eth1接口连接到leaf01的swp1接口。类似地，leaf01的swp51接口连接到spine01的swp1接口。</p>
+<p>本章配置两个路由器：leaf01和spine01。 然后，我们可以采用此配置并将其应用于具有特定IP地址和BGP参数的其他spine和leaf。</p>
+<h2 id="传统BGP配置自动化的难点"><a href="#传统BGP配置自动化的难点" class="headerlink" title="传统BGP配置自动化的难点"></a>传统BGP配置自动化的难点</h2><p>例3-1展示了leaf01和leaf02可能的最简单配置。对于那些刚接触BGP的人，简单介绍一下配置中的一些关键语句</p>
+<p>router bgp 65000 </p>
+<p>这是您为BGP speaker指定ASN的方式。这也标志着FRR中特定于bgp的配置块的开始</p>
+<p>bgp router-id 10.0.254.1</p>
+<p>   每个路由协议speaker都有一个唯一的router-id来识别speaker。这适用于所有的路由协议，包括BGP。如果这个ID在大多数协议中不是唯一的，那么不好的事情就会随之而来，所以最好的做法是通过使它与环回IP地址相同来保持这个唯一。</p>
+<p>neighbor peer-group ISL</p>
+<p>在FRR中，这是一种定义配置模板的方法。</p>
+<p>neighbor ISL remote-as 65500</p>
+<p>​    这是对端ASN号码。传统的BGP配置需要这样做。我们将在下一章中看到如何简化它。</p>
+<p>neighbor 169.254.1.0 peer-group IS</p>
+<p>​    这是您向BGP守护进程指示的方式，即使用配置模板ISL中指定的参数，使用指定的IP地址建立会话。</p>
+<p>address-family ipv4 unicast</p>
+<p>   考虑到BGP是一个多协议路由协议，address-family块指定了应用于特定协议的配置(在本例中为ipv4单播)。</p>
+<p>neighbor ISL activate</p>
+<p>   BGP要求您明确地声明您希望它为给定的地址族发布路由状态，这就是acti vate所做的。</p>
+<p>network 10.0.254.1/32</p>
+<p>​       这告诉BGP向前缀10.0.254.1/32网段的可达性。这个前缀需要已经在路由表中，以便BGP宣传它。 </p>
+<p>maximum-paths 64</p>
+<p>​      这告诉BGP，它需要使用多个路径(如果可用)来访问一个前缀</p>
+<p>各种计时器的含义在第24页的“由于默认计时器而导致的慢速收敛”中进行了讨论。</p>
+<p><strong>例3 - 1。在leaf01和leaf02上突出显示特定于路由器的配置</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// leaf01’s BGP configuration </span></span><br><span class="line"></span><br><span class="line">log file /<span class="keyword">var</span>/log/frr/frr.log </span><br><span class="line">router bgp <span class="number">65000</span></span><br><span class="line"> bgp router-id <span class="number">10.0</span>.254.1</span><br><span class="line"> bgp log-neighbor-changes </span><br><span class="line"> bgp no <span class="keyword">default</span> ipv4-unicast </span><br><span class="line"> timers bgp <span class="number">3</span> <span class="number">9</span></span><br><span class="line"> neighbor peer-group ISL </span><br><span class="line"> neighbor ISL remote-as <span class="number">65500</span></span><br><span class="line"> neighbor ISL advertisement-interval <span class="number">0</span> </span><br><span class="line"> neighbor ISL timers connect <span class="number">5</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.0 peer-group ISL </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.64 peer-group ISL </span><br><span class="line"> address-family ipv4 unicast</span><br><span class="line">	neighbor ISL activate </span><br><span class="line">	network <span class="number">10.0</span>.254.1/<span class="number">32</span> </span><br><span class="line">	network <span class="number">10.1</span>.1.0/<span class="number">26</span> </span><br><span class="line">	maximum-paths <span class="number">64</span></span><br><span class="line">	exit-address-family</span><br><span class="line"> </span><br><span class="line"></span><br><span class="line"><span class="comment">// leaf02’s BGP configuration </span></span><br><span class="line">log file /<span class="keyword">var</span>/log/frr/frr.log </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">router bgp <span class="number">65001</span></span><br><span class="line">bgp router-id <span class="number">10.0</span>.254.2</span><br><span class="line"> bgp log-neighbor-changes</span><br><span class="line"> bgp no <span class="keyword">default</span> ipv4-unicast timers bgp <span class="number">3</span> <span class="number">9</span></span><br><span class="line"> neighbor peer-group ISL</span><br><span class="line"> neighbor ISL remote-as <span class="number">65500</span></span><br><span class="line"> neighbor ISL advertisement-interval <span class="number">0</span> </span><br><span class="line"> neighbor ISL timers connect <span class="number">5</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.0 peer-group ISL </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.64 peer-group ISL </span><br><span class="line"> address-family ipv4 unicast</span><br><span class="line">    neighbor ISL activate </span><br><span class="line">	network <span class="number">10.0</span>.254.1/<span class="number">32</span> </span><br><span class="line">	network <span class="number">10.1</span>.1.0/<span class="number">26</span> </span><br><span class="line">	maximum-paths <span class="number">64</span></span><br><span class="line">	exit-address-family</span><br></pre></td></tr></table></figure>
+<p>让我们先来看一下leaf01，看看其中有什么重复。 例如，两次指定10.0.254.1，一次使用/ 32，一次不使用。 第一次将其指定为默认网关地址，第二次将其指定为接口。</p>
+<p>当重复尽可能少时，配置不太容易出错。 在编码中避免重复代码是众所周知的准则。 重复是有问题的，因为有更多的位置可以修复同一条信息，而在进行更改或解决问题时，很容易忘记修复多个位置之一。 重复也很麻烦，因为单个更改会转换为需要在多个位置进行的更改。</p>
+<p>考虑跨接口和BGP内部重复IP地址的影响。 如果接口IP地址更改，则还必须在BGP配置中进行相应的更改。否则，更改后您将失去连接。 另一个例子是，您更改了该节点上的默认网关地址，并将其分配给另一个节点，但是忘记了router-id的更改。 您最终将获得两个具有相同router-id的路由器，这可能会导致对等互连问题（尽管仅在iBGP中，而不在eBGP中）。 同样的内容也适用于网络表述。</p>
+<p>此外，此配置假设每个leaf仅使用一个VLAN或子网。 如果有多个子网，则单独列出所有子网将无法扩展。 或者，即使您这样做，最终的配置也将太长而无法阅读。</p>
+<p>现在让我们比较一下这些spines的配置，如例3-2所示：</p>
+<p><strong>3 - 2示例：突出显示跨spine01和spine02的特定于路由器的配置</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// spine01’s BGP configuration </span></span><br><span class="line"></span><br><span class="line">log file /<span class="keyword">var</span>/log/frr/frr.log </span><br><span class="line"></span><br><span class="line">router bgp <span class="number">65534</span></span><br><span class="line"> bgp router-id <span class="number">10.0</span>.254.254</span><br><span class="line"> bgp log-neighbor-changes </span><br><span class="line"> bgp no <span class="keyword">default</span> ipv4-unicast</span><br><span class="line"> timers bgp <span class="number">3</span> <span class="number">9</span></span><br><span class="line"> neighbor peer-group ISL</span><br><span class="line"> neighbor ISL advertisement-interval <span class="number">0</span> </span><br><span class="line"> neighbor ISL timers connect <span class="number">5</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.1 remote-as <span class="number">65000</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.1 peer-group ISL </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.3 remote-as <span class="number">65001</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.3 peer-group ISL </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.5 remote-as <span class="number">65002</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.5 peer-group ISL </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.5 remote-as <span class="number">65003</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.7 peer-group ISL </span><br><span class="line"> bgp bestpath as-path multipath-relax </span><br><span class="line"> address-family ipv4 unicast</span><br><span class="line">	neighbor ISL activate</span><br><span class="line">	network <span class="number">10.0</span>.254.254/<span class="number">32</span> </span><br><span class="line">	maximum-paths <span class="number">64</span></span><br><span class="line">   exit-address-family</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// spine02’s BGP configuration </span></span><br><span class="line">log file /<span class="keyword">var</span>/log/frr/frr.log</span><br><span class="line"></span><br><span class="line">router bgp <span class="number">65534</span></span><br><span class="line"> bgp router-id <span class="number">10.0</span>.254.253 </span><br><span class="line"> bgp log-neighbor-changes </span><br><span class="line"> bgp no <span class="keyword">default</span> ipv4-unicast </span><br><span class="line"> timers bgp <span class="number">3</span> <span class="number">9</span></span><br><span class="line"> neighbor peer-group ISL</span><br><span class="line"> neighbor ISL advertisement-interval <span class="number">0</span> </span><br><span class="line"> neighbor ISL timers connect <span class="number">5</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.1 remote-as <span class="number">65000</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.1 peer-group ISL </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.3 remote-as <span class="number">65001</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.3 peer-group ISL</span><br><span class="line"> neighbor <span class="number">169.254</span>.1.5 remote-as <span class="number">65002</span></span><br><span class="line"> neighbor <span class="number">169.254</span>.1.5 peer-group ISL </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.5 remote-as <span class="number">65003</span> </span><br><span class="line"> neighbor <span class="number">169.254</span>.1.7 peer-group ISL </span><br><span class="line"> bgp bestpath as-path multipath-relax </span><br><span class="line"> address-family ipv4 unicast</span><br><span class="line">   neighbor ISL activate </span><br><span class="line">   network <span class="number">10.0</span>.254.254/<span class="number">32</span> </span><br><span class="line">   maximum-paths <span class="number">64</span></span><br><span class="line">exit-address-family</span><br></pre></td></tr></table></figure>
+<p>同样的问题也存在于leaf节点的配置中，也存在于spine节点的配置中。</p>
+<p>然而，在这个配置中有几件事情做得很好:</p>
+<p> 接口IP地址具有模行。 假设有32个端口spines（如今常见的是32×100 Gbps和32×40 Gbps交换机），则需要64个接口IP地址。 在每个接口上使用/ 31子网允许我们在两个spine之间分配/ 26子网。</p>
+<p> 默认网关地址子网是从一个公共子网中宣布的，它不同于分配给终端主机的子网</p>
+<p> 假设每个机架上有40台主机，除了最大的数据中心外，其他所有的数据中心都有40台主机，在网络配置中，我们为每个与主机相关的子网分配了/26子网。</p>
+<p>总结跨节点配置的困难点，我们看到使用IP地址意味着在多个位置重复信息，因此随着新IP地址的添加和删除，配置变得脆弱和不可伸缩。尽管可以检测相邻IP地址中的模型，但它也很脆弱，因为以后的更改可能会破坏模型识别中内置的假设。 例如，如果我们假设对地址进行了序列编号，则稍后添加新的spines可能会破坏该模式。 因此，除了简单的添加之外，每项更改都是脆弱的，需要特别处理。</p>
+<p>那么，我们如何克服这些问题呢?是时候从武器库中取出一些工具了。</p>
+<h2 id="路由重分发"><a href="#路由重分发" class="headerlink" title="路由重分发"></a>路由重分发</h2><p>为了消除通过网络声明宣告的单个IP地址的规范，我们可以使用一个不同的命令:</p>
+<p>Redistribute.</p>
+<p>从它们的第一次引入开始，所有的路由协议套件都提供了一个从一个协议中提取前缀并在另一个协议中宣告它的选项。这种做法被称为redistrbuting routes.</p>
+<p>BGP中的常规命令格式如下：</p>
+<p>redistribute <em>protocol</em> route-map <em>route-map-name</em></p>
+<p>该<em>protocol</em>是下列值之一:</p>
+<ul>
+<li>Static: 宣告静态配置的路由。</li>
+<li>Connected：宣告与接口地址关联的路由。 配置运行时，这些接口上的链接必须正常运行。 如果链接失败，则立即取消其IP地址。</li>
+<li>Kernel：这特定于Linux操作系统。 路由既可以通过路由套件（例如FRRouting，bird或quagga）进行静态配置，也可以直接在内核中通过iproute2（ip系列命令）之类的工具集或直接通过netlink配置 与内核本身的接口。</li>
+<li>Ospf：重分发重通过OSPF学习到的路由。</li>
+<li>Bgp：重分发通过BGP协议学到的路由。</li>
+<li>Rip：重分发通过RIP协议学到的路由。</li>
+</ul>
+<p>其他一些不太常见的协议也可以表示，比如IS-IS。</p>
+<p>因此，为了宣告设备上所有vlans和默认网关的接口IP地址，用一个命令替换所有网络语句就足够了:</p>
+<p>redistribute connected</p>
+<p>用reistribute替换neworkt语句后，leaf01上的配置如下所示：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">log</span> file /var/<span class="built_in">log</span>/frr/frr.<span class="built_in">log</span> </span><br><span class="line"></span><br><span class="line">router bgp <span class="number">65000</span></span><br><span class="line"> bgp router-id <span class="number">10.0</span><span class="number">.254</span><span class="number">.1</span> </span><br><span class="line"> bgp <span class="built_in">log</span>-neighbor-changes </span><br><span class="line"> bgp no <span class="keyword">default</span> ipv4-unicast </span><br><span class="line"> timers bgp <span class="number">3</span> <span class="number">9</span></span><br><span class="line"> neighbor peer-group ISL neighbor ISL remote-as <span class="number">65500</span></span><br><span class="line"> neighbor ISL advertisement-interval <span class="number">0</span> </span><br><span class="line"> neighbor ISL timers connect <span class="number">5</span> </span><br><span class="line"> neighbor <span class="number">169.254</span><span class="number">.1</span><span class="number">.0</span> peer-group ISL </span><br><span class="line"> neighbor <span class="number">169.254</span><span class="number">.1</span><span class="number">.64</span> peer-group ISL </span><br><span class="line"> address-family ipv4 unicast</span><br><span class="line">   neighbor ISL activate </span><br><span class="line">   redistribute connected </span><br><span class="line">   maximum-paths <span class="number">64</span></span><br><span class="line"> <span class="built_in">exit</span>-address-family</span><br></pre></td></tr></table></figure>
+<p>但是，使用未经修饰的redistribute语句可能会导致潜在的广告地址（例如接口IP地址）不正确的发布或传播配置错误。 作为后者的示例，如果运营商在接口上意外添加了8.8.8.8/32的IP地址，则BGP将宣布该地址的可达性，从而将所有针对公共DNS服务器的请求发送至那不幸的配置错误的路由器。</p>
+<p>为了避免所有这些问题，几乎每个路由协议都支持某种形式的路由策略</p>
+<h2 id="路由策略"><a href="#路由策略" class="headerlink" title="路由策略"></a>路由策略</h2><p>简单来说，路由策略指定何时接受或拒绝路由通告。 根据使用的位置，接受或拒绝可以应用于从对等方接收的路由，发布给对等方的路由以及重新分发的路由。 最复杂的情况是，路由策略可以修改会影响前缀的最佳路径选择的度量，并可以从前缀或前缀集中添加或删除属性或团体属性。 鉴于BGP主要用于连接不同的管理域，所以BGP具有最复杂的路由策略构造。</p>
+<p>路由策略通常由一系列if-then-else语句组成，其中包含匹配项以及对成功匹配项采取的措施。</p>
+<p>到目前为止，尽管我们避免使用任何路由策略，但现在我们可以看到在数据中心中将它们与BGP一起使用的原因。</p>
+<p>例如，为避免出现上一节中所述的通告8.8.8.8的问题，路由策略的伪代码应如下所示（到本节末尾，我们将该伪代码开发为实际的配置语法）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> prefix equals <span class="string">'8.8.8.8/32'</span> then reject <span class="keyword">else</span> accept</span><br></pre></td></tr></table></figure>
+<p>在重新分配连接的路由的配置中，安全策略是接受属于该数据中心的路由，并拒绝任何其他路由。 我展示的配置包含两种前缀：10.1.0.0/16（假设网络中有许多面向主机的子网）和路由器的回送IP地址，例如10.0.254.1/32。 我们还看到了接口地址子网169.254.0.0/16，该子网不得发布。 因此，路由策略的初步尝试如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> prefix equals <span class="number">10.1</span><span class="number">.0</span><span class="number">.0</span>/<span class="number">16</span> then accept</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> prefix equals <span class="number">10.0</span><span class="number">.254</span><span class="number">.1</span>/<span class="number">32</span> then accept </span><br><span class="line"><span class="keyword">else</span> reject</span><br></pre></td></tr></table></figure>
+<p>然而，这要求我们为每个路由器放入不同的route-map子句，因为每个路由器都有不同的环回IP地址。 相反，如果我们选择从中分配这些地址的子网10.0.254.0/24，则所有路由器之间的route-map都将相同。 但是，由于路由器的环回IP地址包含在此子网中，并且不等于该子网，因此我们不能使用prefix equals。取而代之的是，我们引入一个新的限定符“ belongs”，该限定符检查IP地址是否属于指定的子网。 这是路由策略新改写的伪代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> prefix belongs to <span class="number">10.1</span>.0.0/<span class="number">16</span> then accept</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> prefix belongs to <span class="number">10.0</span>.254.0/<span class="number">24</span> then accept</span><br><span class="line"><span class="keyword">else</span> reject</span><br></pre></td></tr></table></figure>
+<p>但这可以接受任何人意外地宣布子网10.0.254.0/26的情况，例如，当允许的前缀是路由器回送的精确地址时，所有这些都是/ 32地址。 我们该如何解决？ 通过添加更多限定词：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> prefix belongs to <span class="number">10.1</span>.0.0/<span class="number">16</span> then accept </span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (prefix belongs to <span class="number">10.0</span>.254.0/<span class="number">24</span> and</span><br><span class="line">address mask equals <span class="number">32</span>) then accept</span><br><span class="line"><span class="keyword">else</span> reject</span><br></pre></td></tr></table></figure>
+<p>我们添加的限定符address mask equals，使我们不仅可以考虑地址，还可以考虑地址掩码，从而更精确地匹配地址。</p>
+<p>因为可能有多个这样的路由策略，所以我们给这个策略起个名字，让它成为一个函数:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ACCEPT_DC_LOCAL(prefix)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> prefix belongs to <span class="number">10.1</span>.0.0/<span class="number">16</span> then accept </span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (<span class="number">10.0</span>.254.0/<span class="number">24</span> contains prefix and</span><br><span class="line">	subnet equals <span class="number">32</span>) then  accept</span><br><span class="line">    <span class="keyword">else</span> reject</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Note:我所见过的几乎每一种网络配置都使用大写形式表示route-map和prefix-list名称。 尽管这只是一个名称，并且操作员可以自由选择其约定（所有大写字母，camelCase(驼峰命名法)或其他内容），但了解约定很有用。</p>
+<h3 id="Route-Maps"><a href="#Route-Maps" class="headerlink" title="Route-Maps"></a>Route-Maps</h3><p>route-maps是实现路由策略的常用方法。 Cisco的IOS，NXOS，开源协议套件FRRouting，Arista等均支持路由图。 JunOS使用不同的语法，有些人会说这是更直观的关键字。 开源路由套件BIRD更进一步，它使用一种简单的特定于域的编程语言，而不是route-maps和prefix-lists.的这种组合。 描述的详细信息超出了本书的范围，但是如果您有兴趣，可以在BIRD的网页上找到详细信息。</p>
+<p>Route-maps的语法如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">route-map NAME (permit|deny) [sequence_number] </span><br><span class="line">  match classifier</span><br><span class="line">  <span class="built_in">set</span> action</span><br></pre></td></tr></table></figure>
+<p>这将为策略分配名称，指示匹配的路由是允许还是拒绝，然后将输入与分类器进行匹配。 如果match子句成功匹配分类器，则set子句将作用于路由。 可选的sequence number命令要在route-map中执行的子句序列。</p>
+<p>当我们使用permit关键字时，匹配成功时将应用set操作，但是当我们使用deny关键字时，匹配失败时将应用set操作。 换句话说，将功能拒绝为“not”运算符：如果存在匹配项，则拒绝该路由。</p>
+<p>route-maps在最后有一个隐含的“deny”。因此，如果没有匹配的条目，则结果是拒绝输入。</p>
+<h3 id="Classifiers-in-route-maps"><a href="#Classifiers-in-route-maps" class="headerlink" title="Classifiers in route-maps"></a>Classifiers in route-maps</h3><p>route-maps带有丰富的分类器集。 您可以使用各种各样的特征作为分类器，并且不同的实现支持这些分类器的不同子集（有些支持全部或更多）。 表3-1中的列表摘自FRRouting的列表。</p>
+<p>Table 3-1. Key classifiers in the match field of a route-map</p>
+<ul>
+<li><strong>as-path</strong>        匹配BGP中的AS_PATH属性</li>
+<li><strong>community</strong>   匹配前缀中的团体属性,</li>
+<li><strong>extcommunity</strong>      匹配BGP中的扩展团体属性</li>
+<li><strong>interface</strong>      匹配下一条路由的接口名称</li>
+<li><strong>ip, ipv6</strong>       匹配IP信息，如IP地址、下一跳或来源</li>
+<li><strong>local-preference</strong>  匹配路由的LOCAL_PREFERENCE属性</li>
+<li><strong>metric</strong>    匹配路由的metric属性</li>
+<li><strong>origin</strong>     匹配路由的ORIGIN属性</li>
+<li><strong>peer</strong>       匹配会话对等方的信息</li>
+</ul>
+<p>作为使用IP前缀作为分类器的路由策略的一个示例，让我们首先看看如何定义两个前缀:</p>
+<p>ip prefix-list DC_LOCAL_SUBNET seq 5 permit 10.1.0.0/16 le 26</p>
+<p>ip prefix-list DC_LOCAL_SUBNET seq 10 permit 10.0.254.0/24 le 32</p>
+<p>这些命令一起定义了一个名为DC_LOCAL_SUB NET的列表，该列表包含两个前缀：10.1.0.0/16和10.0.254.0/24。 在这两种情况下，将任何前缀与此列表进行匹配都会检查该前缀是否完全匹配或包含在所提供的前缀中。 在这种情况下，10.0.254.0/24 le 32特别指出，任何匹配项都必须位于/ 32的子网上。 即使它说“小于或等于”，在IPv4中也没有小于/ 32的子网，因此，它仅与/ 32前缀完全匹配。</p>
+<p>seq <number>用于标识匹配的顺序。例如，如果您想要拒绝10.1.1.1/32而允许10.1.1.0/24，那么使用序列号对前缀列表进行排序的正确方法如下:</number></p>
+<p>ip prefix-list EXAMPLE_SEQ seq 5 deny 10.1.1.1/32</p>
+<p>ip prefix list EXAMPLE_SEQ seq 10 permit 10.1.1.0/24</p>
+<p>为了允许将子句插入到现有顺序的中间，通常的做法是将序列号分隔开一些间隙。 在该示例中，我们使用了5为间隔。</p>
+<p>现在，我们可以定义一个route-map，以将两个前缀与DC_LOCAL_SUBNET名称匹配。 以下是等效于先前在“路由策略”部分中描述的if-then-else路由策略伪代码的路由映射，并包括考虑了该策略的redistribute命令：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ip prefix-<span class="built_in">list</span> DC_LOCAL_SUBNET seq <span class="number">5</span> permit <span class="number">10.1</span><span class="number">.0</span><span class="number">.0</span>/<span class="number">16</span> le <span class="number">26</span></span><br><span class="line">ip prefix-<span class="built_in">list</span> DC_LOCAL_SUBNET seq <span class="number">10</span> permit <span class="number">10.0</span><span class="number">.254</span><span class="number">.0</span>/<span class="number">24</span> le <span class="number">32</span> </span><br><span class="line">route-<span class="built_in">map</span> ACCEPT_DC_LOCAL permit <span class="number">10</span></span><br><span class="line">	match ip-address DC_LOCAL_SUBNET</span><br></pre></td></tr></table></figure>
+<p>redistribute connected route-map DC_LOCAL_SUBNET</p>
+<p>这里是伪代码等价于这个route-map:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">DC_LOCAL_SUBNET(prefix)</span><br><span class="line">&#123;</span><br><span class="line"><span class="keyword">if</span> (prefix belongs to <span class="number">10.1</span><span class="number">.1</span><span class="number">.0</span>/<span class="number">26</span> <span class="keyword">and</span> prefixlen &lt;= <span class="number">26</span> <span class="keyword">or</span> </span><br><span class="line">prefix belongs to <span class="number">10.0</span><span class="number">.254</span><span class="number">.0</span>/<span class="number">24</span> <span class="keyword">and</span> prefixlen &lt;= <span class="number">32</span>) then </span><br><span class="line">	redistribute connected route</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>除了IP前缀，我们也可以使用任何其他分类器。 例如，如果我们需要做的只是通告路由器的主要环回IP地址，则配置行如下：</p>
+<p>route-map ADV_LO permit 10 </p>
+<p>match interface lo</p>
+<p>redistribute connected route-map ADV_LO</p>
+<p>请注意，这不会播发与回送接口关联的主机本地127.x.x.x地址，而只会播发全球可用的IP地址。</p>
+<h3 id="编写安全route-map策略"><a href="#编写安全route-map策略" class="headerlink" title="编写安全route-map策略"></a>编写安全route-map策略</h3><p>有两种编写路由策略的方法，一种是安全的，另一种是不安全的。基本原则是:拒绝任何不明确的许可。让我们通过一个例子来考虑这个问题。除了上行(内部交换)接口swp51和swp52以及管理接口eth0之外，在所有接口上发布IP地址的情况并不少见。这里有一种方式来编写配置:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">route-map EXCEPT_ISL_ETH0 deny <span class="number">10</span> </span><br><span class="line">	match <span class="class"><span class="keyword">interface</span> <span class="title">swp51</span></span></span><br><span class="line"><span class="class"><span class="title">route</span>-<span class="title">map</span> <span class="title">EXCEPT_ISL_ETH0</span> <span class="title">deny</span> 20 </span></span><br><span class="line"><span class="class">	<span class="title">match</span> <span class="title">interface</span> <span class="title">swp52</span></span></span><br><span class="line"><span class="class"><span class="title">route</span>-<span class="title">map</span> <span class="title">EXCEPT_ISL_ETH0</span> <span class="title">deny</span> 30 </span></span><br><span class="line"><span class="class">	<span class="title">match</span> <span class="title">interface</span> <span class="title">eth0</span></span></span><br><span class="line"><span class="class"><span class="title">route</span>-<span class="title">map</span> <span class="title">EXCEPT_ISL_ETH0</span> <span class="title">permit</span> 40</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">redistribute</span> <span class="title">connected</span> <span class="title">route</span>-<span class="title">map</span> <span class="title">EXCEPT_ISL_ETH0</span></span></span><br></pre></td></tr></table></figure>
+<p>最后的permit配置允许通过任何与deny route-maps.不匹配的接口。</p>
+<p>这种方法的好处是，它允许您自由更改接口并为其使用非连续的IP地址，而无需更改路由映射或修改BGP配置。 缺点是，无论管理员是否打算使用任何带有有效IP地址的新接口，都会立即发布其IP地址。 因此，这被认为是一种不安全的方法，您绝不能在配置路由策略时使用它。</p>
+<p>如果有许多接口需要声明其地址，则备用方法可能很繁琐。 典型的路由套件实施不允许通过诸如swp1-49之类的语法指定多个接口（包括从swp1到swp49的所有接口）。 在这种情况下，如果接口上使用的IP地址仅来自几个子网，那么可以选择使用较小的IP地址列表。</p>
+<h3 id="Route-maps-in-BGP"><a href="#Route-maps-in-BGP" class="headerlink" title="Route-maps in BGP"></a>Route-maps in BGP</h3><p>除了重分发路由外，您还可以在BGP处理期间在多个其他位置应用route-maps。以下是一些例子:</p>
+<ul>
+<li><p>使用route-maps过滤从邻居通告路由中的接受的前缀：</p>
+<p>neighbor 169.254.1.1 route-map NBR_RT_ACCEPT in</p>
+</li>
+<li><p>使用route-maps来过滤出哪些路由通告给邻居</p>
+<p>neighbor 169.254.1.1 route-map NBR_RT_ADV out</p>
+</li>
+<li><p>过滤通过network宣告的路由</p>
+<p>network 10.1.1.1/24 route-map ADV_NET</p>
+</li>
+<li><p>通告默认路由</p>
+<p>neighbor foo default-originate route-map ONLY_NON_EXITS</p>
+</li>
+</ul>
+<h3 id="route-maps对BGP处理的影响"><a href="#route-maps对BGP处理的影响" class="headerlink" title="route-maps对BGP处理的影响"></a>route-maps对BGP处理的影响</h3><p>BGP是一种路径向量路由协议，因此在运行最佳路径算法之前，它不会宣告路由更新。 route-maps应用于数据包接收和数据包发送。 如果BGP speaker有数十个或数百个邻居，并且有route-maps附加到这些邻居，则在通告该路由之前为每个邻居运行该route-map会占用大量CPU并减慢更新的发送速度。 缓慢的更新处理也可能导致较差的收敛时间。</p>
+<p>   因此，对等体组（peer-groups）通常与route-maps一起使用，以大幅度减少在向其邻居发布路由之前BGP需要执行的处理量。 实现通常不动态地建立这些组，而不仅仅是依靠用户配置的对等组。 这是因为即使在一个对等组中，不同的邻居也可能支持不同的功能(例如，有些可能支持MPLS，有些可能不支持)。此信息只能在会话建立期间确定。因此，用户配置不是没有帮助就是给用户增加了不必要的负担</p>
+<p>因此，支持动态创建和拆除对等组的实现会将具有相同输出策略和相同功能的所有邻居置于一个新的，动态创建的对等组或更准确地说是动态更新组中。 BGP对包含整个对等组的前缀运行一次策略。 然后将结果自动应用于该动态构建的对等组的每个成员。 这允许实施扩展以支持数百甚至数千个邻居。</p>
+<h2 id="使用接口名称作为邻居"><a href="#使用接口名称作为邻居" class="headerlink" title="使用接口名称作为邻居"></a>使用接口名称作为邻居</h2><p>由于我们使用/ 31地址作为接口IP地址，因此可以轻松确定对等方的接口IP地址。 例如，如果一端的IP地址为169.254.1.0/31，则接口一端的IP地址显然为169.254.1.1/31。 同样，如果一端的IP地址为169.254.1.64/31，则另一端的IP地址为169.254.1.65/31。 如果将/ 30子网用作接口地址，则同样如此。</p>
+<p>FRRouting使用此技巧使用户可以在邻居语句中替换接口名称，而不用指定IP地址。</p>
+<p>这会将leaf01中的邻居配置从</p>
+<p>neighbor 169.254.1.0 peer-group ISL </p>
+<p>neighbor 169.254.1.64 peer-group ISL</p>
+<p>替换为：</p>
+<p>neighbor swp51 interface peer-group ISL </p>
+<p>neighbor swp52 interface peer-group ISL</p>
+<p>当FRRouting中的BGP代码在neighbor语句中遇到接口名称时，它将检查接口是否具有/ 30或/ 31的IPv4地址。 如果是这样，则BGP自动识别对端的IP地址，并启动到该IP地址的BGP会话。 如果IP地址不是/ 30或/ 31并且链接上有IPv4地址，该代码将显示警告并停止尝试启动连接。 </p>
+<p>如示例3-3所示，使用接口名称代替IP地址会使整个leaves和spines的配置看起来很相似。</p>
+<p><strong>Example 3-3. BGP configuration of leaves using interface names</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// leaf01’s BGP configuration </span></span><br><span class="line">log file /<span class="keyword">var</span>/log/frr/frr.log</span><br><span class="line"></span><br><span class="line">ip prefix-list DC_LOCAL_SUBNET <span class="number">5</span> permit <span class="number">10.1</span>.0.0/<span class="number">16</span> le <span class="number">26</span></span><br><span class="line">ip prefix-list DC_LOCAL_SUBNET <span class="number">10</span> permit <span class="number">10.0</span>.254.0/<span class="number">24</span> le <span class="number">32</span> </span><br><span class="line">route-map ACCEPT_DC_LOCAL permit <span class="number">10</span></span><br><span class="line">	match ip-address DC_LOCAL_SUBNET</span><br><span class="line"></span><br><span class="line">router bgp <span class="number">65000</span></span><br><span class="line"> bgp router-id <span class="number">10.0</span>.254.1 </span><br><span class="line"> bgp log-neighbor-changes </span><br><span class="line"> bgp no <span class="keyword">default</span> ipv4-unicast </span><br><span class="line"> timers bgp <span class="number">3</span> <span class="number">9</span></span><br><span class="line"> neighbor peer-group ISL </span><br><span class="line"> neighbor ISL remote-as <span class="number">65500</span></span><br><span class="line"> neighbor ISL advertisement-interval <span class="number">0</span> </span><br><span class="line"> neighbor ISL timers connect <span class="number">5</span> </span><br><span class="line"> neighbor swp51 peer-group ISL </span><br><span class="line"> neighbor swp52 peer-group ISL</span><br><span class="line"> address-family ipv4 unicast </span><br><span class="line"> neighbor ISL activate</span><br><span class="line"> redistribute connected route-map DC_LOCAL </span><br><span class="line"> maximum-paths <span class="number">64</span></span><br><span class="line"> exit-address-family</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// leaf02’s BGP configuration </span></span><br><span class="line">log file /<span class="keyword">var</span>/log/frr/frr.log</span><br><span class="line"></span><br><span class="line">ip prefix-list DC_LOCAL_SUBNET <span class="number">5</span> permit <span class="number">10.1</span>.0.0/<span class="number">16</span> le <span class="number">26</span></span><br><span class="line">ip prefix-list DC_LOCAL_SUBNET <span class="number">10</span> permit <span class="number">10.0</span>.254.0/<span class="number">24</span> le <span class="number">32</span></span><br><span class="line">route-map ACCEPT_DC_LOCAL permit <span class="number">10</span> </span><br><span class="line">	match ip-address DC_LOCAL_SUBNET</span><br><span class="line"></span><br><span class="line">router bgp <span class="number">65001</span></span><br><span class="line"> bgp router-id <span class="number">10.0</span>.254.2 </span><br><span class="line"> bgp log-neighbor-changes </span><br><span class="line"> bgp no <span class="keyword">default</span> ipv4-unicast </span><br><span class="line"> timers bgp <span class="number">3</span> <span class="number">9</span></span><br><span class="line"> neighbor peer-group ISL </span><br><span class="line"> neighbor ISL remote-as <span class="number">65500</span></span><br><span class="line"> neighbor ISL advertisement-interval <span class="number">0</span> </span><br><span class="line"> neighbor ISL timers connect <span class="number">5</span> </span><br><span class="line"> neighbor swp51 peer-group ISL </span><br><span class="line"> neighbor swp52 peer-group ISL</span><br><span class="line"> address-family ipv4 unicast </span><br><span class="line">    neighbor ISL activate</span><br><span class="line">	redistribute connected route-map DC_LOCAL </span><br><span class="line">	maximum-paths <span class="number">64</span></span><br><span class="line">    exit-address-family</span><br></pre></td></tr></table></figure>
+<p>除了对router-id和邻居的ASN进行了更改外，这些spines的配置看起来也一样。结果如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">log file /<span class="keyword">var</span>/log/frr/frr.log</span><br><span class="line"></span><br><span class="line">ip prefix-list ACCRT <span class="number">5</span> permit <span class="number">10.1</span>.0.0/<span class="number">16</span> le <span class="number">26</span></span><br><span class="line">ip prefix-list ACCRT <span class="number">10</span> permit <span class="number">10.0</span>.254.0/<span class="number">24</span> le <span class="number">32</span> </span><br><span class="line">route-map DC_LOCAL permit <span class="number">10</span></span><br><span class="line">	match ip-address ACCRT</span><br><span class="line"></span><br><span class="line">router bgp <span class="number">65500</span></span><br><span class="line"> bgp router-id <span class="number">10.0</span>.254.254 </span><br><span class="line"> bgp log-neighbor-changes </span><br><span class="line"> bgp no <span class="keyword">default</span> ipv4-unicast </span><br><span class="line"> timers bgp <span class="number">3</span> <span class="number">9</span></span><br><span class="line"> neighbor peer-group ISL</span><br><span class="line"> neighbor ISL advertisement-interval <span class="number">0</span> </span><br><span class="line"> neighbor ISL timers connect <span class="number">5</span> </span><br><span class="line"> neighbor swp1 remote-as <span class="number">65000</span> </span><br><span class="line"> neighbor swp1 peer-group ISL</span><br><span class="line"> neighbor swp2 remote-as <span class="number">65001</span> </span><br><span class="line"> neighbor swp2 peer-group ISL </span><br><span class="line"> neighbor swp3 remote-as <span class="number">65002</span> </span><br><span class="line">  neighbor swp3 peer-group ISL </span><br><span class="line"> neighbor swp4 remote-as <span class="number">65003</span> </span><br><span class="line"> neighbor swp4 peer-group ISL</span><br><span class="line"> bgp bestpath as-path multipath-relax </span><br><span class="line"> address-family ipv4 unicast</span><br><span class="line">	neighbor ISL activate</span><br><span class="line">	redistribute connected route-map DC_LOCAL</span><br><span class="line">	maximum-paths <span class="number">64</span> </span><br><span class="line">	exit-address-family</span><br></pre></td></tr></table></figure>
+<p>相同的路由策略应用于leaf和spine。</p>
+<p>使用接口名而不是IP地址不仅限于配置。所有相关的show和clear命令(我们将在第5章讨论这些)也可以使用接口名。</p>
+<p>使用接口名而不是IP地址支持良好配置的另一个基本原则:减少重复。对于redistribute connected和neighbor语句，接口的IP地址只指定在接口配置中。</p>
+<p>如果您熟悉自动化，可能会想知道如何用接口名称替换IP地址使其更易于自动化。为什么使用变量来处理路由器之间的差异不够？归根结底，自动化涉及某种编程逻辑，因此根据工具的不同，逻辑可以是简单的也可以是复杂的。但是，自动化代码的简洁性对于减少错误至关重要。许多研究表明，由操作员引起的错误是网络中断的第二大常见原因。借助自动化，我们引入了抽象级别，以及即时对大量路由器造成破坏的功能。例如，一种布线方法可以是，操作员使用不同leaf上的不同端口来连接交换机间链路。因为每个节点上的端口都不相同，所以使用每个节点的变量来定义上行链路端口可能会导致不良的物理网络设计。但是这些变量会创建一个抽象级别，从而在操作员不小心的情况下掩盖了问题。通过统一布线，操作员可以无需为不同节点上的上行链路端口定义变量。同样，尽管并非总是可能，但没有IP地址的配置意味着该配置可以广泛使用，例如跨Pod重复使用或在安装新数据中心时使用。</p>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>本章首先提出了使BGP配置更加自动化友好的方法。 首先，我们使用路由策略以单个Redistribute connected指令（带有route-map）替换单个网络语句中的IP地址，以确保仅发布适当的地址。 接下来，以/ 30和/ 31子网所覆盖的少量地址为基础（一旦知道了本地端的IP地址，就可以轻松确定远程端的IP地址），我们减少配置以使用接口名称代替IP 识别对等体的地址。</p>
+<p>然而，我们尚未完成。 该配置隐藏的是，即使接口已从BGP配置中隐藏并且没有重复，它们仍然需要IP地址配置。 同样，配置仍然依赖于对等方的ASN的知识。 在第4章中，我们消除了这两个要求。</p>
+<h1 id="重新设计BGP配置"><a href="#重新设计BGP配置" class="headerlink" title="重新设计BGP配置"></a>重新设计BGP配置</h1><p>本章说明如何通过完全消除接口IP地址并指定每个邻居的远程地址来减少路由器配置。 这两项改进将使在数据中心中配置BGP路由器变得轻而易举，并且使自动化变得轻而易举。</p>
+<p>在第3章中，我们展示了如何从BGP配置中消除IP地址的使用。但是，运营商仍然需要在BGP对等对等的接口上配置IP地址。由于这些接口地址只用于BGP配置，并且它们的信息从不通过BGP传播，因此它们的配置是数据中心中服务提供商世界的无意义的遗留。 在第3章结尾提到的关于自动配置的另一个问题是需要了解对等方的remote-as。</p>
+<p>消除了这两个需求之后，我们剩下的配置在节点之间是同质且无重复的，唯一特定于节点的内容是节点的ASN及其router-id。 换句话说，该配置非常易于自动化且简单。</p>
+<p>为了实现这些目标，我们需要了解几乎与路由一样古老的主题：未编号的接口，以及如何使该结构适应BGP。</p>
+<h2 id="接口IP地址和remote-as的需求"><a href="#接口IP地址和remote-as的需求" class="headerlink" title="接口IP地址和remote-as的需求"></a>接口IP地址和remote-as的需求</h2><p>由于BGP在TCP / IP上运行，因此它需要一个IP地址来创建连接。我们如何在不分配接口任何IP地址的同时识别这个远程节点的地址?回答这个问题需要理解一个不太为人所知的RFC和IPv6提供的无状态配置工具。它还涉及到理解路由的真正核心。</p>
+<p>第二个问题是每个BGP配置都依赖于知道remote ASN。 但是，实际上仅一件事需要知道ASN：识别会话是受内部BGP（iBGP）还是外部BGP（eBGP）的规则控制</p>
+<h2 id="编号接口上的数字"><a href="#编号接口上的数字" class="headerlink" title="编号接口上的数字"></a>编号接口上的数字</h2><p>在一个接口上配置IP地址真的那么重要吗?到底有多少个呢?</p>
+<p>考虑一个简单的两层Clos，带有4个spines和32个leaves，是一个相当常见的网络。 每个spine有32个链路，连接到每个leaf，并且有4个spine。 这需要4 <em> 32 </em> 2 = 256个IP地址（4个spine<em> 32个接口</em>每个接口2个地址，每个末端一个）。 如果leaves的数量变为96个而不是32个（在中等规模的网络中也不罕见），则我们需要的接口IP地址总数将为4 <em> 96 </em> 2 = 768。 随着我们增加规模，到16个spines，地址总数将增加到16<em> 96 </em> 2 = 3,072。</p>
+<p>尽管从算法上推导这些数字是可能的，但它可能很笨拙，而且容易出错。自动化代码变得更加复杂。人们通常采用的一种方法是将接口地址存储为一个列表或一组变量，在自动化过程中，从这些变量中读取数据，将地址分配给接口。这种方法变得无法使用。</p>
+<p>这一切的悲哀之处在于，这些地址除了BGP会话外，什么都没有使用。 那么，为什么不完全摆脱它们呢？</p>
+<h3 id="关于编号接口的哲学"><a href="#关于编号接口的哲学" class="headerlink" title="关于编号接口的哲学"></a>关于编号接口的哲学</h3><p>在传统的第3层(L3)设计中，为每个可寻址接口端点分配一个IP地址是相当基本的实践。但是这种设计留下了一个IP地址属于谁的问题:接口还是节点?</p>
+<p>这种身份混淆所隐含的一个实际问题是：“节点是否可以响应在接口上收到的地址解析协议（ARP）请求，以获取分配给该节点但未分配给该特定接口的IP地址？” 路由器用响亮的“No”回答了这个问题。 如果要在路由器上启用这种行为，则需要启用一个称为“proxy-ary”的功能。 Linux用响亮的“Yes”回答了同样的问题。 Linux实现者的理由是，他们希望最大程度地实现通信。 因此，无论在哪个接口上收到ARP请求，该节点都可以自由地响应其拥有的任何IP地址的ARP请求。</p>
+<p>Internet控制消息协议（ICMP）的设计进一步巩固了接口需要IP地址的想法。 ICMP仅报告数据包转发失败的端点的IP地址。 例如，它不报告端点的DNS名称。 你问为什么这很重要？ Traceroute。 Traceroute是一种古老，功能强大且流行的工具，人们可以使用它来调试网络中的连通性问题。 如果ICMP响应报告了接口的IP地址，则不仅可以标识节点，还可以标识拒绝不良数据包的传入接口。 然后，可以使用此信息来查找缺乏连接性的根本原因。 我经常被问到的一个问题是traceroute是否可以使用无编号的接口(是的，它可以，您可以使用发布在GitHub上的代码自己查看它)。</p>
+<p>最后，确保接口的两端被分配来自同一子网的地址可能是验证正确布线的一种拙劣的方法。</p>
+<h2 id="无编号接口"><a href="#无编号接口" class="headerlink" title="无编号接口"></a>无编号接口</h2><p>早期的网络架构师还探讨了此设计决策中的另一个问题：不为节点的每个接口分配唯一的IP地址。 没有自己的IP地址的接口称为“无编号”接口。</p>
+<p>这并不是说接口没有IP地址;它从另一个接口借用它的IP地址。但是，如果借用IP地址的接口出现故障，则其IP地址将不能被删除。为了避免接口突然丢失它们的IP地址，接口从一个永远不会丢失的接口（环回接口）借用IP地址。</p>
+<p>路由器可以使用接收接口的本地MAC地址在未编号的接口上响应arp，因为该接口有一个IP地址，即使是借来的。ICMP和traceroute仍然可以工作。但是，如果一个IP地址在一个节点上不再是唯一的，我们是不是就失去了识别数据包进入路由器的接口的能力?</p>
+<p>Clos网络主要是由每一对节点之间的单一链路构成的。因此，标识节点之间的链接并由此获得传入接口或传出接口的标识非常简单。如果一个Clos网络的节点之间确实存在多条平行链路，那么在连接性问题的根源上，就很难确定这些平行链路之间的特定接口。然而，由于各种原因，Clos网络中节点之间的多个并行链路并不常见，这些原因在第一章中进行了讨论。</p>
+<p>那么路由协议如何处理无编号的接口呢？ 在IP上运行的OSPF可以正常工作。 原始的OSPF RFC提供了有关如何使此方案起作用的足够指导。 即使大多数供应商都没有实现，开源路由套件FRRouting也支持相同的做法。 在许多站点的生产中都部署了无编号的OSPF。 IS-IS甚至不能在IP上运行，但在无编号的接口上也可以正常工作。</p>
+<h2 id="无编号的BGP"><a href="#无编号的BGP" class="headerlink" title="无编号的BGP"></a>无编号的BGP</h2><p>所有这些都是好事，但是BGP如何在一个没有接口IP地址的世界中工作呢?</p>
+<p>在路由协议世界中，有一个先有鸡还是先有蛋的问题。如果路由协议是您如何宣告路由的可达性，那么路由协议本身如何知道如何到达它的对等点呢?许多协议通过依赖于特定于链路的组播地址来解决这个问题(组播被限制为仅在链路上分布)。BGP不能这样做，因为BGP依赖于TCP，而TCP需要单播包，而不是组播。BGP的解决方案是在连接路由器的接口链路之间使用共享子网。</p>
+<p>Note：请记住，仅当目标IP地址与源IP地址位于不同子网中时，才需要进行路由。 例如，在10.0.0.0/24子网中，同一个子网（例如10.0.0.1和10.0.0.10）中的流量将在不进行任何进一步路由配置的情况下流动。 连接IP的系统使用ARP协议来确定子网内的可达性。 来自10.0.0.1到10.0.0.10的数据包不需要路由，但是从10.0.0.1到10.0.1.1的数据包将需要路由。 接口上10.0.0.0/24的路由称为“connected route”，因为假定该链接上的子网可直接访问（或直连的）。</p>
+<p>回到BGP对等体如何进行通信的方式，传统的eBGP配置使用接口上的连接路由无需进一步配置即可到达邻居。 如果无法通过连接的子网访问对等方的IP地址，则路由器将不知道如何在不进行进一步配置的情况下（或通过运行另一个宣告该地址的路由协议）访问对等方的IP地址。 例如，如果每个节点仅分配了一个/ 32 IP地址（其中/ 32表示该节点是该网络中唯一的实体），则BGP将无法与对等方进行通信。 要到达对等方的地址，需要有一个明确的/ 32路由。 这样的附加配置给用户带来了不适当的负担。 此静态配置的路由位于节点的对等方上，这意味着用户必须知道对等方的路由位于每个节点上的哪个端口上才能配置静态映射。</p>
+<p>BGP还有一些其他选择，例如使用动态邻居（我们将在第6章中介绍），但是它们都没有以对用户有意义的方式简化配置。</p>
+<p>那么，在没有用户配置和使用接口地址的情况下，我们如何才能发现对等方的IP地址？</p>
+<p>​       使用IPv6，一个晦涩的标准，RFC 5549.</p>
+<h3 id="IPv6路由通告"><a href="#IPv6路由通告" class="headerlink" title="IPv6路由通告"></a>IPv6路由通告</h3><p>IPv6架构师将IPv6设计为在没有显式配置的情况下尽可能地工作。 为此，将自动为IPv6网络中的每个链接分配一个IP地址，该IP地址仅对该链接唯一。 这样的地址称为链路本地IPv6地址。 链路本地地址link local address（LLA）仅可通过直接连接的对等方访问，并且只能在该接口上访问。 通常，LLA是从链路上的MAC地址派生的。</p>
+<p>为了确保主机自动发现相邻路由器，引入了一种称为路由器广告（RA）的新链路层协议。 在接口上启用后，RA会定期宣布接口的IPv6地址，包括LLA。 因此，一端可以自动确定另一端的IPv6地址。</p>
+<p>目前，IPv6和RA都在主机和路由器上普遍实现。 因此，这似乎是朝着使对等地址可自动发现的正确方向迈出的一步。</p>
+<p>需要明确的是，使用IPv6 LLA并不要求运营商开始在其网络中部署IPv6。这里也没有涉及到任何类型的隧道，IPv6中的IPv4或其他，我们在这里尝试使用的东西，IPv6 LLA仅用于建立用于启动BGP会话的TCP连接。除了在链接上启用IPv6(通常是自动启用的)和在链接上启用IPv6路由器通告之外，操作者不需要了解其他有关IPv6的知识。</p>
+<p>即使已自动发现对等方的IP地址并可以建立BGP会话，但这仍不足以实现完整的网络。</p>
+<h3 id="RFC-5549"><a href="#RFC-5549" class="headerlink" title="RFC 5549"></a>RFC 5549</h3><p>即使我们现在可以无需接口IP地址就可以建立BGP对等体，但是发布路由也需要一种方法来指定如何到达发布路由的路由器。 在BGP中，这是通过NEXTHOP属性在路由公告中显式发出的。 上一节显示了如何与RA一起使用以通过IPv6建立BGP会话。 如果IPv4路由可以将IPv6地址用作下一跳，则可以实现无编号接口的目标。</p>
+<p>如第1章所述，BGP是一种多协议路由套件，它允许通过单个连接来承载多个地址族的通告和撤回。 因此，BGP IPv4 UPDATE消息可以通过IPv6 TCP连接传输，就像IPv6 UPDATE消息可以通过IPv4 TCP连接传输一样。 在这种情况下，通告IPv4或IPv6路由不涉及任何形式的自动或者其它的隧道。</p>
+<p>在UPDATE消息中通告路由的可达性，BGP包含与要通告的路由关联的下一跳IP地址。 在IPv4的情况下，它作为BGP UPDATE消息的主要属性部分中的NEXTHOP属性携带（属性类似于附加信息，它提供了有关正在发布的路由的其他信息）。 下一跳地址与路由本身属于同一族。 换句话说，IPv4路由通过IPv4的 nexthops宣告，IPv6路由通过IPv6 的nexthops宣告。 在没有IPv4地址的接口上的eBGP会话中承载IPv4路由时，要通告的下一跳IP地址是什么？ 该接口上唯一可用的地址是IPv6 LLA。 使用RFC 5549。</p>
+<p>RFC 5549是一个有点晦涩难懂的RFC，是在新世纪的早期发明的。它的目的是允许IPv4路由的通告和IPv4包在纯IPv6网络上进行路由。因此，它提供了一种方式来携带IPv4路由与IPv6下一跳。你没看错:IPv4路由下一个是IPv6地址。</p>
+<p>以下是路由如何理解的简要概述。 假设10.1.1.0/24的路由条目的下一跳为20.1.1.1/30，传出接口为swp1。</p>
+<ol>
+<li><p>在接收到发往10.1.1.1的数据包时，路由使用此路由条目并确定下一跳的IP地址为20.1.1.1/30，并且这是我们的设备swp1。</p>
+</li>
+<li><p>要将数据包传送到20.1.1.1，路由器需要20.1.1.1的相应MAC地址。 如果路由器的ARP缓存中没有用于20.1.1.1的ARP条目，则它将运行arp以在接口swp1上获取20.1.1.1的MAC地址。</p>
+</li>
+<li><p>来自相邻路由器的ARP应答会在swp1接口上使用MAC地址20.1.1.1填充ARP缓存。</p>
+</li>
+<li><p>然后，路由器将此MAC地址作为数据包的目标MAC地址，并带有接口swp1的源MAC地址，并以其正常的方式发送数据包。</p>
+</li>
+</ol>
+<p>除了获取要放入数据包中的MAC地址外，其他IP地址都未在数据包中使用。</p>
+<p>同样在IPv6的情况下，nexthop IPv6地址也用于识别下一个跃点MAC地址，它使用IPv6等效于ARP：Neighbor Discovery（ND）。 即使在IPv6中，转发到原始目的地也仅涉及下一跳的MAC地址。 下一跳IP地址仅用于获取下一跳的MAC地址。</p>
+<p>RFC 5549建立在此观察的基础上，并提供了一种编码方案，以允许路由器使用IPv6邻居发布IPv4路由。</p>
+<h3 id="使用RFC-5549转发"><a href="#使用RFC-5549转发" class="headerlink" title="使用RFC 5549转发"></a>使用RFC 5549转发</h3><p>但是，等等，您说的是，精明的读者。路由表本身的结构是基于这样的假设:每个IPv4路由都有一个IPv4下跳，IPv6路由有一个IPv6下跳。RFC 5549本身除了允许您解决BGP问题外什么也不做。继续前进，你会说，这难道不需要IPv4路由进入IPv6栈，打破分层，协议隔离，天知道还有什么? 这个解决方案不需要硬件支持吗?因为硬件在路由包方面的功能和软件实现的功能差不多。</p>
+<p>一个幼稚的实现确实需要所有这些。但是，一个人不必如此天真。尽管RFC 5549在一些传统的路由器中被简化了，但是访问开源的FRRouting套件使我们可以更近距离地检查一个非幼稚的思想是如何工作的。</p>
+<p> FRRouting在本地实现IPv6 RA。IPv6 RA也有携带发送者的MAC地址的选项。FRRouting使用这个选项来声明它自己的LLA和MAC地址。在接收到一个RA包时，FRRouting中的相邻节点的RA代码将获得MAC地址和相关的IPv6 LLA。既然知道了接口的对等地址，FRRouting就可以启动BGP来建立连接。图4-1中的包交换时间线图也显示了这一点。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/4-1.png" alt="4-1"></p>
+<p>图 4-1. 未编号的BGP数据包时间轴序列</p>
+<p>在成功建立连接后，BGP会使用对等方的IPv6 LLA（如果配置了全局IPv6地址）从对等方接收前面提及的10.1.1.0/24的路由通告。如果BGP选择这条路径作为达到10.1.1.0/24的最佳路径，它将这条路径向下传递到路由信息数据库Routing Information dataBase (RIB)进程(在FRRouting中称为zebra)， 并且将nexthop设置为IPv6 LLA，这 在BGP UPDATE消息中接收到nexthop信息。</p>
+<p>Note：RIB是运行在节点上的每个路由协议和静态配置路由所接收到的所有路由的集合。如果一个路由有多个宣告者，那么RIB流程将选择一个名为distance的字段的最小值。每个协议都有默认的距离值，但是用户也可以更改它们。</p>
+<p>在接收到使用IPv6 LLA的10.1.1 /24路由时，假设RIB选择这条路由作为填充转发表的最佳路由。现在，RIB进程参考它的数据库，看看它是否有与这个IPv6 LLA相关联的MAC地址的信息。假设这个MAC地址是00:00:01:02:03:04。现在，RIB进程用这个MAC地址为169.254.0.1添加了一个静态ARP条目，指出了对等体接口。169.254.0.1是IPv4 LLA，尽管它不像IPv6 LLA那样自动分配到接口。FRRouting假设保留了169.254.0.1(在撰写本文时，这不能通过配置选项进行更改)。静态ARP入口的原因是路由器不能运行ARP来获取这个地址;这个IP地址是由路由器隐式地分配的，而它的邻居对此一无所知;因此，邻居不能响应ARP，因为它没有分配给接口的IP地址。</p>
+<p>然后，RIB进程将路由推送到内核路由表中，下一跳为169.254.0.1，出接口设置为对等接口的出接口。 因此，表中的最终状态如下所示：</p>
+<p>ROUTE: 10.1.1.0/24 via 169.254.0.1 dev swp1</p>
+<p>ARP: 169.254.0.1 dev swp1 lladdr 00:00:01:02:03:04 PERMANENT</p>
+<p>至此，一切都准备就绪，包转发才能正常工作。 更具体地，该模型的分组转发逻辑保持不变。</p>
+<p>如果链路断开或远端停止生成RA，则本地RA进程会从RIB中提取LLA及其关联的MAC。 这使RIB进程决定下一跳不再可达，从而使BGP进程通知对等体不再可达。 RIB还拆除了它创建的静态ARP条目。 终止会话会使BGP引出指出该对等接口的路由。</p>
+<p>简而言之：</p>
+<ul>
+<li>无编号的BGP使用接口的IPv6 LLA与对等方建立BGP会话。</li>
+<li>通过IPv6的路由器通告（RA）协议发现了远端的IPv6 LLA</li>
+<li>RA不仅提供了远端的LLA，还提供了其相应的MAC地址。</li>
+<li>BGP使用RFC 5549将IPv4路由编码为通过IPv6 LLA作为下一跳，可以通过IPv6 nexthop到达。</li>
+<li>RIB进程使用保留的IPv4 LLA 169.254.0.1编程静态ARP条目，并将MAC地址设置为通过RA获知的MAC地址。</li>
+<li>BGP向下传递给RIB进程，将IPv6 LLA作为下一跳的IPv4路由。</li>
+<li>在转发表中对路由进行编程之前，RIB进程将下一跳转换为169.254.0.1和发送接口。</li>
+</ul>
+<h3 id="BGP协商RFC-5549使用的能力"><a href="#BGP协商RFC-5549使用的能力" class="headerlink" title="BGP协商RFC 5549使用的能力"></a>BGP协商RFC 5549使用的能力</h3><p>由于用IPv6下一跳编码的IPv4路由不是通常的模型，RFC 5549定义了一种称为扩展下一跳的新功能，可以在对等会话中协商使用RFC 5549。由于具有BGP功能，双方都必须宣传自己的能力以理解RFC 5549，以便将其用于BGP对等接入。</p>
+<p>FRRouting在一个接口上自动启用RA，当一个BGP对等体被设置为基于一个没有IPv4地址的接口时，支持发送扩展的下一跳BGP功能。</p>
+<h3 id="互通性"><a href="#互通性" class="headerlink" title="互通性"></a>互通性</h3><p>每个eBGP对等点在发送路由通告之前将下一跳设置为它自己的IP地址。</p>
+<p>图4-2显示了一个假设的网络，其中路由器B和D支持RFC 5549，而路由器A和C不支持。因此，在B与A之间、B与C之间的链路上存在接口IP地址。当A宣布其到10.1.1 /24可达性时，它提供其对等接口的IPv4地址作为下一跳。当B宣告到10.1.1.0/24的可达时，它在向D发送路由时将其IPv6 LLA设置为下一跳，在向C发送路由时将其接口的IPv4地址设置为下一跳。</p>
+<p>相反，如果D宣告前缀10.1.2.0/24可达，它使用其接口的IPv6 LLA将其发送给B。当B向A和C宣布此消息时，它将下一跳设置为对等接口的IPv4地址的下一跳。</p>
+<p>​                  <img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/4-2.png" alt="4-2"></p>
+<p>图 4-2. RFC 5549的互通性</p>
+<h2 id="使用其他任何名称的remote-as"><a href="#使用其他任何名称的remote-as" class="headerlink" title="使用其他任何名称的remote-as"></a>使用其他任何名称的remote-as</h2><p>在消除了接口地址之后，剩下的惟一一件事就是完成简单的、通用配置的目标，即需要通过BGP邻居配置的remote-as关键字来指定邻居的ASN。</p>
+<p>在邻居规范中指定邻居的ASN有两个主要用途：</p>
+<ul>
+<li>本着跨管理域连接的精神，如果不小心连接到错误的管理域，可能造成巨大的财务和全球范围的损害，验证操作员的意图是至关重要的。</li>
+<li>标识BGP会话是由iBGP规则还是由eBGP规则管理。</li>
+</ul>
+<p>在数据中心内，因为我们不跨越管理域，所以安全性不再是指定ASN的迫切原因。 而且，如果唯一的原因是要确定由什么规则来控制会话，则可以通过一个简单的非特定于邻居的字段来完成。</p>
+<p>基于这种推理，FRRouting为remote-as关键字增加了两个新选项:external和internal。“External”意味着您希望与此邻居建立一个eBGP连接，而“Internal”意味着您希望建立一个iBGP连接。实际上，您甚至可以忽略这个规范，因为您可以通过在BGP OPEN消息中接收到的ASN来识别iBGP和eBGP。但是，remote-as命令有助于启动BGP对等点数据结构的创建，因为很容易在其中一个命令的相邻规范中出现打印错误，并意外地创建一个新的BGP对等体。例如，如果有一个对等169.254.1.11，并且其中一个邻居命令中有错字-neighbor 169.254.11.1 timers connect 9 代替了neighbor 169.254.1.11 timers connect 9，您不希望BGP开始建立新的邻居会话。</p>
+<h2 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h2><p>通过消除接口IP地址和精确的远端规范(如邻居命令规范)，我们可以得到一个配置，如例4-1所示，在图3-1所示的leaves和spines点之间看起来非常相似。在本例中，节点之间的唯一区别以粗体显示：</p>
+<p>例 4-1. Clos网络leaf和spine的最终配置</p>
+<p>// leaf01 configuration</p>
+<p>log file /var/log/frr/frr.log</p>
+<p>ip  prefix-list DC_LOCAL_SUBNET 5 permit 10.1.0.0/16 le 26</p>
+<p>ip prefix-list DC_LOCAL_SUBNET 10 permit 10.0.254.0/24 le 32 </p>
+<p>route-map ACCEPT_DC_LOCAL permit 10</p>
+<p>match ip-address DC_LOCAL_SUBNET</p>
+<p>router bgp <strong>65000</strong></p>
+<p>bgp router-id <strong>10.0.254.1</strong> </p>
+<p>neighbor peer-group ISL </p>
+<p>neighbor ISL remote-as external</p>
+<p>neighbor swp51 interface peer-group ISL </p>
+<p>neighbor swp52 interface peer-group ISL </p>
+<p>address-family ipv4 unicast</p>
+<p>neighbor ISL activate</p>
+<p>redistribute connected route-map ACCEPT_DC_LOCAL</p>
+<p>// spine01 configuration</p>
+<p>log file /var/log/frr/frr.log</p>
+<p>ip prefix-list DC_LOCAL_SUBNET 5 permit 10.1.0.0/16 le 26</p>
+<p>ip prefix-list DC_LOCAL_SUBNET 10 permit 10.0.254.0/24 le 32</p>
+<p>route-map ACCEPT_DC_LOCAL permit 10 </p>
+<p>match ip-address DC_LOCAL_SUBNET</p>
+<p>router bgp <strong>65534</strong></p>
+<p>bgp router-id <strong>10.0.254.254</strong> </p>
+<p>neighbor peer-group ISL </p>
+<p>neighbor ISL remote-as external</p>
+<p>neighbor swp1 interface peer-group ISL </p>
+<p>neighbor swp2 interface peer-group ISL </p>
+<p>neighbor swp3 interface peer-group ISL </p>
+<p>neighbor swp4 interface peer-group ISL </p>
+<p>address-family ipv4 unicast</p>
+<p>neighbor ISL activate</p>
+<p>redistribute connected route-map ACCEPT_DC_LOCAL</p>
+<p>这与原始的特定于节点的BGP配置相去甚远。 使用Ansible，Puppet或Chef之类的工具来自动化该配置也非常简单。 这不仅是由于通过使用接口名称消除了几乎每个路由器特定的信息，而且更重要的是，每个路由器的配置都包含了完全在路由器本地的信息，没有关于同级的信息。</p>
+<p>到目前为止，我们专注于在Clos拓扑中配置BGP。 我们没有描述如何查看配置结果，在初始配置后管理BGP或如何配置BGP将Clos拓扑连接到外部环境。 这些是第5章的重点。</p>
+<h1 id="BGP生命周期管理"><a href="#BGP生命周期管理" class="headerlink" title="BGP生命周期管理"></a>BGP生命周期管理</h1><p>到目前为止，这本书已经为使用BGP创建一个简单的、自动匹配的数据中心网络配置奠定了基础。但是我们已经完成了leaf和spine路由器的初始配置。任何网络操作员都知道，在网络部署之后，工作还远远没有完成。路由器需要升级，需要应用安全补丁，需要引入新的路由器，上帝保佑我们所有人，如果BGP拒绝行为怎么办?本章讨论这些问题。</p>
+<h2 id="有用的show命令"><a href="#有用的show命令" class="headerlink" title="有用的show命令"></a>有用的show命令</h2><p>到目前为止，我们只讨论了配置BGP，没有查看我们的劳动成果。本节将介绍用于查看BGP状态的两个最有用和最常用的命令。本节的目的是帮助新加入BGP的网络运营者起步(尽管一些老大师可能也会学到一两件新东西)，并强调与传统业务的区别，但不是一个完整的参考。关于BGP中使用的各种show命令，有很多在线文档和打印文档。</p>
+<h3 id="显示BGP会话信息"><a href="#显示BGP会话信息" class="headerlink" title="显示BGP会话信息"></a>显示BGP会话信息</h3><p>查看BGP状态最常用的命令是show ip bgp summary。 图5-1显示了本书中用于参考拓扑的命令的示例输出（基于FRRouting）。</p>
+<p>​                  <img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-1.png" alt="5-1"></p>
+<p> 图 5-1. Showing the network</p>
+<p>该命令仅显示IPv4 BGP会话的输出。 BGP诞生之初，只有IPv4，而关键字ip对于它所指的协议却毫不含糊。 自从IPv6问世以来，随着BGP支持多种协议的发展，我们也需要一个命令来显示IPv6会话。符合AFI/SAFI模式,show bgp命令进化到支持show bgp ipv4 unicast summary 和 show bgp ipv6 unicast summary。但是，对于许多操作员而言，纯粹的肌肉记忆力迫使他们使用show ip bgp summary.</p>
+<p>以下是此输出中要注意的关键点：</p>
+<ul>
+<li>该路由器应该与之对等的所有邻居都被列出(与OSPF等其他协议不同)。</li>
+<li>列出每个会话的状态。如果会话处于创建状态，而不是状态名，则显示从对等方接受的前缀数量。</li>
+<li>显示每个会话的正常运行时间(如果会话没有处于建立状态，则显示其停机时间)。</li>
+<li>还会显示节点的路由器ID和ASN等信息。</li>
+</ul>
+<p>鉴于当前使用的所有BGP实现（尤其是在数据中心中）都运行协议的第4版，因此BGP的版本（图5-1中的“ V”列）是过时的。 除非有问题，否则其余字段大多没有意思。</p>
+<p>与您在几乎所有其他实现（ExaBGP除外）中可能看到的结果相比，上一个输出中要注意的一个区别是对等方主机名的显示。 这基于IETF草案，该草案定义了一种新的BGP功能，称为主机名，该功能允许操作者将主机名与BGP OPEN消息一起发布。 这使调试更加简单，因为记住主机名要比记住接口名更容易。 互联网编号分配机构（IANA）已发布了用于此功能的标准功能ID。</p>
+<p>因此，任何show或clear命令都可以使用主机名而不是邻居名。 在命令中使用主机名可能会简化故障排除，因为说“向我显示与主机x的会话状态”比“向我显示IP地址x的会话状态”或“显示”要直观得多。 我在接口x上的会话状态。”</p>
+<p>在FRRouting中，我们可以在任何不配置BGP会话的命令中使用主机名。限制的原因是，在协商BGP功能和交换主机名之前，主机名是未知的。</p>
+<p>有关邻居的详细信息，您可以使用命令show ip bgp neighbors neighbor_name。此命令的输出包含其他信息，比如会话最后一次被重置的时间、重置的原因以及发送和接收的BGP更新消息的数量。例5-1给出了一个来自leaf01的示例输出，用于相邻的spine01。</p>
+<p>例 5-1. 显示BGP对等体邻居会话的详细信息示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line">BGP neighbor on swp51: fe80::4638:39ff:fe00:5c, remote AS 65000, local AS 64513, external link</span><br><span class="line">Hostname: spine01</span><br><span class="line">Member of peer-group fabric for session parameters </span><br><span class="line">BGP version 4, remote router ID 10.254.0.254</span><br><span class="line">BGP state = Established, up for 00:02:36 Last read 00:00:00, </span><br><span class="line">Last write 00:02:35</span><br><span class="line">Hold time is 9, keepalive interval is 3 seconds</span><br><span class="line">    Neighbor capabilities:</span><br><span class="line">4 Byte AS: advertised and received </span><br><span class="line">AddPath:</span><br><span class="line">IPv4 Unicast: RX advertised IPv4 Unicast and received </span><br><span class="line">IPv6 Unicast: RX advertised IPv6 Unicast and received</span><br><span class="line">Extended nexthop: advertised and received </span><br><span class="line">Address families by peer:</span><br><span class="line">IPv4 Unicast</span><br><span class="line">Route refresh: advertised and received(old &amp; new) </span><br><span class="line">Address family IPv4 Unicast: advertised and received </span><br><span class="line">Address family IPv6 Unicast: advertised and received </span><br><span class="line">Hostname Capability: advertised and received</span><br><span class="line">Graceful Restart Capabilty: advertised and received </span><br><span class="line">Remote Restart timer is 120 seconds</span><br><span class="line">Address families by peer: none</span><br><span class="line">Graceful restart informations:</span><br><span class="line">End-of-RIB send: IPv4 Unicast, IPv6 Unicast</span><br><span class="line">End-of-RIB received: IPv4 Unicast, IPv6 Unicast Message statistics:</span><br><span class="line">Message statistics:</span><br><span class="line">Inq depth is 0 </span><br><span class="line">Outq depth is 0       </span><br><span class="line">		       send         Rcvd           </span><br><span class="line"> Opens:           4           5        </span><br><span class="line"> Notifications:   4           2        </span><br><span class="line"> Updates:         40          25       </span><br><span class="line"> Keepalives:     26962       26959        </span><br><span class="line"> Route Refresh:     0         0        </span><br><span class="line"> Capability:        0         0       </span><br><span class="line"> Total:           27010      26991   </span><br><span class="line">Minimum time between advertisement runs is 0 seconds </span><br><span class="line">For address family: IPv4 Unicast</span><br><span class="line">fabric peer-group member</span><br><span class="line">Update group 1, subgroup 1 </span><br><span class="line">Packet Queue length 0</span><br><span class="line">Community attribute sent to this neighbor(both)</span><br><span class="line">5 accepted prefixes</span><br><span class="line"></span><br><span class="line">For address family: IPv6 Unicast </span><br><span class="line">fabric peer-group member</span><br><span class="line">Update group 2, subgroup 2</span><br><span class="line">End-of-RIB send: IPv4 Unicast, IPv6 Unicast</span><br><span class="line">End-of-RIB received: IPv4 Unicast, IPv6 Unicast </span><br><span class="line">Message statistics:</span><br><span class="line">   Ind depth is 0</span><br><span class="line">   Outq depth is 0</span><br><span class="line">                Sent        Rcvd       </span><br><span class="line"> Opens:           4          5        </span><br><span class="line">Notifications:    4          2        </span><br><span class="line">Updates:          40         25       </span><br><span class="line"> Keepalives:    26988        26985       </span><br><span class="line"> Route Refresh:    0        0       </span><br><span class="line"> Capability:       0        0        </span><br><span class="line">Total:          27036        27017   </span><br><span class="line">Minimum time between advertisement runs is 0 seconds</span><br><span class="line"></span><br><span class="line">For address family: IPv4 Unicast</span><br><span class="line">fabric peer-group member </span><br><span class="line">Update group 1, subgroup 1 </span><br><span class="line">Packet Queue length 0</span><br><span class="line">Community attribute sent to this neighbor(both)</span><br><span class="line">5 accepted prefixes</span><br><span class="line"></span><br><span class="line">For address family: IPv6 Unicast</span><br><span class="line"> fabric peer-group member</span><br><span class="line">Update group 2, subgroup 2 </span><br><span class="line">Packet Queue length 0</span><br><span class="line">Community attribute sent to this neighbor(both)</span><br><span class="line">0 accepted prefixes</span><br><span class="line"></span><br><span class="line">Connections established 3; dropped 2</span><br><span class="line">Last reset 00:03:57, due to NOTIFICATION sent (Cease/Connection collision resolution)</span><br><span class="line">Message received that caused BGP to send a NOTIFICATION: </span><br><span class="line">FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF</span><br><span class="line">00660104 FDE80009 0AFE00FE 49020601</span><br><span class="line">04000100 01020601 04000200 01020805</span><br><span class="line">06000100 01000202 02800002 02020002</span><br><span class="line">06410400 00FDE802 0A450800 01010100</span><br><span class="line">02010102 0B490907 7370696E 65303100</span><br><span class="line">02044002 0078</span><br><span class="line">Local host: fe80::4638:39ff:fe00:5b, Local port: 179 </span><br><span class="line">Foreign host: fe80::4638:39ff:fe00:5c, Foreign port: 52191 </span><br><span class="line">Nexthop: 10.254.0.1</span><br><span class="line">Nexthop global: fe80::4638:39ff:fe00:5b </span><br><span class="line">Nexthop local: fe80::4638:39ff:fe00:5b </span><br><span class="line">BGP connection: shared network</span><br><span class="line">BGP Connect Retry Timer in Seconds: 10 </span><br><span class="line">Read thread: on Write thread: off</span><br></pre></td></tr></table></figure>
+<h3 id="显示交换的路由"><a href="#显示交换的路由" class="headerlink" title="显示交换的路由"></a>显示交换的路由</h3><p>另一个常见的命令是在BGP的路由表中查看计算出的路由列表。此命令是show ip bgp或show bgp ipv4 unicast。图5-2显示了该命令在参考拓扑的leaf01上的输出。</p>
+<p>关键字段是前缀本身，可能的下一跳以及与每个前缀关联的AS_PATH。 此屏幕仅显示12个前缀中的8个，因为其他两个前缀未被接受。 拒绝前缀的常见原因是策略决策，或者是因为检测到AS_PATH循环（在这种情况下检测到AS_PATH循环）。 行首的星号（*）表示该路由有效； 那是下一跳是可以到达的。 随后，等号（=）表示该路由具有多个可用的等价路径。</p>
+<p>​                  <img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-2.png" alt="5-2"></p>
+<p>图 5-2 在参考拓扑的leaf01中可以看到BGP路由</p>
+<p>您可以使用带有特定前缀的相同命令来获取接收到的前缀广告的详细信息。例如，图5-3描述了命令show ip bgp 10.254.0.3的输出</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-3.png" alt="5-3"></p>
+<p>​                    图   5-3. 通告的前缀</p>
+<p>使用此功能，网络操作员可以仔细检查以确定有关前缀的详细信息，例如，接收到哪些属性以接收前缀，以及向谁通告该前缀。</p>
+<h2 id="连接到外界"><a href="#连接到外界" class="headerlink" title="连接到外界"></a>连接到外界</h2><p>我们还没有讨论的一件事是如何为数据中心之外为路由做通告。此任务通常也属于数据中心网络操作员的权限范围。</p>
+<p> 让我们使用贯穿本书的参考拓扑，如图5-4所示。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-4.png" alt="5-4"></p>
+<p>​            图 5-4. 本书中使用的参考拓扑</p>
+<p>exit01和exit02是从外部划分数据中心内部的两个节点。 它们已连接到名为Internet的节点； 这是数据中心的边缘交换机，是与外部世界对等的交换机。 exit01和exit02被称为边界leaf或出口leaf（边界叶子可能在三层Clos网络的边界pod中，如第1章所述）。</p>
+<p>边界leaf具有两个主要功能：剥离专用ASN，可选地聚合内部数据中心路由以及仅宣布到达边缘路由器的汇总路由。</p>
+<p>您可以通过命令从路径中删除私有的asn，neighbor neighbor_name remove-private-AS all.</p>
+<p>您可以通过以下命令汇总路由并仅宣布聚合，aggregate-address <em>summary-route</em> summary-only.</p>
+<p>关键字summary-only指定不得发送详细路由。 如果没有该选项，则将发布汇总路由以及详细路由。 当路由聚合并且仅宣告汇聚路由时，除非另外指定，否则还将删除整个AS_PATH。</p>
+<h2 id="调度节点维护"><a href="#调度节点维护" class="headerlink" title="调度节点维护"></a>调度节点维护</h2><p>路由器的生命周期通常包括软件升级。升级可能覆盖整个路由器，只包括路由软件或其他相关软件，这些软件会导致路由器在重新启动时失去与邻居的对等连接。如果路由器的邻居在路由器重新启动时继续转发流量，流量就会被丢弃，造成不必要的流量损失。为了避免这种情况，特别是当操作员知道节点将被关闭时，允许邻居绕过路由器是很有用的。例如，如果spine01将要升级，你应该要求所有的leaves在它们的最佳路径计算中忽略spine01，并在此期间只将所有流量发送到spine02，以确保流量顺畅。类似地，对于具有双上联服务器的leaf，对于spine来说，避免将流量发送到正在进行升级的leaf并只使用工作leaf是很有用的。在这种情况下，路由器可以升级，一次升级一个机箱，而不会造成不必要的流量损失。</p>
+<p>正如在第一章中所讨论的，现代数据中心有两个以上的spine节点，其中四个是最常见的，特别是在大中型企业中。有了4个节点，当一个spine被拿出来进行维护时，网络可以保持75%的容量。在传统的企业网络工作设计中，只有两个spine节点，当一个spine停止工作时，会导致更大的容量损失。的确，如果服务器是双上联的，它们的运行能力将只有一半。这就是为什么一些大型企业只将双上联服务器用于故障转移，而不是同时激活两个链接。网络规模的数据中心通过单独连接服务器来解决这个问题，并且拥有如此多的机架，以至于拆除一个机架并不是什么大问题。有些超级大的网络也有16或32个spine，所以一个spine的丢失只会导致交换容量减少1/16或1/32。</p>
+<p>最常见和可互操作的流量流失方法是强制将路由从节点进行通告，并在通告中添加额外的ASN，从而导致AS_PATH长度相对于节点的节点增加。例如，leaf03看到由leaf01通告的路由具有多个路径，一个路径通过spine01，另一个路径通过spine02，二者的AS_PATH长度均为2。如果要升级spine02，我们可以增加其AS_PATH长度，而leaf03将 停止使用spine02到达leaf01。</p>
+<p>通常，节点自己的ASN用于添加其他ASN。 这是spine01上的一个配置片段示例，该片段在向所有邻居的公告中添加了自己的ASN：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">route-map SCHED_MAINT permit 10</span><br><span class="line">	set as-path prepend 65000 65000</span><br><span class="line"></span><br><span class="line"> neighbor ISL route-map SCHED_MAINT out</span><br></pre></td></tr></table></figure>
+<p>图5-5显示了图5-4中使用的相同前缀的输出，除了其中一个spine02已经声明了一个比另一个长一些的路径，因此没有选择该路径。</p>
+<p> <img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-5.png" alt="5-5"></p>
+<p>​                图   5-5. 一个路径没有选择</p>
+<h2 id="调试BGP"><a href="#调试BGP" class="headerlink" title="调试BGP"></a>调试BGP</h2><p>像任何其他软件一样，由于错误或操作员的误解，BGP有时也会出现无法预测的行为。 解决此问题的常见解决方案是启用调试并查看调试日志以确定不可预期行为的原因。</p>
+<p>不同的路由器软件提供了不同的旋钮，可在调试期间进行调整。 在FRRouting中，debug bgp命令是了解BGP正在进行的操作的网关。 调试下列出了许多选项，但关键是三个：</p>
+<p>neighbor-events</p>
+<p>  这用于调试任何会话并提出问题。 调试可以针对所有会话，也可以仅针对特定会话。 启用此选项后，所有信息都可以在调试日志中看到，例如哪一端发起了连接，BGP状态机转换以及交换了哪些功能。</p>
+<p>bestpath</p>
+<p>  这用于调试bestpath计算。 如果为特定的前缀启用它，日志将显示为前缀选择最佳路径（包括多路径选择）时遵循的逻辑。 图5-6显示了日志中的片段示例。 这用于调试图5-3和图5-5中所示的相同前缀。 如图所示，您还可以使用调试日志来更好地了解BGP的最佳路径选择逻辑的工作原理-在这种情况下，较长的AS_PATH如何阻止选择路径。 </p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/5-6.png" alt="5-6"></p>
+<p>图 5-6. 显示最佳路径计算的调试日志示例</p>
+<p> Updates</p>
+<p> 这用于调试与相邻前缀的通告或接收通告有关的问题。可以为单个邻居指定单个前缀、所有前缀或所有前缀，以便更仔细地检查问题的根源。调试日志不仅显示接受的前缀，还显示拒绝的前缀。例如，考虑到spine共享相同的ASN，一个spine的环回IP地址不能被其他spine看到。要查看实际情况，通过发出调试bgp更新前缀10.254.0.253/32，我们可以得到日志文件中的示例5-2所示的输出。</p>
+<p> 例 5-2. 前缀被拒绝，因为ASN循环</p>
+<figure class="highlight verilog"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.112100</span> BGP: swp2 rcvd UPDATE w/ attr: , origin i, mp_nexthop fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">2</span>e(fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">2</span>e),</span><br><span class="line"></span><br><span class="line">path <span class="number">64514</span> <span class="number">65000</span> <span class="number">65000</span> <span class="number">65000</span> <span class="number">64515</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.112165</span> BGP: swp2 rcvd UPDATE about <span class="number">10</span><span class="variable">.254</span><span class="variable">.0</span><span class="variable">.3</span>/<span class="number">32</span></span><br><span class="line"></span><br><span class="line">-- DENIED due to: as-path contains our own AS;</span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.113438</span> BGP: swp3 rcvd UPDATE w/ attr: , origin i, mp_nexthop fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">57</span>(fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">57</span>),</span><br><span class="line"></span><br><span class="line">metric <span class="number">0</span>, path <span class="number">64515</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.113471</span> BGP: swp3 rcvd <span class="number">10</span><span class="variable">.254</span><span class="variable">.0</span><span class="variable">.3</span>/<span class="number">32</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.113859</span> BGP: swp4 rcvd UPDATE w/ attr: , origin i, mp_nexthop fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">43</span>(fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">43</span>),</span><br><span class="line"></span><br><span class="line">path <span class="number">64516</span> <span class="number">65000</span> <span class="number">65000</span> <span class="number">65000</span> <span class="number">64515</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.113886</span> BGP: swp4 rcvd UPDATE about <span class="number">10</span><span class="variable">.254</span><span class="variable">.0</span><span class="variable">.3</span>/<span class="number">32</span></span><br><span class="line"></span><br><span class="line">-- DENIED due to: as-path contains our own AS;</span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.114135</span> BGP: swp1 rcvd UPDATE w/ attr: , origin i, mp_nexthop fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">5</span>b(fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">5</span>b),</span><br><span class="line"></span><br><span class="line">path <span class="number">64513</span> <span class="number">65000</span> <span class="number">65000</span> <span class="number">65000</span> <span class="number">64515</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.114157</span> BGP: swp1 rcvd UPDATE about <span class="number">10</span><span class="variable">.254</span><span class="variable">.0</span><span class="variable">.3</span>/<span class="number">32</span></span><br><span class="line"></span><br><span class="line">-- DENIED due to: as-path contains our own AS;</span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.162440</span> BGP: u3:s6 send UPDATE w/ attr: , origin i, mp_nexthop ::(::), path <span class="number">64515</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.162788</span> BGP: u3:s6 send UPDATE <span class="number">10</span><span class="variable">.254</span><span class="variable">.0</span><span class="variable">.3</span>/<span class="number">32</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.214657</span> BGP: swp4 rcvd UPDATE w/ attr: , origin i, mp_nexthop fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">43</span>(fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">43</span>),</span><br><span class="line"></span><br><span class="line">path <span class="number">64516</span> <span class="number">65000</span> <span class="number">64515</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.214803</span> BGP: swp4 rcvd UPDATE about <span class="number">10</span><span class="variable">.254</span><span class="variable">.0</span><span class="variable">.3</span>/<span class="number">32</span></span><br><span class="line"></span><br><span class="line">-- DENIED due to: as-path contains our own AS;</span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.214914</span> BGP: swp2 rcvd UPDATE w/ attr: , origin i, mp_nexthop fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">2</span>e(fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">2</span>e),</span><br><span class="line"></span><br><span class="line">path <span class="number">64514</span> <span class="number">65000</span> <span class="number">64515</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.214933</span> BGP: swp2 rcvd UPDATE about <span class="number">10</span><span class="variable">.254</span><span class="variable">.0</span><span class="variable">.3</span>/<span class="number">32</span></span><br><span class="line"></span><br><span class="line">-- DENIED due to: as-path contains our own AS;</span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.216418</span> BGP: swp1 rcvd UPDATE w/ attr: , origin i, mp_nexthop fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">5</span>b(fe80::<span class="number">4638</span>:<span class="number">39</span>ff:fe00:<span class="number">5</span>b),</span><br><span class="line"></span><br><span class="line">path <span class="number">64513</span> <span class="number">65000</span> <span class="number">64515</span></span><br><span class="line"></span><br><span class="line"><span class="number">2017</span>/<span class="number">05</span>/<span class="number">20</span> <span class="number">15</span>:<span class="number">09</span>:<span class="number">54</span><span class="variable">.216449</span> BGP: swp1 rcvd UPDATE about <span class="number">10</span><span class="variable">.254</span><span class="variable">.0</span><span class="variable">.3</span>/<span class="number">32</span></span><br><span class="line"></span><br><span class="line">-- DENIED due to: as-path contains our own AS;</span><br></pre></td></tr></table></figure>
+<h2 id="总结-3"><a href="#总结-3" class="headerlink" title="总结"></a>总结</h2><p>本章提供了一些不太常用的工具和任务的信息，这些工具和任务用于管理和排除数据中心中的BGP部署。在此阶段，您应该对数据中心网络(BGP)以及如何在数据中心中配置和管理Clos网络有很好的理解。</p>
+<p>第6章涵盖了将BGP路由一直扩展到主机，由于虚拟服务的兴起以及其他用途，这一技术也越来越多地作为解决方案部署到数据中心。</p>
+<h1 id="主机上的BGP"><a href="#主机上的BGP" class="headerlink" title="主机上的BGP"></a>主机上的BGP</h1><p>现代数据中心的出现彻底改变了我们所知道的关于计算和网络的一切。无论是NoSQL数据库、新的应用程序架构和微服务的兴起，还是以路由为基本规则而非桥接的Clos网络，它们都颠覆了迄今为止人们公认的理念。这也影响了防火墙和负载平衡器等服务的部署方式。</p>
+<p>本章讨论了新的服务模型如何将路由转移到服务器上，以及我们如何在主机上配置BGP来与ToR或Leaf交换机通信。</p>
+<p>传统网络管理员的权限在ToR交换机处终止。服务器管理员处理服务器配置和管理。在新的世界秩序中，单独的服务器和网络管理员已经被一个全能的数据中心操作员所取代，或者网络管理员必须与服务器管理员协同工作来配置主机上的路由。在这两种情况下，对于数据中心操作员来说，确保主机上的BGP配置不影响网络的完整性是非常重要的。</p>
+<h2 id="虚拟服务器的兴起"><a href="#虚拟服务器的兴起" class="headerlink" title="虚拟服务器的兴起"></a>虚拟服务器的兴起</h2><p>在传统的数据中心网络中，桥接和路由之间的边界（L2-L3网关）是部署防火墙和负载平衡器之类的服务的地方。 边界很自然，因为边界在某种意义上代表了客户端与服务器的分离。 在此边界分配防火墙以保护服务器免受恶意或未授权客户端的攻击是合乎逻辑的。 同样，负载均衡器前端服务器（通常是Web服务器）支持横向扩展（scale-out）模型。 该设计还扩展到防火墙，当流量带宽超过单个防火墙的容量时，负载均衡器将一排防火墙置于前端。</p>
+<p>这些防火墙和负载均衡器通常是设备，通常使用（scale-in）扩展模型进行扩展。 也就是说，购买越来越大的设备来支持不断增长的流量。</p>
+<p>Clos网络破坏了任何这样的自然边界，并且由于其庞大的规模，现代数据中心使（scale-in）模型变得不切实际。 在新世界中，服务由运行在最终主机或未虚拟化的最终主机上的虚拟机（VM）提供。 通过这种方式提供的两个流行服务是负载平衡器和防火墙服务。 在此模型中，随着流量的起伏变化，可以动态启动或关闭VM，以应对不断变化的流量需求。</p>
+<h3 id="任播地址"><a href="#任播地址" class="headerlink" title="任播地址"></a>任播地址</h3><p>由于提供服务的服务器(或vm)可以在数据中心的任何位置出现，因此IP地址不再可以被限制在单个机架或路由器上。相反，几个机架可能会声明相同的IP地址。由于路由具有ECMP功能，数据包将流向提供服务的最近节点之一。这些端点IP地址没有可与之关联的缓冲架或交换机。这些由多个端点公布的IP地址被称为任播IP地址。它们是单播IP地址，这意味着它们被发送到一个目的地(而不是多目的地地址，如组播或广播)，但是选择的目的地是由路由决定的，不同的端点选择不同的提供相同服务的节点。</p>
+<p>通常按机架分配子网。 正如我们在第1章中讨论的那样，每个机架有40台服务器，导致ToR宣布/ 26子网。 但是，ToR如何发现或通告作为多播服务IP地址的非子网地址？ 静态路由配置是不可接受的。 BGP再次解救。</p>
+<h2 id="与服务器对等的BGP模型"><a href="#与服务器对等的BGP模型" class="headerlink" title="与服务器对等的BGP模型"></a>与服务器对等的BGP模型</h2><p>与服务器对等的模型有两种。 第一个是第4章中概述的BGP无编号模型。第二个涉及BGP支持的称为动态邻居的功能。 我们将研究每种模型，并列出两种模型的优缺点。 但是，我们首先查看两种模型的共同点：ASN编号方案以及服务器与ToR之间的路由交换。</p>
+<h3 id="分配ASN"><a href="#分配ASN" class="headerlink" title="分配ASN"></a>分配ASN</h3><p>我看到的最常见的部署是为所有服务器分配专用ASN。 这种方法的优点在于，它易于配置和自动化，并且简化了对服务器路由的识别和过滤。 这种方法的两个主要缺点是：1）如果我们需要宣告的不仅仅是主机默认路由，则服务器上配置的复杂性会增加； 2）跟踪哪个服务器宣布的路由变得更加棘手，因为所有服务器都共享相同的ASN。</p>
+<p>另一种方法是为连接到同一交换机的所有服务器分配单个ASN，但为单独的交换机分配单独的ASN。 在现代数据中心中，这意味着每个机架具有单独的服务器ASN。 这种模型的好处在于，现在看起来服务器只是Clos网络的另一层。 该模型的主要缺点与先前的模型相同，尽管我们可以将路由通告的范围缩小到特定的机架。</p>
+<p>最终方法是将每个服务器视为一个单独的节点，并为每个服务器分配单独的ASN。 尽管我认识的一些客户正在使用这种方法，但感觉有些过头了。 这种方法的主要好处是，它完全适合Clos网络的模型规定，并且很容易确定哪个服务器发布了路由。 鉴于服务器数量庞大，因此使用4字节ASN似乎是谨慎的做法。</p>
+<h3 id="路由交换模型"><a href="#路由交换模型" class="headerlink" title="路由交换模型"></a>路由交换模型</h3><p>由于现在每个主机都是一级路由器，因此，如果我们不控制交换机从主机接受的路由，则可能会发生各种不良情况。 例如，主机可能意外或恶意宣布默认路由（或它不拥有的任何其他路由），从而将流量传递到错误的目的地。 要防止的另一件事是确保ToR（或Leaf）交换机从不认为主机是传输节点。 也就是说，可以连接到其他节点。这个错误将导致严重的流量损失，因为主机的设计不能够处理每秒数百千兆的流量负载。最后，连接到服务器的路由器只通告默认路由。这是为了避免把太多的路由发到主机,填满它的路由表,使主机浪费宝贵的周期试图运行最佳路径算法每次一些路由的变化(例如,当ToR交换机失去与一个leaf或spine交换机连接)。</p>
+<p>为了处理所有这些场景，我们使用第3章中描述的路由策略。下面的配置片段展示了我们如何通过使用路由器策略来完成上述的每一项任务，如下图所示:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ip prefix-list ANYCAST_VIP seq 5 permit 10.1.1.1/32</span><br><span class="line">ip prefix-list ANYCAST_VIP seq 10 permit 20.5.10.110/32 </span><br><span class="line">ip prefix-list DEFONLY seq 5 permit 0.0.0.0/0</span><br><span class="line">route-map ACCEPT_ONLY_ANYCAST permit 10 </span><br><span class="line">	match ip address prefix-list ANYCAST_VIP</span><br><span class="line">route-map ADVERTISE_DEFONLY permit 10 </span><br><span class="line">	match ip address prefix-list DEFONLY</span><br><span class="line">neighbor server route-map ACCEPT_ONLY_ANYCAST in </span><br><span class="line">neighbor server route-map ADVERTISE_DEFONLY out </span><br><span class="line">neighbor server default-originate</span><br></pre></td></tr></table></figure>
+<p>在此配置中，带有route-map ACCEPT_ONLY_ANYCAST的邻居声明说，从属于（peer-group）对等组服务器的邻居接受的唯一路由通告是ANYCAST_VIP prefix-list.中列出的任意播IP地址。 同样，带有route-map ADVER TISE_DEFONLY的neighbor语句指定BGP仅将默认路由通告给属于对等组服务器的任何邻居。</p>
+<h3 id="边缘服务器的BGP对等方案"><a href="#边缘服务器的BGP对等方案" class="headerlink" title="边缘服务器的BGP对等方案"></a>边缘服务器的BGP对等方案</h3><p>既然我们已经确定了将边缘服务器（例如负载平衡器和防火墙）包含在路由配置中的重要性，那么我们就可以考虑使用两种BGP模型：动态邻居和无编号的BGP。 每个模型都有其局限性，因此请查看以下小节，并确定最适合满足数据中心需求的模型。</p>
+<h4 id="动态邻居"><a href="#动态邻居" class="headerlink" title="动态邻居"></a>动态邻居</h4><p>由于BGP运行在TCP上，只要其中一个节点发起连接，另一端就可以保持被动状态，静静地等待连接的到来，就像web服务器等待来自浏览器或其他客户机的连接一样。</p>
+<p>BGP动态邻居是某些实现中支持的功能，其中一端通常是被动的。 它仅被告知要从哪个IP子网接受连接，并与控制对等会话特性的对等组相关联。</p>
+<p>回想一下，机架中的服务器通常与同一机架中的其他服务器共享一个子网。 例如，假设一组连接到ToR交换机的40台服务器位于10.1.0.0/26子网中。 ToR上BGP动态邻居的典型配置如下所示：</p>
+<p>neighbor servers peer-group </p>
+<p>neighbor servers remote-as 65530</p>
+<p>bgp listen range 10.1.0.0/26 peer-group servers</p>
+<p>此时，BGP守护进程将开始在端口179（众所周知的BGP端口）上进行被动侦听。 如果它收到来自10.1.0.0/26子网中任何人的连接，说其ASN为65530，则BGP守护程序将接受连接请求，并建立一个新的BGP会话。</p>
+<p>在服务器端，交换机的对等IP地址通常是默认网关的IP地址。 对于子网10.1.0.0/26，网关地址通常为10.1.0.1。 因此，服务器上的BGP配置可以如下：</p>
+<p>neighbor ISL peer-group </p>
+<p>neighbor ISL remote-as external</p>
+<p>neighbor 10.1.0.1 peer-group ISL</p>
+<p>此时，在服务器上运行的BGP守护程序将启动与交换机的连接，一旦建立连接，其余BGP状态机将照常进行。</p>
+<p>不幸的是，动态邻居功能目前还没有通过接口进行支持;也就是说，你不能bgp listen inter face vlan10 peer-group servers.。也不可能在服务器端使用接口名，因为使用接口名的技巧(在第3章中描述)只适用于/30或/31子网地址，而这里使用的是/26地址。</p>
+<p>您可以通过命令neighbor listen limit <em>limit-number</em>.来限制动态邻居模型支持的对等点的数量。例如，通过配置bgp listen limit 20,您可以在任何给定时间只允许建立20个动态邻居。</p>
+<p>该模型的主要优点是，它与单连接服务器以及通过预引导执行环境（PXE）引导服务器时都能很好地配合使用。 图6-1展示了此模型。</p>
+<p><img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/6-1.png" alt="6-1"></p>
+<p>​            图    6-1. 动态邻居的共享子网模型</p>
+<h4 id="无编号BGP模型"><a href="#无编号BGP模型" class="headerlink" title="无编号BGP模型"></a>无编号BGP模型</h4><p>就像路由器之间建立BGP会话一样，可以使用无编号的BGP在服务器和交换机之间建立BGP会话。 回顾第四章，无编号的BGP在FRRouting套件中起作用，而无需在Linux内核中进行任何修改。</p>
+<p>图6-2所示的BGP无编号配置模型看起来与动态邻居版本不同。</p>
+<p>​                  <img src="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/6-2.png" alt="6-2"></p>
+<p>​                图 6-2. 与主机对等的BGP无编号模型</p>
+<p>您可以通过命令邻居监听限制限制号来限制动态邻居模型支持的对等点的数量。与动态邻居的共享子网模型不同，BGP无编号模型没有共享子网。就像路由器一样，服务器的IP地址独立于接口，通常分配给环回地址。每个服务器都可以分配一个独立的/32地址。因为IPv6链路本地地址(LLA)用于与路由器对等，所以不需要共享子网。例如，通过配置bgp侦听限制20，您可以在任何给定时间只允许建立20个动态邻居。</p>
+<p>交换机端的配置如下所示：</p>
+<p>neighbor peer-group servers </p>
+<p>neighbor servers remote-as external </p>
+<p>neighbor swp1 peer-group servers </p>
+<p>neighbor swp2 peer-group servers</p>
+<p>…</p>
+<p>并且服务器端的配置看起来类似：</p>
+<p>neighbor eth0 remote-as external</p>
+<p>这种方法的主要优点是您可以构建纯路由数据中心，而桥接则完全消除。 该模型还支持双连接服务器，无需运行任何专用的多节点LACP。 这种方法的主要缺点是难以支持DHCPv4或PXE引导的服务器，因为在PXE引导期间没有路由堆栈，但是交换机不知道如何将数据包转发到特定的服务器。 有可能的解决方案，但说明超出了本书的范围。</p>
+<p>当共享链路在交换机和服务器组之间时，共享接口上的BGP无编号模型在理论上是可能的，但目前尚未实现。</p>
+<h2 id="主机路由软件"><a href="#主机路由软件" class="headerlink" title="主机路由软件"></a>主机路由软件</h2><p>如果您精通网络设计，那么您会认识到，实际上，服务器上运行的BGP实际上只不过是BGP speaker，而无需使用最佳路径计算来实现完整的路由协议， 将路由编程到路由表中，依此类推。 Web-scale的先驱意识到了这一点，并运行了ExaBGP之类的软件，该软件长期以来仅充当BGP speaker。</p>
+<p>今天，在Linux和BSD服务器上可以使用功能更全的开源路由套件，如FRRouting和BIRD routing。FRRouting既支持BGP无编号邻居，也支持动态邻居。本章使用的示例依赖于FRRouting。</p>
+<h2 id="总结-4"><a href="#总结-4" class="headerlink" title="总结"></a>总结</h2><p>本章展示了如何将BGP的使用扩展到主机。随着功能强大、功能齐全的路由套件(如FRRouting)的出现，只需使用无编号的BGP就可以配置BGP，使得在所有服务器上自动配置BGP配置变得非常简单。如果您无法忍受当前BGP无编号的限制，或者您更喜欢传统的BGP对等，那么BGP动态邻居是另一种解决方案。此外，我们还展示了如何限制服务器通告不正确路由进入网络所造成的任何损害，不管这种通告是有意还是无意的。</p>
+<h1 id="关于作者"><a href="#关于作者" class="headerlink" title="关于作者"></a>关于作者</h1><p>Dinesh G. Dutt是Cumulus Networks的首席科学家。 在过去的20年中，他一直在网络行业工作-大部分时间是他在思科系统公司工作的。 他一直从事企业和数据中心网络技术的研究，包括为Cisco大型交换机提供动力的许多ASIC的设计，例如Cat6K和Nexus系列交换机。 他在Andiamo Systems的工作以及FCoE的设计，还拥有存储网络方面的经验。 他是TRILL和VxLAN的合著者，并已申请40多项专利。</p>
+<hr>
+<blockquote>
+<p> <strong>说明：</strong></p>
+<p>这是最近在学习《BGP in the datacenter》。由于原文是全英文。所以在学习过程中，利用谷歌翻译和网易翻译，再把翻译不通的地方，加上自己理解稍微改了改。在此共享出来，需要的人可以参考参考。</p>
+<p>原文链接：<a href="https://www.oreilly.com/library/view/bgp-in-the/9781491983416/" target="_blank" rel="noopener">https://www.oreilly.com/library/view/bgp-in-the/9781491983416/</a></p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/" title="(BGP in the datacenter)数据中心的BGP,数据中心网络架构,Clos网络架构">https://cshihong.github.io/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/BGP/" rel="tag"># BGP</a>
+          
+            <a href="/tags/数据中心/" rel="tag"># 数据中心</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/18/BGP知识手册-华为-华三-思科/" rel="next" title="BGP知识手册(华为,华三,思科)">
+                <i class="fa fa-chevron-left"></i> BGP知识手册(华为,华三,思科)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/" rel="prev" title="在大型数据中心使用BGP进行路由(RFC7938)">
+                在大型数据中心使用BGP进行路由(RFC7938) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#数据中心的BGP"><span class="nav-number">1.</span> <span class="nav-text">数据中心的BGP</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#本书使用的软件"><span class="nav-number">2.1.</span> <span class="nav-text">本书使用的软件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据中心网络简介"><span class="nav-number">3.</span> <span class="nav-text">数据中心网络简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据中心网络的需求"><span class="nav-number">3.1.</span> <span class="nav-text">数据中心网络的需求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Clos网络拓扑"><span class="nav-number">3.2.</span> <span class="nav-text">Clos网络拓扑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#三层Clos网络"><span class="nav-number">3.2.1.</span> <span class="nav-text">三层Clos网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Clos网络的关键副作用"><span class="nav-number">3.2.2.</span> <span class="nav-text">Clos网络的关键副作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Clos网络的网络架构"><span class="nav-number">3.2.3.</span> <span class="nav-text">Clos网络的网络架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器连接模型"><span class="nav-number">3.3.</span> <span class="nav-text">服务器连接模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#与外部世界的连接"><span class="nav-number">3.4.</span> <span class="nav-text">与外部世界的连接</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#支持多租户（或者云）"><span class="nav-number">3.5.</span> <span class="nav-text">支持多租户（或者云）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#现代数据中心设计的运营结果"><span class="nav-number">3.6.</span> <span class="nav-text">现代数据中心设计的运营结果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#选择路由协议"><span class="nav-number">3.7.</span> <span class="nav-text">选择路由协议</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BGP如何应用在数据中心"><span class="nav-number">4.</span> <span class="nav-text">BGP如何应用在数据中心</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#有多少种路由协议？"><span class="nav-number">4.1.</span> <span class="nav-text">有多少种路由协议？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用IBGP还是EBGP？"><span class="nav-number">4.2.</span> <span class="nav-text">使用IBGP还是EBGP？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ASN编号"><span class="nav-number">4.3.</span> <span class="nav-text">ASN编号</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#私有ASNs"><span class="nav-number">4.3.1.</span> <span class="nav-text">私有ASNs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#路径搜索问题"><span class="nav-number">4.3.2.</span> <span class="nav-text">路径搜索问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ASN编号模型"><span class="nav-number">4.3.3.</span> <span class="nav-text">ASN编号模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最优路径算法"><span class="nav-number">4.4.</span> <span class="nav-text">最优路径算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多路径选择"><span class="nav-number">4.5.</span> <span class="nav-text">多路径选择</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#默认计时器导致收敛缓慢"><span class="nav-number">4.6.</span> <span class="nav-text">默认计时器导致收敛缓慢</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#通告间隔（Advertisement-Interval）"><span class="nav-number">4.6.1.</span> <span class="nav-text">通告间隔（Advertisement Interval）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#保活和保持计时器（Keepalive-and-Hold-Timers）"><span class="nav-number">4.6.2.</span> <span class="nav-text">保活和保持计时器（Keepalive and Hold Timers）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连接计时器（Connect-Timer）"><span class="nav-number">4.6.3.</span> <span class="nav-text">连接计时器（Connect Timer）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据中心的默认配置"><span class="nav-number">4.7.</span> <span class="nav-text">数据中心的默认配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.8.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#构建可自动化的BGP配置"><span class="nav-number">5.</span> <span class="nav-text">构建可自动化的BGP配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#自动化配置的基础知识"><span class="nav-number">5.1.</span> <span class="nav-text">自动化配置的基础知识</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据中心网络示例"><span class="nav-number">5.2.</span> <span class="nav-text">数据中心网络示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传统BGP配置自动化的难点"><span class="nav-number">5.3.</span> <span class="nav-text">传统BGP配置自动化的难点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由重分发"><span class="nav-number">5.4.</span> <span class="nav-text">路由重分发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由策略"><span class="nav-number">5.5.</span> <span class="nav-text">路由策略</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Route-Maps"><span class="nav-number">5.5.1.</span> <span class="nav-text">Route-Maps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Classifiers-in-route-maps"><span class="nav-number">5.5.2.</span> <span class="nav-text">Classifiers in route-maps</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编写安全route-map策略"><span class="nav-number">5.5.3.</span> <span class="nav-text">编写安全route-map策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Route-maps-in-BGP"><span class="nav-number">5.5.4.</span> <span class="nav-text">Route-maps in BGP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#route-maps对BGP处理的影响"><span class="nav-number">5.5.5.</span> <span class="nav-text">route-maps对BGP处理的影响</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用接口名称作为邻居"><span class="nav-number">5.6.</span> <span class="nav-text">使用接口名称作为邻居</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结-1"><span class="nav-number">5.7.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#重新设计BGP配置"><span class="nav-number">6.</span> <span class="nav-text">重新设计BGP配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#接口IP地址和remote-as的需求"><span class="nav-number">6.1.</span> <span class="nav-text">接口IP地址和remote-as的需求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编号接口上的数字"><span class="nav-number">6.2.</span> <span class="nav-text">编号接口上的数字</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于编号接口的哲学"><span class="nav-number">6.2.1.</span> <span class="nav-text">关于编号接口的哲学</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无编号接口"><span class="nav-number">6.3.</span> <span class="nav-text">无编号接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无编号的BGP"><span class="nav-number">6.4.</span> <span class="nav-text">无编号的BGP</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IPv6路由通告"><span class="nav-number">6.4.1.</span> <span class="nav-text">IPv6路由通告</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RFC-5549"><span class="nav-number">6.4.2.</span> <span class="nav-text">RFC 5549</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用RFC-5549转发"><span class="nav-number">6.4.3.</span> <span class="nav-text">使用RFC 5549转发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BGP协商RFC-5549使用的能力"><span class="nav-number">6.4.4.</span> <span class="nav-text">BGP协商RFC 5549使用的能力</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#互通性"><span class="nav-number">6.4.5.</span> <span class="nav-text">互通性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用其他任何名称的remote-as"><span class="nav-number">6.5.</span> <span class="nav-text">使用其他任何名称的remote-as</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结-2"><span class="nav-number">6.6.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BGP生命周期管理"><span class="nav-number">7.</span> <span class="nav-text">BGP生命周期管理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#有用的show命令"><span class="nav-number">7.1.</span> <span class="nav-text">有用的show命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#显示BGP会话信息"><span class="nav-number">7.1.1.</span> <span class="nav-text">显示BGP会话信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#显示交换的路由"><span class="nav-number">7.1.2.</span> <span class="nav-text">显示交换的路由</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#连接到外界"><span class="nav-number">7.2.</span> <span class="nav-text">连接到外界</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调度节点维护"><span class="nav-number">7.3.</span> <span class="nav-text">调度节点维护</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#调试BGP"><span class="nav-number">7.4.</span> <span class="nav-text">调试BGP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结-3"><span class="nav-number">7.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#主机上的BGP"><span class="nav-number">8.</span> <span class="nav-text">主机上的BGP</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟服务器的兴起"><span class="nav-number">8.1.</span> <span class="nav-text">虚拟服务器的兴起</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#任播地址"><span class="nav-number">8.1.1.</span> <span class="nav-text">任播地址</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#与服务器对等的BGP模型"><span class="nav-number">8.2.</span> <span class="nav-text">与服务器对等的BGP模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#分配ASN"><span class="nav-number">8.2.1.</span> <span class="nav-text">分配ASN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#路由交换模型"><span class="nav-number">8.2.2.</span> <span class="nav-text">路由交换模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#边缘服务器的BGP对等方案"><span class="nav-number">8.2.3.</span> <span class="nav-text">边缘服务器的BGP对等方案</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#动态邻居"><span class="nav-number">8.2.3.1.</span> <span class="nav-text">动态邻居</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#无编号BGP模型"><span class="nav-number">8.2.3.2.</span> <span class="nav-text">无编号BGP模型</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主机路由软件"><span class="nav-number">8.3.</span> <span class="nav-text">主机路由软件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结-4"><span class="nav-number">8.4.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关于作者"><span class="nav-number">9.</span> <span class="nav-text">关于作者</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

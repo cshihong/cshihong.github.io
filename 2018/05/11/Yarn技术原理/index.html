@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Yarn的基本介绍Yarn基本定义：Apache Hadoop YARN（Yet Another Resource Negotiator,另一种资源协调者）是一种新的Hadoop资源管理器，它是一个通用资源管理系统，可为上层应用提供统一的资源管理和调度，它的引入为集群在利用率、资源统一管理和数据共享等方面带来的巨大的好处。 YARN在产品中的位置： 图：Yarn在FusionInsight产品中的">
+<meta name="keywords" content="Hadoop,大数据,Yarn">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Yarn技术原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="Yarn的基本介绍Yarn基本定义：Apache Hadoop YARN（Yet Another Resource Negotiator,另一种资源协调者）是一种新的Hadoop资源管理器，它是一个通用资源管理系统，可为上层应用提供统一的资源管理和调度，它的引入为集群在利用率、资源统一管理和数据共享等方面带来的巨大的好处。 YARN在产品中的位置： 图：Yarn在FusionInsight产品中的">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/yarn位置.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/设计.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/Yarn组件架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/Yarn的部署.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/工作流程.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/发展.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/Yarn%20HA.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/APP容错.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/资源分配模型.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/用户.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/动态内存管理.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/标签调度.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/命令.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/2.png">
+<meta property="og:updated_time" content="2019-11-15T14:39:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Yarn技术原理">
+<meta name="twitter:description" content="Yarn的基本介绍Yarn基本定义：Apache Hadoop YARN（Yet Another Resource Negotiator,另一种资源协调者）是一种新的Hadoop资源管理器，它是一个通用资源管理系统，可为上层应用提供统一的资源管理和调度，它的引入为集群在利用率、资源统一管理和数据共享等方面带来的巨大的好处。 YARN在产品中的位置： 图：Yarn在FusionInsight产品中的">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/05/11/Yarn技术原理/yarn位置.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/05/11/Yarn技术原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Yarn技术原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/05/11/Yarn技术原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Yarn技术原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-11 10:34:07" itemprop="dateCreated datePublished" datetime="2018-05-11T10:34:07+08:00">2018-05-11</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-15 22:39:34" itemprop="dateModified" datetime="2019-11-15T22:39:34+08:00">2019-11-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 3,762</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 13</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Yarn的基本介绍"><a href="#Yarn的基本介绍" class="headerlink" title="Yarn的基本介绍"></a>Yarn的基本介绍</h1><h2 id="Yarn基本定义："><a href="#Yarn基本定义：" class="headerlink" title="Yarn基本定义："></a>Yarn基本定义：</h2><p>Apache Hadoop YARN（Yet Another Resource Negotiator,另一种资源协调者）是一种新的Hadoop资源管理器，它是一个通用资源管理系统，可为上层应用提供统一的资源管理和调度，它的引入为集群在利用率、资源统一管理和数据共享等方面带来的巨大的好处。</p>
+<h2 id="YARN在产品中的位置："><a href="#YARN在产品中的位置：" class="headerlink" title="YARN在产品中的位置："></a>YARN在产品中的位置：</h2><p><img src="/2018/05/11/Yarn技术原理/yarn位置.png" alt="yarn位置"></p>
+<p><center>图：Yarn在FusionInsight产品中的位置<center></center></center></p>
+<p>YARN是Hadoop2.0中的资源管理系统，它是一个通用的资源管理模块，可为各类应用程序提供资源管理和调度功能。</p>
+<p>Yarn是轻量级弹性计算平台，除了MapReduce框架，还可以支持其他框架，如Spark、Storm等。</p>
+<p>多种框架统一管理，共享集群资源的优点：</p>
+<ol>
+<li>资源利用率高</li>
+<li>运维成本低</li>
+<li>数据共享方便</li>
+</ol>
+<h2 id="YARN的设计思路："><a href="#YARN的设计思路：" class="headerlink" title="YARN的设计思路："></a>YARN的设计思路：</h2><p>YARN的设计是为了解决MapReduce1.0中的一些缺陷。</p>
+<ol>
+<li>存在单点故障。</li>
+<li>JobTracker“大包大揽”导致任务过重（任务多时内存开销大，上限4000节点）。</li>
+<li>容易出现内存溢出（分配资源只考虑MapReduce任务数，不考虑CPU、内存）。</li>
+<li>资源划分不合理（强制划分为slot ，包括Map slot和Reduce slot）。</li>
+</ol>
+<p>Yarn架构思路：</p>
+<p><img src="/2018/05/11/Yarn技术原理/设计.png" alt="设计"></p>
+<p><center>图：Yarn的架构思路：将原Job Tacker三大功能拆分<center></center></center></p>
+<h1 id="Yarn的组件架构"><a href="#Yarn的组件架构" class="headerlink" title="Yarn的组件架构"></a>Yarn的组件架构</h1><h2 id="Yarn的组件架构："><a href="#Yarn的组件架构：" class="headerlink" title="Yarn的组件架构："></a>Yarn的组件架构：</h2><p><img src="/2018/05/11/Yarn技术原理/Yarn组件架构.png" alt="Yarn组件架构"></p>
+<p><center>图：YARN的组件架构图<center></center></center></p>
+<p>三大组件的主要功能介绍：</p>
+<p><strong>（1）ResourceManager：</strong></p>
+<ul>
+<li>处理客户端请求</li>
+<li>启动/监控ApplicationMaster</li>
+<li>监控NodeManager</li>
+<li>资源分配与调度</li>
+</ul>
+<p><strong>（2）ApplicationMaster：</strong></p>
+<ul>
+<li>为应用程序申请资源，并分配给内部任务</li>
+<li>任务调度、监控与容错</li>
+</ul>
+<p><strong>（3）NodeManager：</strong></p>
+<ul>
+<li>单个节点上的资源管理</li>
+<li>处理来自ResourceManger的命令</li>
+<li>处理来自ApplicationMaster的命令</li>
+</ul>
+<h2 id="ResourceManager："><a href="#ResourceManager：" class="headerlink" title="ResourceManager："></a>ResourceManager：</h2><p>ResourceManager（RM）是一个全局的资源管理器，负责整个系统的资源管理和分配，主要包括两个组件，即调度器（Scheduler）和应用程序管理器（Applications Manager）。</p>
+<p>调度器接收来自ApplicationMaster的应用程序资源请求，把集群中的资源以“<strong>容器</strong>”的形式分配给提出申请的应用程序，容器的选择通常会考虑应用程序所要处理的数据的位置，进行就近选择，从而实现“计算向数据靠拢”。</p>
+<p>容器（Container）作为动态资源分配单位，每个容器中都封装了一定数量的CPU、内存、磁盘等资源，从而限定每个应用程序可以使用的资源量。</p>
+<p>调度器被设计成是一个可插拔的组件，YARN不仅自身提供了许多种直接可用的调度器，也允许用户根据自己的需求重新设计调度器。</p>
+<p>应用程序管理器（Applications Manager）负责系统中所有应用程序的管理工作，主要包括应用程序提交、与调度器协商资源以启动ApplicationMaster、监控ApplicationMaster运行状态并在失败时重新启动等。</p>
+<h2 id="ApplicationMaster："><a href="#ApplicationMaster：" class="headerlink" title="ApplicationMaster："></a>ApplicationMaster：</h2><p>ResourceManager接收用户提交的作业，按照作业的上下文信息以及从NodeManager收集来的容器状态信息，启动调度过程，为用户作业启动一个ApplicationMaster。</p>
+<p> ApplicationMaster的主要功能是： </p>
+<p>（1）当用户作业提交时，ApplicationMaster与ResourceManager协商获取资源，ResourceManager会以容器的形式为ApplicationMaster分配资源； </p>
+<p>（2）把获得的资源进一步分配给内部的各个任务（Map任务或Reduce任务），实现资源的“二次分配”；</p>
+<p> （3）与NodeManager保持交互通信进行应用程序的启动、运行、监控和停止，监控申请到的资源的使用情况，对所有任务的执行进度和状态进行监控，并在任务发生失败时执行失败恢复（即重新申请资源重启任务）； </p>
+<p>（4）定时向ResourceManager发送“心跳”消息，报告资源的使用情况和应用的进度信息； </p>
+<p>（5）当作业完成时，ApplicationMaster向ResourceManager注销容器，执行周期完成。</p>
+<h2 id="NodeManager："><a href="#NodeManager：" class="headerlink" title="NodeManager："></a>NodeManager：</h2><p>NodeManager是驻留在一个YARN集群中的每个节点上的代理，主要负责：</p>
+<ul>
+<li>容器生命周期管理。</li>
+<li>监控每个容器的资源（CPU、内存等）使用情况。</li>
+<li>跟踪节点健康状况。</li>
+<li>以“心跳”的方式与ResourceManager保持通信。</li>
+<li>向ResourceManager汇报作业的资源使用情况和每个容器的运行状态。</li>
+<li>接收来自ApplicationMaster的启动/停止容器的各种请求 。</li>
+</ul>
+<p>需要说明的是，NodeManager主要负责管理抽象的容器，只处理与容器相关的事情，而不具体负责每个任务（Map任务或Reduce任务）自身状态的管理，因为这些管理工作是由ApplicationMaster完成的，ApplicationMaster会通过不断与NodeManager通信来掌握各个任务的执行状态。</p>
+<h2 id="YARN的部署："><a href="#YARN的部署：" class="headerlink" title="YARN的部署："></a>YARN的部署：</h2><p><img src="/2018/05/11/Yarn技术原理/Yarn的部署.png" alt="Yarn的部署"></p>
+<p><center>图：Yarn和Hadoop平台其他组件的统一部署<center></center></center></p>
+<p>在集群部署方面，YARN的各个组件是和Hadoop集群中的其他组件进行统一部署的.</p>
+<h2 id="Yarn的工作流程："><a href="#Yarn的工作流程：" class="headerlink" title="Yarn的工作流程："></a>Yarn的工作流程：</h2><p><img src="/2018/05/11/Yarn技术原理/工作流程.png" alt="工作流程"></p>
+<p><center>图：YARN的工作流程图<center></center></center></p>
+<p>Yarn的工作流程如下：</p>
+<ol>
+<li>用户编写客户端应用程序，向YARN提交应用程序，提交的内容包括ApplicationMaster程序，启动ApplicationMaster的命令、用户程序等。</li>
+<li>YARN中的ResourceManager负责接收和处理来自客户端的请求，为应用程序分配一个容器，在该容器中启动一个ApplicationMaster。</li>
+<li>ApplicationMaster被创建后会首先向ResourceManager注册。</li>
+<li>ApplicationMaster采用轮询的方式向ResourceManager申请资源。</li>
+<li>ResourceManager以“容器”的形式向提出申请的ApplicationMaster分配资源。</li>
+<li>在容器中启动任务（运行环境、脚本）。</li>
+<li>各个任务向ApplicationMaster汇报自己的状态和进度。</li>
+<li>应用程序运行完成后，ApplicationMaster向ResourceManager的应用程序管理器注销并关闭自己。</li>
+</ol>
+<h2 id="Yarn框架与MapReduce1-0框架的对比分析"><a href="#Yarn框架与MapReduce1-0框架的对比分析" class="headerlink" title="Yarn框架与MapReduce1.0框架的对比分析"></a>Yarn框架与MapReduce1.0框架的对比分析</h2><p>从MapReduce1.0框架发展到YARN框架，客户端并没有发生变化，其大部分调用API及接口都保持兼容，因此，原来针对Hadoop1.0开发的代码不用做大的改动，就可以直接放到Hadoop2.0平台上运行。</p>
+<p>总体而言，YARN相对于MapReduce1.0来说具有以下优势：</p>
+<ul>
+<li><p>大大减少了承担中心服务功能的ResourceManager的资源消耗。</p>
+<p>ApplicationMaster来完成需要大量资源消耗的任务调度和监控。</p>
+<p>多个作业对应多个ApplicationMaster，实现了监控分布化。</p>
+</li>
+<li><p>MapReduce1.0既是一个计算框架，又是一个资源管理调度框架，但是，只能支持MapReduce编程模型。而YARN则是一个纯粹的资源调度管理框架，在它上面可以运行包括MapReduce在内的不同类型的计算框架，只要编程实现相应的ApplicationMaster。</p>
+</li>
+<li><p>YARN中的资源管理比MapReduce1.0更加高效。</p>
+<p><strong>以容器为单位，而不是以slot为单位</strong>。</p>
+</li>
+</ul>
+<h2 id="Yarn的发展目标："><a href="#Yarn的发展目标：" class="headerlink" title="Yarn的发展目标："></a>Yarn的发展目标：</h2><p><strong>YARN的目标就是实现“一个集群多个框架”。</strong></p>
+<p>一个企业当中同时存在各种不同的业务应用场景，需要采用不同的计算框架。</p>
+<ul>
+<li>MapReduce实现离线批处理</li>
+<li>使用Impala实现实时交互式查询分析</li>
+<li>使用Storm实现流式数据实时分析</li>
+<li>使用Spark实现迭代计算</li>
+</ul>
+<p>这些产品通常来自不同的开发团队，具有各自的资源调度管理机制。</p>
+<p>为了避免不同类型应用之间互相干扰，企业就需要把内部的服务器拆分成多个集群，分别安装运行不同的计算框架，即“一个框架一个集群”。</p>
+<p>导致问题</p>
+<ul>
+<li>集群资源利用率低</li>
+<li>数据无法共享</li>
+<li>维护代价高</li>
+</ul>
+<hr>
+<p><img src="/2018/05/11/Yarn技术原理/发展.png" alt="发展"></p>
+<p><center>图：在Yarn上部署各种计算框架<center></center></center></p>
+<ul>
+<li>YARN的目标就是实现“一个集群多个框架”，即在一个集群上部署一个统一的资源。调度管理框架YARN，在YARN之上可以部署其他各种计算框架</li>
+<li>由YARN为这些计算框架提供统一的资源调度管理服务，并且能够根据各种计算框架的负载需求，调整各自占用的资源，实现集群资源共享和资源弹性收缩。</li>
+<li>可以实现一个集群上的不同应用负载混搭，有效提高了集群的利用率。</li>
+<li>不同计算框架可以共享底层存储，避免了数据集跨集群移动。</li>
+</ul>
+<p>##Yarn HA：</p>
+<p><img src="/2018/05/11/Yarn技术原理/Yarn HA.png" alt="Yarn HA"></p>
+<p><center>图：YARN HA方案<center></center></center></p>
+<p>Yarn中的ResourceManager负责整个集群的资源管理和任务调度，Yarn高可用性方案通过引入冗余的ResourceManager节点的方式，解决了ResourceManager单点故障问题。</p>
+<h2 id="Yarn-APPMaster容错机制："><a href="#Yarn-APPMaster容错机制：" class="headerlink" title="Yarn APPMaster容错机制："></a>Yarn APPMaster容错机制：</h2><p><img src="/2018/05/11/Yarn技术原理/APP容错.png" alt="APP容错"></p>
+<p><center>图：Yarn APPMaster容错机制<center></center></center></p>
+<h1 id="Yarn的资源管理和任务调度"><a href="#Yarn的资源管理和任务调度" class="headerlink" title="Yarn的资源管理和任务调度"></a>Yarn的资源管理和任务调度</h1><h2 id="资源管理："><a href="#资源管理：" class="headerlink" title="资源管理："></a>资源管理：</h2><p>当前Yarn支持内存和CPU两种资源类型的管理和分配。</p>
+<p>每个NodeManager可分配的内存和CPU的数量可以通过配置选项设置（可在Yarn服务配置页面配置）。</p>
+<ul>
+<li>yarn.nodemanager.resource.memory-mb</li>
+<li>yarn.nodemanager.vmem-pmem-ratio</li>
+<li>yarn.nodemanager.resource.cpu-vcore</li>
+</ul>
+<h2 id="资源分配模型："><a href="#资源分配模型：" class="headerlink" title="资源分配模型："></a>资源分配模型：</h2><p><img src="/2018/05/11/Yarn技术原理/资源分配模型.png" alt="资源分配模型"></p>
+<p><center>图：资源分配模型<center></center></center></p>
+<ul>
+<li>调度器维护一群队列的信息、用户可以向一个或多个队列提交应用。</li>
+<li>每次NM心跳的时候，调度器根据一定的规则选择一个队列，再在队列上选择一个应用，尝试在这个应用上分配资源。</li>
+<li>调度器会优先匹配本地资源的申请请求，其次是同机架的，最后是任意机器的。</li>
+</ul>
+<h2 id="容量调度器："><a href="#容量调度器：" class="headerlink" title="容量调度器："></a>容量调度器：</h2><h3 id="容量调度器的介绍："><a href="#容量调度器的介绍：" class="headerlink" title="容量调度器的介绍："></a>容量调度器的介绍：</h3><p>容量调度器使得Hadoop应用能够共享的、多用户的、操作简便的运行在集群上，同时最大化集群的吞吐量和利用率。</p>
+<p><strong>容量调度器以队列为单位划分资源</strong>，每个队列都有资源使用的下限和上限。每个用户可以设定资源使用上限。管理员可以约束单个队列、用户或者作业的资源使用、支持作业优先级，但不支持抢占。</p>
+<h3 id="容量调度器的特点："><a href="#容量调度器的特点：" class="headerlink" title="容量调度器的特点："></a><strong>容量调度器的特点：</strong></h3><ul>
+<li>容量保证：管理员可为每个队列设置资源最低保证和资源使用上限，所有提交到该队列的应用程序共享这些资源。</li>
+<li>灵活性：如果一个队列中的资源有剩余，可以暂时共享给那些需要资源的队列，当该队列有新的应用程序提交，则其他队列释放的资源会归还给该队列。</li>
+<li>支持优先级：队列支持任务优先级调度（默认是FIFO）。</li>
+<li>多重租赁：支持多用户共享集群和多应用程序同时运行。为防止单个应用程序、用户或者队列独占集群资源，管理员可以为之增加多重约束。</li>
+<li>动态更新配置参数：管理员可以根据需要动态修改配置参数，以实现在线集群管理。</li>
+</ul>
+<h3 id="容量调度器的任务选择："><a href="#容量调度器的任务选择：" class="headerlink" title="容量调度器的任务选择："></a>容量调度器的任务选择：</h3><p>调度时，首先按照以下策略选择一个合适队列：</p>
+<ol>
+<li>资源利用最低的队列优先，比如同级的两个队列Q1和Q2，它们的容量均为30，而Q1已经使用10，Q2已使用12，则会优先将资源分配给Q1.</li>
+<li>最小队列层级优先。例如：QueueA与QueueB.childQueueB，则QueueA优先。</li>
+<li>资源回收请求队列优先。</li>
+</ol>
+<p>然后按以下策略选择该任务中一个任务：</p>
+<ul>
+<li>按照任务优先级和提交时间顺序选择，同时考虑用户资源量限制和内存限制。</li>
+</ul>
+<h2 id="队列资源限制："><a href="#队列资源限制：" class="headerlink" title="队列资源限制："></a>队列资源限制：</h2><p>队列的创建是在多租户页面，当创建一个租户关联Yarn服务时，会创建同名的队列。比如先创建QueueA，QueueB两个租户即对应Yarn两个队列。</p>
+<p><strong>队列的资源容量（百分比）</strong>：</p>
+<p>例如，有default，QueueA，QueueB三个队列，每个队列都有一个[队列名].capacity配置。</p>
+<ul>
+<li>Default队列容量为整个集群资源的20%。</li>
+<li>QueueA队列容量为整个集群资源的10%。</li>
+<li>QueueB队列容量为整个集群资源的10%，后台有个影子队列root-default使队列之和达到100%。</li>
+</ul>
+<p><strong>共享空闲资源：</strong></p>
+<ul>
+<li>由于存在资源共享，因此一个队列使用的资源可能超过其容量，而最多使用资源量可通过该参数限制。</li>
+<li>如果某个队列任务较少，可将剩余资源共享给其他队列。例如QueueA的maximum-capacity配置为100，假设当前只有QueueA在运行任务，理论上QueueA可以占用整个集群100%的资源。</li>
+</ul>
+<h2 id="用户限制："><a href="#用户限制：" class="headerlink" title="用户限制："></a>用户限制：</h2><p><strong>每个用户最低资源保障（百分比）</strong></p>
+<p>任何时刻，一个队列中每个用户可使用的资源量均由一定的限制，当一个队列中同时运行多个用户的任务时，每个用户的可使用资源量在一个最小值与最大值之间浮动，其中，最大值取决于正在运行的任务数据，而最小值则由minimum-user-limit-percent决定。</p>
+<p>例如：设置队列A的这个值为25，即yarn.scheduler.capacity.root.AueueA.minimum-user-limit-percent=25，那么随着任务的用户增加，队列资源的调整如下：</p>
+<p><img src="/2018/05/11/Yarn技术原理/用户.png" alt="用户"></p>
+<hr>
+<p><strong>每个用户最多可使用的资源量（所在队列容量的倍数）</strong></p>
+<p>queue容量的倍数，用来设置一个user可以获取更多的资源。yarn.scheduler.capacity.root.QueueD.user-limit-factor=1.默认值为1，表示一个user获取的资源容量不能超过queue配置的capacity，无论集群有多少空闲字眼，最多不超过maximum-capacity。</p>
+<h2 id="任务限制："><a href="#任务限制：" class="headerlink" title="任务限制："></a>任务限制：</h2><ul>
+<li>最大活跃任务数：整个集群中允许的最大活跃任务数，包括运行或挂起状态的所有任务，当提交的任务申请数据达到限制以后，新提交的任务将会被拒绝。默认10000。yarn.scheduler.capacity.maximum-applications=10000.</li>
+<li>每个队列最大任务数：对于每个队列，可以提交的最大任务数，以QueueA为例，可以在队列配置页面配置，默认是1000，即此队列允许最多1000个活跃任务。</li>
+<li>每个用户可以提交的最大任务数：这个数值依赖每个队列最大任务数。假设根据上面的结果，QueueA最多可以提交1000个任务，那么对于每个用户而言，可以向QueueA提交的最大任务数为：1000 <em> yarn.scheduler.capacity.root.QueueA.minimum-user-limit-percent </em> yarn.scheduler.capacity.root.QueueA.user-limit-factor.</li>
+</ul>
+<h1 id="Yarn的增强特性"><a href="#Yarn的增强特性" class="headerlink" title="Yarn的增强特性"></a>Yarn的增强特性</h1><h2 id="Yarn动态内存管理："><a href="#Yarn动态内存管理：" class="headerlink" title="Yarn动态内存管理："></a>Yarn动态内存管理：</h2><p><img src="/2018/05/11/Yarn技术原理/动态内存管理.png" alt="动态内存管理"></p>
+<p><center>图：Yarn动态内存管理<center></center></center></p>
+<h2 id="Yarn基于标签调度："><a href="#Yarn基于标签调度：" class="headerlink" title="Yarn基于标签调度："></a>Yarn基于标签调度：</h2><p><img src="/2018/05/11/Yarn技术原理/标签调度.png" alt="标签调度"></p>
+<p><center>图：Yarn基于标签调度<center></center></center></p>
+<h1 id="常用维护命令"><a href="#常用维护命令" class="headerlink" title="常用维护命令"></a>常用维护命令</h1><p><img src="/2018/05/11/Yarn技术原理/命令.png" alt="命令"></p>
+<hr>
+<p>常用性能调优参数：</p>
+<p><img src="/2018/05/11/Yarn技术原理/1.png" alt="1"></p>
+<p><img src="/2018/05/11/Yarn技术原理/2.png" alt="2"></p>
+<hr>
+<hr>
+<blockquote>
+<p>以上内容为听华为大数据培训课程和大学MOOC上厦门大学 林子雨的《大数据技术原理与应用》课程而整理的笔记。</p>
+<p><strong><a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">大数据技术原理与应用</a></strong>： <a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">https://www.icourse163.org/course/XMU-1002335004</a> </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/05/11/Yarn技术原理/" title="Yarn技术原理">https://cshihong.github.io/2018/05/11/Yarn技术原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+            <a href="/tags/大数据/" rel="tag"># 大数据</a>
+          
+            <a href="/tags/Yarn/" rel="tag"># Yarn</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/11/MapReduce技术原理/" rel="next" title="MapReduce技术原理">
+                <i class="fa fa-chevron-left"></i> MapReduce技术原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/11/Hadoop的优化与发展/" rel="prev" title="Hadoop的优化与发展">
+                Hadoop的优化与发展 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Yarn的基本介绍"><span class="nav-number">1.</span> <span class="nav-text">Yarn的基本介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Yarn基本定义："><span class="nav-number">1.1.</span> <span class="nav-text">Yarn基本定义：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#YARN在产品中的位置："><span class="nav-number">1.2.</span> <span class="nav-text">YARN在产品中的位置：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#YARN的设计思路："><span class="nav-number">1.3.</span> <span class="nav-text">YARN的设计思路：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Yarn的组件架构"><span class="nav-number">2.</span> <span class="nav-text">Yarn的组件架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Yarn的组件架构："><span class="nav-number">2.1.</span> <span class="nav-text">Yarn的组件架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResourceManager："><span class="nav-number">2.2.</span> <span class="nav-text">ResourceManager：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ApplicationMaster："><span class="nav-number">2.3.</span> <span class="nav-text">ApplicationMaster：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NodeManager："><span class="nav-number">2.4.</span> <span class="nav-text">NodeManager：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#YARN的部署："><span class="nav-number">2.5.</span> <span class="nav-text">YARN的部署：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Yarn的工作流程："><span class="nav-number">2.6.</span> <span class="nav-text">Yarn的工作流程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Yarn框架与MapReduce1-0框架的对比分析"><span class="nav-number">2.7.</span> <span class="nav-text">Yarn框架与MapReduce1.0框架的对比分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Yarn的发展目标："><span class="nav-number">2.8.</span> <span class="nav-text">Yarn的发展目标：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Yarn-APPMaster容错机制："><span class="nav-number">2.9.</span> <span class="nav-text">Yarn APPMaster容错机制：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Yarn的资源管理和任务调度"><span class="nav-number">3.</span> <span class="nav-text">Yarn的资源管理和任务调度</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#资源管理："><span class="nav-number">3.1.</span> <span class="nav-text">资源管理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#资源分配模型："><span class="nav-number">3.2.</span> <span class="nav-text">资源分配模型：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#容量调度器："><span class="nav-number">3.3.</span> <span class="nav-text">容量调度器：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#容量调度器的介绍："><span class="nav-number">3.3.1.</span> <span class="nav-text">容量调度器的介绍：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容量调度器的特点："><span class="nav-number">3.3.2.</span> <span class="nav-text">容量调度器的特点：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容量调度器的任务选择："><span class="nav-number">3.3.3.</span> <span class="nav-text">容量调度器的任务选择：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#队列资源限制："><span class="nav-number">3.4.</span> <span class="nav-text">队列资源限制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用户限制："><span class="nav-number">3.5.</span> <span class="nav-text">用户限制：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#任务限制："><span class="nav-number">3.6.</span> <span class="nav-text">任务限制：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Yarn的增强特性"><span class="nav-number">4.</span> <span class="nav-text">Yarn的增强特性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Yarn动态内存管理："><span class="nav-number">4.1.</span> <span class="nav-text">Yarn动态内存管理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Yarn基于标签调度："><span class="nav-number">4.2.</span> <span class="nav-text">Yarn基于标签调度：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#常用维护命令"><span class="nav-number">5.</span> <span class="nav-text">常用维护命令</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/05/11/Yarn技术原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

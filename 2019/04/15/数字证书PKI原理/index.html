@@ -1,0 +1,2185 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="PKI基础架构密钥管理面临的挑战：在使用任何基于RSA服务之前 ，一个实体需要真实可靠的获取其他实体的公钥。  通过非信任的通道，公钥交换必须是安全的。 在密钥交换过程中，公钥必须不能够被截获和更改。 交换呈现Full Mesh的复杂度。 由最终用户来确认密钥有效性，非常不靠谱。  PIK介绍：公钥基础设施PKI（Public Key Infrastructure），是通过使用公钥技术和数字证书来">
+<meta name="keywords" content="IPSec VPN,VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数字证书PKI原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/04/15/数字证书PKI原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="PKI基础架构密钥管理面临的挑战：在使用任何基于RSA服务之前 ，一个实体需要真实可靠的获取其他实体的公钥。  通过非信任的通道，公钥交换必须是安全的。 在密钥交换过程中，公钥必须不能够被截获和更改。 交换呈现Full Mesh的复杂度。 由最终用户来确认密钥有效性，非常不靠谱。  PIK介绍：公钥基础设施PKI（Public Key Infrastructure），是通过使用公钥技术和数字证书来">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/15/数字证书PKI原理/证书组成.png">
+<meta property="og:updated_time" content="2019-08-25T01:45:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数字证书PKI原理">
+<meta name="twitter:description" content="PKI基础架构密钥管理面临的挑战：在使用任何基于RSA服务之前 ，一个实体需要真实可靠的获取其他实体的公钥。  通过非信任的通道，公钥交换必须是安全的。 在密钥交换过程中，公钥必须不能够被截获和更改。 交换呈现Full Mesh的复杂度。 由最终用户来确认密钥有效性，非常不靠谱。  PIK介绍：公钥基础设施PKI（Public Key Infrastructure），是通过使用公钥技术和数字证书来">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/04/15/数字证书PKI原理/证书组成.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/04/15/数字证书PKI原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>数字证书PKI原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/04/15/数字证书PKI原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">数字证书PKI原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-15 11:14:45" itemprop="dateCreated datePublished" datetime="2019-04-15T11:14:45+08:00">2019-04-15</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:45:08" itemprop="dateModified" datetime="2019-08-25T09:45:08+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 3,377</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 12</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="PKI基础架构"><a href="#PKI基础架构" class="headerlink" title="PKI基础架构"></a>PKI基础架构</h1><h2 id="密钥管理面临的挑战："><a href="#密钥管理面临的挑战：" class="headerlink" title="密钥管理面临的挑战："></a>密钥管理面临的挑战：</h2><p>在使用任何基于RSA服务之前 ，一个实体需要真实可靠的获取其他实体的公钥。</p>
+<ol>
+<li>通过非信任的通道，公钥交换必须是安全的。</li>
+<li>在密钥交换过程中，公钥必须不能够被截获和更改。</li>
+<li>交换呈现Full Mesh的复杂度。</li>
+<li>由最终用户来确认密钥有效性，非常不靠谱。</li>
+</ol>
+<h2 id="PIK介绍："><a href="#PIK介绍：" class="headerlink" title="PIK介绍："></a>PIK介绍：</h2><p>公钥基础设施PKI（Public Key Infrastructure），是通过使用公钥技术和数字证书来提供系统信息安全服务，并负责验证数字证书持有者身份的一种体系。PKI技术是信息安全技术的核心，也是电子商务的关键和基础技术。</p>
+<p>PIK保证了通信数据的私密性、完整性、不可否认性和 源认证性 。</p>
+<h2 id="为什么要用PKI："><a href="#为什么要用PKI：" class="headerlink" title="为什么要用PKI："></a>为什么要用PKI：</h2><p> <strong>IPSec身份认证（预共享密钥方式）：</strong></p>
+<ul>
+<li>配置简单。只需要在总部和二分部的网关上配相同的密钥即可。</li>
+<li>维护复杂。随着分部数量越俩越多，总部和每个分部之间形成的对等体都要配置预共享秘钥。</li>
+<li>安全风险高。如果所有对等体都使用同一个密钥，存在安全风险。</li>
+</ul>
+<p><strong>IPSec身份认证（PIK中的证书认证方式）：</strong></p>
+<ul>
+<li>维护简单。随着分部数量越来越多，只需要向CA申请证书即可。</li>
+<li>安全风险低。不同的分部使用不同的证书，对应的密钥也不同。</li>
+</ul>
+<h1 id="数字证书介绍"><a href="#数字证书介绍" class="headerlink" title="数字证书介绍"></a>数字证书介绍</h1><h2 id="数字证书："><a href="#数字证书：" class="headerlink" title="数字证书："></a>数字证书：</h2><p>数字证书简称证书，它是一个经证书授权中心CA数字签名的文件，包含拥有者的公钥及相关身份信息。</p>
+<p>数字证书技术解决了数字签名技术中无法确定公钥是指定拥有者的问题。</p>
+<blockquote>
+<p><strong>注意：数字证书仅仅是解决了“这个公钥的持有者到底是谁“的问题。</strong></p>
+</blockquote>
+<h2 id="证书结构："><a href="#证书结构：" class="headerlink" title="证书结构："></a>证书结构：</h2><p>最简单的证书包含一个<strong>公钥、名称以及证书授权中心的数字签名</strong>。一般情况下证书中还包括密钥的有效期，颁发者（证书授权中心）的名称，该证书的序列号等信息，证书的结构遵循X.509 v3版本的规范。</p>
+<p><img src="/2019/04/15/数字证书PKI原理/证书组成.png" alt="证书组成"></p>
+<center>图：证书组成结构</center>
+
+
+<p>证书的各字段解释：</p>
+<ul>
+<li>版本：即使用X.509的版本，目前普遍使用的是v3版本（0x2）。</li>
+<li>序列号：颁发者分配给证书的一个正整数，同一颁发者颁发的证书序列号各不相同，可用与颁发者名称一起作为证书唯一标识。</li>
+<li>签名算法：颁发者颁发证书使用的签名算法。</li>
+<li>颁发者：颁发该证书的设备名称，必须与颁发者证书中的主体名一致。通常为CA服务器的名称。</li>
+<li>有效期：包含有效的起、止日期，不在有效期范围的证书为无效证书。</li>
+<li>主体名：证书拥有者的名称，如果与颁发者相同则说明该证书是一个自签名证书。</li>
+<li>公钥信息：用户对外公开的公钥以及公钥算法信息。</li>
+<li>扩展信息：通常包含了证书的用法、CRL的发布地址等可选字段。</li>
+<li>签名：颁发者用私钥对证书信息的签名。</li>
+</ul>
+<h2 id="证书类型："><a href="#证书类型：" class="headerlink" title="证书类型："></a>证书类型：</h2><ul>
+<li>自签名证书：自签名证书又称为根证书，是自己颁发给自己的证书，即证书中的颁发者和主体名相同。</li>
+<li>CA证书：CA自身的证书。如果PKI系统中没有多层级CA，CA证书就是自签名证书；如果有多层级CA，则会形成一个CA层次结构，最上层的CA是根CA，它拥有一个CA“自签名”的证书。</li>
+<li>本地证书：CA颁发给申请者的证书。</li>
+<li>设备本地证书：设备根据CA证书给自己颁发的证书，证书中的颁发者名称是CA服务器的名称。</li>
+</ul>
+<h2 id="证书格式："><a href="#证书格式：" class="headerlink" title="证书格式："></a>证书格式：</h2><ol>
+<li>PKCS#12：以二进制格式保存证书，可以包含私钥，也可以不包含私钥。常用的后缀有：.P12和.PFX。</li>
+<li>DER：以二进制格式保存证书，不包含私钥。常用的后缀有：.DER、.CER和.CRT。</li>
+<li>PEM：以ASCII码格式保存证书，可以包含私钥，也可以不包含私钥。常用的后缀有：.PEM、.CER和.CRT。</li>
+</ol>
+<blockquote>
+<p>对于证书后缀为.CER或.CRT，可以用记事本打开证书，查看证书内容来区分证书格式。</p>
+<ul>
+<li>如果有类似＂—–BEGIN CERTIFICATE—–＂和＂—–END CERTIFICATE—–＂的头尾标记，则证书格式为PEM。</li>
+<li>如果是乱码，则证书格式为DER</li>
+</ul>
+</blockquote>
+<h1 id="PKI的核心部分CA"><a href="#PKI的核心部分CA" class="headerlink" title="PKI的核心部分CA"></a>PKI的核心部分CA</h1><h2 id="CA介绍："><a href="#CA介绍：" class="headerlink" title="CA介绍："></a>CA介绍：</h2><p>证书认证机构CA（Certificate Authority）。CA是PKI的信任基础，是一个用于颁发并管理数字证书的可信实体。它是一种权威性、可信任性和公正性的第三方机构，通常由服务器充当，例如Windows Server 2008。</p>
+<p>CA通常采用多层次的分级结构，根据证书颁发机构的层次，可以划分为根CA和从属CA。</p>
+<p>CA的核心功能就是发放和管理数字证书，包括：证书的颁发、证书的更新、证书的撤销、证书的查询、证书的归档、证书废除列表CRL（Certificate Revocation List）的发布等。</p>
+<p>有关CA的特性：</p>
+<ul>
+<li>仅仅只有一个受信任的介绍者(证书颁发机构)</li>
+<li>CA签署每一个人的公钥</li>
+<li>每个人都有CA的公钥</li>
+</ul>
+<p><strong>CA颁发证书流程：</strong></p>
+<ul>
+<li>每个实体都要获取CA的公钥（认证CA的过程）</li>
+<li>每个实体都要提交自己的公钥给CA（注册到PKI）</li>
+<li>这个初始步骤，必须手动认证或者通过一个可信任的传输网络来执行。</li>
+<li>CA使用自己的私钥为提交的公钥做数字签名。</li>
+<li>被数字签了名的公钥（身份证书）再返回给实体。</li>
+<li>实体现在亏可以通过非信任的网络来彼此交换被CA签了名的公钥了。</li>
+<li>收到的公钥都是被CA的公钥所确认的，CA的公钥在每个实体本地必须是有效的。</li>
+</ul>
+<h2 id="PKI的组成："><a href="#PKI的组成：" class="headerlink" title="PKI的组成："></a>PKI的组成：</h2><p>一个PKI体系由终端实体、证书认证机构、证书注册机构和证书/CRL存储库四部分共同组成。</p>
+<ul>
+<li>证书颁发机构（CA）</li>
+<li>证书注册机构（RA)</li>
+<li>证书库</li>
+<li>密钥备份及恢复系统</li>
+<li>证书废除处理系统</li>
+<li>应用系统接口</li>
+<li>数字证书</li>
+</ul>
+<h2 id="PKI框架的三个重要角色："><a href="#PKI框架的三个重要角色：" class="headerlink" title="PKI框架的三个重要角色："></a>PKI框架的三个重要角色：</h2><ol>
+<li>终端实体（EE, End Entity）: 证书的最终使用者，例如总部和分支的网关。</li>
+<li>证书颁发机构（CA， Certificate Authority）：是一个权威的、可信的第三方机构，负载证书颁发、查询以及更新等工作。</li>
+<li>证书注册机构（RA）</li>
+</ol>
+<h2 id="数字证书的验证过程："><a href="#数字证书的验证过程：" class="headerlink" title="数字证书的验证过程："></a>数字证书的验证过程：</h2><p><strong>第一步：验证前的主备：</strong></p>
+<ul>
+<li><p>实体A：需要有A的公钥、A的私钥、A证书、CA证书</p>
+</li>
+<li><p>实体B：需要有B的公钥、B的私钥、B证书、CA证书</p>
+</li>
+</ul>
+<blockquote>
+<p>A证书内容：【A公钥 + CA私钥签名[Hash（A的公钥 + 个人信息）]】</p>
+<p>B证书内容：【B公钥 + CA私钥签名[Hash（B的公钥 + 个人信息）]】</p>
+<p>CA证书内容：【CA公钥 + CA私钥签名[Hash（CA的公钥 + 个人信息）]】</p>
+</blockquote>
+<p>交换证书：</p>
+<p>​    实体A有了B证书，实体B有了A证书。</p>
+<p><strong>第二步：验证证书是否合法</strong></p>
+<p>举例：A验证B证书是否合法：</p>
+<p>B证书：B公【CA私HASH（B公】<br>CA证书：CA公【CA私HASH(CA公】</p>
+<ol>
+<li><p>用CA公解密B证书——得到HASH值12345。</p>
+</li>
+<li><p>使用B证书提供的个人信息，公钥，签名算法也做HASH值得到12345 。</p>
+</li>
+<li>如果两次hash值相同，即验证了B证书的合法。</li>
+</ol>
+<p><strong>第三步：验证证书的持有者</strong></p>
+<p>A举例：用A的私钥加密HASH值得到签名。用B的公钥解密，得到HASH值。</p>
+<p><strong>第四步：使用公钥加密实现私密性</strong></p>
+<h1 id="证书申请步骤"><a href="#证书申请步骤" class="headerlink" title="证书申请步骤"></a>证书申请步骤</h1><h2 id="证书申请过程："><a href="#证书申请过程：" class="headerlink" title="证书申请过程："></a>证书申请过程：</h2><p>前提条件：正确部署CA服务器 </p>
+<ol>
+<li><p><strong>同步时间</strong>：时间是PIK系统的重中之重，必须先确保参加PKI系统的设备和主机的时间同步。才能开始PKI的部署。</p>
+<p>当设备的时间慢与证书有效期的开始时间或者设备时间大于证书有效期的结束时间那么证书都是无效的。</p>
+<p><strong>忌讳：设备时间比证书服务器的时间慢。</strong></p>
+</li>
+<li><p><strong>部署证书服务器</strong>。证书服务器是整个PKI系统的核心。可以选择微软的证书服务器。</p>
+</li>
+<li><p><strong>客户端产生密钥对</strong>。每一个实体在申请证书之前，需要预先产生RSA的秘钥对。</p>
+</li>
+<li><p><strong>验证证书服务器的合法性。</strong>每一个实体需要获取证书服务器的根证书，里面包含证书服务器的公钥。获取了根证书后，可以通过fingerprint离先验证证书服务器。</p>
+</li>
+<li><p><strong>申请个人证书</strong>。每一个实体发送自己的个人信息和公钥到证书服务器。（在线和离线方式）</p>
+</li>
+<li><p><strong>CA审核并签名证书</strong>。管理员对每一个证书请求进行审核，并对个人信息和公钥内容进行数字签名，签名后的文件即为数字证书。</p>
+</li>
+<li><p><strong>CA颁发数字证书给设备。</strong>证书服务器把签名的证书颁发给实体。</p>
+</li>
+<li><p><strong>设备相互交换证书。</strong></p>
+</li>
+</ol>
+<h1 id="证书申请方式"><a href="#证书申请方式" class="headerlink" title="证书申请方式"></a>证书申请方式</h1><p>证书主要有以下申请方式：</p>
+<ul>
+<li>SCEP（Simple Certificate Enrollment Protocol）for VPN devices。</li>
+<li>File-based（PKCS#10）</li>
+<li>Web-based(browser-to-CA)</li>
+</ul>
+<h2 id="SECP介绍："><a href="#SECP介绍：" class="headerlink" title="SECP介绍："></a><strong>SECP介绍：</strong></h2><ol>
+<li>主要用于<strong>在线申请。</strong></li>
+<li>主要由Cisco设计的技术。</li>
+<li>VPN设备PKI证书申请的工业标准。</li>
+<li><strong>HTTP传输协议。</strong></li>
+<li>被绝大多数VPN和CA厂商支持。</li>
+<li>为VPN设备（VPN最终用户）提供了简单而功能强大的证书申请方式。</li>
+</ol>
+<h2 id="RKCS-10介绍："><a href="#RKCS-10介绍：" class="headerlink" title="RKCS#10介绍："></a>RKCS#10介绍：</h2><ol>
+<li>主要用于<strong>离线证书</strong>申请。</li>
+<li>定义了证书请求的数据格式。</li>
+<li>证书请求包括：<ul>
+<li>DN（Distinguished name）个人信息</li>
+<li>Public key公钥</li>
+<li>Opentional set of attributes其他属性。</li>
+</ul>
+</li>
+</ol>
+<h2 id="Web-based证书申请："><a href="#Web-based证书申请：" class="headerlink" title="Web-based证书申请："></a>Web-based证书申请：</h2><ul>
+<li>主要用于MS证书服务器的申请。</li>
+</ul>
+<h2 id="证书吊销方式："><a href="#证书吊销方式：" class="headerlink" title="证书吊销方式："></a>证书吊销方式：</h2><ol>
+<li><p>CRL（证书吊销列表）：周期性查询，有CRL吊销</p>
+<p>类似于通缉布告</p>
+<p>time-stamped（有效期）</p>
+<p>CA-signed（服务器签名）</p>
+<p>客户周期性轮询CRL存储位（http、ldap、ftp）获取当前CRL。</p>
+<p>管理员一旦吊销证书，新的CRL就会被颁布，但是新的CRL并不会立即被客户获取，必须等老的CRL超期，才能获取新的CRL</p>
+</li>
+<li><p>OCSP（Online Cerificate Status Protocol）：在线吊销 </p>
+<p>在线式证书吊销状态查询协议，IOS CA暂不支持。</p>
+</li>
+</ol>
+<h2 id="证书的应用："><a href="#证书的应用：" class="headerlink" title="证书的应用："></a>证书的应用：</h2><ul>
+<li><p>通过HTTPS登录web界面的应用</p>
+<p>管理员可以通过HTTPS方式安全地登录HTTPS服务器的Web界面，并通过Web界面对设备进行管理。为了提高双方建立SSL连接时的安全性，在设备上为HTTPS客户端指定由Web浏览器信任的CA颁发的本地证书。这样，Web浏览器可以验证本地证书的合法性，避免了可能存在的主动攻击，保证了管理员的安全登录。</p>
+<p>在SSL连接建立的过程中，HTTPS客户端和HTTPS服务器之间的主要交互流程如下：</p>
+<ol>
+<li>HTTPS服务器向PKI认证中心申请本地证书。</li>
+<li>PKI认证中心向HTTPS服务器颁发本地证书。</li>
+<li>HTTPS服务器将携带自己公钥信息的数字证书发送给HTTPS客户端。</li>
+<li>HTTPS客户端验证HTTPS服务器的本地证书合法后，利用证书中的公钥加密HTTPS客户端随机生成的密钥，并发送给HTTPS服务器。</li>
+<li>HTTPS客户端和HTTPS服务器通过协商，最终确定所使用的密钥和加密套件。后续传输的数据，双方都会使用该密钥和加密套件进行加密处理。</li>
+</ol>
+</li>
+<li><p>在IPSec VPN中应用</p>
+<p>采用基于PKI的证书进行身份认证后，IPSec在进行IKE协商过程中交换密钥时，会对通信双方进行身份认证，保证了密钥交换的安全。而且，证书可以为IPSec提供集中的密钥管理机制，并增强整个IPSec网络的可扩展性。同时，在采用证书认证的IPSec网络中，每台设备都拥有PKI认证中心颁发的本地证书。有新设备加入时，只需要为新增加的设备申请一个证书，新设备就可以与其它设备进行安全通讯，而不需要对其他设备的配置进行修改，这大大减少了配置工作量。</p>
+</li>
+<li><p>在SSL VPN中应用</p>
+<p>在SSL VPN应用中，SSL VPN客户端可以通过证书验证SSL VPN网关的身份；SSL VPN网关也可以通过证书来验证客户端的身份。</p>
+</li>
+<li><p>在IPv6 Send中应用：在IPv6 Send场景中，为了防止设备被攻击者冒充，可以在设备上配置SEND（Secure Neighbor Discovery）路由器授权功能，路由器授权功能可以用于对设备的身份进行认证。</p>
+</li>
+</ul>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/04/15/数字证书PKI原理/" title="数字证书PKI原理">https://cshihong.github.io/2019/04/15/数字证书PKI原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/IPSec-VPN/" rel="tag"># IPSec VPN</a>
+          
+            <a href="/tags/VPN/" rel="tag"># VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/09/IPsec-VPN各种场景配置示例/" rel="next" title="IPsec VPN各种场景配置示例">
+                <i class="fa fa-chevron-left"></i> IPsec VPN各种场景配置示例
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/17/IPSec VPN的NAT穿越-NAT-T-原理/" rel="prev" title="IPSec VPN的NAT穿越(NAT-T)原理">
+                IPSec VPN的NAT穿越(NAT-T)原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PKI基础架构"><span class="nav-number">1.</span> <span class="nav-text">PKI基础架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#密钥管理面临的挑战："><span class="nav-number">1.1.</span> <span class="nav-text">密钥管理面临的挑战：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PIK介绍："><span class="nav-number">1.2.</span> <span class="nav-text">PIK介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要用PKI："><span class="nav-number">1.3.</span> <span class="nav-text">为什么要用PKI：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数字证书介绍"><span class="nav-number">2.</span> <span class="nav-text">数字证书介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数字证书："><span class="nav-number">2.1.</span> <span class="nav-text">数字证书：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#证书结构："><span class="nav-number">2.2.</span> <span class="nav-text">证书结构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#证书类型："><span class="nav-number">2.3.</span> <span class="nav-text">证书类型：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#证书格式："><span class="nav-number">2.4.</span> <span class="nav-text">证书格式：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PKI的核心部分CA"><span class="nav-number">3.</span> <span class="nav-text">PKI的核心部分CA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CA介绍："><span class="nav-number">3.1.</span> <span class="nav-text">CA介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PKI的组成："><span class="nav-number">3.2.</span> <span class="nav-text">PKI的组成：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PKI框架的三个重要角色："><span class="nav-number">3.3.</span> <span class="nav-text">PKI框架的三个重要角色：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数字证书的验证过程："><span class="nav-number">3.4.</span> <span class="nav-text">数字证书的验证过程：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#证书申请步骤"><span class="nav-number">4.</span> <span class="nav-text">证书申请步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#证书申请过程："><span class="nav-number">4.1.</span> <span class="nav-text">证书申请过程：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#证书申请方式"><span class="nav-number">5.</span> <span class="nav-text">证书申请方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SECP介绍："><span class="nav-number">5.1.</span> <span class="nav-text">SECP介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RKCS-10介绍："><span class="nav-number">5.2.</span> <span class="nav-text">RKCS#10介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Web-based证书申请："><span class="nav-number">5.3.</span> <span class="nav-text">Web-based证书申请：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#证书吊销方式："><span class="nav-number">5.4.</span> <span class="nav-text">证书吊销方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#证书的应用："><span class="nav-number">5.5.</span> <span class="nav-text">证书的应用：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/04/15/数字证书PKI原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

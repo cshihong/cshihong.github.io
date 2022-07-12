@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="DNS服务介绍DNS服务简介：DNS(Domain Name System–域名系统),是因特网的一项服务。它作为将域名和IP地址相互映射的一个分布式数据库，能够使人更方便地访问互联网。是一个应用层的协议DNS使用TCP和UDP端口53。 DNS是一个分布式数据库,命名系统采用层次的逻辑结构,如同一颗倒置的树,这个逻辑的树形结构称为域名空间,由于DNS划分了域名空间,所以各机构可以使用自己的域名空">
+<meta name="keywords" content="Linux笔记,Linux服务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DNS服务器搭建与配置">
+<meta property="og:url" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="DNS服务介绍DNS服务简介：DNS(Domain Name System–域名系统),是因特网的一项服务。它作为将域名和IP地址相互映射的一个分布式数据库，能够使人更方便地访问互联网。是一个应用层的协议DNS使用TCP和UDP端口53。 DNS是一个分布式数据库,命名系统采用层次的逻辑结构,如同一颗倒置的树,这个逻辑的树形结构称为域名空间,由于DNS划分了域名空间,所以各机构可以使用自己的域名空">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/DNS查询流程图.jpg">
+<meta property="og:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/主配置文件.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/正向解析.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/测试1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/正向解析测试.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/反向配置文件.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/测试2.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/秘钥.png">
+<meta property="og:updated_time" content="2018-12-31T01:17:30.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DNS服务器搭建与配置">
+<meta name="twitter:description" content="DNS服务介绍DNS服务简介：DNS(Domain Name System–域名系统),是因特网的一项服务。它作为将域名和IP地址相互映射的一个分布式数据库，能够使人更方便地访问互联网。是一个应用层的协议DNS使用TCP和UDP端口53。 DNS是一个分布式数据库,命名系统采用层次的逻辑结构,如同一颗倒置的树,这个逻辑的树形结构称为域名空间,由于DNS划分了域名空间,所以各机构可以使用自己的域名空">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/DNS查询流程图.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DNS服务器搭建与配置 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">DNS服务器搭建与配置
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-10-15 21:20:07" itemprop="dateCreated datePublished" datetime="2018-10-15T21:20:07+08:00">2018-10-15</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-12-31 09:17:30" itemprop="dateModified" datetime="2018-12-31T09:17:30+08:00">2018-12-31</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 8,564</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 35</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="DNS服务介绍"><a href="#DNS服务介绍" class="headerlink" title="DNS服务介绍"></a>DNS服务介绍</h1><h2 id="DNS服务简介："><a href="#DNS服务简介：" class="headerlink" title="DNS服务简介："></a>DNS服务简介：</h2><p>DNS(Domain Name System–域名系统),是因特网的一项服务。它作为将域名和IP地址相互映射的一个分布式数据库，能够使人更方便地访问互联网。是一个应用层的协议DNS使用TCP和UDP端口53。</p>
+<p>DNS是一个分布式数据库,命名系统采用层次的逻辑结构,如同一颗倒置的树,这个逻辑的树形结构称为域名空间,由于DNS划分了域名空间,所以各机构可以使用自己的域名空间创建DNS信息. </p>
+<blockquote>
+<p>注:DNS域名空间中,树的最大深度不得超过127层,树中每个节点最长可以存储63个字符.</p>
+</blockquote>
+<h2 id="DNS名词解释："><a href="#DNS名词解释：" class="headerlink" title="DNS名词解释："></a>DNS名词解释：</h2><h3 id="1-域和域名"><a href="#1-域和域名" class="headerlink" title="1. 域和域名"></a><strong>1. 域和域名</strong></h3><p>DNS树的每个节点代表一个域.通过这些节点,对整个域名空间进行划分,成为一个层次结构. </p>
+<p>域名空间的每个域的名字,通过域名进行表示. </p>
+<p>域名:通常由一个完全合格域名（FQDN）标识.FQDN能准确表示出其相对于DNS  域树根的位置,也就是节点到DNS 树根的完整表述方式,从节点到树根采用反向书写,并将每个节点用“.”分隔,对于DNS 域google  来说,其完全正式域名（FQDN）为google.com. </p>
+<p><strong>例如：google为com域的子域,其表示方法为google.com，而www为google域中的子域,可以使用<a href="http://www.google.com表示" target="_blank" rel="noopener">www.google.com表示</a></strong> </p>
+<blockquote>
+<p>注意:通常,FQDN 有严格的命名限制,长度不能超过256 字节,只允许使用字符a-z,0-9,A-Z和减号（-）.点号（.）只允许在域名标志之间（例如“google.com”）或者FQDN 的结尾使用. </p>
+</blockquote>
+<p>域名不区分大小. </p>
+<p>由最顶层到下层,可以分成:根域、顶级域、二级域、子域. </p>
+<p>Internet 域名空间的最顶层是根域（root）,其记录着Internet 的重要DNS 信息,由<strong>Internet域名注册授权机构管理</strong>,该机构把域名空间各部分的管理责任分配给连接到Internet 的各个组织. </p>
+<p><strong>“.”全球有13个根(root)服务器</strong> </p>
+<p>DNS 根域下面是顶级域,也由Internet 域名注册授权机构管理.共有3 种类型的顶级域. </p>
+<p><strong>组织域</strong>:<strong>采用3 个字符的代号</strong>,<strong>表示DNS 域中所包含的组织的主要功能或活动</strong>.比如com 为商业机构组织,edu 为教育机构组织,gov 为政府机构组织,mil 为军事机构组织,net 为网络机构组织,org 为非营利机构组织,int 为国际机构组织. </p>
+<p><strong>地址域</strong>:<strong>采用两个字符的国家或地区代号</strong>.如cn 为中国,kr 为韩国,us 为美国. </p>
+<p><strong>反向域</strong>:<strong>这是个特殊域</strong>,<strong>名字为in-addr.arpa</strong>,<strong>用于将IP 地址映射到名字（反向查询）</strong>. </p>
+<p>对于顶级域的下级域,Internet 域名注册授权机构授权给Internet 的各种组织.当一个组织获得了对域名空间某一部分的授权后,该组织就负责命名所分配的域及其子域,包括域中的计算机和其他设备,并管理分配域中主机名与IP 地址的映射信息. </p>
+<h3 id="2、区（Zone）："><a href="#2、区（Zone）：" class="headerlink" title="2、区（Zone）："></a>2、区（Zone）：</h3><p>区是DNS 名称空间的一部分,其包含了一组存储在DNS 服务器上的资源记录. </p>
+<p>使用区的概念,DNS 服务器回答关于自己区中主机的查询,每个区都有自己的授权服务器. </p>
+<h3 id="3-主域名服务器和辅助域名服务器："><a href="#3-主域名服务器和辅助域名服务器：" class="headerlink" title="3.主域名服务器和辅助域名服务器："></a>3.主域名服务器和辅助域名服务器：</h3><p>当区的辅助服务器启动时,它与该区的主控服务器进行连接并启动一次区传输,区辅助服务器定期与区主控服务器通信,查看区数据是否改变.如果改变了,它就启动一次数据更新传输.每个区必须有主服务器,另外每个区至少要有一台辅助服务器,否则如果该区的主服务器崩溃了,就无法解析该区的名称. </p>
+<p>辅助服务器的优点: </p>
+<ol>
+<li><p>容错能力 </p>
+<p>配置辅助服务器后,在该区主服务器崩溃的情况下,客户机仍能解析该区的名称.一般把区的主服务器和区的辅助服务器安装在不同子网上,这样如果到一个子网的连接中断,DNS 客户机还能直接查询另一个子网上的名称服务器. </p>
+</li>
+<li><p>减少广域链路的通信量 </p>
+<p>如果某个区在远程有大量客户机,用户就可以在远程添加该区的辅助服务器,并把远程的客户机配置成先查询这些服务器,这样就能防止远程客户机通过慢速链路通信来进行DNS 查询. </p>
+</li>
+<li><p>减轻主服务器的负载 </p>
+<p>辅助服务器能回答该区的查询,从而减少该区主服务器必须回答的查询数. </p>
+</li>
+</ol>
+<h3 id="4-DNS相关概念："><a href="#4-DNS相关概念：" class="headerlink" title="4.DNS相关概念："></a>4.DNS相关概念：</h3><ul>
+<li><p>DNS服务器：</p>
+<p>运行DNS 服务器程序的计算机,储存DNS 数据库信息.DNS 服务器会尝试解析客户机的查询请求. </p>
+<p>在解答查询时,如果DNS 服务器能提供所请求的信息,就直接回应解析结果,如果该DNS 服务器没有相应的域名信息,则为客户机提供另一个能帮助解析查询的服务器地址,如果以上两种方法均失败,则回应客户机没有所请求的信息或请求的信息不存在. </p>
+</li>
+<li><p>DNS缓存：</p>
+<p>运行DNS 服务器程序的计算机,储存DNS 数据库信息.DNS 服务器会尝试解析客户机的查询请求. </p>
+<p>在解答查询时,如果DNS 服务器能提供所请求的信息,就直接回应解析结果,如果该DNS 服务器没有相应的域名信息,则为客户机提供另一个能帮助解析查询的服务器地址,如果以上两种方法均失败,则回应客户机没有所请求的信息或请求的信息不存在. </p>
+</li>
+</ul>
+<h3 id="5、DNS两种查询方式："><a href="#5、DNS两种查询方式：" class="headerlink" title="5、DNS两种查询方式："></a>5、DNS两种查询方式：</h3><ol>
+<li><p>递归查询：</p>
+<p>递归查询是一种DNS 服务器的查询模式,在该模式下DNS 服务器接收到客户机请求,必须使用一个准确的查询结果回复客户机.如果DNS 服务器本地没有存储查询DNS 信息,那么该服务器会询问其他服务器,并将返回的查询结果提交给客户机.</p>
+</li>
+<li><p>迭代查询：</p>
+<p>DNS 服务器另外一种查询方式为迭代查询,当客户机发送查询请求时,DNS 服务器并不直接回复查询结果,而是告诉客户机另一台DNS 服务器地址,客户机再向这台DNS 服务器提交请求,依次循环直到返回查询的结果为止.</p>
+</li>
+</ol>
+<h3 id="6、正向解析和方向解析："><a href="#6、正向解析和方向解析：" class="headerlink" title="6、正向解析和方向解析："></a>6、正向解析和方向解析：</h3><ul>
+<li>正向解析：是指域名到IP地址的解析过程。</li>
+<li>反向解析：是指IP地址到域名的解析过程。</li>
+</ul>
+<h3 id="7、DNS资源记录："><a href="#7、DNS资源记录：" class="headerlink" title="7、DNS资源记录："></a>7、DNS资源记录：</h3><ol>
+<li><p><strong>SOA 资源记录(全区唯一)</strong></p>
+<p>每个区在区的开始处都包含了一个起始授权记录（Start of Authority Record）,简称SOA 记录. </p>
+<p>SOA 定义了域的全局参数,进行整个域的管理设置.一个区域文件只允许存在唯一的SOA 记录. </p>
+</li>
+<li><p><strong>NS 资源记录:</strong></p>
+<p>NS（Name Server）记录是域名服务器记录,用来指定该域名由哪个DNS服务器来进行解析.每个区在区根处至少包含一个NS 记录. </p>
+</li>
+<li><p><strong>A 资源记录</strong></p>
+<p>地址（A）资源记录把FQDN 映射到IP 地址. 因为有此记录,所以DNS服务器能解析FQDN域名对应的IP 地址. </p>
+<p>A ：是IPv4地址。 AAAA是IPv6主机地址。</p>
+</li>
+<li><p><strong>PTR 资源记录</strong></p>
+<p>相对于A 资源记录,指针（PTR）记录把IP地址映射到FQDN. 用于反向查询,通过IP地址,找到域名. </p>
+</li>
+<li><p><strong>CNAME 资源记录</strong></p>
+<p>别名记录（CNAME）资源记录创建特定FQDN 的别名.用户可以使用CNAME 记录来隐藏用户网络的实现细节,使连接的客户机无法知道真正的域名. </p>
+<p>例:ping百度时,解析到了百度的别名服务器.百度有个cname=<a href="http://www.a.shifen.com.的别名" target="_blank" rel="noopener">www.a.shifen.com.的别名</a> </p>
+</li>
+<li><p><strong>MX 资源记录</strong> </p>
+<p>邮件交换（MX）资源记录,为DNS 域名指定邮件交换服务器. </p>
+<p>邮件交换服务器是为DNS 域名处理或转发邮件的主机.处理邮件指把邮件投递到目的地或转交另一不同类型的邮件传送者.转发邮件指把邮件发送到最终目的服务器,用简单邮件传输协议SMTP 把邮件发送给离最终目的地最近的邮件交换服务器,或使邮件经过一定时间的排队. </p>
+</li>
+</ol>
+<h2 id="DNS工作原理：查询过程"><a href="#DNS工作原理：查询过程" class="headerlink" title="DNS工作原理：查询过程"></a>DNS工作原理：查询过程</h2><p>假设<a href="http://www.abc.com的主机要查询www.xyz.abc.com的服务器ip地址。" target="_blank" rel="noopener">www.abc.com的主机要查询www.xyz.abc.com的服务器ip地址。</a></p>
+<h3 id="递归查询："><a href="#递归查询：" class="headerlink" title="递归查询："></a>递归查询：</h3><p>第一步：在hosts静态文件、DNS解析器缓存中查找某主机的ip地址</p>
+<blockquote>
+<p>hosts文件：以静态映射的方式提供IP地址与主机名的对照表，类似ARP表</p>
+<p>域：abc.com是一个域，它可以划分为多个区域，如abc.com和xyz.abc.com</p>
+</blockquote>
+<p>第二步：上一步无法找到，去DNS本地服务器（即域服务器）查找，其本质是去区域服务器、服务器缓存中查找</p>
+<p>第三步：本地DNS服务器查不到就根据‘根提示文件’向负责顶级域‘.com’的DNS服务器查询</p>
+<p>第四步：‘根DNS服务器’根据查询域名中的‘xyz.com’，再向xyz.com的区域服务器查询</p>
+<p>第五步：<a href="http://www.xyz.abc.com的DNS服务器直接解析该域名，将查询到的ip再原路返回给请求查询的主机" target="_blank" rel="noopener">www.xyz.abc.com的DNS服务器直接解析该域名，将查询到的ip再原路返回给请求查询的主机</a></p>
+<h3 id="迭代查询"><a href="#迭代查询" class="headerlink" title="迭代查询"></a>迭代查询</h3><p>第一步：在hosts静态文件、DNS解析器缓存中查找某主机的ip地址</p>
+<p>第二步：上一步无法找到，在DNS本地服务器（即域服务器）查找所有本层次的区域服务器</p>
+<p>第三步：本地DNS服务器查不到就查询上一层次的所有区域服务器，以此类推直至根域名DNS服务器‘.’</p>
+<p>第四步：到达根域名服务器后又向下查询，直至查到结果为止。</p>
+<h3 id="迭代查询与递归查询结合"><a href="#迭代查询与递归查询结合" class="headerlink" title="迭代查询与递归查询结合"></a>迭代查询与递归查询结合</h3><p>递归查询需要经过逐层查询才能获得查询结果，当查询具有许多层次的DNS结构时效率很低，所以一般采用两者相结合的查询方式。</p>
+<p>第一步：在hosts静态文件、DNS解析器缓存中查找某主机的ip地址</p>
+<p>第二步：上一步无法找到，去DNS本地服务器（即域服务器）查找，其本质是去区域服务器、服务器缓存中查找</p>
+<p>第三步：本地DNS服务器查不到就根据‘根提示文件’向负责顶级域‘.com’的根DNS服务器查询</p>
+<p>第四步：根DNS服务器直接将其区域DNS服务器的ip地址返回给本地服务器，而不用再向xyz.com的区域服务器查询。</p>
+<p>第五步：本地DNS服务器将结果返回给请求的主机</p>
+<p><img src="/2018/10/15/DNS服务器搭建与配置/DNS查询流程图.jpg" alt="DNS查询流程图"></p>
+<center>图：DNS查询流程图</center>
+
+<h1 id="Linux下DNS服务器安装"><a href="#Linux下DNS服务器安装" class="headerlink" title="Linux下DNS服务器安装"></a>Linux下DNS服务器安装</h1><h2 id="BIND简介："><a href="#BIND简介：" class="headerlink" title="BIND简介："></a>BIND简介：</h2><p>BIND（Berkeley Internet Name Domain，伯克利因特网名称域）服务是全球范围内使用最广泛、最安全可靠且高效的域名解析服务程序。DNS域名解析服务作为互联网基础设施服务，其责任之重可想而知，因此建议大家在生产环境中安装部署bind服务程序时加上chroot（俗称牢笼机制）扩展包，以便有效地限制bind服务程序仅能对自身的配置文件进行操作，以确保整个服务器的安全。</p>
+<h2 id="安装bind服务和启动步骤："><a href="#安装bind服务和启动步骤：" class="headerlink" title="安装bind服务和启动步骤："></a>安装bind服务和启动步骤：</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># yum install -y bind*</span></span><br><span class="line"><span class="comment">#安装bind组件</span></span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl start named</span></span><br><span class="line"><span class="comment">#启动dns服务</span></span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl enable named</span></span><br><span class="line"><span class="comment">#设置dns服务开机启动</span></span><br><span class="line">Created symlink from /etc/systemd/system/multi-user.target.wants/named.service to /usr/lib/systemd/system/named.service.</span><br></pre></td></tr></table></figure>
+<h2 id="DNS配置的主要文件组："><a href="#DNS配置的主要文件组：" class="headerlink" title="DNS配置的主要文件组："></a>DNS配置的主要文件组：</h2><ul>
+<li><p><strong>/etc/hosts</strong>　　主机的一个文件列表 　　添加记录如:111.13.100.92   <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a></p>
+<p>对于简单的主机名解析（点分表示法），默认在请求DNS或NIS网络域名服务器前，/etc/named.conf 通常会告诉程序先查看此文件。</p>
+</li>
+<li><p><strong>/etc/resolv.conf</strong>　　转换程序配置文件</p>
+<p>在配置程序请求BIND域名查询服务查询主机名时，必须告诉程序使用哪个域名服务器和IP地址来完成这个任务</p>
+</li>
+<li><p><strong>/etc/named.conf</strong>　　BIND主文件</p>
+<p>设置一般的name参数，指向该服务器使用的域数据库的信息源</p>
+</li>
+<li><p><strong>/var/named/named.ca</strong>　　根域名配置服务器指向文件</p>
+<p>指向根域名配置服务器，用于告诉缓存服务器初始化</p>
+</li>
+<li><p><strong>/var/named/localhost.zone</strong>　   localhost区正向域名解析文件</p>
+<p>用于将本地IP地址（127.0.0.1）转换为本地回送IP地址（127.0.0.1）</p>
+</li>
+<li><p><strong>/var/named/name.local</strong>　　localhost区反向域名解析文件</p>
+<p>用于将localhost名字转换为本地回送IP地址（127.0.0.1）</p>
+</li>
+<li><p><strong>/etc/named.rfc1912.zones</strong>　　区块设置文件</p>
+</li>
+</ul>
+<p><strong>name.conf文件的主要配置信息：</strong></p>
+<ul>
+<li><strong>acl</strong>　　定义ip地址的访问控制清单</li>
+<li><strong>control</strong>　　定义rndc使用的控制通道</li>
+<li><strong>include</strong>　　把其他的文件包含到配置文件中</li>
+<li><strong>key</strong>　　定义授权的安全密钥</li>
+<li><strong>logging</strong>　　定义日志内容和位置</li>
+<li><strong>options</strong>　　定义全局配置选项和默认值</li>
+<li><strong>server</strong>　　定义远程服务的特征</li>
+<li><strong>zone</strong>　　定义一个区</li>
+</ul>
+<h2 id="DNS的资源记录（Resource-Record-RR）格式："><a href="#DNS的资源记录（Resource-Record-RR）格式：" class="headerlink" title="DNS的资源记录（Resource Record, RR）格式："></a>DNS的资源记录（Resource Record, RR）格式：</h2><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line">DNS域名数据库有资源记录和区文件指令组成，由SOA（Start Of Authority起始授权机构记录，SOA 记录说明了在众多NS记录里那一台才是主名称服务器。</span><br><span class="line">RR开始，同时包括NS RR；</span><br><span class="line">正向解析文件包括A internet Address，作用，FQDN --&gt; IP） </span><br><span class="line">MX （Mail eXchanger，邮件交换器）</span><br><span class="line">CNAME（Canonical NAME 别名） </span><br><span class="line">反向解析文件包括PTR（PTR: PoinTeR，IP --&gt; FQDN）</span><br><span class="line"></span><br><span class="line">RR 语法：name　　[TTL]　　IN　　<span class="built_in">type</span>　　value （字段之间由空格和制表符隔开）</span><br><span class="line"></span><br><span class="line">注意： (1) TTL可从全局继承　　(2) @可用于引用当前区域的名字 　　(3) 同一个名字可以通过多条记录定义多个不同的值；此时 DNS服务器会以轮询方式响应 　　(4) 同一个值也可能有多个不同的定义名字；通过多个不同的 名字指向同一个值进行定义；此仅表示通过多个不同的名字 可以找到同一个主机</span><br><span class="line"></span><br><span class="line">SOA记录：name: 当前区域的名字，例如“heiye.com.” 　　value: 有多部分组成 (1) 当前区域的主DNS服务器的FQDN，也可以使用当前区域的名字；  </span><br><span class="line"></span><br><span class="line">(2) 当前区域管理员的邮箱地址；地址中不能使用@符号，一般用.替换 如linuxedu.heiye.com  (3) 主从服务区域传输相关定义以及否定的答案的统一的TTL </span><br><span class="line"></span><br><span class="line">例如： heiye.com.　　86400 　　IN 　　SOA 　　ns.heiye.com.</span><br><span class="line"></span><br><span class="line">　　　 nsadmin.heiye.com. 　　(</span><br><span class="line">　　　 　　　　2015042201 ;</span><br><span class="line">　　　　　　　 序列号 2H ;</span><br><span class="line">　　　　　　　 刷新时间 10M ;</span><br><span class="line">　　　　　　　 重试时间 1W ;</span><br><span class="line">　　　　　　　 过期时间 1D ;</span><br><span class="line">　　　　　　　 否定答案的TTL值</span><br><span class="line">　　　)</span><br><span class="line"></span><br><span class="line">NS记录：name: 当前区域的名字 　　value: 当前区域的某DNS服务器的名字，例如 ns.heiye.com. 注意：一个区域可以有多个NS记录</span><br><span class="line"></span><br><span class="line">例如：heiye.com. 　　IN 　　NS　　ns1.heiye.com.  </span><br><span class="line"></span><br><span class="line">　　　heiye.com. 　　IN 　　NS 　   ns2.heiye.com.</span><br><span class="line"></span><br><span class="line">注意： (1) 相邻的两个资源记录的name相同时，后续的可省略 </span><br><span class="line">(2) 对NS记录而言，任何一个ns记录后面的服务器名字 ，都应该在后续有一个A记录</span><br><span class="line"></span><br><span class="line">MX记录（Mail eXchanger）：name: 当前区域的名字 　　value: 当前区域的某邮件服务器(smtp服务器)的主机名 ， 一个区域内，MX记录可有多个；</span><br><span class="line"></span><br><span class="line">但每个记录的value之前应 该有一个数字(0-99)，表示此服务器的优先级；数字越小优 先级越高  例如：</span><br><span class="line">heiye.com. 　　IN 　　MX 　　10 　　mx1.heiye.com.</span><br><span class="line">       　　　　 IN 　　MX 　　20 　　mx2.heiye.com.</span><br><span class="line"></span><br><span class="line">注意： (1) 对MX记录而言，任何一个MX记录后面的服务器名字 ，都应该在后续有一个A记录</span><br><span class="line"></span><br><span class="line">A记录（Addrss）:name: 某主机的FQDN，例如www.heiye.com. 　　value: 主机名对应主机的IP地址</span><br><span class="line"></span><br><span class="line">例如： www.heiye.com. 　　IN 　　A 　　1.1.1.1 　　</span><br><span class="line">　　　 www.heiye.com.　　 IN 　　A 　　2.2.2.2 　　</span><br><span class="line">　　　 mx1.heiye.com. 　　IN 　　A 　　3.3.3.3</span><br><span class="line">　　　 mx2.heiye.com.    　 IN 　　A 　　4.4.4.4</span><br><span class="line">　　　 *.heiye.com. 　　　  IN 　　A 　　5.5.5.5</span><br><span class="line">　　　 heiye.com. 　　　　IN 　　A 　　 6.6.6.6 　　</span><br><span class="line">避免用户写错名称时给错误答案，可通过泛域名解析进行解 析至某特定地址</span><br><span class="line"></span><br><span class="line">其他记录：AAAA: name: FQDN 　　value: IPv6 　　　　</span><br><span class="line"></span><br><span class="line">　　　　　PTR: name: IP，有特定格式，把IP地址反过来写，1.2.3.4，要写 作4.3.2.1；而有特定后缀：<span class="keyword">in</span>-addr.arpa.，所以完整写法为 ：</span><br><span class="line"></span><br><span class="line">4.3.2.1.in-addr.arpa. 　　value: FQDN</span><br><span class="line"></span><br><span class="line">例如： 4.3.2.1.　　<span class="keyword">in</span>-addr.arpa. 　　IN 　　PTR 　　www.heiye.com.</span><br><span class="line"></span><br><span class="line">如1.2.3为网络地址，可简写成： 4 　　IN 　　PTR 　　www.heiye.com.</span><br><span class="line"></span><br><span class="line">注意：网络地址及后缀可省略；主机地址依然需要反着写</span><br><span class="line"></span><br><span class="line">别名记录:name: 别名的FQDN 　　value: 真正名字的FQDN</span><br><span class="line"></span><br><span class="line">例如： www.heiye.com. 　　IN 　　CNAME 　　websrv.heiye.com.</span><br><span class="line"></span><br><span class="line">named字段：</span><br><span class="line"></span><br><span class="line">	（1）根域以” . “结束，并且只有一个，没有上级域。而在Internet中，根域一般不需要表现出来。</span><br><span class="line"></span><br><span class="line">	（2）@：默认域，文件使用<span class="variable">$ORIGIN</span> domain 来说明默认域。</span><br><span class="line"></span><br><span class="line">	（3）ttl 全称”Time to Live “，以秒为单位记录该资源记录中存放高速缓存中的时间长度。通常此处设为空，表示采用SOA的最小ttl值。</span><br><span class="line"></span><br><span class="line">	（4）IN：将该记录标志为一个Internet DNS资源记录。</span><br><span class="line"></span><br><span class="line"><span class="built_in">type</span>字段:</span><br><span class="line"></span><br><span class="line">	(1)A记录：主机名对应的IP地址记录，用户可将该域名下网站服务器指向自己的Web服务器，同时也可设置域名的二级域名。</span><br><span class="line"></span><br><span class="line">	(2)MX记录：邮件交换记录可将该域下所有邮件服务器 指向自己的邮件服务器，只需在线填写服务器的IP地址。</span><br><span class="line"></span><br><span class="line">	(3)CNAME记录：别名记录，可允许多个名字映射到同一计算机，通常用于同时提供Web和邮件服务器的计算机。</span><br><span class="line"></span><br><span class="line">	(4)SOA记录：一个授权区的开始，配置文件的第一个记录必须是SOA的开始。</span><br><span class="line"></span><br><span class="line">	(5)PTR记录：用于地址到主机名的映射。</span><br><span class="line"></span><br><span class="line">	(6)HINFO记录：由一组描述主机的信息文件组成，通常包括硬件名称和操作系统名称。</span><br><span class="line"></span><br><span class="line">value字段：</span><br><span class="line"></span><br><span class="line">	（1）A :存放IP地址。</span><br><span class="line"></span><br><span class="line">	（2）CNAME：设置主机别名。</span><br><span class="line"></span><br><span class="line">	（3）HINFO：通常为两行，分别对应Hareware（计算机硬件名称）和OS-type（操作系统名称）。</span><br><span class="line"></span><br><span class="line">	（4）NS：域名服务器的名称。</span><br><span class="line"></span><br><span class="line">	（5）PTR:主机真实名称。</span><br><span class="line"></span><br><span class="line">测试检查配置文件错误的工具：nslookup、dig、named-checkzone、host、named-checkconf及dlint。</span><br></pre></td></tr></table></figure>
+<h1 id="Linux下DNS服务器配置实验"><a href="#Linux下DNS服务器配置实验" class="headerlink" title="Linux下DNS服务器配置实验"></a>Linux下DNS服务器配置实验</h1><h2 id="配置DNS正向解析："><a href="#配置DNS正向解析：" class="headerlink" title="配置DNS正向解析："></a>配置DNS正向解析：</h2><p>在配置Bind服务时，主要用到以下三个配置文件：</p>
+<ul>
+<li><p><strong>主配置文件（/etc/named.conf）</strong>：用来定义bind服务程序的运行。</p>
+</li>
+<li><p><strong>区域配置文件（/etc/named.rfc1912.zones）</strong>：用来保存域名和IP地址对应关系的所在位置。类似于图书的目录，对应着每个域和相应IP地址所在的具体位置，当需要查看或修改时，可根据这个位置找到相关文件。</p>
+</li>
+<li><p><strong>数据配置文件目录（/var/named）</strong>：该目录用来保存域名和IP地址真实对应关系的数据配置文件。</p>
+</li>
+</ul>
+<p><strong>第一步：修改主配置文件/etc/named.conf</strong>。将监听地址和运行查询的地址都改为 any，分别表示服务器上的所有IP地址均可提供DNS域名解析服务，以及允许所有人对本服务器发送DNS查询请求。</p>
+<p><img src="/2018/10/15/DNS服务器搭建与配置/主配置文件.png" alt="主配置文件"></p>
+<p><center>图：主配置文件要修改的地方<center>   </center></center></p>
+<p><strong>第二步：修改区域配置文件（/etc/named.rfc1912.zones）</strong>。用来保存域名和IP地址对应关系的所在位置。在这个文件中，定义了域名与IP地址解析规则保存的文件位置以及服务类型等内容，而没有包含具体的域名、IP地址对应关系等信息。服务类型有三种，分别为hint（根区域）、master（主区域）、slave（辅助区域），其中常用的master和slave指的就是主服务器和从服务器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zone &quot;example.com&quot; IN &#123;</span><br><span class="line">        type master;</span><br><span class="line">        file &quot;example.com.zone&quot;;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>DNS默认端口是53的TCP和UPD,UDP是供用户查询的，主从复制用TCP和UDP的53端口都用。</strong></p>
+<p><strong>BIND的ACL：bind有四个内置的acl:</strong></p>
+<p>　　 <strong>none: 没有一个主机</strong> </p>
+<p>　　 <strong>any: 任意主机</strong> </p>
+<p>　　 <strong>localhost: 本机</strong> </p>
+<p>　　 <strong>localnet: 本机的IP同掩码运算后得到的网络地址段</strong></p>
+<p>　　 <strong>注意：只能先定义，后使用；因此一般定义在配置文件中， 处于options的前面，当然也可自定义如下</strong></p>
+<p>　　 <strong>acl   lan｛</strong></p>
+<p>​        　　<strong>192.168.25.0/24</strong></p>
+<p>　　 <strong>} ;</strong></p>
+<p><strong>访问控制：</strong></p>
+<p>　　<strong>访问控制的指令： allow-query {}： 允许查询的主机；白名单</strong> </p>
+<p>　　　　　　　　　　 <strong>allow-transfer {}：允许区域传送的主机；（白名单，一般用于主从）</strong></p>
+<p>　　　　　　　　　　 <strong>allow-recursion {}: 允许递归的主机,建议全局使用</strong> </p>
+<p>　　　　　　　　　　 <strong>allow-update {}: 允许更新区域数据库中的内容</strong></p>
+</blockquote>
+<p>第三步：编辑数据配置文件。**从/var/named目录中复制一份正向解析的模板文件（named.localhost），然后把域名和IP地址的对应数据填写数据配置文件中并保存。在复制时记得加上-a参数，这可以保留原始文件的所有者、所属组、权限属性等信息，以便让bind服务程序顺利读取文件内容：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]<span class="comment"># cp -a named.localhost example.com</span></span><br><span class="line">[root@localhost named]<span class="comment"># vim example.com.zone </span></span><br><span class="line"><span class="variable">$TTL</span> 1D</span><br><span class="line">@       IN SOA  @ example.com.   (</span><br><span class="line">	 <span class="comment">#授权信息开始:   #DNS区域的地址,在域地址后面还可以加管理员邮箱，不能加@，用.代替。</span></span><br><span class="line">              20181001        ; serial  <span class="comment">#更新序列号</span></span><br><span class="line">                      1D      ; refresh <span class="comment">#更新时间</span></span><br><span class="line">                      1H      ; retry   <span class="comment">#重试时间</span></span><br><span class="line">                      1W      ; expire   <span class="comment">#失效时间</span></span><br><span class="line">                      3H )    ; minimum  <span class="comment">#无效解析记录的缓存时间</span></span><br><span class="line">        NS      ns.example.com.  <span class="comment">#DNS区域的地址</span></span><br><span class="line">ns      A       192.168.245.128  <span class="comment">#地址记录</span></span><br><span class="line">www     A       192.168.245.128  <span class="comment">#www站点记录</span></span><br><span class="line">mail    A       192.168.245.129  <span class="comment">#地址记录</span></span><br><span class="line">        MX 10   mail.example.com. <span class="comment">#邮箱交换记录</span></span><br><span class="line">example.com.    A 192.168.245.200</span><br><span class="line"><span class="comment"># 即使不写主机名，DNS也能解析到另外一个指定的地址</span></span><br><span class="line"><span class="variable">$GENERATE</span> 1-245 server$ A 1.1.1.$</span><br><span class="line"><span class="comment">#如果服务器过多，对应主机名也很多，则可以这样写.例如：</span></span><br><span class="line"><span class="comment">#server1.example.com对应地址为：1.1.1.1</span></span><br><span class="line"><span class="comment">#server100.exmaple.com对应地址为：1.1.1.50</span></span><br><span class="line">bbs     CNAME   www           <span class="comment">#别名记录</span></span><br><span class="line">*       A       192.168.245.128</span><br><span class="line"><span class="comment">#“*”代表所有，即便主机www写错，DNS也能正确解析出来。这就是泛域名解析</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2018/10/15/DNS服务器搭建与配置/正向解析.png" alt="正向解析"></p>
+<p><center>图：正向解析文件配置<center></center></center></p>
+<p><strong>第四步：检查配置,重启服务和测试。</strong> </p>
+<p>检查和重启服务：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# named-checkconf   #检查主配置文件语法</span><br><span class="line">[root@localhost ~]# named-checkzone eample.com /var/named/example.com.zone </span><br><span class="line"><span class="meta">#</span><span class="bash">检查区域配置文件语法</span></span><br><span class="line">/var/named/example.com.zone:13: ignoring out-of-zone data (example.com)</span><br><span class="line">zone eample.com/IN: loaded serial 20181001</span><br><span class="line">[root@localhost ~]# vi /etc/resolv.conf</span><br><span class="line"><span class="meta">#</span><span class="bash">进入该配置文件，指定使用的域名解析服务器。</span></span><br><span class="line"><span class="meta">	#</span><span class="bash"> Generated by NetworkManager</span></span><br><span class="line">	nameserver 192.168.245.128</span><br><span class="line">	search 192.168.245.128</span><br><span class="line">[root@localhost ~]# systemctl restart named  #重启服务</span><br></pre></td></tr></table></figure>
+<p>测试：</p>
+<p><img src="/2018/10/15/DNS服务器搭建与配置/测试1.png" alt="测试1"></p>
+<h2 id="图；正向解析测试"><a href="#图；正向解析测试" class="headerlink" title="图；正向解析测试"></a><center>图；正向解析测试<center></center></center></h2><p><img src="/2018/10/15/DNS服务器搭建与配置/正向解析测试.png" alt="正向解析测试"></p>
+<p><center>nslookup测试<center></center></center></p>
+<h2 id="配置DNS反向解析："><a href="#配置DNS反向解析：" class="headerlink" title="配置DNS反向解析："></a>配置DNS反向解析：</h2><p>在DNS域名解析服务中，反向解析的作用是将用户提交的IP地址解析为对应的域名信息，它一般用于对某个IP地址上绑定的所有域名进行整体屏蔽，屏蔽由某些域名发送的垃圾邮件。它也可以针对某个IP地址进行反向解析，大致判断出有多少个网站运行在上面。当购买虚拟主机时，可以使用这一功能验证虚拟主机提供商是否有严重的超售问题。</p>
+<p><strong>第一步：配置区域文件。</strong></p>
+<blockquote>
+<p><strong>反向解析是把IP地址解析成域名格式，因此在定义zone（区域）时应该要把IP地址反写，比如原来是192.168.10.0，反写后应该就是10.168.192，而且只需写出IP地址的网络位即可。</strong></p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# vim /etc/named.rfc1912.zones</span><br><span class="line"><span class="meta">#</span><span class="bash">在中添加反向数据文件的记录</span></span><br><span class="line">zone "245.168.192.in-addr.arpa" IN &#123;</span><br><span class="line">        type master;</span><br><span class="line">        file "245.168.192.arpa";</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>第二步：编辑数据配置文件。</strong></p>
+<blockquote>
+<p><strong>反向解析是把IP地址解析成域名格式，因此在定义zone（区域）时应该要把IP地址反写，比如原来是192.168.10.0，反写后应该就是10.168.192，而且只需写出IP地址的网络位即可。</strong></p>
+</blockquote>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># cp -a /var/named/named.loopback /var/named/245.168.192.arpa </span></span><br><span class="line">[root@localhost ~]<span class="comment"># vi /var/named/245.168.192.arpa</span></span><br><span class="line"><span class="comment">#编辑反正配置文件即可，和正向解析格式类似</span></span><br><span class="line"><span class="comment">#PTR为指针记录，仅用于反向解析中。</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2018/10/15/DNS服务器搭建与配置/反向配置文件.png" alt="反向配置文件"></p>
+<p><center>图：反向配置文件<center></center></center></p>
+<p><strong>第三步：检查配置文件，重启服务，测试。</strong></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# named-checkconf </span><br><span class="line">[root@localhost ~]# named-checkzone 245.168.192 /var/named/245.168.192.arpa </span><br><span class="line">zone 245.168.192/IN: loaded serial 20181001</span><br><span class="line">OK</span><br><span class="line">[root@localhost ~]# systemctl restart named</span><br></pre></td></tr></table></figure>
+<p><img src="/2018/10/15/DNS服务器搭建与配置/测试2.png" alt="测试2"></p>
+<p><center>图：反向解析测试<center></center></center></p>
+<h2 id="搭建DNS主从服务器："><a href="#搭建DNS主从服务器：" class="headerlink" title="搭建DNS主从服务器："></a>搭建DNS主从服务器：</h2><p>从而起到备份解析记录与负载均衡的作用，因此通过部署从服务器可以减轻主服务器的负载压力，还可以提升用户的查询效率。</p>
+<p><strong>第一步：</strong>在主服务器的区域配置文件中允许该从服务器的更新请求，即修改allow-update {允许更新区域信息的主机地址;};参数，然后重启主服务器的DNS服务程序。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vi /etc/named.rfc191</span></span><br><span class="line">zone <span class="string">"example.com"</span> IN &#123;</span><br><span class="line">        <span class="built_in">type</span> master;</span><br><span class="line">        file <span class="string">"example.com.zone"</span>;</span><br><span class="line">        allow-update &#123; 192.168.245.129; &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">zone <span class="string">"245.168.192.in-addr.arpa"</span> IN &#123;</span><br><span class="line">        <span class="built_in">type</span> master;</span><br><span class="line">        file <span class="string">"245.168.192.arpa"</span>;</span><br><span class="line">        allow-update &#123; 192.168.245.129; &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl restart named</span></span><br></pre></td></tr></table></figure>
+<p><strong>第二步：</strong> 在从服务器中填写主服务器的IP地址与要抓取的区域信息，然后重启服务。注意此时的服务类型应该是slave（从），而不再是master（主）。masters参数后面应该为主服务器的IP地址，而且file参数后面定义的是同步数据配置文件后要保存到的位置，稍后可以在该目录内看到同步的文件。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vi /etc/named.conf</span></span><br><span class="line">options &#123;</span><br><span class="line">        listen-on port 53 &#123; any; &#125;; <span class="comment">#改为any，</span></span><br><span class="line">        listen-on-v6 port 53 &#123; ::1; &#125;;</span><br><span class="line">        directory       <span class="string">"/var/named"</span>;</span><br><span class="line">        dump-file       <span class="string">"/var/named/data/cache_dump.db"</span>;</span><br><span class="line">        statistics-file <span class="string">"/var/named/data/named_stats.txt"</span>;</span><br><span class="line">        memstatistics-file <span class="string">"/var/named/data/named_mem_stats.txt"</span>;</span><br><span class="line">        allow-query     &#123; any; &#125;; <span class="comment">#改为any，允许所有主机查询</span></span><br><span class="line">[root@localhost ~]<span class="comment"># vi /etc/named.rfc191</span></span><br><span class="line">zone <span class="string">"example.com"</span> IN &#123;</span><br><span class="line">        <span class="built_in">type</span> master;</span><br><span class="line">        file <span class="string">"example.com.zone"</span>;</span><br><span class="line">        allow-update &#123; 192.168.245.129; &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">zone <span class="string">"245.168.192.in-addr.arpa"</span> IN &#123;</span><br><span class="line">        <span class="built_in">type</span> master;</span><br><span class="line">        file <span class="string">"245.168.192.arpa"</span>;</span><br><span class="line">        allow-update &#123; 192.168.245.129; &#125;;</span><br><span class="line">&#125;;</span><br><span class="line">[root@localhost ~]<span class="comment"># vi /etc/named.conf^C</span></span><br><span class="line">[root@localhost ~]<span class="comment"># iptables -F  #关闭防火墙</span></span><br><span class="line">[root@localhost ~]<span class="comment"># setenforce 0</span></span><br><span class="line">setenforce: SELinux is disabled</span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl restart named</span></span><br><span class="line">[root@localhost ~]<span class="comment"># systemctl enable named</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>重启以后，成功的话会在/var/named/slaves/下看见同步的文件。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt; [root@localhost named]<span class="comment"># ls /var/named/slaves/</span></span><br><span class="line">&gt; 245.168.192.arpa  example.com.zone</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<p><strong>第三步：测试。</strong>可将从服务的DNS地址改为自己，进行地址解析。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost named]<span class="comment"># dig www.example.com</span></span><br><span class="line"></span><br><span class="line">; &lt;&lt;&gt;&gt; DiG 9.9.4-RedHat-9.9.4-37.el7 &lt;&lt;&gt;&gt; www.example.com</span><br><span class="line">;; global options: +cmd</span><br><span class="line">;; Got answer:</span><br><span class="line">;; -&gt;&gt;HEADER&lt;&lt;- opcode: QUERY, status: NOERROR, id: 9870</span><br><span class="line">;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 1, ADDITIONAL: 2</span><br><span class="line"></span><br><span class="line">;; OPT PSEUDOSECTION:</span><br><span class="line">; EDNS: version: 0, flags:; udp: 4096</span><br><span class="line">;; QUESTION SECTION:</span><br><span class="line">;www.example.com.               IN      A</span><br><span class="line"></span><br><span class="line">;; ANSWER SECTION:</span><br><span class="line">www.example.com.        86400   IN      A       192.168.245.128</span><br><span class="line"></span><br><span class="line">;; AUTHORITY SECTION:</span><br><span class="line">example.com.            86400   IN      NS      ns.example.com.</span><br><span class="line"></span><br><span class="line">;; ADDITIONAL SECTION:</span><br><span class="line">ns.example.com.         86400   IN      A       192.168.245.128</span><br><span class="line"></span><br><span class="line">;; Query time: 1 msec</span><br><span class="line">;; SERVER: 192.168.245.129<span class="comment">#53(192.168.245.129)</span></span><br><span class="line">;; WHEN: Tue Oct 16 11:19:04 CST 2018</span><br><span class="line">;; MSG SIZE  rcvd: 93</span><br></pre></td></tr></table></figure>
+<p>这种情况下，证明DNS主从服务器搭建成功。一旦主DNS发生故障，将自动利用DNS从服务器进行解析，实现了某种程度上的容错。</p>
+<h2 id="配置DNS安全的加密传输："><a href="#配置DNS安全的加密传输：" class="headerlink" title="配置DNS安全的加密传输："></a>配置DNS安全的加密传输：</h2><p>TSIG主要是利用了密码编码的方式来保护区域信息的传输（Zone Transfer），即TSIG加密机制保证了DNS服务器之间传输域名区域信息的安全性。</p>
+<p><strong>第一步：在主服务上生产密钥</strong>。dnssec-keygen命令用于生成安全的DNS服务密钥，其格式为“dnssec-keygen [参数]”，常用的参数以及作用如下：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-a</td>
+<td>指定加密算法，包括RSAMD5（RSA）、RSASHA1、DSA、NSEC3RSASHA1、NSEC3DSA等</td>
+</tr>
+<tr>
+<td>-b</td>
+<td>密钥长度（HMAC-MD5的密钥长度在1~512位之间）</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>密钥的类型（HOST表示与主机相关）</td>
+</tr>
+</tbody>
+</table>
+<p>使用下述命令生成一个主机名称为master-slave的128位HMAC-MD5算法的密钥文件。在执行该命令后默认会在当前目录中生成公钥和私钥文件，在传输配置文件中会用到该秘钥。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># dnssec-keygen -a HMAC-MD5 -b 128 -n HOST master-slave </span></span><br><span class="line">Kmaster-slave.+157+15811</span><br><span class="line">[root@localhost ~]<span class="comment"># cat Kmaster-slave.+157+47396.key</span></span><br><span class="line">master-slave. IN KEY 512 3 157 9+m1PlQOAF7xnMLClzNmXw==</span><br><span class="line">[root@localhost ~]<span class="comment"># cat Kmaster-slave.+157+47396.private </span></span><br><span class="line">Private-key-format: v1.3</span><br><span class="line">Algorithm: 157 (HMAC_MD5)</span><br><span class="line">Key: 9+m1PlQOAF7xnMLClzNmXw==  </span><br><span class="line">Bits: AAA=</span><br><span class="line">Created: 20181016033058</span><br><span class="line">Publish: 20181016033058</span><br><span class="line">Activate: 20181016033058</span><br></pre></td></tr></table></figure>
+<p><strong>第二步：在主服务器中创建验证秘钥文件。</strong></p>
+<p>进入bind服务程序用于保存配置文件的目录，把刚刚生成的密钥名称、加密算法和私钥加密字符串按照下面格式写入到tansfer.key传输配置文件中。为了安全起见，我们需要将文件的所属组修改成named，并将文件权限设置得要小一点，然后把该文件做一个硬链接到/etc目录中。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /var/named/chroot/etc/transfer.key</span></span><br><span class="line"></span><br><span class="line">key <span class="string">"master-slave"</span> &#123;</span><br><span class="line">algorithm hmac-md5;</span><br><span class="line">secret <span class="string">"9+m1PlQOAF7xnMLClzNmXw=="</span>;</span><br><span class="line">&#125;;</span><br><span class="line">[root@localhost ~]<span class="comment"># chown root:named/var/named/chroot/etc/transfer.key</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ln /var/named/chroot/etc/transfer.key /etc/transfer.key</span></span><br></pre></td></tr></table></figure>
+<p><strong>第三步：开启主服务器密钥验证功能：</strong></p>
+<p>开启并加载Bind服务的密钥验证功能。首先需要在主服务器的主配置文件中加载密钥验证文件，然后进行设置，使得只允许带有master-slave密钥认证的DNS服务器同步数据配置文件：</p>
+<p><img src="/2018/10/15/DNS服务器搭建与配置/秘钥.png" alt="秘钥"></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">include <span class="string">"/etc/transfer.key"</span>;             //在主服务器中添加此条</span><br><span class="line">options &#123;</span><br><span class="line">        listen-on port 53 &#123; any; &#125;;</span><br><span class="line">        listen-on-v6 port 53 &#123; ::1; &#125;;</span><br><span class="line">        directory       <span class="string">"/var/named"</span>;</span><br><span class="line">        dump-file       <span class="string">"/var/named/data/cache_dump.db"</span>;</span><br><span class="line">        statistics-file <span class="string">"/var/named/data/named_stats.txt"</span>;</span><br><span class="line">        memstatistics-file <span class="string">"/var/named/data/named_mem_stats.txt"</span>;</span><br><span class="line">        allow-query     &#123; any; &#125;;</span><br><span class="line">        allow-transfer  &#123; key master-slave; &#125;;</span><br></pre></td></tr></table></figure>
+<p>至此，DNS主服务器的TSIG密钥加密传输功能就已经配置完成。此时清空DNS从服务器同步目录中所有的数据配置文件，然后再次重启bind服务程序，这时就已经获取不到主服务器的配置文件了。</p>
+<p><strong>第四步：配置从服务器支持秘钥验证：</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># scp /var/named/chroot/etc/transfer.key root@192.168.245.128:/var/named/chroot/etc/transfer.key</span></span><br><span class="line">root@192.168.245.128<span class="string">'s password: </span></span><br><span class="line"><span class="string">transfer.key                    100%   79     0.1KB/s   00:00 </span></span><br><span class="line"><span class="string">[root@localhost ~]# chown root:named /var/named/chroot/etc/transfer.key</span></span><br><span class="line"><span class="string">[root@localhost ~]# ln /var/named/chroot/etc/transfer.key /etc/transfer.key</span></span><br></pre></td></tr></table></figure>
+<p><strong>第五步：配置从服务器配置文件：</strong></p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vi /etc/named.conf </span></span><br><span class="line"></span><br><span class="line">include <span class="string">"/etc/transfer.key"</span>; <span class="comment">#在此添加秘钥文件</span></span><br><span class="line"></span><br><span class="line">options &#123;</span><br><span class="line">        listen-on port 53 &#123; any; &#125;;</span><br><span class="line">        listen-on-v6 port 53 &#123; ::1; &#125;;</span><br><span class="line">        directory       <span class="string">"/var/named"</span>;</span><br><span class="line">        dump-file       <span class="string">"/var/named/data/cache_dump.db"</span>;</span><br><span class="line">        statistics-file <span class="string">"/var/named/data/named_stats.txt"</span>;</span><br><span class="line">        memstatistics-file <span class="string">"/var/named/data/named_mem_stats.txt"</span>;</span><br><span class="line">        allow-query     &#123; any; &#125;;</span><br><span class="line"></span><br><span class="line">        /* </span><br><span class="line">           recursion. </span><br><span class="line">           reduce such attack surface </span><br><span class="line">        */</span><br><span class="line">        recursion yes;</span><br><span class="line"></span><br><span class="line">        dnssec-enable yes;</span><br><span class="line">        dnssec-validation yes;</span><br><span class="line"></span><br><span class="line">        /* Path to ISC DLV key */</span><br><span class="line">        bindkeys-file <span class="string">"/etc/named.iscdlv.key"</span>;</span><br><span class="line"></span><br><span class="line">        managed-keys-directory <span class="string">"/var/named/dynamic"</span>;</span><br><span class="line"></span><br><span class="line">        pid-file <span class="string">"/run/named/named.pid"</span>;</span><br><span class="line">        session-keyfile <span class="string">"/run/named/session.key"</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">#在此添加主服务器地址，位置不能太靠前，否则bind服务程序会因为没有加载完预设参数而报错：</span></span><br><span class="line">server 192.168.245.128 &#123;</span><br><span class="line">        keys &#123; master-slave; &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">logging &#123;</span><br><span class="line">        channel default_debug &#123;</span><br><span class="line">                file <span class="string">"data/named.run"</span>;</span><br><span class="line">                severity dynamic;</span><br><span class="line">        &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">zone <span class="string">"."</span> IN &#123;</span><br><span class="line">        <span class="built_in">type</span> hint;</span><br><span class="line">        file <span class="string">"named.ca"</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">include <span class="string">"/etc/named.rfc1912.zones"</span>;</span><br><span class="line">include <span class="string">"/etc/named.root.key"</span>;</span><br></pre></td></tr></table></figure>
+<p>至此，主从服务器配置完成，重启服务后，可在/var/named/slaves/目录下看到同步过来的文件。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># systemctl restart named</span></span><br><span class="line">[root@localhost ~]<span class="comment"># ls /var/named/slaves/</span></span><br><span class="line">245.168.192.arpa  example.com.zone</span><br></pre></td></tr></table></figure>
+<h2 id="配置DNS缓存服务器："><a href="#配置DNS缓存服务器：" class="headerlink" title="配置DNS缓存服务器："></a>配置DNS缓存服务器：</h2><p>DNS缓存服务器（Caching DNS Server）是一种不负责域名数据维护的DNS服务器。简单来说，缓存服务器就是把用户经常使用到的域名与IP地址的解析记录保存在主机本地，从而提升下次解析的效率。DNS缓存服务器一般用于经常访问某些固定站点而且对这些网站的访问速度有较高要求的企业内网中，但实际的应用并不广泛。而且，缓存服务器是否可以成功解析还与指定的上级DNS服务器的允许策略有关。</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]<span class="comment"># vim /etc/named.conf</span></span><br><span class="line">options &#123;</span><br><span class="line">10 listen-on port 53 &#123; any; &#125;;</span><br><span class="line">11 listen-on-v6 port 53 &#123; ::1; &#125;;</span><br><span class="line">12 directory <span class="string">"/var/named"</span>;</span><br><span class="line">13 dump-file <span class="string">"/var/named/data/cache_dump.db"</span>;</span><br><span class="line">14 statistics-file <span class="string">"/var/named/data/named_stats.txt"</span>;</span><br><span class="line">15 memstatistics-file <span class="string">"/var/named/data/named_mem_stats.txt"</span>;</span><br><span class="line">16 allow-query &#123; any; &#125;;</span><br><span class="line">17 forwarders &#123; 目标地址; &#125;; <span class="comment">#在此处添加转发地址即可</span></span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/" title="DNS服务器搭建与配置">https://cshihong.github.io/2018/10/15/DNS服务器搭建与配置/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux笔记/" rel="tag"># Linux笔记</a>
+          
+            <a href="/tags/Linux服务/" rel="tag"># Linux服务</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/15/Linux下systemctl命令和service、chkconfig命令的区别/" rel="next" title="Linux下systemctl命令和service、chkconfig命令的区别">
+                <i class="fa fa-chevron-left"></i> Linux下systemctl命令和service、chkconfig命令的区别
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/10/16/NFS服务器搭建与配置/" rel="prev" title="NFS服务器搭建与配置">
+                NFS服务器搭建与配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DNS服务介绍"><span class="nav-number">1.</span> <span class="nav-text">DNS服务介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS服务简介："><span class="nav-number">1.1.</span> <span class="nav-text">DNS服务简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS名词解释："><span class="nav-number">1.2.</span> <span class="nav-text">DNS名词解释：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-域和域名"><span class="nav-number">1.2.1.</span> <span class="nav-text">1. 域和域名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2、区（Zone）："><span class="nav-number">1.2.2.</span> <span class="nav-text">2、区（Zone）：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-主域名服务器和辅助域名服务器："><span class="nav-number">1.2.3.</span> <span class="nav-text">3.主域名服务器和辅助域名服务器：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-DNS相关概念："><span class="nav-number">1.2.4.</span> <span class="nav-text">4.DNS相关概念：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5、DNS两种查询方式："><span class="nav-number">1.2.5.</span> <span class="nav-text">5、DNS两种查询方式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6、正向解析和方向解析："><span class="nav-number">1.2.6.</span> <span class="nav-text">6、正向解析和方向解析：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7、DNS资源记录："><span class="nav-number">1.2.7.</span> <span class="nav-text">7、DNS资源记录：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS工作原理：查询过程"><span class="nav-number">1.3.</span> <span class="nav-text">DNS工作原理：查询过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#递归查询："><span class="nav-number">1.3.1.</span> <span class="nav-text">递归查询：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#迭代查询"><span class="nav-number">1.3.2.</span> <span class="nav-text">迭代查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#迭代查询与递归查询结合"><span class="nav-number">1.3.3.</span> <span class="nav-text">迭代查询与递归查询结合</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux下DNS服务器安装"><span class="nav-number">2.</span> <span class="nav-text">Linux下DNS服务器安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#BIND简介："><span class="nav-number">2.1.</span> <span class="nav-text">BIND简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装bind服务和启动步骤："><span class="nav-number">2.2.</span> <span class="nav-text">安装bind服务和启动步骤：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS配置的主要文件组："><span class="nav-number">2.3.</span> <span class="nav-text">DNS配置的主要文件组：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS的资源记录（Resource-Record-RR）格式："><span class="nav-number">2.4.</span> <span class="nav-text">DNS的资源记录（Resource Record, RR）格式：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux下DNS服务器配置实验"><span class="nav-number">3.</span> <span class="nav-text">Linux下DNS服务器配置实验</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置DNS正向解析："><span class="nav-number">3.1.</span> <span class="nav-text">配置DNS正向解析：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图；正向解析测试"><span class="nav-number">3.2.</span> <span class="nav-text">图；正向解析测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置DNS反向解析："><span class="nav-number">3.3.</span> <span class="nav-text">配置DNS反向解析：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#搭建DNS主从服务器："><span class="nav-number">3.4.</span> <span class="nav-text">搭建DNS主从服务器：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置DNS安全的加密传输："><span class="nav-number">3.5.</span> <span class="nav-text">配置DNS安全的加密传输：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置DNS缓存服务器："><span class="nav-number">3.6.</span> <span class="nav-text">配置DNS缓存服务器：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/10/15/DNS服务器搭建与配置/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

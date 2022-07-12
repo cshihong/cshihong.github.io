@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="WireGuard:下一代内核网络隧道摘要：WireGuard是一个安全的网络隧道，在第3层运行，作为Linux的内核虚拟网络接口实现，其目标是在大多数情况下取代IPsec，以及流行的用户空间和/或基于tls的解决方案，如OpenVPN，同时更安全、性能更高且更易于使用。虚拟隧道接口基于安全隧道的基本原则:对等公钥和隧道源IP地址之间的关联。它使用基于NoiseIK的单次往返密钥交换，并使用新的计">
+<meta name="keywords" content="VPN,安全,WireGuard">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WireGuard基本原理">
+<meta property="og:url" content="https://cshihong.github.io/2020/10/11/WireGuard基本原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="WireGuard:下一代内核网络隧道摘要：WireGuard是一个安全的网络隧道，在第3层运行，作为Linux的内核虚拟网络接口实现，其目标是在大多数情况下取代IPsec，以及流行的用户空间和/或基于tls的解决方案，如OpenVPN，同时更安全、性能更高且更易于使用。虚拟隧道接口基于安全隧道的基本原则:对等公钥和隧道源IP地址之间的关联。它使用基于NoiseIK的单次往返密钥交换，并使用新的计">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2020/10/11/WireGuard基本原理/image-20201020084837820.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/10/11/WireGuard基本原理/image-20201104085400411.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/10/11/WireGuard基本原理/image-20201104085453001.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/10/11/WireGuard基本原理/netns-container.svg">
+<meta property="og:image" content="https://cshihong.github.io/2020/10/11/WireGuard基本原理/netns-physical.svg">
+<meta property="og:updated_time" content="2020-11-09T15:59:42.781Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WireGuard基本原理">
+<meta name="twitter:description" content="WireGuard:下一代内核网络隧道摘要：WireGuard是一个安全的网络隧道，在第3层运行，作为Linux的内核虚拟网络接口实现，其目标是在大多数情况下取代IPsec，以及流行的用户空间和/或基于tls的解决方案，如OpenVPN，同时更安全、性能更高且更易于使用。虚拟隧道接口基于安全隧道的基本原则:对等公钥和隧道源IP地址之间的关联。它使用基于NoiseIK的单次往返密钥交换，并使用新的计">
+<meta name="twitter:image" content="https://cshihong.github.io/2020/10/11/WireGuard基本原理/image-20201020084837820.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2020/10/11/WireGuard基本原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>WireGuard基本原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2020/10/11/WireGuard基本原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">WireGuard基本原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-10-11 22:22:20" itemprop="dateCreated datePublished" datetime="2020-10-11T22:22:20+08:00">2020-10-11</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-09 23:59:42" itemprop="dateModified" datetime="2020-11-09T23:59:42+08:00">2020-11-09</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 11,647</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 44</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="WireGuard-下一代内核网络隧道"><a href="#WireGuard-下一代内核网络隧道" class="headerlink" title="WireGuard:下一代内核网络隧道"></a>WireGuard:下一代内核网络隧道</h1><h2 id="摘要："><a href="#摘要：" class="headerlink" title="摘要："></a>摘要：</h2><p>WireGuard是一个安全的网络隧道，在第3层运行，作为Linux的内核虚拟网络接口实现，其目标是在大多数情况下取代IPsec，以及流行的用户空间和/或基于tls的解决方案，如OpenVPN，同时更安全、性能更高且更易于使用。虚拟隧道接口基于安全隧道的基本原则:对等公钥和隧道源IP地址之间的关联。它使用基于NoiseIK的单次往返密钥交换，并使用新的计时器状态机机制对用户透明地处理所有会话创建。短的预共享静态密钥（Curve25519点）用于OpenSSH风格的相互认证。该协议除了提供高度的身份隐藏之外，还提供了强大的完美前向保密性。使用ChaCha20Poly1305身份验证加密将数据包封装在UDP中可以实现传输速度。 IP绑定cookie的改进形式用于缓解拒绝服务攻击，从而大大改进了IKEv2和DTLS的cookie机制以添加加密和身份验证。总体设计不允许为接收到的数据包分配任何资源，并且从系统的角度来看，有多种有趣的Linux实现技术用于队列和并行性。最后，WireGuard可以轻松地用不到4,000行代码在Linux上实现，从而易于审核和验证。</p>
+<p><strong>WireGuard的优势</strong>：</p>
+<ul>
+<li>更轻便：以Linux内核模块的形式运行，资源占用小。</li>
+<li>更高效：相比目前主流的IPSec、OpenVPN等协议，WireGuard的效率要更高。</li>
+<li>更快速：比目前主流的VPN协议，连接速度要更快。</li>
+<li>更安全：使用了更先进的加密技术。</li>
+<li>更易搭建：部署难度相对更低。</li>
+<li>更隐蔽：以UDP协议进行数据传输，比TCP协议更低调。</li>
+<li>不易被封锁：TCP阻断对WireGuard无效，IP被墙的情况下仍然可用。</li>
+<li>更省电：不使用时不进行数据传输，移动端更省电。</li>
+</ul>
+<h2 id="简介与动机"><a href="#简介与动机" class="headerlink" title="简介与动机"></a>简介与动机</h2><p>在Linux中，加密隧道的标准解决方案是IPsec，它使用Linux转换(“xfrm”)层。用户填充一个内核结构，以确定哪个密码套件和密钥，或其他转换(如压缩)用于遍历子系统的哪个选择器。通常，用户空间守护进程负责根据密钥交换的结果更新这些数据结构，通常使用IKEv2来完成，而IKEv2本身是一个复杂的协议，具有很多选择和可扩展性。这种解决方案的复杂性以及代码的数量是相当可观的。管理员有一套完全独立的防火墙语义和IPsec包的安全标签。从语义的观点来看，将密钥交换层与传输加密或转换层分开是明智的选择，并且从网络的角度来看，相似的是将转换层与接口层分开是正确的，但是这种严格正确的分层方法增加了复杂性，难以正确实施和部署。</p>
+<p>WireGuard消除了这些分层分隔。WireGuard没有提供复杂的IPsec和xfrm层，而是提供了一个虚拟接口(例如wg0)，然后可以使用标准的ip和ifconfig实用程序对其进行管理。在使用私钥(以及可选的预共享对称密钥和它将安全通信的对等点的各种公钥配置接口之后，隧道就简单地工作了。密钥交换、连接、断开、重连接、发现等在幕后透明而可靠地发生，管理员不需要担心这些细节。换句话说，从管理的角度来看，WireGuard接口似乎是无状态的。然后可以使用普通的基础结构为防火墙接口配置防火墙规则，并确保对来自WireGuard接口的数据包进行身份验证和加密。与IPsec相比，WireGuard简单明了，不容易发生灾难性故障和配置错误。需要强调的是，IPsec的分层是正确无误的。使用IPsec，一切都在正确的地方，以达到学术上的完美。但是，正如抽象的正确性经常发生的那样，它严重缺乏可用性，并且很难实现可验证的安全实现。相反，WireGuard从有缺陷的分层违规开始，然后试图纠正这种合并产生的问题，使用实用的工程解决方案和解决现实世界问题的密码技术。</p>
+<p>另一个极端是OpenVPN，它是一种基于用户空间TUN/TAP的解决方案，使用TLS。由于它位于用户空间，它的性能非常差——因为包必须在内核空间和用户空间之间复制多次——而且需要一个长期存在的守护进程;对于管理员来说，OpenVPN并不是无状态的。虽然TUN/TAP接口(比如tun0)具有上述类似于wg0的优点，但OpenVPN也非常复杂，它支持大量的TLS功能，这将相当一部分代码暴露给了潜在的漏洞。OpenVPN可以在用户空间中实现，因为内核中的ASN.1和x509解析器历来都有很大的问题(CVE-2008-1673、CVE-2016-2053)，而添加一个TLS堆栈只会使问题变得更糟。TLS还带来了一个巨大的状态机，以及源IP地址和公钥之间不太清晰的关联。</p>
+<p>对于密钥分发，WireGuard从OpenSSH汲取灵感，其常见用法包括一种非常简单的密钥管理方法。通过一组不同的带外机制，两个对等点通常交换其静态公钥。有时，它很简单，就像PGP签名的电子邮件一样，而有时，它是使用LDAP和证书颁发机构的复杂密钥分发机制。重要的是，大多数情况下，OpenSSH密钥分发完全不可知。 WireGuard也效仿。两个WireGuard对等方通过某种未指定的机制交换其公钥，之后便可以进行通信。换句话说，WireGuard对待密钥分发的态度是，这是解决特定问题的错误层，因此界面足够简单，因此可以与任何密钥分发解决方案一起使用。另外一个优点是，公钥只有32个字节长，并且可以轻松地用44个字符的Base64编码表示，这对于通过各种不同的介质传输密钥非常有用。</p>
+<p>最后，WireGuard具有密码学依据。 它故意缺乏密码和协议敏捷性。如果在基础原语中发现漏洞，则需要更新所有端点。正如不断涌现的SSL/TLS漏洞所显示的，密码的敏捷性极大地增加了复杂性。 WireGuard使用Trevor Perrin的Noise的变体（在其开发过程中收到了来自本文作者的大量输入，目的是为了在WireGuard中使用）与Curve25519进行1-RTT密钥交换[5]。 对于ECDH，HKDF [15]用于扩展ECDH结果，RFC7539 [17]的ChaCha20 [3]和Poly1305 [8]的结构用于认证加密，而BLAKE2s [2]的哈希处理。 它使用新的crypto-cookie机制来实现IP地址可归属性，从而内置了防止拒绝服务攻击的保护功能。</p>
+<p>同样，WireGuard仅适用于第3层。这是确保数据包真实性和可归属性的最干净的方法。 作者认为，layer 3是桥接多个IP网络的正确方法，将其应用到WireGuard上可以实现许多简化，从而产生一个更清晰、更容易实现的协议。它支持IPv4和IPv6的第3层，可以封装v4-in-v6和v6-in-v4</p>
+<p>WireGuard将这些原则组合在一起，专注于简单性和可审核的代码库，同时仍然保持极高的速度，并适合于少数环境。 通过将密钥交换和第3层传输加密组合为一种机制，并使用虚拟接口而不是转换层，WireGuard确实打破了传统的分层原则，从而寻求了一种既实用又安全的可靠工程解决方案。 一路走来，它采用了几种新颖的密码和系统解决方案来实现其目标。</p>
+<h1 id="密钥路由Cryptokey-Routing"><a href="#密钥路由Cryptokey-Routing" class="headerlink" title="密钥路由Cryptokey Routing"></a>密钥路由Cryptokey Routing</h1><p>安全VPN的基本原理是对等节点(peer)之间的关联，每个节点的IP地址都允许用作源IP。在WireGuard中，对等点(peer)严格由它们的公钥(32字节Curve25519点)识别。这意味着在公钥和一组允许的IP地址之间存在一个简单的关联映射。检查下面的密钥路由表:</p>
+<p><em>Configuration 1a</em></p>
+<table>
+<thead>
+<tr>
+<th><strong>Interface Public Key</strong></th>
+<th><strong>Interface Private Key</strong></th>
+<th><strong>Listening UDP Port</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HIgo…8ykw</td>
+<td>yAnz…fBmk</td>
+<td>41414</td>
+</tr>
+<tr>
+<td><strong>Peer Public Key</strong></td>
+<td><strong>Allowed Source IPs</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>xTIB…p8Dg</td>
+<td>10.192.122.3/32, 10.192.124.0/24</td>
+<td></td>
+</tr>
+<tr>
+<td>TrMv…WXX0</td>
+<td>10.192.122.4/32, 192.168.0.0/16</td>
+<td></td>
+</tr>
+<tr>
+<td>gN65…z6EA</td>
+<td>10.10.10.230/32</td>
+</tr>
+</tbody>
+</table>
+<p>接口本身有一个私有密钥和一个UDP端口，它在上面侦听，后面是对等点列表。每个对等点(peer)由其公钥标识。每个ip都有一个允许源ip的列表。</p>
+<p>当外发包在WireGuard接口wg0上传输时，要参考此表来确定使用哪个公钥进行加密。例如，目的地IP为10.192.122.4的数据包将使用来自公钥TrMv…WXX0的安全会话进行加密。相反，当wg0收到一个加密的包时，在对它进行解密和认证之后，只有当它的源IP在表中解析为安全会话中用于解密它的公钥时，它才会接受它。例如，如果一个包解密从xTIB…qp8D，只有在解密包的源IP为10.192.122.3或在10.192.124.0到10.192.124.255之间才允许解密;否则它将被丢弃（dropped）。</p>
+<p>有了这个非常简单的原则，管理员可以依赖于简单的防火墙规则。例如，在接口wg0上的一个源IP为10.10.10.230的数据包可以被认为是来自具有gN65…Bz6E公钥的对等方。更一般的情况是，到达WireGuard接口的任何数据包都将具有可靠的可信源IP(当然，这是为了保证传输的完美前向保密)。请注意，这是唯一可能的，因为WireGuard是严格基于第3层。与一些常见的VPN协议(如L2TP/IPsec)不同，在第3层使用经过身份验证的对等点标识可以实现更明确的网络设计。</p>
+<p>如果一个WireGuard对等点希望路由所有流量通过另一个WireGuard对等点，则密钥路由表可以更简单地配置为：</p>
+<p><em>Configuration 2a</em></p>
+<table>
+<thead>
+<tr>
+<th><strong>Interface Public Key</strong></th>
+<th><strong>Interface Private Key</strong></th>
+<th><strong>Listening UDP Port</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gN65…z6EA</td>
+<td>gI6E…fWGE</td>
+<td>21841</td>
+</tr>
+<tr>
+<td><strong>Peer Public Key</strong>  HIgo…8ykw</td>
+<td><strong>Allowed Source  IPs</strong>  0.0.0.0/0</td>
+</tr>
+</tbody>
+</table>
+<p>在这里，对等体授权HIgo…f8yk将包与任何源IP放到wg0上，wg0上发出的所有包将使用与该公钥关联的安全会话进行加密并发送到该对等点的端点（peer’s endpoint.）。</p>
+<h2 id="端点和漫游（Endpoints-amp-Roaming）"><a href="#端点和漫游（Endpoints-amp-Roaming）" class="headerlink" title="端点和漫游（Endpoints &amp; Roaming）"></a>端点和漫游（Endpoints &amp; Roaming）</h2><p>当然，对等点能够在特定的互联网端点向彼此发送加密的WireGuard UDP数据包是很重要的。密钥路由表中的每个对等点可以选择性地预先指定该对等点端点的已知外部IP地址和UDP端口。它是可选的原因是，如果它没有被指定并且WireGuard从一个对等点接收到一个正确的经过身份验证的包，它将使用外部源IP地址来确定端点。</p>
+<p>由于公钥唯一地标识一个对等点，加密的WireGuard包的外部源IP被用来标识对等点的远程端点，使对等点能够在不同的外部IP(例如在移动网络之间)之间自由漫游，类似于Mosh[25]所允许的内容。例如，可以扩充之前的加密密钥路由表，使其具有一个对等点的初始端点:</p>
+<p><em>Configuration 2b</em></p>
+<table>
+<thead>
+<tr>
+<th><strong>Interface Public Key</strong></th>
+<th><strong>Interface Private Key</strong></th>
+<th><strong>Listening UDP Port</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gN65…z6EA</td>
+<td>gI6E…fWGE</td>
+<td>21841</td>
+</tr>
+<tr>
+<td><strong>Peer Public Key</strong></td>
+<td><strong>Allowed Source IPs</strong></td>
+<td><strong>Internet Endpoint</strong></td>
+</tr>
+<tr>
+<td>HIgo…8ykw</td>
+<td>0.0.0.0/0</td>
+<td>192.95.5.69:41414</td>
+</tr>
+</tbody>
+</table>
+<p>然后，这个主机，gN65…z6EA，发送加密包HIgo…f8yk给192.95.5.69:41414。后HIgo……f8yk收到一个包，它更新它的表，以学习发送应答包的端点，例如，192.95.5.64:21841:</p>
+<p><em>Configuration 1b</em></p>
+<table>
+<thead>
+<tr>
+<th><strong>Interface Public Key</strong></th>
+<th><strong>Interface Private Key</strong></th>
+<th><strong>Listening UDP Port</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HIgo…8ykw</td>
+<td>yAnz…fBmk</td>
+<td>41414</td>
+</tr>
+<tr>
+<td><strong>Peer Public Key</strong></td>
+<td><strong>Allowed Source IPs</strong></td>
+<td><strong>Internet Endpoint</strong></td>
+</tr>
+<tr>
+<td>xTIB…p8Dg</td>
+<td>10.192.122.3/32, 10.192.124.0/24</td>
+<td></td>
+</tr>
+<tr>
+<td>TrMv…WXX0</td>
+<td>10.192.122.4/32, 192.168.0.0/16</td>
+<td></td>
+</tr>
+<tr>
+<td>gN65…z6EA</td>
+<td>10.10.10.230/32</td>
+<td>192.95.5.64:21841</td>
+</tr>
+</tbody>
+</table>
+<p>请注意，对等方的侦听端口和发送的数据包的源端口始终相同，从而大大简化了操作，同时还确保了在NAT之后的可靠遍历。 而且，由于此漫游属性确保对等方将拥有最新的外部源IP和UDP端口，因此NAT无需使会话长时间保持打开状态。 （对于必须无限期地打开NAT会话或有状态防火墙的用例，可以选择将接口配置为定期发送经过身份验证的持久性Keepalive。）</p>
+<p>这种设计带来了极大的便利和最小的配置。 虽然拥有活跃中间人的攻击者当然可以修改这些未经身份验证的外部源IP，但是攻击者将无法解密或修改任何有效载荷，这仅相当于拒绝服务攻击， 只需从假定的中间人位置丢弃原始数据包，这已经很容易实现。 而且，无法解密并随后回复数据包的主机将很快被遗忘。</p>
+<h1 id="发送和接收的数据流"><a href="#发送和接收的数据流" class="headerlink" title="发送和接收的数据流"></a>发送和接收的数据流</h1><p>漫游的设计，结合密钥路由表，在wg0接口上使用上节“Configuration 1”的配置，对数据包的发送和接收流程如下：</p>
+<p><strong>本地生成(或转发)数据包，并准备在出方向接口wg0上传输:</strong></p>
+<ol>
+<li>明文包到达WireGuard接口wg0。</li>
+<li>数据包的目的IP地址192.168.87.21被检查，它与对等节点TrMv…WXX0匹配。(如果它没有匹配的对等点，它被丢弃，并且发送者被一个标准的ICMP“<code>no route to host</code>”数据包通知，并且返回-ENOKEY到用户空间。)</li>
+<li>与对等方关联的安全会话的发送对称加密密钥和 nonce随机数计数器，<br>TrMv … WXX0用于使用ChaCha20Poly1305算法加密明文数据包。</li>
+<li>包含在第后续章节中说明的各个字段的标头被放在现在加密的数据包之前。</li>
+<li>此标头和加密的数据包一起作为UDP数据包发送到与对等TrMv … WXX0关联的Internet UDP / IP端点，从而导致外部UDP / IP数据包包含标头和加密的内部- 包。 对等端点是预先配置的，或者是从接收到的最新经过正确身份验证的数据包的外部外部源IP标头字段中获悉的。 （否则，如果无法确定端点，则将数据包丢弃，发送ICMP消息，并将-EHOSTUNREACH返回到用户空间。）</li>
+</ol>
+<p><strong>一个UDP/IP数据包到达主机的UDP端口41414，该端口为wg0接口监听UDP端口:</strong></p>
+<ol>
+<li>在正确的端口(在本例中，端口41414)上接收到一个UDP/IP数据包，其中包含一个特定的报头和一个加密的有效负载。</li>
+<li>使用WireGuard报文头，WireGuard确定它与peer TrMv…WXX0的关联安全会话，检查消息计数器的有效性，并尝试使用安全会话中接收对称密钥对其进行身份验证和解密。如果它不能确定一个对等点或身份验证失败，数据包将被丢弃。</li>
+<li>从数据包被正确验证以后，外部UDP/IP数据包的源IP被用于更新对等TrMv…WXX0的端点。</li>
+<li>一旦数据包有效负载被解密，接口就有一个明文数据包。如果这不是一个IP包，它将被丢弃。否则，WireGuard检查明文包内的源IP地址是否在密钥路由表中有相应的路由。例如，如果解密的明文包的源IP是192.168.31.28，则这个数据包会被进行相应路由。但是，如果源IP是10.192.122.3，数据包就不会为这个对等体进行相应路由，而被丢弃。</li>
+<li>如果明文包没有被丢弃，它将被插入到wg0接口的接收队列中。</li>
+</ol>
+<p>可以将允许的IP列表分为两个列表—一个用于检查传入数据包的源地址，另一个用于根据目标地址选择对等方。但是，通过将它们保留在同一列表中，可以实现类似于反向路径过滤的功能。发送数据包时，将根据目标IP查询该列表。当接收到数据包时，将使用相同的列表来确定是否允许源IP。但是，与其询问接收数据包的发送对等方是否具有该源IP作为其允许的IP列表的一部分，它还可以询问一个更全局的问题-在表中为该源IP选择哪个对等方，并且这样做将从匹配的对等方接收数据包。这将强制执行发送和接收IP地址的一对一映射，因此，如果从特定对等方接收到数据包，则将确保对该IP的答复到达该同一个对等方。   </p>
+<h1 id="基本用法-Basic-Usage"><a href="#基本用法-Basic-Usage" class="headerlink" title="基本用法(Basic Usage)"></a>基本用法(Basic Usage)</h1><p>在深入了解密码学和实现细节之前，看看一个使用WireGuard的简单命令行接口可能会很有用，从而将目前所介绍的概念具体化。</p>
+<p>考虑一个具有单个物理网络接口eth0的Linux环境，它使用192.95.5.69的公共IP将其连接到Internet。可以添加WireGuard接口wg0并使用标准ip实用程序进行配置在/ 24子网中具有10.192.122.3的隧道IP地址，如左图所示。然后可以使用wg（8）工具以多种方式配置密钥路由表，包括从配置文件中读取信息，如右图所示：</p>
+<p><img src="/2020/10/11/WireGuard基本原理/image-20201020084837820.png" alt="image-20201020084837820"></p>
+<p>此时，向该系统上的10.10.10.230发送数据包将通过wg0接口发送数据，该接口将使用与公钥gN65…z6EA相关联的安全会话加密数据包和发送加密和经过UDP封装的数据包到192.95.5.70:54421。当在wg0上收到来自10.10.10.230的数据包时，管理员可以确信它是来自gN65…z6EA。</p>
+<h1 id="协议和加密学-Protocol-amp-Cryptography"><a href="#协议和加密学-Protocol-amp-Cryptography" class="headerlink" title="协议和加密学(Protocol&amp;Cryptography)"></a>协议和加密学(Protocol&amp;Cryptography)</h1><p>如前所述，为了开始发送加密的封装数据包，必须先进行1-RTT密钥交换握手。发起方将消息发送到响应方，响应方将消息发送回发起方。在此握手之后，发起者可以使用共享的对称密钥对将加密消息发送给响应者，一个用于发送，一个用于接收，并且在第一个加密消息从发起方发送到响应方之后，响应方可以开始向发起方发送加密的消息。此顺序限制要求要求进行确认，如针对KEA + C [18]所述，并允许握手消息被异步处理以传输数据消息。这些消息除了使用新颖的cookie结构来减轻拒绝服务攻击之外，还使用Noise [23]中的“ IK”模式。该协议的最终结果是一个非常健壮的安全系统，该系统达到了认证密钥交换（AKE）安全性的要求[18]，避免了密钥泄露，避免了重播攻击，提供了完美的前向保密性，提供了静态公共身份的隐藏密钥类似于SIGMA [16]，并且具有拒绝服务攻击的能力。</p>
+<h2 id="Silence-is-a-Virtue："><a href="#Silence-is-a-Virtue：" class="headerlink" title="Silence is a Virtue："></a>Silence is a Virtue：</h2><p>WireGuard的一个设计目标是避免在身份验证之前存储任何状态，并且不对未经身份验证的数据包发送任何响应。由于没有存储未经身份验证的数据包的状态，也没有生成响应，因此，WireGuard对非法对等端和网络扫描程序是不可见的。通过不允许未经身份验证的数据包影响任何状态，可以避免几类攻击。而且更普遍的是，有可能以一种根本不需要动态内存分配的方式来实现WireGuard，即使对于经过身份验证的数据包也是如此。但是，此属性要求响应者收到的第一条消息就对发起者进行身份验证。 像这样在第一个数据包中进行身份验证可能会使响应者面临重放攻击的风险。攻击者可以重播初始握手消息，以诱使响应者重新生成其临时密钥，从而使合法发起者的会话无效（尽管不会影响任何消息的保密性或真实性）。为防止这种情况，在第一个消息中包含12字节的TAI64N [7]时间戳，并对其进行加密和身份验证。响应者跟踪每个对等方收到的最大时间戳，并丢弃包含小于或等于该时间戳的数据包。 （实际上，它甚至不必是准确的时间戳；它仅必须是按对等方单调递增的96位数字。）如果响应方重新启动并丢失了此状态，那不是问题：即使初始可以重播较早的数据包，它不可能中断任何正在进行的安全会话，因为响应者刚刚重新启动，因此没有活动的安全会话要中断。一旦发起方在重新发起后与响应方重新建立了安全会话，发起方将使用更大的时间戳，从而使前一个时间戳无效。此时间戳可确保攻击者不会通过重播攻击中断发起者和响应者之间的当前会话。 (这也意味着两个不同的对等点不应该共享私钥，因为在这种情况下，发送给一个对等点的数据包可能会被重放给另一个对等点，随后产生的响应将导致发起者不由自主地从一个对等点漫游到另一个。但无论如何，一开始就不应该共享私钥。)从实现的角度来看，TAI64N[7]非常方便，因为它是big-endian，允许使用标准memcmp()对两个12字节的时间戳进行比较。由于WireGuard不使用签名，为了获得一定程度的可否认性，第一条消息仅依赖于两个对等点静态密钥的Diffie-Hellman结果进行身份验证。这意味着，如果它们中的任何一个静态密钥被破坏，攻击者将能够伪造包含最大时间戳值的初始消息(尽管它无法完成完整的handshap)，从而阻止所有未来的连接成功。虽然这看起来类似于传统的密钥泄露模拟漏洞(WireGuard并不是它的弱点)，但它实际上非常不同。因为，如果一个密钥泄露使得攻击者能够阻止其他节点再次使用他们泄露的密钥，那么攻击者实际上已经帮助了对这种泄露的正确响应。如果TIA64N时间戳的精度造成了不合适的信息泄漏，实现可能会截断时间戳的24位纳秒部分。</p>
+<h2 id="可选的预共享对称密钥模式"><a href="#可选的预共享对称密钥模式" class="headerlink" title="可选的预共享对称密钥模式"></a>可选的预共享对称密钥模式</h2><p>WireGuard依赖于先与对等方(peer)彼此交换静态公钥，作为它们的静态身份。所有数据发送的保密性依赖于Curve25519 ECDH函数的安全性。为了减少量子计算未来的进步，WireGuard还支持一种模式，在这种模式中，任何一对对等点可以在它们之间额外预先共享一个256位的对称加密密钥，以增加一层对称加密。这里的攻击模式是，对手可能会长期记录加密的流量，希望有一天能够打破Curve25519并解密过去的流量。尽管从密钥管理的角度来看，预共享对称加密密钥通常很麻烦，而且更有可能被窃取，但这种想法是，当量子计算进步到突破Curve25519时，这种预共享对称密钥早已被遗忘。更重要的是，从短期来看，如果预先共享的对称密钥被破坏，Curve25519密钥仍然提供足够的保护。与使用完全的后量子密码系统(到编写时还不适合在这里使用)不同，这种预共享对称密钥的可选混合方法为极端偏执的人提供了一种合理的和可接受的折衷方案。此外，它还允许在WireGuard上构建复杂的键旋转方案，以实现各种类型的折衷后安全性。</p>
+<p>WireGuard依赖于先与对等方(peer)彼此交换静态公钥，作为它们的静态身份。发送的所有数据的保密性取决于Curve25519 ECDH功能的安全性。为了减轻将来在量子计算方面的任何进步，WireGuard还支持一种模式，在该模式下，任何对对端都可以在彼此之间预共享一个256位对称加密密钥，以便添加一层对称加密。这里的攻击模型是，攻击者可能会长期记录加密的流量，以期有一天能够打破Curve25519并解密过去的流量。虽然预共享对称加密密钥通常从密钥管理的角度来看很麻烦，并且可能更容易被盗，但是这种想法是，随着量子计算的发展打破了Curve25519，这种长共享对称密钥早已被人们遗忘。而且，更重要的是，在短期内，如果预共享的对称密钥遭到破坏，Curve25519密钥仍然可以提供足够的保护。替代使用完整的后量子密码系统（在撰写本文时不适合在此处使用），此预共享对称密钥的可选混合方法可补充椭圆曲线密码，为用户提供了合理的折衷方案。极度偏执。此外，它还允许在WireGuard上构建复杂的键旋转方案，以实现各种类型的折衷后安全性。</p>
+<h2 id="缓解拒绝服务攻击和Cookies"><a href="#缓解拒绝服务攻击和Cookies" class="headerlink" title="缓解拒绝服务攻击和Cookies"></a>缓解拒绝服务攻击和Cookies</h2><p>即使Curve25519在大多数处理器上是非常快的曲线，计算Curve25519点乘法也是CPU密集型的。 为了确定握手消息的真实性，必须计算Curve25519乘法，这意味着可能会出现拒绝服务攻击。为了防止cpu耗尽攻击，如果响应方——消息的接收方——处于负载状态，它可以选择不处理握手消息(启动或响应握手消息)，而是使用包含cookie的cookie应答消息进行响应。然后发起者使用这个cookie来重新发送消息，并让它在接下来的时间被响应者接受。</p>
+<p>响应方维护一个秘密的随机值，该值每两分钟更改一次。cookie只是使用这个变化的密钥作为MAC密钥计算发起者源IP地址的MAC的结果。发起方在重新发送它的消息时，使用这个cookie作为MAC密钥发送它的消息的MAC。当responder接收到消息时，如果它处于负载状态，它可以根据是否有正确的MAC使用cookie作为密钥来选择是否接受和处理消息。这种机制将从发起者发送的消息绑定到它的IP地址，提供IP所有权的证明，允许使用经典的IP速率限制算法来限制速率(令牌桶等)。</p>
+<p>这或多或少是DTLS [24]和IKEv2 [13]使用的方案。 但是，它具有三个主要缺陷。 首先，我们希望保持silent，不要对未认证的消息发送任何回复； 在负载下不加选择地发送cookie回复消息会破坏此属性。 其次，cookie不应以明文形式发送，因为中间人可能会使用它来发送经过处理的欺诈性消息。 第三，发起者本人可能会被发送欺诈性cookie，从而遭到拒绝服务攻击，然后，它就无法成功使用它来计算其消息的MAC。 WireGuard的cookie机制使用两个MAC（msg.mac1和msg.mac2）解决了这些问题。</p>
+<p>对于第一个问题，为了响应方保持沉默，即使在负载下，所有消息都有一个使用响应方公钥的第一个MAC (msg.mac1)。这意味着，为了引出任何响应，发送消息的对等方至少必须知道它在与谁交谈(通过知道它的公钥)。无论是否加载，第一个MAC (msg.mac1)都必须存在且有效。虽然响应方的公钥本身不是秘密的，但在这个攻击模型中它是足够秘密的，其目标是确保服务的私密性，因此知道响应方的公钥就足以证明已经知道它的存在。(值得注意的是，第一个MAC允许被动攻击者猜测数据包的目的是哪个公钥，这略微削弱了身份隐藏属性，尽管正确的猜测不会构成密码证明，因为在生成MAC时没有使用私有材料。)</p>
+<p>同样地，为了解决第二个问题——用明文发送mac电脑——我们对传输中的cookie应用了一个扩展的随机现时的AEAD，同样使用响应方的公钥作为对称加密密钥。同样，这里的大多数公共价值对于我们在拒绝服务攻击威胁模型中的目的已经足够了。</p>
+<p>最后，为了解决第三个问题，我们使用AEAD的“附加数据”字段对传输中的cookie进行加密，对引发cookie回复消息的初始消息的第一个MAC (msg.mac1)进行附加认证。这确保了没有中间人的攻击者不能发送无效的cookie的种子到发起者，以防止他们验证一个正确的cookie。(攻击者一个中间人的位置可以简单地把cookie应答消息无论如何防止连接,所以这种情况下是不相关的,但攻击者,只是被动的中间人的地位的确可能伪造这些数据包,这不是明显不同于一个拒绝服务攻击的TCP)。换句话说，我们使用AD字段将cookie响应绑定到启动消息。</p>
+<p>解决了这些问题后，我们就可以使用安全传输的cookie作为MAC密钥添加前面提到的第二个MAC (msg.mac2)。当响应器处于负载状态时，它将只接受另外拥有第二个MAC的消息。</p>
+<p>总之，响应方在计算了这些mac并将其与收到的消息进行比较后，必须总是拒绝带有无效msg的消息。当负载不足时，可能会拒绝带有无效msg.mac2的消息。如果响应者收到一个有效的消息。mac1，但有一个无效的mac2，并在负载下，它可能会响应一个cookie回复消息。这大大改进了DTLS和IKEv2使用的cookie方案。</p>
+<p>HIPv2[20]通过使用2-RTT密钥交换和复杂性谜题解决了这个问题，与之相反，WireGuard避开了解谜结构，因为前者需要存储状态，而后者使发起者和响应者之间的关系不对称。在WireGuard中，任何节点上的任何一方都可能被激发开始握手。这意味着要求发起者提供一个复杂的难题是不可行的，因为发起者和响应者可能很快就会改变角色，从而将此缓解机制转变为拒绝服务漏洞本身。相反，我们上面的cookie解决方案支持在1-RTT协议上缓解拒绝服务攻击，同时保持发起者和响应者角色对称。</p>
+<h2 id="消息交互（Messages）"><a href="#消息交互（Messages）" class="headerlink" title="消息交互（Messages）"></a>消息交互（Messages）</h2><p>有四种类型的消息，每一种都以一个单字节消息类型标识符作为前缀，标记为msg.type如下：</p>
+<ol>
+<li>开始建立安全会话的握手过程的握手启动消息。</li>
+<li>对结束握手的初始化消息的握手响应，在此之后可以建立安全会话</li>
+<li>对握手启动消息或握手响应消息的响应，它通信一个加密的cookie值，用于重新发送被拒绝的握手启动消息或握手响应消息。</li>
+<li>一种封装和加密的IP包，它使用通过握手协商的安全会话。</li>
+</ol>
+<ul>
+<li><a href="http://cr.yp.to/chacha.html" target="_blank" rel="noopener">ChaCha20</a> for symmetric encryption, authenticated with <a href="http://cr.yp.to/mac.html" target="_blank" rel="noopener">Poly1305</a>, using <a href="https://tools.ietf.org/html/rfc7539" target="_blank" rel="noopener">RFC7539’s AEAD construction</a></li>
+<li><a href="http://cr.yp.to/ecdh.html" target="_blank" rel="noopener">Curve25519</a> for ECDH</li>
+<li><a href="https://blake2.net/" target="_blank" rel="noopener">BLAKE2s</a> for hashing and keyed hashing, described in <a href="https://tools.ietf.org/html/rfc7693" target="_blank" rel="noopener">RFC7693</a></li>
+<li><a href="https://131002.net/siphash/" target="_blank" rel="noopener">SipHash24</a> for hashtable keys</li>
+<li><a href="https://eprint.iacr.org/2010/264" target="_blank" rel="noopener">HKDF</a> for key derivation, as described in <a href="https://tools.ietf.org/html/rfc5869" target="_blank" rel="noopener">RFC5869</a></li>
+</ul>
+<h3 id="协议概述："><a href="#协议概述：" class="headerlink" title="协议概述："></a>协议概述：</h3><p>具体报文字段细节：<a href="https://www.wireguard.com/protocol/" target="_blank" rel="noopener">https://www.wireguard.com/protocol/</a> </p>
+<p>在大多数情况下,握手在1-RTT将完成,之后传输数据如下:</p>
+<p><img src="/2020/10/11/WireGuard基本原理/image-20201104085400411.png" alt="image-20201104085400411"></p>
+<p>如果有一个对等端负载不足，则在握手时添加一条cookie回复消息，以防止拒绝服务攻击:</p>
+<p><img src="/2020/10/11/WireGuard基本原理/image-20201104085453001.png" alt="image-20201104085453001"></p>
+<h1 id="Routing-amp-Network-Namespace-Integration"><a href="#Routing-amp-Network-Namespace-Integration" class="headerlink" title="Routing &amp; Network Namespace Integration"></a>Routing &amp; Network Namespace Integration</h1><p>与所有Linux网络接口一样，WireGuard集成到网络名称空间基础结构中。这意味着管理员可以拥有几个完全不同的网络子系统，并选择每个子系统中都存在哪些接口。</p>
+<p>WireGuard做了一些非常有趣的事情。创建WireGuard接口时(with <code>ip link add wg0 type wireguard</code>)，它会记住创建它的命名空间。我是在命名空间A中创建的。稍后，WireGuard可以移动到新的命名空间（我要移动到命名空间B），但它仍然会记得它起源于命名空间A。</p>
+<p>WireGuard使用UDP套接字发送和接收加密数据包。此套接字始终位于命名空间A-原始出生地命名空间中。这允许一些非常酷的属性。也就是说，您可以在一个命名空间(A)中创建WireGuard接口，将其移动到另一个命名空间(B)，并通过命名空间A中的UDP套接字。</p>
+<blockquote>
+<p>（请注意，通过在一个名称空间中创建套接字文件描述符，然后再更改为另一个名称空间，并使先前名称空间中的文件描述符保持打开状态，这种相同的技术可用于基于用户空间TUN的接口。）</p>
+<p>这提供了一些非常好的可能性。</p>
+</blockquote>
+<h2 id="普通容器："><a href="#普通容器：" class="headerlink" title="普通容器："></a>普通容器：</h2><p>最明显的用法是为容器（例如Docker容器）提供WireGuard接口作为其唯一接口。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">    inet 127.0.0.1/8 scope host lo</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br><span class="line">17: wg0: &lt;POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP&gt; mtu 1423 qdisc noqueue state UNKNOWN group default qlen 1</span><br><span class="line">    link/none </span><br><span class="line">    inet 192.168.4.33/32 scope global wg0</span><br><span class="line">       valid_lft forever preferred_lft forever</span><br></pre></td></tr></table></figure>
+<p>在这里，唯一可能访问网络的方法是通过WireGuard接口wg0。</p>
+<p><img src="/2020/10/11/WireGuard基本原理/netns-container.svg" alt="Container Network Namespace Diagram"></p>
+<p>完成这样的设置的方法如下：</p>
+<ol>
+<li><p>首先，我们创建一个称为“container”的网络名称空间：</p>
+<p>​    <code># ip netns add container</code></p>
+</li>
+<li><p>接下来，我们在“ init”（原始）名称空间中创建一个WireGuard接口：</p>
+<p><code># ip link add wg0 type wireguard</code> </p>
+</li>
+<li><p>最后，我们将该接口移到新的名称空间中：</p>
+<p><code># ip link set wg0 netns container</code> </p>
+</li>
+<li><p>现在，我们可以像往常一样配置wg0，除了我们这样做时指定它的新名称空间：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> ip -n container addr add 192.168.4.33/32 dev wg0</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ip netns <span class="built_in">exec</span> container wg setconf wg0 /etc/wireguard/wg0.conf</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ip -n container link <span class="built_in">set</span> wg0 up</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> ip -n container route add default dev wg0</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>现在访问“container”的任何网络资源的唯一方法就是通过WireGuard接口。</p>
+<p>请注意，Docker用户可以指定Docker进程的PID而不是网络名称空间名称，使用Docker已经为其容器创建的网络名称空间：</p>
+<p><code># ip link set wg0 netns 879</code></p>
+</li>
+</ol>
+<h2 id="路由所有流量"><a href="#路由所有流量" class="headerlink" title="路由所有流量:"></a>路由所有流量:</h2><p>一种不太明显的用法，但功能极其强大，是使用WireGuard的此特性通过WireGuard重定向所有普通Internet流量。但是首先，让我们回顾一下执行此操作的旧的常用解决方案：</p>
+<h3 id="经典解决方案"><a href="#经典解决方案" class="headerlink" title="经典解决方案:"></a>经典解决方案:</h3><p>经典的解决方案依赖于不同类型的路由表配置。对于所有这些，我们需要为实际的WireGuard端点设置一些显式路由。对于这些示例，让我们假设WireGuard端点是demo.wireguard.com，在编写时，它解析为163.172.161.0。此外，让我们假设我们通常使用eth0和192.168.1.1的经典网关连接到互联网。</p>
+<h4 id="替换默认路由"><a href="#替换默认路由" class="headerlink" title="替换默认路由"></a><strong>替换默认路由</strong></h4><p>最简单的技术是仅替换默认路由，为WireGuard端点添加一个明确的规则：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip route del default</span></span><br><span class="line"><span class="comment"># ip route add default dev wg0</span></span><br><span class="line"><span class="comment"># ip route add 163.172.161.0/32 via 192.168.1.1 dev eth0</span></span><br></pre></td></tr></table></figure>
+<p>这很有效并且相对简单，但是不幸的是，DHCP守护程序等都希望撤消我们刚才所做的事情。</p>
+<h4 id="覆盖默认路由"><a href="#覆盖默认路由" class="headerlink" title="覆盖默认路由"></a><strong>覆盖默认路由</strong></h4><p>因此，除了替换默认路由外，我们还可以使用另外两个特定的规则来覆盖它，这些规则的总和为默认值，但在默认值之前匹配：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip route add 0.0.0.0/1 dev wg0</span></span><br><span class="line"><span class="comment"># ip route add 128.0.0.0/1 dev wg0</span></span><br><span class="line"><span class="comment"># ip route add 163.172.161.0/32 via 192.168.1.1 dev eth0</span></span><br></pre></td></tr></table></figure>
+<p>这样，我们就不会破坏默认路由。这也很好用，但是不幸的是，当eth0 up/down时，demo.wireguard.com的显式路由将被忘记，这很烦人。</p>
+<h4 id="基于规则的路由"><a href="#基于规则的路由" class="headerlink" title="基于规则的路由"></a>基于规则的路由</h4><p>有些人更喜欢使用基于规则的路由和多个路由表。工作方式是我们为WireGuard路由创建一个路由表，为明文Internet路由创建一个路由表，然后添加规则来确定使用哪个路由表:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip rule add to 163.172.161.0 lookup main pref 30</span></span><br><span class="line"><span class="comment"># ip rule add to all lookup 80 pref 40</span></span><br><span class="line"><span class="comment"># ip route add default dev wg0 table 80</span></span><br></pre></td></tr></table></figure>
+<p>现在，我们能够将路由表分开。不幸的是，缺点是仍然需要添加显式端点规则，并且在删除接口时没有清理，需要更复杂的路由规则重复。</p>
+<h4 id="改进的基于规则的路由"><a href="#改进的基于规则的路由" class="headerlink" title="改进的基于规则的路由"></a>改进的基于规则的路由</h4><p>先前的解决方案依赖于我们知道应该从tunnel中豁免的显式端点IP，但是WireGuard端点可以漫游，这意味着该规则可能会过时。幸运的是，我们能够对所有从WireGuard的UDP套接字发出的数据包设置fwmark，然后将其从tunnel中豁免:</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wg set wg0 fwmark 1234</span></span><br><span class="line"><span class="comment"># ip route add default dev wg0 table 2468</span></span><br><span class="line"><span class="comment"># ip rule add not fwmark 1234 table 2468</span></span><br><span class="line"><span class="comment"># ip rule add table main suppress_prefixlength 0</span></span><br></pre></td></tr></table></figure>
+<p>我们首先在接口上设置fwmark，并在替代路由表上设置默认路由。然后我们指示没有fwmark的数据包应该转到这个替代路由表。最后，我们为仍然访问本地网络添加了一个方便的功能，通过这个功能，我们允许没有fwmark的数据包使用主路由表，而不是WireGuard接口的路由表，如果它匹配其中前缀长度大于零的任何路由，例如非默认本地路由。这是wg-Quick(8)工具使用的技术。</p>
+<h4 id="改进经典解决方案"><a href="#改进经典解决方案" class="headerlink" title="改进经典解决方案"></a>改进经典解决方案</h4><p>WireGuard的作者有兴趣在内核中添加一个名为notoif的特性来覆盖隧道用例。这将允许接口说“不要用我自己作为接口路由，以避免路由环路。”WireGuard将能够添加像<code>.flowi4_not_oif = wg0_idx</code>这样的行，基于用户空间tun的接口将能够在他们的输出套接字上设置一个选项，比如<code>set so kopt(fd，so_NOTOIF, Tun0_idx);</code></p>
+<h2 id="新的命名空间解决方案"><a href="#新的命名空间解决方案" class="headerlink" title="新的命名空间解决方案"></a>新的命名空间解决方案</h2><p>事实证明，我们可以使用网络名称空间通过WireGuard路由所有互联网流量，而不是经典的路由表。这种方法的工作原理是，我们将连接到互联网的接口，如eth0或wlan0，移动到命名空间(我们称之为“physical”)，然后有一个WireGuard接口是init命名空间中唯一的接口。</p>
+<p><img src="/2020/10/11/WireGuard基本原理/netns-physical.svg" alt="Physical Network Namespace Diagram"></p>
+<ol>
+<li><p>首先，我们创建“physical”网络名称空间：</p>
+<p><code># ip netns add physical</code></p>
+</li>
+<li><p>现在，将eth0和wlan0移到“physical”名称空间中：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip link set eth0 netns physical</span></span><br><span class="line"><span class="comment"># iw phy phy0 set netns name physical</span></span><br></pre></td></tr></table></figure>
+<p>（请注意，必须使用iw并通过指定物理设备phy0来移动无线设备。）</p>
+</li>
+<li><p>现在，我们在“physical”名称空间中具有这些接口，而在“init”名称空间中没有接口：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip -n physical link</span></span><br><span class="line">1: lo: &lt;LOOPBACK&gt; mtu 65536 qdisc noop state DOWN mode DEFAULT group default qlen 1</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">2: eth0: &lt;NO-CARRIER,BROADCAST,MULTICAST,UP&gt; mtu 1500 qdisc pfifo_fast state DOWN mode DEFAULT group default qlen 1000</span><br><span class="line">    link/ether ab:<span class="built_in">cd</span>:ef:g1:23:45 brd ff:ff:ff:ff:ff:ff</span><br><span class="line">3: wlan0: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc mq state UP mode DORMANT group default qlen 1000</span><br><span class="line">    link/ether 01:23:45:67:89:ab brd ff:ff:ff:ff:ff:ff</span><br><span class="line"></span><br><span class="line"><span class="comment"># ip link</span></span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>现在，我们将WireGuard接口直接添加到“physical”名称空间：</p>
+<p><code># ip -n physical link add wg0 type wireguard</code> </p>
+<p>wg0的出生地命名空间现在是physical命名空间，这意味着密文UDP套接字将分配给eth0和wlan0等设备。我们现在可以将wg0移动到init命名空间中；然而，它仍然会记得套接字的出生地。</p>
+</li>
+<li><p>我们将“ 1”指定为“ init”命名空间，因为这是系统上第一个进程的PID。现在，“ init”名称空间具有wg0设备：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip -n physical link set wg0 netns 1</span></span><br><span class="line"><span class="comment"># ip link</span></span><br><span class="line">1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1</span><br><span class="line">    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00</span><br><span class="line">17: wg0: &lt;POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP&gt; mtu 1423 qdisc noqueue state UNKNOWN mode DEFAULT group default qlen 1</span><br><span class="line">    link/none</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>现在，我们可以使用普通工具配置物理设备，但是我们在“physical”网络名称空间内启动它们：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ip netns exec physical dhcpd wlan0</span></span><br><span class="line"><span class="comment"># ip netns exec physical wpa_supplicant -iwlan0 -c/etc/wpa_supplicant/wpa_supplicant.conf</span></span><br><span class="line"><span class="comment"># ip -n physical addr add 192.168.12.52/24 dev eth0</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>依此类推。最后，我们可以像平常一样配置wg0接口，并将其设置为默认路由：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># wg setconf wg0 /etc/wireguard/wg0.conf</span></span><br><span class="line"><span class="comment"># ip addr add 10.2.4.5/32 dev wg0</span></span><br><span class="line"><span class="comment"># ip link set wg0 up</span></span><br><span class="line"><span class="comment"># ip route add default dev wg0</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>完成了!在这一点上，系统上的所有普通进程都将通过“init”命名空间路由它们的数据包，该命名空间只包含wg0接口和wg0路由。然而，wg0的UDP套接字位于physical命名空间中，这意味着它将把流量从eth0或wlan0发送出去。正常的进程甚至不会意识到eth0或wlan0，除了dhcpcd和wpa_Request icant，它们是在“physical”命名空间中生成的。</p>
+</li>
+<li><p>然而，有时您可能希望打开一个网页或使用physical命名空间快速执行某些操作。例如，也许你计划像往常一样通过WireGuard路由所有的流量，但是你所在的咖啡店要求你在它之前使用网站进行身份验证会给你一个真正的互联网链接。因此，可以使用物理接口执行选择进程（作为您的本地用户）:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> sudo -E ip netns <span class="built_in">exec</span> physical sudo -E -u \<span class="comment">#$(id -u) -g \#$(id -g) chromium</span></span></span><br></pre></td></tr></table></figure>
+<p>当然，可以将它做成.bashrc的一个不错的函数：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g) "$@"; &#125;physexec() &#123; sudo -E ip netns exec physical sudo -E -u \#$(id -u) -g \#$(id -g) "$@"; &#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>现在，您可以编写以下代码在“physical”名称空间中打开chromium。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> physexec chromium</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>当您完成登录咖啡店网络的操作后，像往常一样生成一个浏览器，然后平静地冲浪，知道您的所有流量都受到WireGuard的保护：</p>
+<p><code>$ chromium</code> </p>
+</li>
+</ol>
+<p><strong>示例脚本</strong>：</p>
+<p>以下示例脚本可以另存为/usr/local/bin/ wgphys，并用于诸如wgphys up，wgphys down和wgphys exec之类的命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/bash</span></span><br><span class="line">set -ex</span><br><span class="line"></span><br><span class="line">[[ $UID != 0 ]] &amp;&amp; exec sudo -E "$(readlink -f "$0")" "$@"</span><br><span class="line"></span><br><span class="line">up() &#123;</span><br><span class="line">    killall wpa_supplicant dhcpcd || true</span><br><span class="line">    ip netns add physical</span><br><span class="line">    ip -n physical link add wgvpn0 type wireguard</span><br><span class="line">    ip -n physical link set wgvpn0 netns 1</span><br><span class="line">    wg setconf wgvpn0 /etc/wireguard/wgvpn0.conf</span><br><span class="line">    ip addr add 192.168.4.33/32 dev wgvpn0</span><br><span class="line">    ip link set eth0 down</span><br><span class="line">    ip link set wlan0 down</span><br><span class="line">    ip link set eth0 netns physical</span><br><span class="line">    iw phy phy0 set netns name physical</span><br><span class="line">    ip netns exec physical dhcpcd -b eth0</span><br><span class="line">    ip netns exec physical dhcpcd -b wlan0</span><br><span class="line">    ip netns exec physical wpa_supplicant -B -c/etc/wpa_supplicant/wpa_supplicant-wlan0.conf -iwlan0</span><br><span class="line">    ip link set wgvpn0 up</span><br><span class="line">    ip route add default dev wgvpn0</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">down() &#123;</span><br><span class="line">    killall wpa_supplicant dhcpcd || true</span><br><span class="line">    ip -n physical link set eth0 down</span><br><span class="line">    ip -n physical link set wlan0 down</span><br><span class="line">    ip -n physical link set eth0 netns 1</span><br><span class="line">    ip netns exec physical iw phy phy0 set netns 1</span><br><span class="line">    ip link del wgvpn0</span><br><span class="line">    ip netns del physical</span><br><span class="line">    dhcpcd -b eth0</span><br><span class="line">    dhcpcd -b wlan0</span><br><span class="line">    wpa_supplicant -B -c/etc/wpa_supplicant/wpa_supplicant-wlan0.conf -iwlan0</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">execi() &#123;</span><br><span class="line">    exec ip netns exec physical sudo -E -u \#$&#123;SUDO_UID:-$(id -u)&#125; -g \#$&#123;SUDO_GID:-$(id -g)&#125; -- "$@"</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">command="$1"</span><br><span class="line">shift</span><br><span class="line"></span><br><span class="line">case "$command" in</span><br><span class="line">    up) up "$@" ;;</span><br><span class="line">    down) down "$@" ;;</span><br><span class="line">    exec) execi "$@" ;;</span><br><span class="line">    *) echo "Usage: $0 up|down|exec" &gt;&amp;2; exit 1 ;;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
+<h1 id="Wireguard安装配置："><a href="#Wireguard安装配置：" class="headerlink" title="Wireguard安装配置："></a>Wireguard安装配置：</h1><p> wireguard支持各平台。安装教程可参考官网教程。</p>
+<p><a href="https://www.wireguard.com/install/" target="_blank" rel="noopener">https://www.wireguard.com/install/</a></p>
+<p><a href="https://www.wogong.net/blog/2019/01/how-to-configure-wireguard" target="_blank" rel="noopener">https://www.wogong.net/blog/2019/01/how-to-configure-wireguard</a></p>
+<p><a href="https://www.w3xue.com/exp/article/201811/9320.html" target="_blank" rel="noopener">https://www.w3xue.com/exp/article/201811/9320.html</a></p>
+<p><a href="https://lijiangwei.github.io/2019/06/17/wireguard/" target="_blank" rel="noopener">https://lijiangwei.github.io/2019/06/17/wireguard/</a></p>
+<p><strong>服务端配置</strong>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">[root@centos7 wireguard]# more wg0.conf  </span><br><span class="line">[Interface]</span><br><span class="line">PrivateKey = xxxx</span><br><span class="line">PostUp   = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; i</span><br><span class="line">ptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</span><br><span class="line">PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; i</span><br><span class="line">ptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE</span><br><span class="line">Address = 192.168.2.1/32 </span><br><span class="line">ListenPort = 51820</span><br><span class="line">DNS = 8.8.8.8</span><br><span class="line">MTU = 1420</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">[Peer]</span><br><span class="line">PublicKey = xxx</span><br><span class="line">AllowedIPs = 192.168.2.2/32</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>如果需要服务端转发流量才需要配置PostUp，PostDown，只配置点对点通信的话不需要。</p>
+</blockquote>
+<p><strong>客户端配置</strong>：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost wireguard]# more wg0.conf </span><br><span class="line">[Interface]</span><br><span class="line">Address = 192.168.2.2/32</span><br><span class="line">PrivateKey = XXX</span><br><span class="line">ListenPort = 21841</span><br><span class="line"></span><br><span class="line">[Peer]</span><br><span class="line">PublicKey = XXX</span><br><span class="line">Endpoint = 140.143.154.78:51820</span><br><span class="line">AllowedIPs = 192.168.2.1/32, 0.0.0.0/0</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> This is <span class="keyword">for</span> <span class="keyword">if</span> you<span class="string">'re behind a NAT and</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"> want the connection to be kept alive.</span></span><br><span class="line">PersistentKeepalive = 25</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>要想服务端转发客户端所有流量，在配置文件添加0.0.0.0/0即可。</p>
+</blockquote>
+<p><strong>各配置项说明：</strong><a href="https://fuckcloudnative.io/posts/wireguard-docs-practice/" target="_blank" rel="noopener">https://fuckcloudnative.io/posts/wireguard-docs-practice/</a></p>
+<p>其他链接推荐：</p>
+<p><a href="https://itigic.com/zh-CN/wireguard-vpn-installation-and-configuration/" target="_blank" rel="noopener">https://itigic.com/zh-CN/wireguard-vpn-installation-and-configuration/</a></p>
+<hr>
+<blockquote>
+<p>参考资料：</p>
+<p><a href="https://www.wireguard.com/papers/wireguard.pdf" target="_blank" rel="noopener">https://www.wireguard.com/papers/wireguard.pdf</a></p>
+<p><a href="https://www.wireguard.com/" target="_blank" rel="noopener">https://www.wireguard.com/</a></p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2020/10/11/WireGuard基本原理/" title="WireGuard基本原理">https://cshihong.github.io/2020/10/11/WireGuard基本原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/VPN/" rel="tag"># VPN</a>
+          
+            <a href="/tags/安全/" rel="tag"># 安全</a>
+          
+            <a href="/tags/WireGuard/" rel="tag"># WireGuard</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/10/06/Tacacs-协议交互报文抓包示例/" rel="next" title="Tacacs+协议交互报文抓包示例">
+                <i class="fa fa-chevron-left"></i> Tacacs+协议交互报文抓包示例
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/11/20/如何在交换机上抓包/" rel="prev" title="如何在交换机上抓包">
+                如何在交换机上抓包 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#WireGuard-下一代内核网络隧道"><span class="nav-number">1.</span> <span class="nav-text">WireGuard:下一代内核网络隧道</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#摘要："><span class="nav-number">1.1.</span> <span class="nav-text">摘要：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简介与动机"><span class="nav-number">1.2.</span> <span class="nav-text">简介与动机</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#密钥路由Cryptokey-Routing"><span class="nav-number">2.</span> <span class="nav-text">密钥路由Cryptokey Routing</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#端点和漫游（Endpoints-amp-Roaming）"><span class="nav-number">2.1.</span> <span class="nav-text">端点和漫游（Endpoints &amp; Roaming）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#发送和接收的数据流"><span class="nav-number">3.</span> <span class="nav-text">发送和接收的数据流</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基本用法-Basic-Usage"><span class="nav-number">4.</span> <span class="nav-text">基本用法(Basic Usage)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#协议和加密学-Protocol-amp-Cryptography"><span class="nav-number">5.</span> <span class="nav-text">协议和加密学(Protocol&amp;Cryptography)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Silence-is-a-Virtue："><span class="nav-number">5.1.</span> <span class="nav-text">Silence is a Virtue：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可选的预共享对称密钥模式"><span class="nav-number">5.2.</span> <span class="nav-text">可选的预共享对称密钥模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓解拒绝服务攻击和Cookies"><span class="nav-number">5.3.</span> <span class="nav-text">缓解拒绝服务攻击和Cookies</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息交互（Messages）"><span class="nav-number">5.4.</span> <span class="nav-text">消息交互（Messages）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#协议概述："><span class="nav-number">5.4.1.</span> <span class="nav-text">协议概述：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Routing-amp-Network-Namespace-Integration"><span class="nav-number">6.</span> <span class="nav-text">Routing &amp; Network Namespace Integration</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#普通容器："><span class="nav-number">6.1.</span> <span class="nav-text">普通容器：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#路由所有流量"><span class="nav-number">6.2.</span> <span class="nav-text">路由所有流量:</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#经典解决方案"><span class="nav-number">6.2.1.</span> <span class="nav-text">经典解决方案:</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#替换默认路由"><span class="nav-number">6.2.1.1.</span> <span class="nav-text">替换默认路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#覆盖默认路由"><span class="nav-number">6.2.1.2.</span> <span class="nav-text">覆盖默认路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于规则的路由"><span class="nav-number">6.2.1.3.</span> <span class="nav-text">基于规则的路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#改进的基于规则的路由"><span class="nav-number">6.2.1.4.</span> <span class="nav-text">改进的基于规则的路由</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#改进经典解决方案"><span class="nav-number">6.2.1.5.</span> <span class="nav-text">改进经典解决方案</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#新的命名空间解决方案"><span class="nav-number">6.3.</span> <span class="nav-text">新的命名空间解决方案</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Wireguard安装配置："><span class="nav-number">7.</span> <span class="nav-text">Wireguard安装配置：</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2020/10/11/WireGuard基本原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

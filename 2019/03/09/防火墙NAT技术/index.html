@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="防火墙NAT技术简介NAT（Network Address Translation）是一种地址转换技术，可以将IPv4报文头中的地址转换为另一个地址。通常情况下，利用NAT技术将IPv4报文头中的私网地址转换为公网地址，可以实现位于私网的多个用户使用少量的公网地址同时访问Internet。因此，NAT技术常用来解决随着Internet规模的日益扩大而带来的IPv4公网地址短缺的问题。 NAT类型：">
+<meta name="keywords" content="防火墙,NAT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="防火墙NAT技术">
+<meta property="og:url" content="https://cshihong.github.io/2019/03/09/防火墙NAT技术/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="防火墙NAT技术简介NAT（Network Address Translation）是一种地址转换技术，可以将IPv4报文头中的地址转换为另一个地址。通常情况下，利用NAT技术将IPv4报文头中的私网地址转换为公网地址，可以实现位于私网的多个用户使用少量的公网地址同时访问Internet。因此，NAT技术常用来解决随着Internet规模的日益扩大而带来的IPv4公网地址短缺的问题。 NAT类型：">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/09/防火墙NAT技术/nat分类.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/09/防火墙NAT技术/nat对比.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/09/防火墙NAT技术/alg.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/09/防火墙NAT技术/域间双向nat.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/03/09/防火墙NAT技术/域内.png">
+<meta property="og:updated_time" content="2019-08-25T01:48:34.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="防火墙NAT技术">
+<meta name="twitter:description" content="防火墙NAT技术简介NAT（Network Address Translation）是一种地址转换技术，可以将IPv4报文头中的地址转换为另一个地址。通常情况下，利用NAT技术将IPv4报文头中的私网地址转换为公网地址，可以实现位于私网的多个用户使用少量的公网地址同时访问Internet。因此，NAT技术常用来解决随着Internet规模的日益扩大而带来的IPv4公网地址短缺的问题。 NAT类型：">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/03/09/防火墙NAT技术/nat分类.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/03/09/防火墙NAT技术/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>防火墙NAT技术 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/03/09/防火墙NAT技术/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">防火墙NAT技术
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-09 13:35:35" itemprop="dateCreated datePublished" datetime="2019-03-09T13:35:35+08:00">2019-03-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:48:34" itemprop="dateModified" datetime="2019-08-25T09:48:34+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 6,854</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 29</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="防火墙NAT技术简介"><a href="#防火墙NAT技术简介" class="headerlink" title="防火墙NAT技术简介"></a>防火墙NAT技术简介</h1><p>NAT（Network Address Translation）是一种地址转换技术，可以将IPv4报文头中的地址转换为另一个地址。通常情况下，利用NAT技术将IPv4报文头中的私网地址转换为公网地址，可以实现位于私网的多个用户使用少量的公网地址同时访问Internet。因此，NAT技术常用来解决随着Internet规模的日益扩大而带来的IPv4公网地址短缺的问题。</p>
+<h2 id="NAT类型："><a href="#NAT类型：" class="headerlink" title="NAT类型："></a>NAT类型：</h2><p>根据转化方式的不同，NAT可以分为三类：</p>
+<ol>
+<li><p>源NAT，源地址转化的NAT。</p>
+<p>有：NO—PAT, NAPT, Easy_ip,Smart_nat, 三元组NAT</p>
+</li>
+<li><p>目的NAT：将目的地址做转化。</p>
+<p>有：NAT-Server， SLB</p>
+</li>
+<li><p>双向NAT：即做源地址转化，又做目的地址转化。</p>
+</li>
+</ol>
+<p><img src="/2019/03/09/防火墙NAT技术/nat分类.png" alt="nat分类"></p>
+<h2 id="NAT基本概念："><a href="#NAT基本概念：" class="headerlink" title="NAT基本概念："></a>NAT基本概念：</h2><p><strong>NAT地址池：</strong> 是指用NAT转换时用于分配公网的IP地址范围。进行转换时，设备会从该地址池中选择一个地址，用于替换报文的源IP地址。</p>
+<h1 id="源NAT技术"><a href="#源NAT技术" class="headerlink" title="源NAT技术"></a>源NAT技术</h1><h2 id="源NAT简介："><a href="#源NAT简介：" class="headerlink" title="源NAT简介："></a>源NAT简介：</h2><p>源NAT是指对报文中的源地址进行转换。</p>
+<p>通过源NAT技术将私网IP地址转换成公网IP地址，使私网用户可以利用公网地址访问Internet。</p>
+<h2 id="No-PAT："><a href="#No-PAT：" class="headerlink" title="No-PAT："></a>No-PAT：</h2><p>NAT No-PAT是一种NAT转换时只转换地址，不转换端口，实现私网地址到公网地址一对一的地址转换方式。适用于上网用户较少且公网地址数与同时上网的用户数量相同的场景。</p>
+<p>此方式下，公网地址和私网地址属于一对一转换。如果地址池中的地址已经全部分配出去，则剩余内网主机访问外网时不会进行NAT转换，直到地址池中有空闲地址时才会进行NAT转换。</p>
+<blockquote>
+<p><strong>no_pat可以产生Server-map，但需要流量的触发</strong> </p>
+</blockquote>
+<p>FW上生成的Server-map表中存放Host的私网IP地址与公网IP地址的映射关系。</p>
+<ul>
+<li><p>正向Server-map表项保证特定私网用户访问Internet时，快速转换地址，提高了FW处理效率。</p>
+<p>正向Server-map作用：地址转换映射，加速转发</p>
+</li>
+<li><p>反向Server-map表项允许Internet上的用户主动访问私网用户，将报文进行地址转换。</p>
+<p>反向server-map作用：为外网用户主动访问内网用户，匹配映射。 </p>
+</li>
+</ul>
+<p>NAT NO-PAT有两种：</p>
+<ul>
+<li><p>本地（Local）NO-PAT</p>
+<p>本地NO-PAT生成的Server-Map表中包含安全区域参数，只有此安全区域的Server可以访问内网Host。</p>
+</li>
+<li><p>全局（Global）NO-PAT</p>
+<p>全局NO-PAT生成的Server-Map表中不包含安全区域参数，一旦建立，所有安全区域的Server都可以访问内网Host。</p>
+</li>
+</ul>
+<blockquote>
+<p>防火墙在选地址池中的地址时，根据轮询算法从NAT地址池中国选择一个空闲的地址。</p>
+</blockquote>
+<blockquote>
+<p><strong>注意：源NAT策略放行转化之前的地址。因为先匹配安全策略。再匹配NAT策略。</strong></p>
+</blockquote>
+<h3 id="No-PAT配置思路："><a href="#No-PAT配置思路：" class="headerlink" title="No-PAT配置思路："></a>No-PAT配置思路：</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">第一步： 配置地址池</span><br><span class="line"> nat address-group no_pat</span><br><span class="line"> section 0 202.100.1.100 202.100.1.101</span><br><span class="line"> nat-mode no-pat   ----------------------默认是PAT</span><br><span class="line"></span><br><span class="line">第二步：配置NAT策略</span><br><span class="line">nat-policy</span><br><span class="line"> rule name no_pat</span><br><span class="line">  source-zone trust</span><br><span class="line">  destination-zone untrust</span><br><span class="line">  source-address 10.1.1.0 mask 255.255.255.0</span><br><span class="line">  action nat address-group no_pat </span><br><span class="line"></span><br><span class="line">第三步：配置黑洞路由</span><br><span class="line"></span><br><span class="line">第四步：放行安全策略</span><br><span class="line">security-policy</span><br><span class="line"> rule name trust_untrust</span><br><span class="line">  source-zone trust</span><br><span class="line">  destination-zone untrust</span><br><span class="line">  source-address 10.1.1.0 0.0.0.255 </span><br><span class="line">  action permit</span><br><span class="line"></span><br><span class="line">注意: 源NAT策略放行转换之前的源地址，因为先匹配安全策略，再匹配NAT策略</span><br><span class="line"></span><br><span class="line">第五步：测试检查</span><br></pre></td></tr></table></figure>
+<h3 id="配置黑洞路由的原因："><a href="#配置黑洞路由的原因：" class="headerlink" title="配置黑洞路由的原因："></a>配置黑洞路由的原因：</h3><ul>
+<li><p>如果地址池地址和出接口不在同一段，会发现环路 </p>
+<p>解决方案：  <strong>必须配置黑洞路由</strong><br>ip route-static 1.1.1.2 255.255.255.255 NULL0</p>
+</li>
+<li><p>如果地址池地址和出接口在同一个网段，不会发生环路，但会多一个ARP请求</p>
+<p>解决方案：建议配置黑洞路由</p>
+</li>
+</ul>
+<h2 id="NAPT："><a href="#NAPT：" class="headerlink" title="NAPT："></a>NAPT：</h2><p>NAPT是一种转换时同时转换地址和端口，实现多个私网地址共用一个或多个公网地址的地址转换方式。适用于公网地址数量少，需要上网的私网用户数量大的场景。</p>
+<blockquote>
+<p>FW根据源IP <strong>Hash算法</strong>从NAT地址池中选择一个公网IP地址，替换报文的源IP地址。一个源IP会固定使用那个地址。</p>
+<p>NAPT方式不会生成Server-map表，这一点也与NAT No-PAT方式不同。</p>
+</blockquote>
+<h3 id="NAPT配置思路："><a href="#NAPT配置思路：" class="headerlink" title="NAPT配置思路："></a>NAPT配置思路：</h3><figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">第一步：配置地址池</span><br><span class="line"> nat address-group NAPT</span><br><span class="line"> section 0 202.100.1.20 202.100.1.200 </span><br><span class="line"> nat-mode  pat -----------------------------已经默认了，不显示</span><br><span class="line"></span><br><span class="line">第二步：配置NAT策略</span><br><span class="line">nat-policy</span><br><span class="line"> rule name NAPT</span><br><span class="line">  <span class="built_in">source</span>-zone trust</span><br><span class="line">  destination-zone untrust</span><br><span class="line">  <span class="built_in">source</span>-address 10.1.1.0 mask 255.255.255.0</span><br><span class="line">  action nat address-group NAPT</span><br><span class="line"></span><br><span class="line">第三步：放行安全策略</span><br><span class="line"></span><br><span class="line">第四步：测试检查</span><br></pre></td></tr></table></figure>
+<h3 id="Napt为什么不会产生Server-map"><a href="#Napt为什么不会产生Server-map" class="headerlink" title="Napt为什么不会产生Server-map?"></a>Napt为什么不会产生Server-map?</h3><p>如果产生，需要大量表现，消耗资源，影响性能。</p>
+<h3 id="natp需要配置黑洞路由不？"><a href="#natp需要配置黑洞路由不？" class="headerlink" title="natp需要配置黑洞路由不？"></a>natp需要配置黑洞路由不？</h3><p>两种情况：</p>
+<ol>
+<li><p>第一种情况：地址池地址与出接口在不同网段，会形成环路</p>
+<p>解决方案：<strong>配置路由黑洞</strong><br>ip route-static 1.1.1.2 255.255.255.255 NULL0</p>
+</li>
+<li><p>第二种情况：地址池地址与出接口在同一个网段,不会形成环路，但会多一个ARP请求<br>ip route-static 202.100.1.200 255.255.255.255 NULL0 </p>
+</li>
+</ol>
+<h2 id="华为NAT复用技术：地址池，端口的选择"><a href="#华为NAT复用技术：地址池，端口的选择" class="headerlink" title="华为NAT复用技术：地址池，端口的选择"></a>华为NAT复用技术：地址池，端口的选择</h2><h3 id="地址池地址的选择是随机的吗？"><a href="#地址池地址的选择是随机的吗？" class="headerlink" title="地址池地址的选择是随机的吗？"></a>地址池地址的选择是随机的吗？</h3><blockquote>
+<p>地址池中的地址选择不是随机的，而是按照一定的算法来选择。</p>
+</blockquote>
+<ul>
+<li><p>X —- 表示需要被转化的地址  10.0.0.1 - 10.10.10.10</p>
+</li>
+<li><p>Y—–地址池地址   202.100.1.1 - 202.100.1.5</p>
+</li>
+</ul>
+<p>Y = 5 （地址池中地址的个数，外网地址个数）</p>
+<p>算法：X / Y 取余数：</p>
+<ul>
+<li>当余数为0的时候，对应地址池的第一个地址，202.100.1.1</li>
+<li>​                 1                                                                   202.100.1.2</li>
+</ul>
+<blockquote>
+<p><strong>基于源IP地址做Hash，来选择一个地址池中的地址，一个源IP会固定使用那个选择的地址</strong></p>
+</blockquote>
+<h3 id="端口是不是随机的？"><a href="#端口是不是随机的？" class="headerlink" title="端口是不是随机的？"></a>端口是不是随机的？</h3><blockquote>
+<p>端口的分配是随机的，但是可能会冲突。</p>
+</blockquote>
+<p>端口冲突检测技术：</p>
+<p>Z  —代表端口值，利用（地址池地址    协议   目的地址   目的端口）参数进行某种数学算法，求出端口Z。</p>
+<p>例如：Z = 2000 ，与会话表的端口比较，如果相同端口执行Z++。 2049，继续检测。</p>
+<h2 id="Easy-IP："><a href="#Easy-IP：" class="headerlink" title="Easy IP："></a>Easy IP：</h2><p>Easy IP是一种利用出接口的公网IP地址作为NAT转后的地址，同时转换地址和端口的地址转换方式。对于接口IP是动态获取的场景，Easy IP也一样支持。</p>
+<p><strong>Easy ip配置思路：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">nat-policy</span><br><span class="line"> rule name Easy_ip</span><br><span class="line">  source-zone trust</span><br><span class="line">  egress-<span class="class"><span class="keyword">interface</span> <span class="title">GigabitEthernet0</span>/0/3</span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">address</span> 10.1.1.0 <span class="title">mask</span> 255.255.255.0</span></span><br><span class="line"><span class="class">  <span class="title">action</span> <span class="title">nat</span> <span class="title">easy</span>-<span class="title">ip</span></span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>Easy ip不会产生Server-map</strong></p>
+<p><strong>不需要配置黑洞路由。</strong></p>
+</blockquote>
+<h2 id="Smart-NAT："><a href="#Smart-NAT：" class="headerlink" title="Smart NAT："></a>Smart NAT：</h2><blockquote>
+<p>Smart_nat =no_pat+pat，自动预留一个IP地址做PAT</p>
+</blockquote>
+<p>Smart NAT是No-PAT方式的一种补充。Smart NAT是一种可以在No-PAT的NAT模式下，指定某个IP地址预留做NAPT方式的地址转换方式。适用于平时上网的用户数量少，公网IP地址数量与同时上网用户数基本相同，但个别时段上网用户数激增的场景。</p>
+<p>使用No-PAT方式时，进行地址池的一对一转换。随着内部用户数量的不断增加，地址池中的地址数可能不再能满足用户上网需求，部分用户将得不到转换地址而无法访问Internet。此时，用户可以利用预留的IP地址进行NAPT地址转换，然后访问Internet。</p>
+<p><strong>Smart nat配置：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>.配置nat地址池：</span><br><span class="line">[FW] nat address-group addressgroup1</span><br><span class="line">[FW-address-group-addressgroup1] mode no-pat local</span><br><span class="line">[FW-address-group-addressgroup1] section <span class="number">0</span> <span class="number">1.1</span>.<span class="number">1.10</span> <span class="number">1.1</span>.<span class="number">1.14</span></span><br><span class="line">[FW-address-group-addressgroup1] smart-nopat <span class="number">1.1</span>.<span class="number">1.15</span></span><br><span class="line">[FW-address-group-addressgroup1] route enable</span><br><span class="line">[FW-address-group-addressgroup1] quit</span><br><span class="line"></span><br><span class="line"><span class="number">2</span>.配置nat策略：</span><br><span class="line">[FW] nat-policy</span><br><span class="line">[FW-policy-nat] rule name policy_nat1</span><br><span class="line">[FW-policy-nat-rule-policy_nat1] source-zone trust</span><br><span class="line">[FW-policy-nat-rule-policy_nat1] destination-zone untrust</span><br><span class="line">[FW-policy-nat-rule-policy_nat1] source-address <span class="number">10.1</span>.<span class="number">1.0</span> <span class="number">24</span></span><br><span class="line">[FW-policy-nat-rule-policy_nat1] action source-nat address-group addressgroup1 </span><br><span class="line">[FW-policy-nat-rule-policy_nat1] quit</span><br><span class="line">[FW-policy-nat] quit</span><br><span class="line"><span class="number">3</span>.配置安全策略</span><br><span class="line"></span><br><span class="line"><span class="number">4</span>.配置默认路由</span><br></pre></td></tr></table></figure>
+<h2 id="三元组NAT："><a href="#三元组NAT：" class="headerlink" title="三元组NAT："></a>三元组NAT：</h2><blockquote>
+<p>三元组：源IP，源端口，协议号。 为PAT产生server-map，老化时间内保持不变。</p>
+<p>支持外网主动访问，保障P2P应用。</p>
+<p>动态端口对外一致性。</p>
+</blockquote>
+<p>三元组NAT是一种转换时同时转换地址和端口，实现多个私网地址共用一个或多个公网地址的地址转换方式。它允许Internet上的用户主动访问私网用户，与基于P2P技术的文件共享、语音通信、视频传输等业务可以很好地共存。</p>
+<p>当内网PC访问Internet时，如果FW采用五元组NAT（NAPT）方式进行地址转换，外部设备无法通过转换后的地址和端口主动访问内部PC。</p>
+<p>三元组NAT方式可以很好的解决上述问题，因为三元组NAT方式在进行转换时有以下两个特点：</p>
+<ol>
+<li><p>三元组NAT的端口不能复用，保证了内部PC对外呈现的端口的一致性，不会动态变化，但是公网地址利用率低。</p>
+</li>
+<li><p>支持外部设备通过转换后的地址和端口主动访问内部PC。FW即使没有配置相应的安全策略，也允许此类访问报文通过。</p>
+<blockquote>
+<p>通过生成Server-map来实现。</p>
+<p>FW上生成的Server-map表中存放Host的私网IP地址与公网IP地址的映射关系。</p>
+<ul>
+<li>正向Server-map表项保证内部PC转换后的地址和端口不变。</li>
+<li>反向Server-map表项允许外部设备可以主动访问内部PC。</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+<p>三元组NAT有两种：</p>
+<ul>
+<li><p>本地（Local）三元组NAT</p>
+<p>本地三元组NAT生成的Server-Map表中包含安全区域参数，只有此安全区域的Host可以访问内网Host。</p>
+</li>
+<li><p>全局（Global）三元组NAT</p>
+<p>全局三元组NAT生成的Server-Map表中不包含安全区域参数，一旦建立，所有安全区域的Host都可以访问内网Host。</p>
+</li>
+</ul>
+<p>FW支持Smart三元组NAT功能，可以根据报文的目的端口来选择分配端口的模式，在一定程度上提高公网地址的利用率。当报文的目的端口属于设置的端口范围之内，就采用NAPT模式来分配端口，如果报文的目的端口不属于设置的端口范围之内，则采用三元组NAT模式来分配端口。</p>
+<p><strong>三元组nat配置：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>.配置地址池</span><br><span class="line">[FW] nat address-group addressgroup1</span><br><span class="line">[FW-address-group-addressgroup1] mode full-cone global</span><br><span class="line">[FW-address-group-addressgroup1] route enable</span><br><span class="line">[FW-address-group-addressgroup1] section <span class="number">0</span> <span class="number">1.1</span>.<span class="number">1.10</span> <span class="number">1.1</span>.<span class="number">1.15</span></span><br><span class="line">[FW-address-group-addressgroup1] quit</span><br><span class="line"></span><br><span class="line"><span class="number">2</span>.配置nat策略</span><br><span class="line">[FW] nat-policy</span><br><span class="line">[FW-policy-nat] rule name policy_nat1</span><br><span class="line">[FW-policy-nat-rule-policy_nat1] source-zone trust</span><br><span class="line">[FW-policy-nat-rule-policy_nat1] destination-zone untrust</span><br><span class="line">[FW-policy-nat-rule-policy_nat1] source-address <span class="number">10.1</span>.<span class="number">1.0</span> <span class="number">24</span></span><br><span class="line">[FW-policy-nat-rule-policy_nat1] action source-nat address-group addressgroup1 </span><br><span class="line">[FW-policy-nat-rule-policy_nat1] quit</span><br><span class="line">[FW-policy-nat] quit</span><br><span class="line"></span><br><span class="line"><span class="number">3</span>.开启端点无关过滤功能，缺省情况下，端点无关过滤功能为开启状态。如果没有开启该功能，还需要配置公网到私网的安全策略。</span><br><span class="line">[FW] firewall endpoint-independent <span class="keyword">filter</span> enable</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>端点无关过滤功能:</strong></p>
+<p><code>firewall endpoint-independent filter enable</code></p>
+<p>该命令只对NAT三元组、NAT64三元组和PCP生效，对DS-Lite三元组不生效。</p>
+<p>开启端点无关过滤功能后，当Internet上的用户主动访问位于内部网络的用户时，将会匹配三元组的目的Server-map表或PCP映射表（Server-map表），FW根据目的Server-map表中的转换关系进行地址转换，然后不进行域间安全策略处理，直接转发报文。如果没有开启端点无关过滤功能，则还是会查找域间安全策略规则，由安全策略规则决定是否转发报文。</p>
+<p>管理员可以根据实际需要选择开启端点无关过滤功能，或者在安全域间配置安全策略规则。</p>
+<p>缺省情况下，端点无关过滤功能处于开启状态。</p>
+</blockquote>
+<h2 id="源NAT技术对比："><a href="#源NAT技术对比：" class="headerlink" title="源NAT技术对比："></a>源NAT技术对比：</h2><p><img src="/2019/03/09/防火墙NAT技术/nat对比.png" alt="nat对比"></p>
+<h1 id="NAT-ALG"><a href="#NAT-ALG" class="headerlink" title="NAT ALG"></a>NAT ALG</h1><blockquote>
+<p>作用：解决应用层信息的转换</p>
+<p>出现的原因：NAT只能IP和TCP/UDP，不能对应用层信息进行转换</p>
+<p>开启命令： firewall detect ftp </p>
+</blockquote>
+<blockquote>
+<p>NAT ALG 与ASPF相同与不同：</p>
+<p>相同点：</p>
+<ul>
+<li>一条命令开启两个功能</li>
+</ul>
+<p>不同点： </p>
+<ul>
+<li><p>ASPF——产生临时的安全通道，识别协议</p>
+</li>
+<li><p>NAT ALG——-转换应用信息</p>
+</li>
+</ul>
+</blockquote>
+<h2 id="NAT-ALG简介："><a href="#NAT-ALG简介：" class="headerlink" title="NAT ALG简介："></a>NAT ALG简介：</h2><p>通常情况下，NAT只对报文中IP头部的地址信息和TCP/UDP头部的端口信息进行转换，不关注报文载荷的信息。但是对于一些特殊的协议（如FTP协议），其报文载荷中也携带了地址或端口信息，而报文载荷中的地址或端口信息往往是由通信的双方动态协商生产的，管理员并不能为其提前配置好相应的NAT规则。如果提供NAT功能的设备不能识别并转换这些信息，将会影响到这些协议的正常使用。</p>
+<p>FW提供NAT ALG（Application Level Gateway）功能，可以对报文的载荷字段进行解析，识别并转换其中包含的重要信息，保证类似FTP的多通道协议可以顺利的进行地址转换而不影响其正常使用。</p>
+<p>下面以FTP（File Transfer Protocol）协议为例，简要描述其工作原理。</p>
+<h2 id="FTP协议的NAT-ALG处理："><a href="#FTP协议的NAT-ALG处理：" class="headerlink" title="FTP协议的NAT ALG处理："></a>FTP协议的NAT ALG处理：</h2><p>FTP协议是一个典型的多通道协议，在其工作过程中，FTP Client和FTP Server之间将会建立两条连接（也称为通道）：控制连接和数据连接。控制连接用来传输FTP指令和参数，数据连接用来传输数据。</p>
+<p>FTP协议包括两种工作模式：主动模式和被动模式。主动模式中，FTP Server主动向FTP Client发起数据连接；被动模式中，FTP Server被动接收FTP Client发起的数据连接。无论是主动模式还是被动模式，在控制连接交互报文的载荷中，都包含用于建立数据连接的IP地址和端口号信息。</p>
+<p>如果在FTP Client和FTP Server之间部署了NAT设备，这就要求NAT设备必须能够识别出控制连接中包含的IP地址和端口号并进行处理，否则数据连接无法成功建立，FTP协议不能正常工作。</p>
+<p>下面以FTP协议工作在<strong>主动模式</strong>为例，介绍NAT ALG功能对FTP协议的处理过程。</p>
+<p><img src="/2019/03/09/防火墙NAT技术/alg.png" alt="alg"></p>
+<p><center>图：NAT ALG工作原理示意图<center></center></center></p>
+<p>FTP Client位于私有网络，FTP Server位于公共网络。FW对FTP协议的报文处理过程如下：</p>
+<ol>
+<li>FTP Client通过源NAT地址转换后可以访问FTP Server，与FTP Server完成FTP控制连接的TCP三次握手，并交付用户名和密码信息。</li>
+<li>FW收到FTP Client发送的PORT命令报文后，将报文载荷字段中携带的私网地址和端口替换为公网地址和新的端口，然后发送至FTP Server。</li>
+<li>FW收到FTP Server请求建立数据连接的报文后，替换报文的目的地址和目的端口为原始的地址和端口，然后发送至FTP Client。由此保证数据连接可以成功建立，FTP协议正常工作。</li>
+</ol>
+<blockquote>
+<p>除FTP协议外，FW还支持对DNS、H.323、ICQ、ILS、MMS、MSN、NETBIOS、PPTP、QQ、RSH、RTSP、SCCP、SIP和SQLNET协议提供NAT ALG功能。</p>
+</blockquote>
+<h2 id="NAT-ALG与ASPF的关系："><a href="#NAT-ALG与ASPF的关系：" class="headerlink" title="NAT ALG与ASPF的关系："></a>NAT ALG与ASPF的关系：</h2><p>差异点：</p>
+<ul>
+<li>开启ASPF功能的目的是识别多通道协议，并自动为其开放相应的安全策略。</li>
+<li>开启NAT ALG功能的目的是识别多通道协议，并自动转换报文载荷中的IP地址和端口信息。</li>
+</ul>
+<p>共同点：二者使用相同的配置。开启其中一个功能，另一功能同时生效。</p>
+<p><strong>开启命令：firewall detect <em>protocol</em></strong></p>
+<h1 id="目的NAT技术"><a href="#目的NAT技术" class="headerlink" title="目的NAT技术"></a>目的NAT技术</h1><h2 id="目的nat简介："><a href="#目的nat简介：" class="headerlink" title="目的nat简介："></a>目的nat简介：</h2><p>目的NAT是指对报文中的目的地址和端口进行转换。</p>
+<h2 id="配置思路："><a href="#配置思路：" class="headerlink" title="配置思路："></a>配置思路：</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">配置思路</span><br><span class="line">第一步：ACL配置-----抓出需要被转换的地址</span><br><span class="line">acl number 3000</span><br><span class="line"> rule 5 permit ip source 10.1.1.0 0.0.0.255 destination 100.1.1.0 0.0.0.255 </span><br><span class="line"></span><br><span class="line">第二步： 配置目的NAT</span><br><span class="line">firewall zone trust</span><br><span class="line"> destination-nat 3000 address 200.1.1.1</span><br><span class="line"></span><br><span class="line">第三步：放行安全策略</span><br><span class="line">security-policy</span><br><span class="line"> rule name trust_isp2</span><br><span class="line">  source-zone trust</span><br><span class="line">  destination-zone isp2</span><br><span class="line">  destination-address 200.1.1.1 32 --------------转换之后的地址</span><br><span class="line">  action permit</span><br></pre></td></tr></table></figure>
+<h2 id="Nat-Server"><a href="#Nat-Server" class="headerlink" title="Nat Server:"></a>Nat Server:</h2><p> NAT-Server—–服务器映射<br>既可以转换目的地址,又可以转换目的端口</p>
+<p><strong>语法：</strong> </p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nat server  name   zone  untrust  protocol tcp    global 202.100.1.20  80        inside 192.168.1.1   80</span><br><span class="line">                名字       ZONE可选     协议（可选）         公网地址</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p><strong>注：只要配置NAT-Server,就会产生Server-map，不需要流量的触发。 默认一直存在，直到NAT-Server被删除，Server-map才会消失。</strong></p>
+</blockquote>
+<p><strong>配置思路：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">第一步：配置NAT -Server(全局配置）</span><br><span class="line"> nat server NAT_Server zone untrust protocol tcp global <span class="number">202.100</span>.<span class="number">1.20</span> www inside <span class="number">192.168</span>.<span class="number">1.1</span> www</span><br><span class="line"></span><br><span class="line">第二步：放行安全</span><br><span class="line">security-policy</span><br><span class="line"> rule name untrust_dmz</span><br><span class="line">  source-zone untrust</span><br><span class="line">  destination-zone dmz</span><br><span class="line">  destination-address <span class="number">192.168</span>.<span class="number">1.1</span> mask <span class="number">255.255</span>.<span class="number">255.255</span></span><br><span class="line">  action permit</span><br><span class="line"></span><br><span class="line">注: nat-server放行转换之后的目的地址</span><br></pre></td></tr></table></figure>
+<h3 id="nat-server中产生Server-map的作用："><a href="#nat-server中产生Server-map的作用：" class="headerlink" title="nat server中产生Server-map的作用："></a>nat server中产生Server-map的作用：</h3><ul>
+<li>正向作用： 只是做映射关系，加速转发</li>
+<li>反向作用：让服务器主动发起访问internet（前提是安全策略要放行）</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">第三步：查看Server-map表</span><br><span class="line">[FW1]display  firewall server-map  </span><br><span class="line"> server-map <span class="number">2</span> item(s) </span><br><span class="line"> ------------------------------------------------------------------------------</span><br><span class="line"> Nat Server, any -&gt; <span class="number">202.100</span>.<span class="number">1.20</span>:<span class="number">80</span>[<span class="number">192.168</span>.<span class="number">1.1</span>:<span class="number">80</span>], Zone: untrust</span><br><span class="line">   Protocol: tcp(Appro: http), Left-Time: --:--:--, Addr-Pool: ---</span><br><span class="line">   VPN: public -&gt; public ------正向</span><br><span class="line">作用： 只是做映射关系，加速转发</span><br><span class="line"></span><br><span class="line"> Nat Server Reverse, <span class="number">192.168</span>.<span class="number">1.1</span>[<span class="number">202.100</span>.<span class="number">1.20</span>] -&gt; any, Zone: untrust</span><br><span class="line">   Protocol: any(Appro: ---), Left-Time: --:--:--, Addr-Pool: ---</span><br><span class="line">   VPN: public -&gt; public------反向</span><br><span class="line"></span><br><span class="line">作用：让服务器主动发起访问internet（前提是安全策略要放行）</span><br><span class="line">security-policy</span><br><span class="line"> rule name dmz_untrust</span><br><span class="line">  source-zone dmz</span><br><span class="line">  destination-zone untrust</span><br><span class="line">  action permit</span><br></pre></td></tr></table></figure>
+<p><strong>no-reverse:</strong></p>
+<p>配置指定<strong>no-reverse</strong>参数的NAT Server来实现同一个内部服务器发布多个公网IP供外部网络访问的需求时，由于配置了<strong>no-reverse</strong>参数，内部服务器将无法主动访问外部网络。此时，如果内部服务器想要访问外部网络，需要在内部服务器所在区域和外部网络所在区域的域间配置源NAT策略，将服务器的私网地址转换为公网地址。源NAT策略中引用的地址池可以是<strong>global</strong>地址也可以是其他的公网地址。</p>
+<p>默认配置reverse，配置reverse的优缺点：</p>
+<ul>
+<li><p>优点：<br>服务器上网的源NAT转换不需要配置了。节省配置</p>
+</li>
+<li><p>缺点：<br>只转换IP地址，不转换端口</p>
+</li>
+</ul>
+<h3 id="Server-map要不是reverse-32字真言："><a href="#Server-map要不是reverse-32字真言：" class="headerlink" title="Server-map要不是reverse 32字真言："></a><strong>Server-map要不是reverse 32字真言：</strong></h3><ul>
+<li><p><strong>一去一返 ，来去自如</strong></p>
+<p>正向作用：映射关系</p>
+<p>反向作用：提供服务器上网</p>
+</li>
+<li><p><strong>去反存正，自断其路</strong></p>
+<p>场景：IPSEC VPN场景 +NAT-Server+源NAT</p>
+<blockquote>
+<p>在该场景下：因为nat-server产生的server-map，优先级大于源nat策略。此时，则不能触发IPSec VPN的感兴趣流。所以不能产生反向server-map。</p>
+</blockquote>
+<p>解决方案：<br>不能产生反向Server-map ，加上参数no-reverse<br> nat server NAT_Server zone untrust protocol tcp global 202.100.1.20 www inside 192.168.1.1 www no-reverse</p>
+<p>l另外：解决源转换问题—–配置NAT豁免（NAT旁路）</p>
+</li>
+<li><p><strong>一分为二，源进源出</strong></p>
+<p>针对多出口的环境配置NAT-Server ，解决inside地址重复：</p>
+<ul>
+<li><p>方案一: 如果接口来自的不同的ZONE，NAT-Server配置不同的ZONE<br> nat server AAA zone isp1 global 1.1.1.10 inside 10.1.1.2<br> nat server BBB zone isp2 global 2.2.2.10  inside 10.1.1.2</p>
+</li>
+<li><p>方案二接口来自相同的ZONE,配置no-reverse</p>
+<p> nat server AAA zone isp1 global 1.1.1.10 inside 10.1.1.2 no-reverse<br> nat server BBB zone isp1 global  2.2.2.10 inside 10.1.1.2 no-reverse</p>
+</li>
+</ul>
+<p>针对来回路径不一致的场景配置NAT-Server<br>解决方案：配置源进源出(高于路由表，除了直连路由）</p>
+<blockquote>
+<p>USG6000序列<br>int xxxx<br>reverse-route  nexthop  X.X.X.X </p>
+<p>USG9000序列<br>int xxxx<br>redirect-reverse next-hop  X.X.X.X </p>
+<p>USG6000V<br>int xxxx<br>redirect-reverse  enable </p>
+<p><strong>redirect-reverse</strong>命令用来开启报文从同一接口进入和发出功能。</p>
+</blockquote>
+</li>
+<li><p><strong>虚假变化，合二为一</strong></p>
+<p>针对双机热备，配置NAT-Server会产生免费APR的冲突 (针对于USG2000/5000 V3R1)<br>解决方案：<br>nat server  qyt global 202.100.1.100  inside 10.1.1.1  vrrp 2  </p>
+<p>USG6000 9000不需要绑定。</p>
+</li>
+</ul>
+<h3 id="Nat-server需要配置黑洞路由吗？"><a href="#Nat-server需要配置黑洞路由吗？" class="headerlink" title="Nat-server需要配置黑洞路由吗？"></a>Nat-server需要配置黑洞路由吗？</h3><p>分情况： </p>
+<ul>
+<li><p>粗矿的NAT-Server：可以匹配会话表。<br>nat server nat_server 0 global 1.1.1.1 inside 10.1.1.1 ——-不需要黑洞路由 </p>
+</li>
+<li><p>精确的NAT-Server ：只能匹配tcp：80端口。其他不能匹配。所以有环。<br> nat server nat_server 0 protocol tcp global 1.1.1.1  80  inside 10.1.1.1 80 ——需要黑洞路由</p>
+</li>
+</ul>
+<p>不同的网段（公网地址与出接口在不同的网段）一定要配置黑洞路由，相同的网段呢（公网地址与出接口在同一网段）建议配置黑洞路由<br>解决方案：<br>ip route-static 1.1.1.1 255.255.255.255 NULL0  (不同段的）</p>
+<p>ip route-static 202.100.1.200 255.255.255.255 NULL0（同一个段的）</p>
+<h2 id="SLB-服务器负载均衡"><a href="#SLB-服务器负载均衡" class="headerlink" title="SLB 服务器负载均衡:"></a>SLB 服务器负载均衡:</h2><p>只要创建SLB，就会产生SERVER-MAP</p>
+<p>算法：</p>
+<ol>
+<li><p>轮询算法  ———-加权</p>
+</li>
+<li><p>最小连接————加权  </p>
+</li>
+<li><p>会话保持（源HASH算法）——–加权</p>
+</li>
+</ol>
+<h3 id="配置思路：-1"><a href="#配置思路：-1" class="headerlink" title="配置思路："></a>配置思路：</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br></pre></td><td class="code"><pre><span class="line">第一步：启动SLB</span><br><span class="line">slb enable </span><br><span class="line"></span><br><span class="line">第二步：配置真实服务器和流量分配方式</span><br><span class="line"> slb </span><br><span class="line">  rserver <span class="number">1</span> rip <span class="number">192.168</span>.<span class="number">1.1</span> weight <span class="number">32</span> healthchk ---------默认权重为<span class="number">32</span>， 健康检查开启</span><br><span class="line">  rserver <span class="number">2</span> rip <span class="number">192.168</span>.<span class="number">1.2</span> weight <span class="number">32</span> healthchk</span><br><span class="line">  group SLB</span><br><span class="line">  metric roundrobin  ----------默认轮询方式，可以修改</span><br><span class="line">  addrserver <span class="number">1</span></span><br><span class="line">  addrserver <span class="number">2</span> </span><br><span class="line"></span><br><span class="line">第三步：配置虚拟服务器地址和端口</span><br><span class="line">slb </span><br><span class="line"> vserver SLB vip <span class="number">202.100</span>.<span class="number">1.20</span> group SLB tcp vport <span class="number">80</span> rport <span class="number">80</span></span><br><span class="line"></span><br><span class="line">第四步：放行安全策略</span><br><span class="line"></span><br><span class="line">security-policy</span><br><span class="line"> rule name slb_helth------放行健康检查</span><br><span class="line">  source-zone local</span><br><span class="line">  destination-zone dmz</span><br><span class="line">  source-address <span class="number">192.168</span>.<span class="number">1.10</span> mask <span class="number">255.255</span>.<span class="number">255.255</span></span><br><span class="line">  destination-address <span class="number">192.168</span>.<span class="number">1.1</span> mask <span class="number">255.255</span>.<span class="number">255.255</span></span><br><span class="line">  destination-address <span class="number">192.168</span>.<span class="number">1.2</span> mask <span class="number">255.255</span>.<span class="number">255.255</span></span><br><span class="line">  service icmp</span><br><span class="line">  action permit</span><br><span class="line"> rule name untrust_dmz</span><br><span class="line">  source-zone untrust</span><br><span class="line">  destination-zone dmz</span><br><span class="line">  action permit</span><br><span class="line">第五步：检查测试</span><br><span class="line"></span><br><span class="line">[FW1]display firewall session table</span><br><span class="line"> Current Total Sessions : <span class="number">6</span></span><br><span class="line">  http  VPN:public --&gt; public <span class="number">11.1</span>.<span class="number">1.10</span>:<span class="number">49212</span>--&gt;<span class="number">202.100</span>.<span class="number">1.20</span>:<span class="number">80</span>[<span class="number">192.168</span>.<span class="number">1.2</span>:<span class="number">80</span>]</span><br><span class="line">  http  VPN:public --&gt; public <span class="number">11.1</span>.<span class="number">1.10</span>:<span class="number">49213</span>--&gt;<span class="number">202.100</span>.<span class="number">1.20</span>:<span class="number">80</span>[<span class="number">192.168</span>.<span class="number">1.1</span>:<span class="number">80</span>]</span><br><span class="line"></span><br><span class="line">[FW1]display slb  rserver  </span><br><span class="line"> Real Server Information(Total <span class="number">2</span>)</span><br><span class="line">---------------------------------------------------------------</span><br><span class="line">  Real Server ID        : <span class="number">1</span></span><br><span class="line">  Real Server IP        : <span class="number">192.168</span>.<span class="number">1.1</span></span><br><span class="line">  Real Server Weight    : <span class="number">32</span>  -------------默认权重值</span><br><span class="line">  Health Check Method   : healthchk</span><br><span class="line">  Real Server Status    : active  ---------如果是inactive，要放行安全策略</span><br><span class="line">  Applied Group Number  : <span class="number">1</span></span><br><span class="line">  Virtual IP            : <span class="number">202.100</span>.<span class="number">1.20</span></span><br><span class="line"></span><br><span class="line">  Real Server ID        : <span class="number">2</span></span><br><span class="line">  Real Server IP        : <span class="number">192.168</span>.<span class="number">1.2</span></span><br><span class="line">  Real Server Weight    : <span class="number">32</span></span><br><span class="line">  Health Check Method   : healthchk</span><br><span class="line">  Real Server Status    : active</span><br><span class="line">  Applied Group Number  : <span class="number">1</span></span><br><span class="line">  Virtual IP            : <span class="number">202.100</span>.<span class="number">1.20</span></span><br><span class="line">---------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">[FW1]display  slb vserver  </span><br><span class="line">Virtual Server Information(Total <span class="number">1</span>)</span><br><span class="line">---------------------------------------------------------------</span><br><span class="line">  Virtual Server Name        : SLB</span><br><span class="line">  Virtual Server IP          : <span class="number">202.100</span>.<span class="number">1.20</span></span><br><span class="line">  Group Name                 : SLB</span><br><span class="line">  Protocol                   : tcp</span><br><span class="line">  Virtual Server Port        : <span class="number">80</span></span><br><span class="line">  Real Server Port           : <span class="number">80</span></span><br><span class="line">---------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">[FW1]display slb group  SLB </span><br><span class="line">Group Information(Total <span class="number">1</span>)</span><br><span class="line">---------------------------------------------------------------</span><br><span class="line">  Group Name               : SLB</span><br><span class="line">  Metric                   : weightrr</span><br><span class="line">  Virtual Server Number    : <span class="number">1</span></span><br><span class="line">  Virtual IP               : <span class="number">202.100</span>.<span class="number">1.20</span></span><br><span class="line">  Real Server Number       : <span class="number">2</span></span><br><span class="line">  Real Server List         : <span class="number">1</span>    <span class="number">2</span>    </span><br><span class="line">---------------------------------------------------------------</span><br><span class="line"></span><br><span class="line">[FW1]display firewall  server-map  </span><br><span class="line"> server-map <span class="number">3</span> item(s) </span><br><span class="line"> server-map <span class="number">3</span> item(s) </span><br><span class="line"> ------------------------------------------------------------------------------</span><br><span class="line">SLB配置以后就会产生Server-map</span><br><span class="line"> SLB, any -&gt; <span class="number">202.100</span>.<span class="number">1.20</span>:<span class="number">80</span>[---], Zone: ---</span><br><span class="line">   Protocol: tcp(Appro: http), Left-Time: --:--:--, Addr-Pool: ---</span><br><span class="line">   VPN: public -&gt; public  -----正向</span><br><span class="line">作用：虚拟服务器的功能</span><br><span class="line"></span><br><span class="line"> SLB Reverse, <span class="number">192.168</span>.<span class="number">1.1</span>[<span class="number">202.100</span>.<span class="number">1.20</span>] -&gt; any, Zone: ---</span><br><span class="line">   Protocol: any(Appro: ---), Left-Time: --:--:--, Addr-Pool: ---</span><br><span class="line">   VPN: public -&gt; public -----反向</span><br><span class="line">作用：解决服务器上网问题</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> SLB Reverse, <span class="number">192.168</span>.<span class="number">1.2</span>[<span class="number">202.100</span>.<span class="number">1.20</span>] -&gt; any, Zone: ---</span><br><span class="line">   Protocol: any(Appro: ---), Left-Time: --:--:--, Addr-Pool: ---</span><br><span class="line">   VPN: public -&gt; public</span><br><span class="line"></span><br><span class="line">作用：解决服务器上网问题</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>参考文档：华为HedEx 文档。</p>
+</blockquote>
+<h1 id="双向NAT技术"><a href="#双向NAT技术" class="headerlink" title="双向NAT技术"></a>双向NAT技术</h1><h2 id="双向nat："><a href="#双向nat：" class="headerlink" title="双向nat："></a>双向nat：</h2><p><strong>针对同一数据流</strong>，如果需要<strong>同时改变报文的源地址和目的地址</strong>，就可以配置“源NAT + NAT Server”，称此类NAT技术为双向NAT。</p>
+<h2 id="域间双向NAT："><a href="#域间双向NAT：" class="headerlink" title="域间双向NAT："></a>域间双向NAT：</h2><p>当外部网络中的用户访问内部服务器时，使用该双向NAT功能同时转换该报文的源和目的地址可以避免在内部服务器上设置网关，简化配置。</p>
+<blockquote>
+<p>如下图：untrust区域PC访问DMZ区域Server。源IP由11.1.1.20转化为192.168.1.20，目的IP由202.100.1.20转化为192.168.1.1.报文的源地址和目的地址同时进行了转化，完成了双向NAT。</p>
+<p>NAT Server + 源NAT配置的最大优势为，<strong>服务器可以不用设置网关。</strong></p>
+<p><img src="/2019/03/09/防火墙NAT技术/域间双向nat.png" alt="域间双向nat"></p>
+</blockquote>
+<p><strong>配置思路:</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">第一步：配置NAT-Server </span><br><span class="line"> nat server NAT_Server zone untrust global <span class="number">202.100</span>.<span class="number">1.100</span> inside <span class="number">192.168</span>.<span class="number">1.1</span></span><br><span class="line"></span><br><span class="line">第二步：配置源NAT</span><br><span class="line"> nat address-group dmz20</span><br><span class="line"> section <span class="number">0</span> <span class="number">192.168</span>.<span class="number">1.20</span> <span class="number">192.168</span>.<span class="number">1.20</span></span><br><span class="line"> </span><br><span class="line">nat-policy</span><br><span class="line"> rule name untrust_dmz</span><br><span class="line">  source-zone untrust</span><br><span class="line">  destination-zone dmz</span><br><span class="line">  action nat address-group dmz</span><br><span class="line"></span><br><span class="line">第三步：放行安全策略</span><br><span class="line"></span><br><span class="line">第四步：配置黑洞路由</span><br><span class="line">ip route-static <span class="number">192.168</span>.<span class="number">1.20</span> <span class="number">255.255</span>.<span class="number">255.255</span> NULL0</span><br><span class="line"> ip route-static <span class="number">202.100</span>.<span class="number">1.100</span> <span class="number">255.255</span>.<span class="number">255.255</span> NULL0</span><br><span class="line">第五步：测试检查</span><br><span class="line"></span><br><span class="line">[FW1]display firewall session table</span><br><span class="line"> Current Total Sessions : <span class="number">3</span></span><br><span class="line">  http  VPN:public --&gt; public <span class="number">11.1</span>.<span class="number">1.10</span>:<span class="number">49187</span>[<span class="number">192.168</span>.<span class="number">1.20</span>:<span class="number">2048</span>]--&gt;<span class="number">202.100</span>.<span class="number">1.100</span>:<span class="number">80</span>[<span class="number">192.168</span>.<span class="number">1.1</span>:<span class="number">80</span>]</span><br></pre></td></tr></table></figure>
+<h2 id="域内双向NAT："><a href="#域内双向NAT：" class="headerlink" title="域内双向NAT："></a>域内双向NAT：</h2><p>私网用户与内部服务器在同一安全区域同一网段时，私网用户希望像外网用户一样，通过公网地址来访问内部服务器的场景。</p>
+<blockquote>
+<p> 由于私网用户与死亡服务器被规划到同一个网络中，为了提高内部网络的安全性，使私网服务器的回应报文也经过防火墙，就需要配置域内NAT。</p>
+<p><img src="/2019/03/09/防火墙NAT技术/域内.png" alt="域内"></p>
+</blockquote>
+<p><strong>配置思路：</strong></p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">配置思路： </span><br><span class="line">第一步：配置NAT-Server</span><br><span class="line"> nat server NAT_Server2 zone trust global <span class="number">202.100</span>.<span class="number">1.200</span> inside <span class="number">10.1</span>.<span class="number">1.2</span></span><br><span class="line"></span><br><span class="line">第二步：配置源NAT</span><br><span class="line"> nat address-group insde1</span><br><span class="line"> section <span class="number">0</span> <span class="number">1.1</span>.<span class="number">1.1</span> <span class="number">1.1</span>.<span class="number">1.1</span></span><br><span class="line"></span><br><span class="line">nat-policy</span><br><span class="line"> rule name trust_trust</span><br><span class="line">  source-zone trust</span><br><span class="line">  destination-zone trust</span><br><span class="line">  source-address <span class="number">10.1</span>.<span class="number">1.0</span> mask <span class="number">255.255</span>.<span class="number">255.0</span></span><br><span class="line">  destination-address <span class="number">10.1</span>.<span class="number">1.2</span> mask <span class="number">255.255</span>.<span class="number">255.255</span></span><br><span class="line">  action nat address-group insde1</span><br><span class="line"></span><br><span class="line">第三步：配置黑洞路由</span><br><span class="line"> ip route-static <span class="number">1.1</span>.<span class="number">1.1</span> <span class="number">255.255</span>.<span class="number">255.255</span> NULL0</span><br><span class="line"> ip route-static <span class="number">202.100</span>.<span class="number">1.200</span> <span class="number">255.255</span>.<span class="number">255.255</span> NULL0</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">第四步：检查测试</span><br><span class="line">[FW1]display firewall session table</span><br><span class="line">  http  VPN:public --&gt; public <span class="number">10.1</span>.<span class="number">1.1</span>:<span class="number">61950</span>[<span class="number">1.1</span>.<span class="number">1.1</span>:<span class="number">2064</span>]--&gt;<span class="number">202.100</span>.<span class="number">1.200</span>:<span class="number">80</span>[<span class="number">10.1</span>.<span class="number">1.2</span>:<span class="number">80</span>]</span><br><span class="line">  http  VPN:public --&gt; public <span class="number">10.1</span>.<span class="number">1.1</span>:<span class="number">61949</span>[<span class="number">1.1</span>.<span class="number">1.1</span>:<span class="number">2063</span>]--&gt;<span class="number">202.100</span>.<span class="number">1.200</span>:<span class="number">80</span>[<span class="number">10.1</span>.<span class="number">1.2</span>:<span class="number">80</span>]</span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/03/09/防火墙NAT技术/" title="防火墙NAT技术">https://cshihong.github.io/2019/03/09/防火墙NAT技术/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/防火墙/" rel="tag"># 防火墙</a>
+          
+            <a href="/tags/NAT/" rel="tag"># NAT</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/08/防火墙报文转发流程/" rel="next" title="防火墙报文转发流程">
+                <i class="fa fa-chevron-left"></i> 防火墙报文转发流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/13/DFS例题/" rel="prev" title="DFS例题">
+                DFS例题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#防火墙NAT技术简介"><span class="nav-number">1.</span> <span class="nav-text">防火墙NAT技术简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT类型："><span class="nav-number">1.1.</span> <span class="nav-text">NAT类型：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT基本概念："><span class="nav-number">1.2.</span> <span class="nav-text">NAT基本概念：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源NAT技术"><span class="nav-number">2.</span> <span class="nav-text">源NAT技术</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#源NAT简介："><span class="nav-number">2.1.</span> <span class="nav-text">源NAT简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#No-PAT："><span class="nav-number">2.2.</span> <span class="nav-text">No-PAT：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#No-PAT配置思路："><span class="nav-number">2.2.1.</span> <span class="nav-text">No-PAT配置思路：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置黑洞路由的原因："><span class="nav-number">2.2.2.</span> <span class="nav-text">配置黑洞路由的原因：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAPT："><span class="nav-number">2.3.</span> <span class="nav-text">NAPT：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#NAPT配置思路："><span class="nav-number">2.3.1.</span> <span class="nav-text">NAPT配置思路：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Napt为什么不会产生Server-map"><span class="nav-number">2.3.2.</span> <span class="nav-text">Napt为什么不会产生Server-map?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#natp需要配置黑洞路由不？"><span class="nav-number">2.3.3.</span> <span class="nav-text">natp需要配置黑洞路由不？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#华为NAT复用技术：地址池，端口的选择"><span class="nav-number">2.4.</span> <span class="nav-text">华为NAT复用技术：地址池，端口的选择</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#地址池地址的选择是随机的吗？"><span class="nav-number">2.4.1.</span> <span class="nav-text">地址池地址的选择是随机的吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#端口是不是随机的？"><span class="nav-number">2.4.2.</span> <span class="nav-text">端口是不是随机的？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Easy-IP："><span class="nav-number">2.5.</span> <span class="nav-text">Easy IP：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Smart-NAT："><span class="nav-number">2.6.</span> <span class="nav-text">Smart NAT：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三元组NAT："><span class="nav-number">2.7.</span> <span class="nav-text">三元组NAT：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源NAT技术对比："><span class="nav-number">2.8.</span> <span class="nav-text">源NAT技术对比：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#NAT-ALG"><span class="nav-number">3.</span> <span class="nav-text">NAT ALG</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT-ALG简介："><span class="nav-number">3.1.</span> <span class="nav-text">NAT ALG简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FTP协议的NAT-ALG处理："><span class="nav-number">3.2.</span> <span class="nav-text">FTP协议的NAT ALG处理：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NAT-ALG与ASPF的关系："><span class="nav-number">3.3.</span> <span class="nav-text">NAT ALG与ASPF的关系：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#目的NAT技术"><span class="nav-number">4.</span> <span class="nav-text">目的NAT技术</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#目的nat简介："><span class="nav-number">4.1.</span> <span class="nav-text">目的nat简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置思路："><span class="nav-number">4.2.</span> <span class="nav-text">配置思路：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nat-Server"><span class="nav-number">4.3.</span> <span class="nav-text">Nat Server:</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nat-server中产生Server-map的作用："><span class="nav-number">4.3.1.</span> <span class="nav-text">nat server中产生Server-map的作用：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Server-map要不是reverse-32字真言："><span class="nav-number">4.3.2.</span> <span class="nav-text">Server-map要不是reverse 32字真言：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nat-server需要配置黑洞路由吗？"><span class="nav-number">4.3.3.</span> <span class="nav-text">Nat-server需要配置黑洞路由吗？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SLB-服务器负载均衡"><span class="nav-number">4.4.</span> <span class="nav-text">SLB 服务器负载均衡:</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置思路：-1"><span class="nav-number">4.4.1.</span> <span class="nav-text">配置思路：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#双向NAT技术"><span class="nav-number">5.</span> <span class="nav-text">双向NAT技术</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#双向nat："><span class="nav-number">5.1.</span> <span class="nav-text">双向nat：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#域间双向NAT："><span class="nav-number">5.2.</span> <span class="nav-text">域间双向NAT：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#域内双向NAT："><span class="nav-number">5.3.</span> <span class="nav-text">域内双向NAT：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/03/09/防火墙NAT技术/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

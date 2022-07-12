@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="虚拟化介绍什么是虚拟化：虚拟化是一种资源管理技术, 是将计算机的各种物理资源, 如服务器、网络、内存及存储等，予以抽象、转换后呈现出来，打破物理设备结构间的不可切割的障碍，使用户可以比原本的架构更好的方式来应用这些资源。这些资源的虚拟部分是不受现有资源的架构方式、地域或物理设备所限制。 虚拟化创建了一层隔离层，把硬件和上层应用分离开来，允许在一个硬件资源上运行多个逻辑应用。 虚拟化有：服务器虚拟化">
+<meta name="keywords" content="华为网络大赛,Vmware,虚拟化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vmware虚拟化概念原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="虚拟化介绍什么是虚拟化：虚拟化是一种资源管理技术, 是将计算机的各种物理资源, 如服务器、网络、内存及存储等，予以抽象、转换后呈现出来，打破物理设备结构间的不可切割的障碍，使用户可以比原本的架构更好的方式来应用这些资源。这些资源的虚拟部分是不受现有资源的架构方式、地域或物理设备所限制。 虚拟化创建了一层隔离层，把硬件和上层应用分离开来，允许在一个硬件资源上运行多个逻辑应用。 虚拟化有：服务器虚拟化">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/寄居架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/裸金属.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/VSphere.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/内存虚拟化.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/网络虚拟化.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/存储虚拟化.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/ESxi.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/主机管理.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/VSphere.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/vCenter.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/迁移类型.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/对比.png">
+<meta property="og:updated_time" content="2018-04-15T03:25:52.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vmware虚拟化概念原理">
+<meta name="twitter:description" content="虚拟化介绍什么是虚拟化：虚拟化是一种资源管理技术, 是将计算机的各种物理资源, 如服务器、网络、内存及存储等，予以抽象、转换后呈现出来，打破物理设备结构间的不可切割的障碍，使用户可以比原本的架构更好的方式来应用这些资源。这些资源的虚拟部分是不受现有资源的架构方式、地域或物理设备所限制。 虚拟化创建了一层隔离层，把硬件和上层应用分离开来，允许在一个硬件资源上运行多个逻辑应用。 虚拟化有：服务器虚拟化">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/寄居架构.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Vmware虚拟化概念原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Vmware虚拟化概念原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-04-13 21:29:33" itemprop="dateCreated datePublished" datetime="2018-04-13T21:29:33+08:00">2018-04-13</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-04-15 11:25:52" itemprop="dateModified" datetime="2018-04-15T11:25:52+08:00">2018-04-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/虚拟化/" itemprop="url" rel="index"><span itemprop="name">虚拟化</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 4,824</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 17</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="虚拟化介绍"><a href="#虚拟化介绍" class="headerlink" title="虚拟化介绍"></a>虚拟化介绍</h1><h2 id="什么是虚拟化："><a href="#什么是虚拟化：" class="headerlink" title="什么是虚拟化："></a>什么是虚拟化：</h2><p>虚拟化是一种资源管理技术, 是将计算机的各种物理资源, 如服务器、网络、内存及存储等，予以抽象、转换后呈现出来，打破物理设备结构间的不可切割的障碍，使用户可以比原本的架构更好的方式来应用这些资源。这些资源的虚拟部分是不受现有资源的架构方式、地域或物理设备所限制。</p>
+<p>虚拟化创建了一层隔离层，把硬件和上层应用分离开来，允许在一个硬件资源上运行多个逻辑应用。</p>
+<p>虚拟化有：服务器虚拟化、应用程序虚拟化、展现层虚拟化、桌面虚拟化。</p>
+<h2 id="常见的虚拟化："><a href="#常见的虚拟化：" class="headerlink" title="常见的虚拟化："></a>常见的虚拟化：</h2><ol>
+<li>内存虚拟化</li>
+<li>磁盘虚拟化</li>
+<li>网络虚拟化</li>
+</ol>
+<p>VMware实现的是x86服务器的虚拟化，更确切地说，包含以下三个方面</p>
+<ul>
+<li>计算能力：CPU/Memory的虚拟化</li>
+<li>存储：VMFS文件系统</li>
+<li>网络：虚拟交换机</li>
+</ul>
+<h2 id="服务器虚拟化的方式："><a href="#服务器虚拟化的方式：" class="headerlink" title="服务器虚拟化的方式："></a>服务器虚拟化的方式：</h2><p>服务器虚拟化有两种常见的类型</p>
+<ol>
+<li><p>寄居架构（Hosted Architecture）</p>
+<p><img src="/2018/04/13/Vmware虚拟化概念原理/寄居架构.png" alt="寄居架构"></p>
+<p><strong>作为应用安装在OS之上</strong></p>
+<p><strong>基于现有操作系统</strong></p>
+<p><strong>兼容性好</strong></p>
+<p><strong>性能较差</strong></p>
+<p><strong>功能单一</strong></p>
+</li>
+<li><p>裸金属架构（Bare Metal Architecture）</p>
+<p><img src="/2018/04/13/Vmware虚拟化概念原理/裸金属.png" alt="裸金属"></p>
+<p><strong>直接安装在硬件之上，本身就是OS</strong></p>
+<p><strong>基于裸机（Bare Metal）</strong></p>
+<p><strong>硬件兼容性要求高</strong></p>
+<p><strong>性能好</strong></p>
+<p><strong>有许多高级功能。</strong></p>
+</li>
+</ol>
+<h2 id="为什么要使用虚拟机："><a href="#为什么要使用虚拟机：" class="headerlink" title="为什么要使用虚拟机："></a>为什么要使用虚拟机：</h2><p>物理架构存在的问题：</p>
+<ul>
+<li>难以复制和移动 </li>
+<li>受制于一定的硬件组件 </li>
+<li>生命周期短 </li>
+<li>物理服务器的资源利用率低</li>
+</ul>
+<p>服务器虚拟化</p>
+<ul>
+<li>将一台物理服务器虚拟成多台虚拟服务器。虚拟服务器由一系列的文件组成</li>
+</ul>
+<p>虚拟机与物理机相比</p>
+<ul>
+<li><p>最大化利用物理机的资源，节省能耗</p>
+</li>
+<li><p>更方便地获取计算资源</p>
+</li>
+<li><p>硬件无关。虚机都是文件，方便迁移、保护</p>
+</li>
+<li><p>生命周期更长，不会随着硬件变化而变化</p>
+</li>
+<li><p>根据需求的变化，非常容易更改资源的分配</p>
+</li>
+<li><p>更多高级功能</p>
+<p>在线的数据、虚拟机迁移</p>
+<p>高可用</p>
+<p>自动资源调配</p>
+<p>云计算</p>
+</li>
+<li><p>减少整体拥有成本，包括管理、维护等</p>
+</li>
+</ul>
+<h2 id="vSphere基本架构："><a href="#vSphere基本架构：" class="headerlink" title="vSphere基本架构："></a>vSphere基本架构：</h2><p><img src="/2018/04/13/Vmware虚拟化概念原理/VSphere.png" alt="VSphere"></p>
+<p><center>图：vSphere 基本架构<center></center></center></p>
+<h3 id="虚拟化环境中的资源共享："><a href="#虚拟化环境中的资源共享：" class="headerlink" title="虚拟化环境中的资源共享："></a>虚拟化环境中的资源共享：</h3><p>物理机的资源被多个虚拟机共享：CPU、内存、网络、存储等。</p>
+<h3 id="CPU虚拟化："><a href="#CPU虚拟化：" class="headerlink" title="CPU虚拟化："></a>CPU虚拟化：</h3><ul>
+<li><p>LCPU</p>
+<p>逻辑运算单元</p>
+<p>可供使用的物理资源</p>
+<p>超线程对LCPU的影响</p>
+</li>
+<li><p>vCPU</p>
+<p>虚拟化的CPU</p>
+</li>
+<li><p>vmkernel</p>
+<p>负责CPU资源调度</p>
+<p>分时</p>
+</li>
+</ul>
+<h3 id="内存虚拟化："><a href="#内存虚拟化：" class="headerlink" title="内存虚拟化："></a>内存虚拟化：</h3><p><img src="/2018/04/13/Vmware虚拟化概念原理/内存虚拟化.png" alt="内存虚拟化"></p>
+<p><center>图：内存虚拟化示意图<center></center></center></p>
+<p>由vmkernel控制</p>
+<ol>
+<li>vmkernel控制物理内存</li>
+<li>每个虚拟机拥有独立的连续可寻址的虚拟内存空间</li>
+<li>采用多种技术优化内存的使用</li>
+<li>物理内存不足时可以使用磁盘存储作为交换空间</li>
+</ol>
+<h3 id="网络虚拟化："><a href="#网络虚拟化：" class="headerlink" title="网络虚拟化："></a>网络虚拟化：</h3><p><img src="/2018/04/13/Vmware虚拟化概念原理/网络虚拟化.png" alt="网络虚拟化"></p>
+<p><center>图：网络虚拟化示意图<center></center></center></p>
+<ul>
+<li><p>通过虚拟网络交换机实现</p>
+<p>连接虚拟机、vmkernel与外部物理网络，工作在第二层</p>
+</li>
+<li><p>虚拟网卡</p>
+<p>虚拟机中运行的网卡</p>
+<p>虚拟机对外进行网络通讯</p>
+</li>
+<li><p>vmkernel口-vmkernel对外进行网络通讯</p>
+</li>
+<li><p>物理网卡-上连物理网络，工作在第一次</p>
+</li>
+</ul>
+<h3 id="存储虚拟化："><a href="#存储虚拟化：" class="headerlink" title="存储虚拟化："></a>存储虚拟化：</h3><p><img src="/2018/04/13/Vmware虚拟化概念原理/存储虚拟化.png" alt="存储虚拟化"></p>
+<p><center>图：存储虚拟化<center></center></center></p>
+<p>通过虚拟磁盘vmdk文件的封装实现</p>
+<ul>
+<li>多个ESXi主机访问共享存储</li>
+<li>虚机的虚拟磁盘以vmdk文件格式存放在存储中</li>
+<li>每个虚拟机由一组文件组成</li>
+<li>每个虚拟机有各自的目录</li>
+<li>虚拟机的文件系统对ESXi主机不可见</li>
+</ul>
+<h3 id="vSphere与云计算："><a href="#vSphere与云计算：" class="headerlink" title="vSphere与云计算："></a>vSphere与云计算：</h3><ul>
+<li><p>虚拟化是云计算的基础</p>
+<p>虚拟机在虚拟基础架构上运行</p>
+<p>动态的计算资源池作为云计算的基础</p>
+</li>
+<li><p>支持各种云计算平台</p>
+<p>VMware vRealize</p>
+<p>OpenStack</p>
+</li>
+<li><p>支持多种云环境</p>
+<p>私有云</p>
+<p>公有云</p>
+<p>混合云</p>
+</li>
+</ul>
+<h1 id="ESXi基本结构"><a href="#ESXi基本结构" class="headerlink" title="ESXi基本结构"></a>ESXi基本结构</h1><h2 id="ESXi介绍："><a href="#ESXi介绍：" class="headerlink" title="ESXi介绍："></a>ESXi介绍：</h2><p>VMware ESXi是最核心的组件<br>VMware ESXi是我们常说的ESXi主机，虚拟化层<br>组件的作用：ESXi用于协调物理计算机的资源，同时通过ESXi管理其上的虚拟机，如部署、迁移等操作。同时还可以通过ESXi对物理计算机上的网络存储资源仅从管理，ESXi通过配置虚拟交换机上的vSwitch管理配置网络资源，通过VMfs和nfs管理虚拟存储资源。</p>
+<p>核心Hypervisor - VMkernel</p>
+<ul>
+<li>基于裸机的虚拟化</li>
+<li>虚拟CPU/内存</li>
+<li>VMFS存储支持</li>
+<li>虚拟交换机支持</li>
+</ul>
+<p>ESXi的安装方式</p>
+<ul>
+<li>可以安装在本地硬盘，存储网络盘， USB/SD卡，或者内存中</li>
+</ul>
+<h2 id="VMware-ESX的发展过程："><a href="#VMware-ESX的发展过程：" class="headerlink" title="VMware ESX的发展过程："></a>VMware ESX的发展过程：</h2><ol>
+<li><p>2006年，服务器有了第一款虚拟化产品—GSX，此时VMware的安装方式时现在物理机上安装操作系统，再将VMware作为应用程序安装在主机上，VMware通过宿主操作系统进行资源和操作系统的管理。这种将虚拟化程序安装在宿主机上的架构称为寄居式虚拟化。寄居式虚拟化最大的问题式过度的依赖于宿主操作系统。 </p>
+</li>
+<li><p>2009年，VMware推出 ESX，VMware 直接将ESX安装在物理计算机上，这种安装方式称为裸机安装。但是ESX并不能完全的摒弃宿主操作系统，他的解决方法是将虚拟化程序和操作系统整合到一起。也就是说，他将虚拟化的程序写入到linux的操作系统中。此时，ESX通过linux系统的Servers Console来运行，而资源和虚拟机的管理工作则通过合作代理伙伴和编写脚本来执行。ESX有效的解决了对宿主操作系统过于依赖的问题。但是这种架构依然有他自己的缺陷，首先，由于虚拟化程序中包含linux的操作系统，linux的操作系统中非虚拟化部分的进程会占用主机上的部分资源，造成资源的浪费。其次，在进行资源和虚拟机的管理时，只能通过脚本和代理，非常的不方便。 </p>
+</li>
+<li><p>2011年，VMware推出了ESXi,即为当前应用最广泛的虚拟化产品。同样，ESXi也是裸机安装在物理计算机上的，他做的改进是将虚拟化层中繁杂的linux层剔除，只保留了VMkernel虚拟化内核对资源进行管理。这样，便大大的额降低了虚拟化层的大小。同时，也减小了虚拟化层对物理化层的开销。ESXi做的第二大改进便是将控制台从虚拟化程序中移除，变成一个独立的组件，即Vsphere Client，使得管理工作更加的轻松便捷。 </p>
+<p>ESXi体系结构独立于通用的操作系统运行，从而简化了虚拟化管理程序管理并提高了安全性。</p>
+</li>
+</ol>
+<h2 id="ESXi的优点："><a href="#ESXi的优点：" class="headerlink" title="ESXi的优点："></a>ESXi的优点：</h2><ul>
+<li>精简的体系结构 </li>
+<li>更小的安全占用空间 </li>
+<li>简化的部署和配置 </li>
+<li>简化的修补和更新模式 </li>
+</ul>
+<p>##ESXi基本架构：</p>
+<p><img src="/2018/04/13/Vmware虚拟化概念原理/ESxi.PNG" alt="ESxi"></p>
+<p><center>图：ESXi基本架构<center></center></center></p>
+<h2 id="ESXi主机的管理方式："><a href="#ESXi主机的管理方式：" class="headerlink" title="ESXi主机的管理方式："></a>ESXi主机的管理方式：</h2><ul>
+<li><p>独立的ESXi主机</p>
+<p>直接访问ESXi主机</p>
+<p>单独的管理界面，可管理项少</p>
+<p>用户管理与授权由ESXi主机控制</p>
+<p>常用于初始配置或者故障诊断</p>
+</li>
+<li><p>通过vCenter服务器管理多台ESXi主机</p>
+<p>通过vCenter服务器访问ESXi主机</p>
+<p>统一的管理界面，高级功能管理</p>
+<p>可整合第三方管理插件</p>
+<p>用户管理与授权由vCenter服务器控制</p>
+<p>用于日常管理</p>
+</li>
+<li><p>图形界面</p>
+<p>vSphere Client</p>
+<p>vSphere Web Client</p>
+<p>通过API使用第三方软件</p>
+</li>
+<li><p>命令行</p>
+<p>vCLI</p>
+<p>vMA</p>
+<p>PowerCLI</p>
+<p>*DCUI</p>
+<p>*SSH/ESXi Shell**</p>
+</li>
+<li><p>API接口</p>
+</li>
+</ul>
+<p><img src="/2018/04/13/Vmware虚拟化概念原理/主机管理.png" alt="主机管理"></p>
+<p><center>图：ESXi主机的管理方式<center></center></center></p>
+<h1 id="vCenter服务器–数据中心的单一控制点"><a href="#vCenter服务器–数据中心的单一控制点" class="headerlink" title="vCenter服务器–数据中心的单一控制点"></a>vCenter服务器–数据中心的单一控制点</h1><h2 id="vCenter介绍："><a href="#vCenter介绍：" class="headerlink" title="vCenter介绍："></a>vCenter介绍：</h2><p> vCenter Server：</p>
+<p>定义：VMware vCenter Server是充当ESXi主机及其虚拟化中心管理点的服务。供管理员集中的统一的管理企业的虚拟化环境。</p>
+<ul>
+<li>主要的作用是：提供集中的管理接口，供管理员可以管理整套的虚拟化环境。 </li>
+<li>也可以为虚拟化提供更高级的功能。如，虚拟机迁移，分布式的服务，快速部署虚拟机 </li>
+<li>vCenter的配置信息和清单信息主要保存在数据库中，这就是数据库服务器和数据库存储。 </li>
+<li>同时vCenter管理主机时，有部分服务需要在各个主机上，比如，分布式虚拟交换机需要一定的分布式服务，同时在管理虚拟化的环境时，需要有相应的权限管理以及ACL用户访问控制。同时，为了便于管理，需要统一的身份验证，vCenter提供了一些接口，供第三方程序进行连接。</li>
+</ul>
+<p>虚拟化平台的管理服务器</p>
+<ul>
+<li>提供配置、管理、访问控制、监控等基本数据中心服务</li>
+<li>可管理最多1000台ESXi主机、10000台开机的虚拟机</li>
+</ul>
+<p><img src="/2018/04/13/Vmware虚拟化概念原理/VSphere.png" alt="VSphere"></p>
+<h2 id="vCenter服务器及逻辑组件架构："><a href="#vCenter服务器及逻辑组件架构：" class="headerlink" title="vCenter服务器及逻辑组件架构："></a>vCenter服务器及逻辑组件架构：</h2><p><img src="/2018/04/13/Vmware虚拟化概念原理/vCenter.png" alt="vCenter"></p>
+<p><center>图：vCenter逻辑组件架构<center></center></center></p>
+<ul>
+<li><p>每个vCenter可以管理1千台ESXi服务器以及1万台开机的虚拟机</p>
+</li>
+<li><p>许多跨越ESXi主机的服务必须要vCenter支持</p>
+<p>HA, FT, vMotion, DRS, Storage vMotion, Storage DRS, dVS 等等</p>
+</li>
+</ul>
+<p>vCenter服务器的主要逻辑组件包括：</p>
+<ul>
+<li>vCenter服务器 – 管理组件</li>
+<li>数据库服务器 – 存放配置与性能数据</li>
+<li>SSO组件 – 与LDAP或者AD服务器通讯，提供用户认证</li>
+<li>清单服务 Inventory Service</li>
+<li>用户管理界面 – vSphere Client或者使用浏览器+Flash连接Web Client</li>
+</ul>
+<p>vCenter其他组件：</p>
+<ul>
+<li><p>管理接口<br>vSphere API – 应用程序接口</p>
+</li>
+<li><p>vCenter Lookup Service<br>包含关于 vSphere 基础架构的拓扑信息,使 vSphere 组件能够安全地互相连接</p>
+</li>
+<li><p>其它分布式服务</p>
+<p>包括vMotion、DRS和vSphere HA,这些服务随vCenter Server一起安装</p>
+</li>
+</ul>
+<h2 id="vCenter管理角色："><a href="#vCenter管理角色：" class="headerlink" title="vCenter管理角色："></a>vCenter管理角色：</h2><ul>
+<li>安装完vCente后，便带有的管理功能，包括<strong>资源管理，模板管理，虚拟机分布，虚拟机管理，安全任务事件，和日志主机管理</strong>等 </li>
+<li>可扩展的组件，比如<strong>云平台管理，站点恢复管理，APP接口和更新管理</strong>等。 </li>
+<li>在安装vCente时，可以自由选择是否安装可扩展的插件。注意，可扩展模块是<strong>包括一个服务器组件和一个客户端组件</strong>。</li>
+</ul>
+<h1 id="VMware虚拟机及虚拟机管理介绍"><a href="#VMware虚拟机及虚拟机管理介绍" class="headerlink" title="VMware虚拟机及虚拟机管理介绍"></a>VMware虚拟机及虚拟机管理介绍</h1><h2 id="什么是虚拟机："><a href="#什么是虚拟机：" class="headerlink" title="什么是虚拟机："></a>什么是虚拟机：</h2><h2 id="什么是虚拟机：-1"><a href="#什么是虚拟机：-1" class="headerlink" title="什么是虚拟机："></a>什么是虚拟机：</h2><p>虚拟机是一个逻辑的计算机，可以在其上运行受支持的客户端操作系统和应用程序的虚拟硬件集；<br>从本质上来说，或者是从存储的角度来看，是一组离散的文件。<br>虚拟机文件包括</p>
+<ul>
+<li>.vmx – 虚拟机配置文件（文本）</li>
+<li>.nvram – 虚拟机BIOS文件（二进制）</li>
+<li>.vmdk – 虚拟磁盘描述文件（仅描述信息，非常小）</li>
+<li>-flat.vmdk – 虚拟磁盘数据文件（实际数据）</li>
+<li>-rdm.vmdk – 裸设备映射虚拟磁盘文件</li>
+<li>.vswp/vmx-***.vswp – vmkernel swap文件，也称为虚拟机交换文件</li>
+<li>.vmtx –模板的配置文件（文本）</li>
+<li>.vmsd/.vmsn/-delta.vmdk – 虚拟机快照文件及磁盘delta数据文件</li>
+<li>.log – 虚拟机日志文件</li>
+<li>.vmss – 挂起状态文件</li>
+</ul>
+<h2 id="虚拟机的模板："><a href="#虚拟机的模板：" class="headerlink" title="虚拟机的模板："></a>虚拟机的模板：</h2><ul>
+<li>通过虚拟机的模板快速的部署虚拟机 </li>
+<li>模板是虚拟机的主副本，用于创建和部署新的虚拟机。 </li>
+<li>模板通常包括一个客户操作系统，一组应用程序和一个特定的虚拟机配置的映像。</li>
+</ul>
+<h2 id="管理模板"><a href="#管理模板" class="headerlink" title="管理模板:"></a>管理模板:</h2><ul>
+<li>在制作模板时，我们可以选择将虚拟机转化为模板，也可以选择克隆为模板。 </li>
+<li>若是<strong>转换为模板</strong>，则是选择为该虚拟机添加模板标记，并转化为模板，效率很快，此时虚拟机<strong>必须处于关闭状态</strong>才可以进行。 </li>
+<li>若选择<strong>克隆为模板</strong>，则是先客隆虚拟机，再制作模板，所以，耗时很长，但是克隆为模板时，<strong>虚拟机的电源是可以开启的，也可以是关闭的</strong>。 </li>
+<li>在选择用模板部署虚拟机时，可以选择通过模板部署虚拟机，也可以选择转换为虚拟机，来修改模板。同时，在部署虚拟机的过程中，我们可以选择使用规范或者自定义的向导完成部署后的自定义工作。比如，刷新SID，加入域等，以减少部署虚拟机后的后序工作。</li>
+<li><strong>克隆虚拟机：克隆是虚拟机的一个精确副本，被克隆的虚拟机的电源是可以开启的，也可以是关闭的。</strong></li>
+</ul>
+<p>##迁移类型：</p>
+<ul>
+<li>迁移主机</li>
+<li>迁移存储</li>
+<li>同时迁移主机与存储</li>
+</ul>
+<h2 id="虚拟机迁移的方式："><a href="#虚拟机迁移的方式：" class="headerlink" title="虚拟机迁移的方式："></a>虚拟机迁移的方式：</h2><p><img src="/2018/04/13/Vmware虚拟化概念原理/迁移类型.png" alt="迁移类型"></p>
+<p><center>图：迁移方式<center></center></center></p>
+<ul>
+<li><p>冷迁移</p>
+<p>虚拟机电源处于关闭或者挂起状态</p>
+<p>可以迁移主机、存储、或者两者同时迁移</p>
+</li>
+<li><p>热迁移：虚拟机电源处于开机状态</p>
+<p>迁移主机 – vMotion</p>
+<p>迁移数据存储 – Storage vMotion</p>
+<p>同时迁移主机和存储 – Cross-Host vMotion，或者称为无共享存储的vMotion</p>
+</li>
+</ul>
+<h2 id="vSpher-vMotion："><a href="#vSpher-vMotion：" class="headerlink" title="vSpher vMotion："></a>vSpher vMotion：</h2><p>虚拟机开机时，将虚拟机从一个主机在线迁移到另一个主机</p>
+<ul>
+<li>虚拟机数据应当位于可以被两台主机同时访问的共享存储上</li>
+<li>两台主机的CPU必须兼容</li>
+<li>主机与虚拟机需要满足vMotion的条件</li>
+</ul>
+<p>用于</p>
+<ul>
+<li>减少由于主机维护、升级等引起的虚拟机计划内宕机时间</li>
+<li>可以用于控制主机资源的负载均衡</li>
+</ul>
+<h2 id="Storage-vMotion："><a href="#Storage-vMotion：" class="headerlink" title="Storage vMotion："></a>Storage vMotion：</h2><p>虚拟机开机时，将虚拟机从一个存储在线迁移到另一个存储</p>
+<ul>
+<li>不可以跨越虚拟数据中心</li>
+<li>不迁移主机、无宕机时间</li>
+</ul>
+<p>应用场景</p>
+<ul>
+<li>减少由于存储维护引起的计划内宕机时间</li>
+<li>存储资源的负载均衡</li>
+<li>在线地更改虚拟磁盘格式及文件名</li>
+</ul>
+<h2 id="迁移类型的对比："><a href="#迁移类型的对比：" class="headerlink" title="迁移类型的对比："></a>迁移类型的对比：</h2><p><img src="/2018/04/13/Vmware虚拟化概念原理/对比.png" alt="对比"></p>
+<h2 id="虚拟机快照："><a href="#虚拟机快照：" class="headerlink" title="虚拟机快照："></a>虚拟机快照：</h2><ul>
+<li>通过快照保留虚拟机的状态，以便可以反复的回到同一状态。 </li>
+<li>快照提供了一种临时的容错解决方案 </li>
+<li>快照的工作原理：当为虚拟机拍摄快照时，回生成快照的状态文件，保留拍摄快照时虚拟机运行的状态信息，同时，将元虚拟机的磁盘变为只读磁盘，并且新建一块新的增量虚拟磁盘，拍摄快照后的变更数据，写入增量虚拟磁盘中；恢复快照时，将增量虚拟磁盘删除，清除所有变更后的快照信息。并再次新建增量磁盘，如果想在删除快照，则上块增量虚拟磁盘中的数据写入到只读磁盘中，并删除增量虚拟磁盘，这样就保留了快照后的信息，删除了快照节点，<strong>可以在开启，关闭和挂起时拍摄快照</strong>。拍摄快照也可以选择是否捕获虚拟机内存状态，设置状态和虚拟的磁盘状态 </li>
+<li>但是，虚拟机快照只是一种临时的容错方案，不能替代备份方案，如果虚拟机的数据损坏，快照无法完成修复。所以，依然需要规划虚拟机的数据保护。同时，为了比避免增量磁盘过大，需要对虚拟机的快照做及时的删除。</li>
+</ul>
+<p>虚拟机快照是虚拟机某一时间点的状态</p>
+<ul>
+<li>虚拟机磁盘状态</li>
+<li>虚拟机BIOS及配置状态</li>
+<li>虚拟机内存状态</li>
+</ul>
+<p>可以通过快照记录虚拟机状态</p>
+<ul>
+<li>用于测试、备份数据源、快速恢复等用途</li>
+</ul>
+<h1 id="VMware可用性及可扩展性的介绍"><a href="#VMware可用性及可扩展性的介绍" class="headerlink" title="VMware可用性及可扩展性的介绍"></a>VMware可用性及可扩展性的介绍</h1><h2 id="VMware各级容灾方案："><a href="#VMware各级容灾方案：" class="headerlink" title="VMware各级容灾方案："></a>VMware各级容灾方案：</h2><ul>
+<li>在站点级别：有set recovery manager,实现站点的数据备份。 </li>
+<li>在数据级别，有VMware Data Recovery以及其他第三方的备份解决方案 </li>
+<li>在存储级别：通过Storage vMotion可以保存储的可用性 </li>
+<li>在服务器级别：有VMware vSphere和vMotion 和DRS动态资源分布等保证主机级的可用性。 </li>
+<li>在组件级别：有网卡绑定、存储多路径等功能保障网络、存储的可用性。 </li>
+<li>VMware为我们提供了针对故障的保护，实现零停机的计划运维，同时，针对计划外的停机和灾难也提供了相应的保护机制</li>
+</ul>
+<h2 id="VMware在虚拟化级别为我们提供的解决方案—HA（High-Availability）"><a href="#VMware在虚拟化级别为我们提供的解决方案—HA（High-Availability）" class="headerlink" title="VMware在虚拟化级别为我们提供的解决方案—HA（High Availability）"></a>VMware在虚拟化级别为我们提供的解决方案—HA（High Availability）</h2><ul>
+<li>HA的作用：高可用性，停机时间最少，可用于支持的客户操作系统，可用于支持所有的EXSXI硬件，用于为需要这种保护级别的虚拟机提供高可用行 </li>
+<li>HA的适用故障 </li>
+<li>主机故障 </li>
+<li>客户OS故障 </li>
+<li>应用程序故障</li>
+</ul>
+<h2 id="HA如何实现高可用？"><a href="#HA如何实现高可用？" class="headerlink" title="HA如何实现高可用？"></a>HA如何实现高可用？</h2><p>当服务器发生故障时，HA自动的到其他的虚拟机上进行虚拟机的重启，保障其虚拟机的可用性以及业务的连续性</p>
+<h2 id="HA的优势："><a href="#HA的优势：" class="headerlink" title="HA的优势："></a>HA的优势：</h2><p>HA是一套经济有效的适用于所有应用的高可用的解决方案<br>因为HA不需要独占stand-by硬件，也没有集群软件的成本和复杂性，只需要在集群中启用HA的功能即可。</p>
+<h2 id="HA的缺陷："><a href="#HA的缺陷：" class="headerlink" title="HA的缺陷："></a>HA的缺陷：</h2><p>HA可以为组织提供自信的运行其关键业务能力的应用程序的能力，但是是通过重启虚拟机来实现的，有些虚拟机的重新启动的速度很慢，这时业务的连续性就比较低，甚至有些虚拟机需要开机后，在手动的进行某些配置才可以提供服务。仅仅时自动重启，并不能满足高可用性。</p>
+<h2 id="Fault-Tolerance（FT）"><a href="#Fault-Tolerance（FT）" class="headerlink" title="Fault Tolerance（FT）"></a>Fault Tolerance（FT）</h2><p>FT容错系统的设计目标是：出现计划外的中断时，某个备份的虚拟机可以立即去完成任务，确保不出现服务的中断。<br>FT体提供了比HA更高的业务连续性<br>实现了应用程序的<strong>零停机和零数据丢失</strong>。</p>
+<h2 id="虚拟化的可扩展性—DRS"><a href="#虚拟化的可扩展性—DRS" class="headerlink" title="虚拟化的可扩展性—DRS"></a>虚拟化的可扩展性—DRS</h2><p>DRS—Distributed Resource Scheduler,动态负载均衡<br>DRS实现了动态负载均衡连续的智能优化保证了所有的应用需要的资源。<br>DRS可以实现跨资源池的动态调整计算资源，可基于预定义的规则，智能的分配资源。<br>注意：规划DRS时，是围绕着业务进行组织和规划的，而不是硬件</p>
+<h2 id="DRS如何实现动态的扩展？【当有新主机的加入时】"><a href="#DRS如何实现动态的扩展？【当有新主机的加入时】" class="headerlink" title="DRS如何实现动态的扩展？【当有新主机的加入时】"></a>DRS如何实现动态的扩展？【当有新主机的加入时】</h2><p>当有新主机的加入时，DRS自动的将资源池扩展，经过计算后，自动的将虚拟机迁移到新的主机上，这样，变更利于添加更多的资源，避免业务繁忙时，出现过载的现象。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/" title="Vmware虚拟化概念原理">https://cshihong.github.io/2018/04/13/Vmware虚拟化概念原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/华为网络大赛/" rel="tag"># 华为网络大赛</a>
+          
+            <a href="/tags/Vmware/" rel="tag"># Vmware</a>
+          
+            <a href="/tags/虚拟化/" rel="tag"># 虚拟化</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/04/13/云数据中心基础/" rel="next" title="云数据中心基础">
+                <i class="fa fa-chevron-left"></i> 云数据中心基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/15/VXLAN基本概述/" rel="prev" title="VXLAN基本概述">
+                VXLAN基本概述 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#虚拟化介绍"><span class="nav-number">1.</span> <span class="nav-text">虚拟化介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是虚拟化："><span class="nav-number">1.1.</span> <span class="nav-text">什么是虚拟化：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见的虚拟化："><span class="nav-number">1.2.</span> <span class="nav-text">常见的虚拟化：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#服务器虚拟化的方式："><span class="nav-number">1.3.</span> <span class="nav-text">服务器虚拟化的方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么要使用虚拟机："><span class="nav-number">1.4.</span> <span class="nav-text">为什么要使用虚拟机：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vSphere基本架构："><span class="nav-number">1.5.</span> <span class="nav-text">vSphere基本架构：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#虚拟化环境中的资源共享："><span class="nav-number">1.5.1.</span> <span class="nav-text">虚拟化环境中的资源共享：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CPU虚拟化："><span class="nav-number">1.5.2.</span> <span class="nav-text">CPU虚拟化：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#内存虚拟化："><span class="nav-number">1.5.3.</span> <span class="nav-text">内存虚拟化：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络虚拟化："><span class="nav-number">1.5.4.</span> <span class="nav-text">网络虚拟化：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#存储虚拟化："><span class="nav-number">1.5.5.</span> <span class="nav-text">存储虚拟化：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#vSphere与云计算："><span class="nav-number">1.5.6.</span> <span class="nav-text">vSphere与云计算：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ESXi基本结构"><span class="nav-number">2.</span> <span class="nav-text">ESXi基本结构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ESXi介绍："><span class="nav-number">2.1.</span> <span class="nav-text">ESXi介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VMware-ESX的发展过程："><span class="nav-number">2.2.</span> <span class="nav-text">VMware ESX的发展过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ESXi的优点："><span class="nav-number">2.3.</span> <span class="nav-text">ESXi的优点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ESXi主机的管理方式："><span class="nav-number">2.4.</span> <span class="nav-text">ESXi主机的管理方式：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#vCenter服务器–数据中心的单一控制点"><span class="nav-number">3.</span> <span class="nav-text">vCenter服务器–数据中心的单一控制点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#vCenter介绍："><span class="nav-number">3.1.</span> <span class="nav-text">vCenter介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vCenter服务器及逻辑组件架构："><span class="nav-number">3.2.</span> <span class="nav-text">vCenter服务器及逻辑组件架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vCenter管理角色："><span class="nav-number">3.3.</span> <span class="nav-text">vCenter管理角色：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VMware虚拟机及虚拟机管理介绍"><span class="nav-number">4.</span> <span class="nav-text">VMware虚拟机及虚拟机管理介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是虚拟机："><span class="nav-number">4.1.</span> <span class="nav-text">什么是虚拟机：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是虚拟机：-1"><span class="nav-number">4.2.</span> <span class="nav-text">什么是虚拟机：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟机的模板："><span class="nav-number">4.3.</span> <span class="nav-text">虚拟机的模板：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#管理模板"><span class="nav-number">4.4.</span> <span class="nav-text">管理模板:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟机迁移的方式："><span class="nav-number">4.5.</span> <span class="nav-text">虚拟机迁移的方式：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#vSpher-vMotion："><span class="nav-number">4.6.</span> <span class="nav-text">vSpher vMotion：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-vMotion："><span class="nav-number">4.7.</span> <span class="nav-text">Storage vMotion：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#迁移类型的对比："><span class="nav-number">4.8.</span> <span class="nav-text">迁移类型的对比：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟机快照："><span class="nav-number">4.9.</span> <span class="nav-text">虚拟机快照：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VMware可用性及可扩展性的介绍"><span class="nav-number">5.</span> <span class="nav-text">VMware可用性及可扩展性的介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VMware各级容灾方案："><span class="nav-number">5.1.</span> <span class="nav-text">VMware各级容灾方案：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#VMware在虚拟化级别为我们提供的解决方案—HA（High-Availability）"><span class="nav-number">5.2.</span> <span class="nav-text">VMware在虚拟化级别为我们提供的解决方案—HA（High Availability）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HA如何实现高可用？"><span class="nav-number">5.3.</span> <span class="nav-text">HA如何实现高可用？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HA的优势："><span class="nav-number">5.4.</span> <span class="nav-text">HA的优势：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HA的缺陷："><span class="nav-number">5.5.</span> <span class="nav-text">HA的缺陷：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fault-Tolerance（FT）"><span class="nav-number">5.6.</span> <span class="nav-text">Fault Tolerance（FT）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#虚拟化的可扩展性—DRS"><span class="nav-number">5.7.</span> <span class="nav-text">虚拟化的可扩展性—DRS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DRS如何实现动态的扩展？【当有新主机的加入时】"><span class="nav-number">5.8.</span> <span class="nav-text">DRS如何实现动态的扩展？【当有新主机的加入时】</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/04/13/Vmware虚拟化概念原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

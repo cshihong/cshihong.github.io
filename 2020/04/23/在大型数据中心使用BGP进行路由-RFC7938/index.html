@@ -1,0 +1,2143 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本文是在看RFC7938《 Use of BGP for Routing in Large-Scale Data Centers》是翻译整理的资料。主要讲述了在大型数据中心使用BGP进行路由。 原文链接：https://tools.ietf.org/rfc/rfc7938.txt   摘要一些网络运营者建立和运营数据中心，支持超过10万台服务器。在本文中，这样的数据中心被称为“大型（large">
+<meta name="keywords" content="BGP,数据中心">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在大型数据中心使用BGP进行路由(RFC7938)">
+<meta property="og:url" content="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="本文是在看RFC7938《 Use of BGP for Routing in Large-Scale Data Centers》是翻译整理的资料。主要讲述了在大型数据中心使用BGP进行路由。 原文链接：https://tools.ietf.org/rfc/rfc7938.txt   摘要一些网络运营者建立和运营数据中心，支持超过10万台服务器。在本文中，这样的数据中心被称为“大型（large">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/典型拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/Clos.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/5级Clos网络.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/ASN.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/ECMP.png">
+<meta property="og:image" content="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/Clos拓扑.png">
+<meta property="og:updated_time" content="2020-04-23T11:54:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="在大型数据中心使用BGP进行路由(RFC7938)">
+<meta name="twitter:description" content="本文是在看RFC7938《 Use of BGP for Routing in Large-Scale Data Centers》是翻译整理的资料。主要讲述了在大型数据中心使用BGP进行路由。 原文链接：https://tools.ietf.org/rfc/rfc7938.txt   摘要一些网络运营者建立和运营数据中心，支持超过10万台服务器。在本文中，这样的数据中心被称为“大型（large">
+<meta name="twitter:image" content="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/典型拓扑.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>在大型数据中心使用BGP进行路由(RFC7938) | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">在大型数据中心使用BGP进行路由(RFC7938)
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-04-23 16:00:27 / 修改时间：19:54:48" itemprop="dateCreated datePublished" datetime="2020-04-23T16:00:27+08:00">2020-04-23</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/数据中心/" itemprop="url" rel="index"><span itemprop="name">数据中心</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 15,808</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 59</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<blockquote>
+<p>本文是在看RFC7938《 Use of BGP for Routing in Large-Scale Data Centers》是翻译整理的资料。主要讲述了在大型数据中心使用BGP进行路由。</p>
+<p>原文链接：<a href="https://tools.ietf.org/rfc/rfc7938.txt" target="_blank" rel="noopener">https://tools.ietf.org/rfc/rfc7938.txt</a></p>
+</blockquote>
+<hr>
+<h1 id="摘要"><a href="#摘要" class="headerlink" title="摘要"></a>摘要</h1><p>一些网络运营者建立和运营数据中心，支持超过10万台服务器。在本文中，这样的数据中心被称为“大型（large-scale）”，以区别于小型基础设施。这种规模的环境有一组独特的网络需求，强调操作的简单性和网络的稳定性。本文总结了使用BGP作为唯一的路由协议设计和运行大型数据中心的操作经验。其目的是报告一个可靠的和稳定的路由设计，可以被业界的其他人利用。</p>
+<h1 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h1><p>本文档描述了一个可用于大型数据中心(DC)设计的实用路由设计。这样的数据中心，也被称为“超大规模（hyper-scale）”或“仓库规模（warehouse-scale）”的数据中心，有一个独特的属性，支持超过十万台服务器。为了适应这种规模的网络，运营者正在重新审视网络设计和平台，以满足这一需求。</p>
+<p>本文档中提出的设计基于对数据中心的运营经验，这些数据中心是为支持大规模分布式软件基础结构（例如Web搜索引擎）而构建的。 在这种环境中的主要要求是操作的简便性和网络稳定性，以便一小部分人可以有效地支持规模庞大的网络。</p>
+<p>实验和大量测试表明，外部BGP（EBGP）[RFC4271]非常适合作为此类数据中心应用程序的独立路由协议。 这与更传统的DC设计形成对比，后者可能使用简单的树形拓扑，并依赖于跨多个网络设备扩展第2层(L2)域。本文档详细阐述了导致这种设计选择的需求，并提供了EBGP路由设计的细节，以及探索进一步增强的思想。</p>
+<p>本文档首先概述了大型（large-scale）数据中心的网络设计要求和注意事项。 然后，将传统的分层数据中心网络拓扑与水平扩展的Clos网络[CLOS1953]进行对比。 接下来是选择具有Clos拓扑结构的EBGP作为满足要求的最合适路由协议的论据，并详细描述了所提出的设计。 最后，本文回顾了一些其他注意事项和设计选项。 读者计划部署本文档中描述的设计时，需要对BGP有透彻的了解。</p>
+<h1 id="2-网络设计需求"><a href="#2-网络设计需求" class="headerlink" title="2. 网络设计需求"></a>2. 网络设计需求</h1><p>本节描述并总结了大型数据中心的网络设计要求。</p>
+<h2 id="2-1-带宽和流量模型"><a href="#2-1-带宽和流量模型" class="headerlink" title="2.1. 带宽和流量模型"></a>2.1. 带宽和流量模型</h2><p>在为大量服务器构建互连网络时，主要的需求是适应应用程序带宽和延迟需求。直到最近，大量的流量进出数据中心还是很常见的，通常被称为“南北”流量。传统的“树”拓扑足以容纳这样的流量，即使在网络层之间具有很高的收敛比。如果需要更多的带宽，可以通过“扩展（scaling up）”网络元素来增加带宽，例如，升级设备的线路板或结构，或者用端口密度更高的设备来替代设备。</p>
+<p>如今，许多大型数据中心承载着大量的服务器到服务器的流量，这些流量并不会离开DC，通常被称为“东西向”流量。 此类应用程序的示例可以是诸如Hadoop [HADOOP]之类的计算机群集，某些应用程序所需的群集之间的海量数据复制或虚拟机迁移。 由于物理限制（例如，交换机中的端口密度），扩展传统的树拓扑以满足这些带宽需求变得过于昂贵或不可能。</p>
+<h2 id="2-2-CAPEX最小化"><a href="#2-2-CAPEX最小化" class="headerlink" title="2.2. CAPEX最小化"></a>2.2. CAPEX最小化</h2><p>仅与网络基础设施相关的资本支出Capital Expenditures（CAPEX）约占数据中心总支出的10-15％（请参阅[GREENBERG2009]）。 然而，绝对成本是巨大的，因此需要不断降低单个网络元件的成本。 这可以通过两种方式完成：</p>
+<ul>
+<li>统一所有网元，最好使用相同的硬件类型甚至相同的设备。 这样可以对批量购买进行批量定价，并减少维护和库存成本。</li>
+<li>通过引入多家网络设备供应商，利用竞争压力降低成本。</li>
+</ul>
+<p>为了使供应商具有良好的多样性，将网元的软件功能要求降到最低非常重要。此策略可在选择供应商设备时提供最大的灵活性，同时使用开放标准来增强互操作性。</p>
+<h2 id="2-3-OPEX最小化"><a href="#2-3-OPEX最小化" class="headerlink" title="2.3. OPEX最小化"></a>2.3. OPEX最小化</h2><p>操作大型基础设施的成本可能很高，因为从统计上看，作为一个更大的网元更容易故障。设计更简单，使用有限的软件特性集进行操作，可以最大限度地减少与软件问题相关的故障。</p>
+<p>最小化运营支出Operational Expenditure（OPEX）的一个重要方面是减小网络中故障域的大小。 众所周知，以太网容易受到广播或单播流量风暴的影响，这可能会对网络性能和可用性产生重大影响。 全路由设计的使用明显减小了数据平面故障域的大小，即将它们限制在网络层次结构中的最低级别。然而，这样的设计引入了分布式控制平面故障的问题。 这种观察要求使用更简单，更少控制平面协议来减少协议交互问题，从而减少网络崩溃的机会。 如上文CAPEX部分所述，将软件功能要求降至最低还可以降低测试和培训要求。</p>
+<h2 id="2-4-流量工程"><a href="#2-4-流量工程" class="headerlink" title="2.4. 流量工程"></a>2.4. 流量工程</h2><p>在任何数据中心中，应用程序负载均衡都是网络设备执行的关键功能。传统上，负载均衡器被部署为流量转发路径中的专用设备。在日益增长的流量需求下，扩展负载均衡器时会出现问题。更好的解决方案是通过添加更多的统一节点并在这些节点之间分配传入流量，从而水平地扩展负载均衡层。在这种情况下，理想的选择是使用网络基础设施本身在一组负载均衡器之间分配流量。可以使用anycast前缀通告[RFC4786]和等价多路径Equal Cost Multipath (ECMP)功能的组合来实现这一目标。为了允许更细粒度的负载分布，支持网络执行受控的每跳流量工程是有益的。例如，在网络层次结构的每一层直接控制anycast前缀的ECMP下一跳集是有益的。</p>
+<h2 id="2-5-总结需求"><a href="#2-5-总结需求" class="headerlink" title="2.5. 总结需求"></a>2.5. 总结需求</h2><p>本节总结了前面各节中概述的要求列表：</p>
+<ul>
+<li><strong>需求1</strong>：通过添加更多相同类型的链接和网络设备，而不需要升级网络元素本身，选择可以“水平（scale-in）”扩展的拓扑。</li>
+<li><strong>需求2</strong>：定义由众多网络设备供应商支持的一组有限的软件特性/协议。</li>
+<li><strong>需求3</strong>：选择一种路由协议，该路由协议在编程代码复杂度和易于操作支持方面都非常简单。</li>
+<li><strong>需求4</strong>：尽可能减少设备或协议问题的故障范围。</li>
+<li><strong>需求5</strong>：允许进行一些流量工程设计，最好使用内置协议机制，通过明确控制路由前缀下一跳来进行。</li>
+</ul>
+<h1 id="3-数据中心拓扑概述"><a href="#3-数据中心拓扑概述" class="headerlink" title="3. 数据中心拓扑概述"></a>3. 数据中心拓扑概述</h1><p>本节概述了两种通用类型的数据中心设计-分层（也称为“基于树”）和基于Clos的网络设计。</p>
+<h2 id="3-1-传统数据中心拓扑"><a href="#3-1-传统数据中心拓扑" class="headerlink" title="3.1. 传统数据中心拓扑"></a>3.1. 传统数据中心拓扑</h2><p>在网络行业中，数据中心的常见设计选择通常看起来像一个(倒置的)树，它具有冗余的上行链路和三个层次结构;核心层、聚合/分布层和接入层(见图1)。为了满足带宽需求，从服务器到DC出口或WAN的每一个更高的层都具有更高的端口密度和带宽容量，其中核心功能是作为基于树的设计的“主干（trunk）”。为了保持术语的统一，并与其他设计进行比较，在本文中，这些层将被称为第1层、第2层和第3层“tiers”，而不是核心层、聚合层或接入层。</p>
+<p><img src="/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/典型拓扑.png" alt="典型拓扑"></p>
+<p>​                    图 1: 数据中心典型网络拓扑</p>
+<p>不幸的是，如前所述，由于无法获得具有足够大的端口密度的第1层设备来充分扩展第2层，因此无法将基于树的设计扩展到足以处理大规模设计的程度。此外，随着部署规模或带宽需求的增加，需要不断升级或替换上层设备，这在操作上很复杂。因此，采用了需求1，从而无需考虑此类设计。</p>
+<h2 id="3-2-思科网络拓扑"><a href="#3-2-思科网络拓扑" class="headerlink" title="3.2. 思科网络拓扑"></a>3.2. 思科网络拓扑</h2><p>本节描述了大型数据中心中水平可伸缩拓扑的通用设计，以满足<strong>需求1</strong>的要求。</p>
+<h3 id="3-2-1-概述"><a href="#3-2-1-概述" class="headerlink" title="3.2.1 概述"></a>3.2.1 概述</h3><p>水平可伸缩拓扑的常见选择是折叠Clos拓扑，有时也称为“胖树（fat-tree）”（例如[INTERCON]和[ALFARES2008]）。 该拓扑具有奇数个阶级（有时称为“（dimensions）维度”），并且通常由统一元素组成，例如具有相同端口数的网络交换机。 因此，折叠Clos拓扑的选择可以满足需求1并简化需求2。 请参见下面的图2，以获取折叠的3级Clos拓扑的示例（跟踪数据包流时，3级对Tier 2级进行了两次计数）</p>
+<p>：<img src="/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/Clos.png" alt="Clos"></p>
+<p>​                图 2： 3级段折叠Clos拓扑</p>
+<p>此拓扑通常也称为“Leaf和Spine”网络，其中“Spine”是Clos拓扑的中间阶段（Tier 1）的名称，“Leaf”是输入/输出阶级的名称（ Tier 2）。 为了统一起见，本文档将使用“ Tier n”表示法引用这些层。</p>
+<h3 id="3-2-2-Clos拓扑属性"><a href="#3-2-2-Clos拓扑属性" class="headerlink" title="3.2.2. Clos拓扑属性"></a>3.2.2. Clos拓扑属性</h3><p>以下是Clos拓扑的一些关键属性：</p>
+<ul>
+<li>如果M&gt; = N，则拓扑是完全无阻塞的，或更准确地说，是无干扰的，否则超额了N / M倍。 对于第2层交换机，这里的M和N分别是上行链路和下行链路端口数，如图2所示。</li>
+<li>利用这种拓扑需要对带有M或更多fan-out的ECMP提供控制和数据平面支持。</li>
+<li>在这个拓扑结构中，第1层交换机到每个服务器只有一条路径。这是一个重要的属性，使得路由汇总在这种拓扑结构中非常危险(参见下面8.2节)。</li>
+<li>从服务器到服务器的流量通过ECMP在所有可用路径上实现负载平衡。</li>
+</ul>
+<h3 id="3-2-3-扩展Clos拓扑"><a href="#3-2-3-扩展Clos拓扑" class="headerlink" title="3.2.3 扩展Clos拓扑"></a>3.2.3 扩展Clos拓扑</h3><p>可以通过增加网络元素端口密度或添加更多的阶段(例如，转移到5阶段的Clos)来扩展Clos拓扑，如下面的图3所示:</p>
+<p><img src="/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/5级Clos网络.png" alt="5级Clos网络"></p>
+<p>​                            图 3.  5阶段Clos拓扑</p>
+<p>图3中的拓扑小示例是由端口数为4的设备构建的。在本文档中，一组直接连接的第2层和第3层设备及其附属服务器将被称为“集群”。例如，在图3中，DEV A、B、C、D，以及连接到DEV A和B的服务器组成了一个集群。集群的概念也可以是一个有用的概念，作为单个部署或维护单元，它可以在与整个拓扑不同的频率上运行。</p>
+<p>在实践中，网络的第3层通常是机架顶交换机Top-of-Rack（ToR），在此处引入了超额预订（ oversubscription），以便在满足不同类型应用程序的带宽需求的同时，在数据中心中打包更多的服务器。主要原因限制超额预定的单层网络是简化应用程序开发,否则需要考虑多个带宽池:在机架(Tier3)、机架之间(Tier2),和集群之间(Tier1)。由于超额预定与路由设计没有直接关系,它不在本文进一步讨论。</p>
+<blockquote>
+<p>个人备注： oversubscription超额预定，个人理解为收敛比。</p>
+</blockquote>
+<h3 id="3-2-4-管理Clos拓扑层的大小"><a href="#3-2-4-管理Clos拓扑层的大小" class="headerlink" title="3.2.4 管理Clos拓扑层的大小"></a>3.2.4 管理Clos拓扑层的大小</h3><p>如果数据中心网络规模较小，则可以将Clos拓扑的第1层或第2层中的交换机数量减少两倍。要理解如何做到这一点，请以Tier 1为例。每个第2层设备连接到第1层设备的单个组。如果一半的端口在第一层的设备没有被使用，那么它有可能减少第一层设备的数量减半，只是两个上行链路第二层设备映射到相同的第一层设备,以前映射到不同的第一层设备。这种技术保持了相同的带宽，同时减少了第一层的元素数量，从而节省了资本支出。在本例中，折衷的方法是将最大DC大小(总体服务器数量)减少一半。</p>
+<p>在此示例中，第2层设备将使用两个并行链接连接到每个第1层设备。如果这些链路中的一个发生故障，则另一个将接收故障链路的所有流量，如果确定路径过程未考虑带宽量，则可能会导致严重的拥塞和服务质量下降，因为上游第1层设备的数量可能超过两个。为了避免这种情况，可以将并行链路分组为链路聚合组（LAGs），例如[IEEE8023AD]，并具有广泛可用的实现设置，这些设置会在单个链路发生故障时使整个“捆绑（bundle）”失效。可以使用在并行链路上强制执行“fate sharing”的等效技术来代替LAG，以实现相同的效果。这种fate sharing的结果是，来自两个或更多故障链路的流量将在与第1层设备数量相等的大量剩余路径上重新平衡。为了简化起见，此示例使用两个链接，在一个成员链接失败时，捆绑中有更多链接将对容量的影响较小。</p>
+<h1 id="4-数据中心路由概述"><a href="#4-数据中心路由概述" class="headerlink" title="4. 数据中心路由概述"></a>4. 数据中心路由概述</h1><p>本节概述了三种通用类型的数据中心协议设计-仅2层，混合L2 / L3和仅3层。</p>
+<h2 id="4-1-仅2层设计"><a href="#4-1-仅2层设计" class="headerlink" title="4.1. 仅2层设计"></a>4.1. 仅2层设计</h2><p>最初，大多数数据中心设计使用[IEEE8021D-1990]中最初定义的生成树协议(STP)来创建无环拓扑，通常使用3.1节中描述的传统DC拓扑的变体。当时，许多DC交换机要么不支持第3层路由协议，要么需要额外的许可费用来支持它们，这在设计选择中起到了一定的作用。尽管许多增强了通过引入快速生成树协议(RSTP)最新修订的[IEEE8021D-2004]和多生成树协议(MST)中指定[IEEE8021Q]增加收敛，稳定性和负载平衡在较大的拓扑，协议的许多基本原理限制了其在大规模DC中的适用性。STP及其较新的变体使用一种主动/备用的路径选择方法，因此很难像第3.2节中描述的那样在水平伸缩的拓扑中部署。此外，操作人员也有许多处理大型故障的经验，这些故障是由单个设备上的不当布线、配置错误或软件缺陷引起的。这些故障通常会影响整个生成树域，由于协议的性质，很难排除故障。由于这些原因，并且由于几乎所有DC流量现在都是IP，因此需要在网络边缘进行外部连接的第3层路由协议，因此使用STP的设计通常无法满足大型DC运营商的所有要求。对链路聚合协议的各种增强，如[IEEE8023AD]，即通常所知的多机箱链路聚合(M-LAG)，使得使用具有active-active网络路径的第2层设计成为可能，同时依赖STP作为防环的备份。这种方法的主要缺点是，在大多数实现中缺少线性扩展能力，不能超过两个，而且缺乏基于标准的实现，并且增加了在设备之间同步状态的故障域风险。</p>
+<p>应该注意的是，通过在[RFC6325]中引入大量链路(TRILL)的透明互联协议，可以构建大型的、水平可扩展的、没有STP的l2网络。TRILL解决了STP在大规模直流设计中的许多问题，但是，由于实现的数量有限，而且通常需要特定的设备来支持，这限制了它的适用性，并增加了此类设计的成本。</p>
+<p>最后，基本的TRILL规范和M-LAG方法都不能完全消除共享广播域的问题，该问题对任何基于以太网的第2层解决方案的操作都是不利的。 后来主要基于[RFC7067]中概述的方法，提出了TRILL扩展来解决此问题，但这甚至进一步限制了可用于构建结构的互操作实现的数量。 因此，基于TRILL的设计存在满足需求2，需求3和需求4的问题。</p>
+<h2 id="4-2-混合2层3层设计"><a href="#4-2-混合2层3层设计" class="headerlink" title="4.2. 混合2层3层设计"></a>4.2. 混合2层3层设计</h2><p>运营者寻求通过在网络的第1层或第2层部分中实施路由协议并将第2层域划分为多个较小的域来限制数据平面故障的影响并构建大规模拓扑。 这种设计允许数据中心扩大规模，但以管理多个网络协议的复杂性为代价。 由于以下原因，运营者将第2层保留在网络的接入层（第3层）或接入层和汇聚层（第3层和第2层）部分中：</p>
+<ul>
+<li>支持可能需要直接第2层邻接或使用非IP协议的旧版应用程序。</li>
+<li>当虚拟机移至其他Tier 3交换机时，需要保留IP地址的虚拟机的无缝移动性。</li>
+<li>简化的IP寻址=数据中心所需的IP子网更少</li>
+<li>应用程序负载平衡可能需要直接的第2层可达性才能执行某些功能，例如第2层直接服务器返回Direct Server Return（DSR）。 参见[L3DSR]。</li>
+<li>支持L2和L3的交换机之间的持续资本支出（CAPEX ）差异。</li>
+</ul>
+<h2 id="4-3-仅3层设计"><a href="#4-3-仅3层设计" class="headerlink" title="4.3. 仅3层设计"></a>4.3. 仅3层设计</h2><p>利用IP路由到网络第3层的网络设计也已广受欢迎。 这些设计的主要好处是，由于限制了L2广播域，因此提高了网络稳定性和可伸缩性。 通常，在这样的设计中，诸如开放式最短路径优先（OSPF）[RFC2328]之类的内部网关协议（IGP）被用作主要的路由协议。 随着数据中心规模的扩大和服务器数量的增加，成千上万的此类全路由设计变得越来越有吸引力。</p>
+<p>选择仅L3的设计极大地简化了网络，促进了需求1和需求2的满足，并且在大2层邻接和较大3层子网与网络可扩展性和稳定性相比不那么关键的网络中得到了广泛采用。 应用程序提供商和网络运营商将继续开发新的解决方案，以通过使用各种覆盖或隧道技术来满足以前驱动大2层域的某些要求。</p>
+<h1 id="5-路由协议设计"><a href="#5-路由协议设计" class="headerlink" title="5. 路由协议设计"></a>5. 路由协议设计</h1><p>在本节中，回顾了将外部BGP（EBGP）用作具有第3层协议设计和Clos拓扑的数据中心网络的单一路由协议的动机。 然后，提供了一种用于设计基于EBGP的网络的实用方法。</p>
+<h2 id="5-1-选择EBGP作为路由协议"><a href="#5-1-选择EBGP作为路由协议" class="headerlink" title="5.1. 选择EBGP作为路由协议"></a>5.1. 选择EBGP作为路由协议</h2><p>需求2将优先选择单个路由协议以减少复杂性和相互依赖性。 虽然在这种情况下通常依赖IGP，有时在与WAN相连的设备上添加EBGP或在整个内部使用内部BGP（IBGP），但本文档建议使用仅EBGP设计。</p>
+<p>尽管EBGP是Internet上几乎所有域间路由所使用的协议，并且得到了供应商和服务提供商社区的广泛支持，但出于多种原因，它通常未被部署为数据中心内的主要路由协议（某些原因相互关联）：</p>
+<ul>
+<li>BGP被认为是“仅WAN，仅协议”，并不经常用于企业或数据中心应用。</li>
+<li>与IGP相比，BGP被认为具有“慢得多”的路由收敛。</li>
+<li>大规模BGP部署通常利用IGP进行BGP下一跳解析，因为IBGP拓扑中的所有节点均未直接连接。</li>
+<li>BGP被认为需要大量的配置开销，并且不支持邻居自动发现。</li>
+</ul>
+<p>本文讨论了其中的一些看法，特别是适用于所建议的设计，并重点介绍了使用协议的一些优点，例如：</p>
+<ul>
+<li>BGP在其协议设计的一部分中具有较少的复杂性与大多数链路状态IGP（例如OSPF）相比，内部数据结构和状态机更简单。 例如，BGP没有实现邻接关系形成，邻接关系维护和/或流控制，而是仅依靠TCP作为基础传输。 这满足了需求2和需求3.</li>
+<li>与链路状态IGP相比，BGP信息泛滥开销更小。 由于每个BGP路由器都只计算和传播所选的最佳路径，因此一旦BGP发言人找到备用路径，就会掩盖网络故障，当高度对称的拓扑（例如Clos）与仅EBGP设计结合使用时，该备用路径就会存在。 相反，链路状态IGP的事件传播范围是整个区域，而与故障类型无关。 这样，BGP更好地满足了需求3和需求4。 还值得一提的是，所有广泛部署的链路状态IGP均具有定期刷新路由信息的特性，而BGP不会使路由状态失效，尽管这很少影响现代路由器控制平面</li>
+<li>BGP支持第三方（递归解析）下一跳。 通过与应用程序“控制器”建立对等会话，可以将多路径控制为基于ECMP或基于应用程序定义的路径的转发，该对等会话可以将路由信息注入系统，从而满足需求5。 OSPF使用诸如“转发地址”之类的概念提供类似的功能，但是实现起来更加困难，并且对信息传播范围的控制也要少得多。</li>
+<li>使用定义明确的自治系统编号（ASN）分配方案和标准的AS_PATH循环检测，可以控制“ BGP路径搜寻”（请参阅[JAKMA2008]），而复杂的不需要的路径将被忽略。 有关有效的ASN分配方案的示例，请参见5.2节。 在链路状态IGP中，实现相同的目标将需要多（实例/拓扑/进程）支持，通常在所有DC设备中不可用，并且配置和故障排除非常复杂。 使用大多数DC设计使用的传统单一洪泛域，在某些故障情况下可能会拾取不必要的冗长路径，例如遍历多个Tier 2设备。</li>
+<li>使用最少的路由策略实现的EBGP配置更容易对网络可达性问题进行故障排除。在大多数实现中，查看BGP的Loc-RIB内容并将其与路由器的路由信息库(RIB)进行比较是很简单的。此外，在大多数实现中，操作员可以查看每个BGP邻居Adj-RIB-In和Adj-RIB-Out结构，因此传入和传出网络层可达性信息(NLRI)信息可以在BGP会话的两边轻松关联。因此，BGP满足需求3。</li>
+</ul>
+<h2 id="5-2-用于Clos拓扑的EBGP配置"><a href="#5-2-用于Clos拓扑的EBGP配置" class="headerlink" title="5.2. 用于Clos拓扑的EBGP配置"></a>5.2. 用于Clos拓扑的EBGP配置</h2><p>由于这种设计需要大量的互连，因此具有5级的Clos拓扑非常罕见。 因此，下面的示例是参考5级Clos拓扑（处于展开状态）制作的。</p>
+<h3 id="5-2-1-EBGP配置指南和示例ASN方案"><a href="#5-2-1-EBGP配置指南和示例ASN方案" class="headerlink" title="5.2.1 EBGP配置指南和示例ASN方案"></a>5.2.1 EBGP配置指南和示例ASN方案</h3><p>下图说明了ASN分配方案的示例。 以下是可以使用的准则列表：</p>
+<ul>
+<li>EBGP单跳会话是在互连网络节点的直接点到点链路上建立的，即使在同一对节点之间存在多个链路的情况下，也不使用多跳或环回会话。</li>
+<li>使用私有ASNs从64512-65534，避免ASN冲突。</li>
+<li>所有Clos拓扑的第一层分配一个ASN。</li>
+<li>唯一的ASN分配给同一群集中的每组第2层设备。</li>
+<li>在这个拓扑中，一个唯一的ASN被分配给每个第3层设备（例如，ToR）。</li>
+</ul>
+<p><img src="/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/ASN.png" alt="ASN"></p>
+<p>​                图 4. 5-Stage的Clos网络拓扑ASN布局</p>
+<h3 id="5-2-2-私有ASNs的使用"><a href="#5-2-2-私有ASNs的使用" class="headerlink" title="5.2.2 私有ASNs的使用"></a>5.2.2 私有ASNs的使用</h3><p>私有ASN的原始范围[RFC6996]限制了总共有1023个ASNs。 由于网络设备的数量很可能超过此数量，因此需要一种解决方法。 一种方法是在不同群集中重复使用分配给第3层设备的ASN。 例如，可以在每个单独的群集中使用专用ASN 65001、65002 … 65032，并将其分配给第3层设备。</p>
+<p>为了避免由于BGP中的AS_PATH循环检测机制而导致路由抑制，必须在第3层设备上的上游EBGP会话配置“Allowas-in”功能[ALLOWASIN]，该功能允许在接收的路由通告中接受设备自己的ASN。 尽管此功能尚未标准化，但可在多个供应商实施中广泛使用。 引入此功能不会在设计中增加路由循环的可能性，因为AS_PATH是由每个拓扑层的路由器添加到AS_PATH的，并且AS_PATH的长度是BGP路径选择过程中的早期决定因素。 第1层设备仍具有进一步的环路保护功能，该设备将不接受带有包含其自身ASN的路径的路由。 第2层设备之间没有直接连接。</p>
+<p>解决此问题的另一种方法是使用四字节ASN（[RFC6793]），其中还有其他可用的私有ASN，请参阅[IANA.AS]。 使用四字节的ASN会给BGP实现带来额外的协议复杂性，在考虑需求3和需求4时应与重用的复杂性相平衡。 也许更重要的是，它们尚未得到所有BGP实现的支持，这可能会限制供应商选择DC设备。 如果受支持，请确保在需要与这些ASN的外部连接（第5.2.4节）时，已部署的实现能够删除专用ASN。</p>
+<h3 id="5-2-3-前缀列表通告"><a href="#5-2-3-前缀列表通告" class="headerlink" title="5.2.3. 前缀列表通告"></a>5.2.3. 前缀列表通告</h3><p>Clos拓扑具有大量的点对点链接和相关联的前缀。 将所有这些路由发布到BGP中可能会在网络设备中造成转发信息库 Forwarding Information Base（FIB）超载。 通告这些链接还会给BGP控制平面带来额外的路径计算压力，几乎没有好处。有两种可能的解决方案：</p>
+<ul>
+<li>不要在BGP中宣告任何点对点链接。由于基于EBGP的设计更改了每个设备上的下一跳地址，因此可以通过通告EBGP对等点自动访问远程网络，并且不需要对这些前缀具有可达性。然而，这可能会使操作或监视变得复杂:例如，使用流行的“traceroute”工具将显示无法访问的IP地址。</li>
+<li>宣告点对点链接网段，但在每台设备上对它们进行汇总。这需要一个地址分配方案，例如为每个第1层和第2层设备分配一个连续的IP地址块，用于对较低层的点对点接口寻址(第2层上行链路将从第1层地址块分配，等等)。</li>
+</ul>
+<p>第三层设备上的服务器子网必须在不使用2层和1层设备上的路由汇总的情况下被宣布到BGP。在Clos拓扑中汇总子网会导致路由在单个链路失效(例如，在第2层和第3层设备之间)下出现黑洞，因此必须避免这种情况。 由于对等网的O（N ^ 2）复杂性和设备端口的浪费，在同一层中使用对等链接通过提供“旁路”来解决黑洞问题是不可取的。 对等链路的完整网格的替代方案是使用更简单的旁路拓扑，例如[FB4POST]中所述的“环”，但是这种拓扑会增加额外的跃点，并且带宽有限。 可能需要进行特殊调整才能使BGP路由工作，例如将每个设备分配自己的ASN。 在本文档的后面，第8.2节介绍了一种用于在Clos网络中执行有限形式的路由汇总的侵入性较小的方法，并讨论了其相关的取舍。</p>
+<h3 id="5-2-4-外部连接"><a href="#5-2-4-外部连接" class="headerlink" title="5.2.4. 外部连接"></a>5.2.4. 外部连接</h3><p>Clos拓扑中的专用集群(或多个集群)可用于连接广域网 Wide Area Network(WAN)边缘设备或WAN路由器。此类集群中的第3层设备将被WAN路由器取代，并再次使用EBGP对等连接，尽管如果设计中需要Internet连接，WAN路由器可能属于公共ASN。这种专用集群中的第2层设备在本文档中称为“边界路由器”。这些设备必须执行一些特殊功能:</p>
+<ul>
+<li>在向WAN路由器发布路径时隐藏网络拓扑信息，即，从AS_PATH属性中删除“私有ASN” [RFC6996]。通常这样做是为了避免不同数据中心之间的ASN编号冲突，并为WAN ECMP提供一个统一的AS_PATH长度，以便将WAN ECMP用于源自拓扑的任播前缀。通常使用一种实现特定的BGP功能（通常称为“删除私有AS”）来完成此任务。根据实现方式，该功能应在向邻居发布路径之前，剥离在AS_PATH属性中找到的连续的私人使用ASN序列。假定用于内部数据中心编号的所有ASN均来自“私有范围”。当前，剥离私有ASN的过程尚未标准化，请参阅[REMOVAL]。但是，大多数实现至少遵循该供应商的文档[VENDOR-REMOVE-PRIVATE-AS]中描述的逻辑，对于指定的设计而言已足够。</li>
+<li>创建到数据中心设备的默认路由。 这是唯一可以发起默认路由的地方，因为路由汇总对于未修改的Clos拓扑有风险。 或者，边界路由器可以简单地中继从WAN路由器获知的默认路由。 通告来自边界路由器的默认路由要求所有边界路由器都完全连接到上游的WAN路由器，以抵抗导致流量黑洞的单链路故障。 为了防止在给定设备上与WAN路由器的所有EBGP会话同时失败时的黑洞现象，更希望重新发布默认路由，而不是通过某些实现提供的复杂的条件路由发起方案发起默认路由 [CONDITIONALROUTE]。</li>
+</ul>
+<h3 id="5-2-5-在边缘的路由汇总"><a href="#5-2-5-在边缘的路由汇总" class="headerlink" title="5.2.5. 在边缘的路由汇总"></a>5.2.5. 在边缘的路由汇总</h3><p>在将网络可达性信息发布到广域网之前，通常需要汇总网络可达性信息，因为在全路由网络设计中，数据中心中会产生大量IP前缀。 例如，具有2000个Tier 3设备的网络将至少有2000个服务器子网以及基础设施前缀发布到BGP中。 但是，如第5.2.3节所述，由于每层内部都缺乏对等链接，因此建议的网络设计不允许进行路由汇总。</p>
+<p>但是，可以通过为这些设备设计不同的连接模型来解除对边界路由器的限制。 有两种选择：</p>
+<ul>
+<li>使用全网状物理链路或使用任何其他“对等网状”拓扑（例如环网或星型辐射）互连边界路由器。 相应地在所有Border Leafs上配置BGP，以交换网络可达性信息，例如，通过添加IBGP会话的网络。 互连对等链路的大小需要适当调整，以适应在连接边界路由器的网状网络中发生设备故障或链路故障时出现的流量。</li>
+<li>第1层设备可能具有向边界路由器（从第1层角度来看是第2层设备）的附加物理链路。 具体来说，如果需要防止单个链路或节点故障的保护，则每个第1层设备都必须连接到至少两个边界路由器。 这就对第1层设备和边界路由器的端口数提出了额外的要求，与Clos中的其他设备相比，这可能使其成为不一致，更大的端口数的设备。 这也减少了“常规”第2层交换机可用的端口数量，因此减少了可通过第1层互连的集群的数量。</li>
+</ul>
+<p>如果实现了上述任何选项，则可以在边界路由器处对WAN网络核心执行路由汇总，而不会冒单个链路故障时出现路由黑洞情况的风险。 这两个选项都将导致拓扑不统一，因为必须在某些网络设备上设置其他链接。</p>
+<h1 id="6-ECMP注意事项"><a href="#6-ECMP注意事项" class="headerlink" title="6. ECMP注意事项"></a>6. ECMP注意事项</h1><p>本节介绍Clos拓扑的等价多路径Equal Cost Multipath（ECMP）功能，并讨论一些特殊要求。</p>
+<h2 id="6-1-基本ECMP"><a href="#6-1-基本ECMP" class="headerlink" title="6.1. 基本ECMP"></a>6.1. 基本ECMP</h2><p>ECMP是Clos拓扑使用的基本负载分担机制。 实际上，每个下层设备都将使用其所有直接连接的上层设备来负载分担发往同一IP前缀的流量。 Clos拓扑中任何两个Tier3设备之间的ECMP路径数等于中间阶段（第1层）的设备数。 例如，图5说明了一种拓扑，其中第3层设备A具有通过第2层设备B和C然后分别通过第1层设备1、2、3和4到达服务器X和Y的四个路径。</p>
+<p><img src="/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/ECMP.png" alt="ECMP"></p>
+<p>​            图 5. ECMP Fan-Out Tree from A to X and Y</p>
+<p>ECMP要求意味着BGP实现必须支持多路径转发，最多支持在拓扑中任何点上直接连接的上游或下游方向的设备的最大数量。通常，这个数字不超过拓扑中设备上端口的一半。例如，当使用64端口设备构建Clos网络时，需要32个ECMP转发。如果在边界路由器级别上实现如5.2.5节所述的路由汇总，边界路由器可能需要有更宽的上联，以便能够连接到众多的第1层设备。如果设备的硬件不支持更广泛的ECMP，则可以使用逻辑链路分组(第2层的链路聚合)来提供“分层”ECMP(第3层ECMP与第2层ECMP耦合)来补偿上联限制。然而，这种方法增加了流动极化的风险，因为在ECMP的第二阶段熵更小。</p>
+<p>如果大多数BGP实现与[RFC4271] 9.1.2.2节中的步骤（e）匹配并包括在内，则从ECMP角度将其声明为相等。 在建议的网络设计中，没有底层的IGP，因此所有IGP成本都假定为零，否则所有路径上的值都相同，并且可以根据需要应用策略来均衡因供应商默认值而异的BGP属性，例如MULTI_EXIT_DISC（ MED）属性和原始代码。 由于历史原因，不使用0作为均衡的MED值也很有用； [RFC4277]中提供了此信息以及其他一些有用的BGP信息。 由于BGP最佳路径选择过程（首选较短的AS_PATH长度），因此路由循环不太可能，并且通过Tier 1设备的较长路径（不允许在路径中使用自己的ASN）是不可能的。</p>
+<h2 id="6-2-多个ASN上的BGP-ECMP"><a href="#6-2-多个ASN上的BGP-ECMP" class="headerlink" title="6.2. 多个ASN上的BGP ECMP"></a>6.2. 多个ASN上的BGP ECMP</h2><p>为了实现应用程序负载均衡，希望具有从多个Tier 3设备通告的相同前缀。 从其他设备的角度来看，这样的前缀将具有具有不同AS_PATH属性值的BGP路径，同时具有相同的AS_PATH属性长度。 因此，BGP实现必须支持上述路径上的负载分担。 此功能有时称为“multipath relax”或“multipath multiple-AS”，并且如果所有其他属性都相同（如上一节中所述），则有效地允许在不同的相邻ASN之间进行ECMP。</p>
+<h2 id="6-3-加权ECMP"><a href="#6-3-加权ECMP" class="headerlink" title="6.3. 加权ECMP"></a>6.3. 加权ECMP</h2><p>网络设备可能希望实现“加权（weighted）” ECMP，以便能够通过ECMP上联中的某些路径发送更多流量。 这可能有助于补偿网络故障，并通过容量更大的路径发送更多流量。 如第8.1节中所述，必须在多跳会话上使用远程BGP speaker（中心代理）注入需要加权ECMP的前缀。 如果实现中的支持可用，则可以使用[LINK]中描述的技术来发送多个BGP路径的权重分布信号。</p>
+<h2 id="6-4-一致性Hash"><a href="#6-4-一致性Hash" class="headerlink" title="6.4. 一致性Hash"></a>6.4. 一致性Hash</h2><p>通常希望使用于ECMP的哈希函数保持一致（请参阅[CONS-HASH]），以在将下一跳添加或删除到ECMP组时，对下一跳亲和力更改的流的影响最小化。 如果将网络设备用作负载均衡器，将流映射到多个目标，则可以使用此方法-在这种情况下，丢失或添加目标不会对当前建立的流产生不利影响。 [RFC2992]中提供了一个关于实现一致性哈希的特定建议，尽管其他实现也是可能的。 此功能可以自然地与加权ECMP结合使用，下一跳更改的影响与给定下一跳的权重成正比。一致性哈希的缺点是增加了硬件资源利用率，因为通常会有更多的资源（例如Ternary Content-Addressable Memory） （TCAM）空间），以实现一致的哈希功能。</p>
+<h1 id="7-路由收敛特性"><a href="#7-路由收敛特性" class="headerlink" title="7. 路由收敛特性"></a>7. 路由收敛特性</h1><p>本节回顾了拟议设计中的路由收敛特性。 如果实现支持快速的EBGP对等会话取消激活并且在相关链接失败时及时进行RIB和FIB更新，则可以实现亚秒级收敛。</p>
+<h2 id="7-1-故障检测时间"><a href="#7-1-故障检测时间" class="headerlink" title="7.1. 故障检测时间"></a>7.1. 故障检测时间</h2><p>BGP通常依赖于IGP在AS内部的链路/节点故障周围进行路由，并实施基于轮询的机制或事件驱动机制来获取有关IGP状态更改的更新。 提议的路由设计不使用IGP，因此可用于故障检测的其余机制是BGP保持活动超时（或任何其他类型的保持活动机制）和链接失败触发器。</p>
+<p>仅依靠BGP保持活动数据包可能会导致高收敛延迟，约为数秒（在许多BGP实现中，最小可配置BGP保持计时器值为三秒）。 但是，许多BGP实现可以关闭本地EBGP对等会话，以响应用于BGP对等的传出接口的“连接断开”事件。 有时将此功能称为“快速故障转移”。 由于现代数据中心中的链接主要是点对点光纤连接，因此通常会在几毫秒内检测到物理接口故障，并随后触发BGP重新收敛。</p>
+<p>以太网链路可以支持故障信令或检测标准，例如[IEEE8021Q]中所述的连接性故障管理 Connectivity Fault Management （CFM）； 或者，某些平台可能支持双向转发检测Bidirectional Forwarding Detection （BFD）[RFC5880]，以允许亚秒级的故障检测和向BGP进程的故障信令。 但是，这两种方法的使用都对供应商软件以及可能的硬件提出了额外的要求，并且可能与需求1相矛盾。 直到最近[RFC7130]为止，BFD还不允许在LAG上检测到单个成员链接失败，这将限制其在某些方面的用途。</p>
+<h2 id="7-2-事件传播时间"><a href="#7-2-事件传播时间" class="headerlink" title="7.2. 事件传播时间"></a>7.2. 事件传播时间</h2><p>在建议的设计中，应考虑[RFC4271] 9.2.1.1节中指定的BGP MinRouteAdvertisementIntervalTimer（MRAI计时器）的影响。 根据该标准，BGP实现要求将连续的BGP UPDATE消息至少间隔MRAI秒，这通常是可配置的值。 携带撤回路由的事件后的初始BGP UPDATE消息通常不受此计时器的影响。 当BGP发言人“等待”从其对等方学习新路径并且没有本地备份路径信息时，MRAI计时器可能会出现明显的收敛延迟。</p>
+<p>在Clos拓扑中，每个EBGP发言者通常具有一条路径（由于相同的ASN，第2层设备不接受来自同一集群中其他第2层的路径）或同一前缀的N条路径，其中N是一个很大的数字，例如N = 32（ECMP Fan-Out（多链路上联）到下一层）。因此，如果到另一个接收到路径的设备的链接失败，则根本没有备份路径（例如，从第2层交换机丢失到第3层设备的链接的角度），或者该备份很容易获得在BGP Loc-RIB中（例如，从第2层设备丢失到第1层交换机的链接的角度）。在前一种情况下，BGP退出通告将立即传播，并在受影响的设备上触发重新收敛。在后一种情况下，将重新评估最佳路径，并且将更改与新的下一跳集相对应的本地ECMP组。如果BGP路径是先前选择的最佳路径，则由于BGP AS_PATH属性的更改，将通过BGP UPDATE消息发送“隐式撤回”，如[RFC4271]第3.1节中的选项b所述。</p>
+<h2 id="7-3-Clos拓扑（Fan-Outs）的影响"><a href="#7-3-Clos拓扑（Fan-Outs）的影响" class="headerlink" title="7.3. Clos拓扑（Fan-Outs）的影响"></a>7.3. Clos拓扑（Fan-Outs）的影响</h2><p>Clos拓扑具有较大的上联，这在某些情况下可能会影响“上-下”收敛，如本节所述。在第3层和第2层设备之间的链接发生故障的情况下，第2层设备将向所有上游第1层设备发送BGP UPDATE消息，并撤消受影响的前缀。第1层设备依次将这些消息中继到所有下游的第2层设备（发起者除外）。然后，除发起UPDATE的设备之外的第2层设备应等待所有上游第1层设备发送UPDATE消息，然后再删除受影响的前缀，并向连接的第3层设备下游发送相应的UPDATE。如果原始第2层设备或中继第1层设备在其UPDATE消息声明中引入了一些延迟，则结果可能是UPDATE消息“分散”，可能长达数秒。为了避免这种行为，BGP实现必须支持“更新组”。 “更新组”定义为共享相同出站策略的邻居的集合-本地发言人将BGP更新同步发送到该组的成员。</p>
+<p>这种“分散”的影响随着拓扑上联数的增加而增加，并且在网络融合波动的情况下也会增加。 某些运营者可能会尝试引入厂商提供的“路由摆动衰减（route flap dampening）”类型的功能，以减少快速摆动的前缀对控制平面的影响。 但是，由于在这些实现中，尤其是在此类“分散”事件下，由于存在误报问题，因此不建议在此设计中启用此功能。 [RFC7196]中详细介绍了“路由风门衰减”的更多背景知识和问题以及可能影响其的实现更改。</p>
+<h2 id="7-4-故障影响范围"><a href="#7-4-故障影响范围" class="headerlink" title="7.4. 故障影响范围"></a>7.4. 故障影响范围</h2><p>一旦故障影响范围内的所有设备都收到事件通知，并重新计算其RIB并因此更新了FIB，则声明网络将响应故障而收敛。 较大的故障影响范围通常意味着收敛速度较慢，因为必须通知更多的设备，并导致网络不稳定。 在本节中，我们将介绍BGP在减少Clos拓扑的故障影响范围方面优于链路状态路由协议的优势。</p>
+<p>BGP的行为类似于距离矢量协议，因为从本地路由器的角度来看，只有最佳路径才发送到邻居。 这样，如果本地节点可以立即找到备份路径并且不必进一步发送任何更新，则可以掩盖某些故障。 请注意，在最坏的情况下，数据中心拓扑中的所有设备都必须完全撤消前缀或更新其FIB中的ECMP组。 但是，许多故障不会导致如此广泛的影响。 有两种主要的故障类型可以减小影响范围：</p>
+<ul>
+<li>第2层和第1层设备之间的连接失败：在这种情况下，第2层设备将更新受影响的ECMP组，并删除失败的连接。 除非BGP进程选择了最佳路径，否则无需向下游第3层设备发送新信息，在这种情况下，仅需要发送“隐式撤回”，并且这不会影响转发。 受影响的第1层设备将失去到达特定群集的唯一路径，并且必须撤消关联的前缀。 这样的前缀提取过程将仅影响直接连接到受影响的Tier 1设备的Tier 2设备。 接收带有前缀的BGP UPDATE消息的第2层设备仅需更新其ECMP组。 第3层设备不参与重新融合过程。</li>
+<li>第1层设备的故障：在这种情况下，所有直接连接到发生故障的节点的第2层设备都必须为来自非本地群集的所有IP前缀更新其ECMP组。 第3层设备再次不参与重新收敛过程，但如上所述，可能会收到“隐式提取”。</li>
+</ul>
+<p>即使必须在FIB中重新编程多个IP前缀的此类故障的情况下，值得注意的是，所有这些前缀在第2层设备上共享一个ECMP组。 因此，在具有分层FIB的实现方式中，仅需对FIB进行一次更改。 这里的“分级FIB”表示FIB结构，其中下一跳转发信息与前缀查找表分开存储，并且后者仅存储指向各个转发信息的指针。 有关FIB层次结构和快速收敛的讨论，请参见[BGP-PIC]。</p>
+<p>即使在某些情况下BGP提供了减少的故障范围，但对于提出的设计，总不能通过摘要来进一步减少故障域，因为使用此技术可能会产生路由黑洞，如前所述。 因此，控制平面上最严重的故障影响范围是整个网络-例如，在第2层和第3层设备之间发生链路故障的情况下。 在这种情况下，受影响的前缀数量将比在Clos网络拓扑的上层发生故障的情况下少得多。 具有如此大的故障范围的特性不是在设计中选择EBGP的结果，而是使用Clos拓扑的结果。</p>
+<h2 id="7-5-路由（Micro-Loops）微环路"><a href="#7-5-路由（Micro-Loops）微环路" class="headerlink" title="7.5 路由（Micro-Loops）微环路"></a>7.5 路由（Micro-Loops）微环路</h2><p>当下游设备（例如Tier 2设备）丢失所有前缀路径时，通常具有指向上游设备的默认路由-在这种情况下为Tier 1设备。 结果，可能会遇到第2层交换机丢失前缀，但第1层交换机仍具有指向第2层设备的路径的情况； 这会导致瞬态微循环，因为第1层交换机将不断将数据包传递给受影响的前缀并返回第2层设备，而第2层将使用默认路由再次将其反弹。 此微循环将持续一段时间，以使上游设备完全更新其转发表。</p>
+<p>为了最大程度地减少此类微环的影响，可以为第2层和第1层交换机配置静态“discard”或“null”路由，这些路由比默认路由对网络融合过程中缺少前缀的默认路由更具针对性。 对于第2层交换机，丢弃路由应该是涵盖基础3层设备的所有服务器子网的汇总路由。 对于第1层设备，丢弃路由应为，涵盖了整个数据中心分配的服务器IP地址子网的汇总路由。 这些丢弃路由仅在网络收敛期间具有优先权，直到设备通过新路径获知更具体的前缀为止。</p>
+<h1 id="8-额外的设计选型"><a href="#8-额外的设计选型" class="headerlink" title="8. 额外的设计选型"></a>8. 额外的设计选型</h1><h2 id="8-1-第三方路由注入"><a href="#8-1-第三方路由注入" class="headerlink" title="8.1. 第三方路由注入"></a>8.1. 第三方路由注入</h2><p>BGP允许“第三方”（即直接连接的BGP speaker）在网络拓扑中的任意位置注入路由，从而满足需求5。 这可以通过与拓扑中的某些甚至所有设备通过多跳BGP会话进行对等来实现。 此外，BGP多样路径分布[RFC6774]可用于为同一前缀注入多个BGP下一跳，以促进负载平衡，或者在实施支持的情况下使用BGP ADD-PATH功能[RFC7911]。 不幸的是，在许多实现中，发现ADD-PATH仅在最初对其进行了优化的用例中才正确地支持IBGP。 这将“第三方”对等仅限于IBGP。</p>
+<p>为了在建议的设计中实现路由注入，第三方BGP发言者可以与第3层和第1层交换机进行对等，注入相同的前缀，但对第1层设备使用一组特殊的BGP下一跳。 假定这些下一跳是通过BGP递归解析的，例如可以是第3层设备上的IP地址。 生成的转发表编程可以在不同群集之间提供所需的流量比例分配。</p>
+<h2 id="8-2-Clos拓扑内的路由汇总"><a href="#8-2-Clos拓扑内的路由汇总" class="headerlink" title="8.2. Clos拓扑内的路由汇总"></a>8.2. Clos拓扑内的路由汇总</h2><p>如前所述，路由汇总在建议的Clos拓扑中是不可能的，因为它使网络在单链路故障下容易受到路由黑洞的影响。 主要问题是网元之间的冗余路径数量有限，例如，在任何一对第1层和第3层设备之间只有一条路径。 但是，某些运营商可能会发现路由聚合是提高控制平面稳定性所需要的。</p>
+<p>如果计划了在拓扑中进行总结的任何技术，则不仅应针对单链路或多链路故障，而且还应对拓扑超出物理位置的光纤路径故障或光域故障，进行路由行为和潜在的黑洞建模。 在存在外部连接性的情况下，通过检查每层设备之间以及到WAN路由器之间的链路或路径故障的情况下进行汇总的设备的可达性，可以简化建模的工作。</p>
+<p>路由汇总可能需要对网络拓扑进行少量修改，尽管折衷方案是减小网络的总大小以及在特定故障下的网络拥塞。 这种方法与上述技术非常相似，后者允许边界路由器汇总整个数据中心地址空间。</p>
+<h3 id="8-2-1-崩溃的第1层设备层"><a href="#8-2-1-崩溃的第1层设备层" class="headerlink" title="8.2.1. 崩溃的第1层设备层"></a>8.2.1. 崩溃的第1层设备层</h3><p>为了在第1层和第3层设备之间添加更多路径，请将第2层设备成对分组，然后将这些对连接到同一组第1层设备。 从逻辑上讲，这等效于将第1层设备“折叠”成一半大小的组，将“折叠”的设备上的链接合并。 结果如图6所示。例如，在此拓扑中，DEV C和DEV D连接到同一组第1层设备（DEV 1和DEV 2），而在它们连接到不同组的第1层设备之前。</p>
+<p><img src="/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/Clos拓扑.png" alt="Clos拓扑"></p>
+<p>​                        图 6. 5-Stage Clos拓扑</p>
+<p>采用此设计后，第2层设备可以配置为仅通告默认路由到第3层设备。 如果第2层和第3层之间的链接失败，流量将通过第2层交换机已知的第二条可用路径重新路由。 仍然不可能公布来自第2层设备的用于单个集群的前缀的汇总路由，因为每个设备只有一个到该前缀的路径。 这将需要双宿主服务器来完成。 另请注意，此设计仅是弹性的单链路故障。 双链路故障可能会将第2层设备从所有路径隔离到特定的第3层设备，从而导致路由黑洞。</p>
+<p>提议的拓扑修改的结果将是降低第1层设备的端口容量。 这限制了连接的第2层设备的最大数量，因此将限制最大的DC网络大小。 较大的网络将需要具有更高端口密度的其他第1层设备来实施此更改。</p>
+<p>另一个问题是链路故障下的流量重新平衡。 由于从第1层到第3层有两条路径，因此第1层和第2层交换机之间的链路故障会导致所有流量在将发生故障的链路切换到其余路径。 这将导致剩余链路上的链路利用率加倍。</p>
+<h3 id="8-2-2-简单虚拟聚合"><a href="#8-2-2-简单虚拟聚合" class="headerlink" title="8.2.2. 简单虚拟聚合"></a>8.2.2. 简单虚拟聚合</h3><p>如果主要目标是减小FIB大小，同时允许控制平面散布完整的路由信息，则可以采用完全不同的路由汇总方法。 首先，可以很容易地注意到，在许多情况下，多个前缀共享一些相同的下一跳集（相同的ECMP组），其中某些前缀不太明确。 例如，从第3层设备的角度来看，只要网络中没有故障，从上游第2层设备获悉的所有路由（包括默认路由）都将共享同一组BGP下一跳。 这样就可以使用类似于[RFC6769]中描述的技术，并且仅在FIB中安装最不特定的路由，如果它们共享相同的下一跳集，则忽略更特定的路由。 例如，在正常网络条件下，仅默认路由需要被编程到FIB中。</p>
+<p>此外，如果第2层设备配置有覆盖其所有附加第3层设备前缀的汇总前缀，则相同的逻辑也可以应用在第1层设备中，并通过引入不同群集中的第2层/第3层交换机。 这些汇总路由仍应允许泄漏到第1层设备的更特定的前缀，以便在特定链接失败时能够检测到下一跳中的不匹配项，从而更改了特定前缀的下一跳集。</p>
+<p>再次重申，此技术不会减少控制平面状态的数量（即BGP UPDATE，BGP Loc-RIB大小），而只能通过检测共享其下一跳集的更特定的前缀来提高FIB利用率。 包含不太明确的前缀。</p>
+<h2 id="8-3-ICMP不可达消息伪装"><a href="#8-3-ICMP不可达消息伪装" class="headerlink" title="8.3. ICMP不可达消息伪装"></a>8.3. ICMP不可达消息伪装</h2><p>本节讨论了一些不将点对点链接子网发布到BGP中的操作方面，如先前在5.2.3节中所述。 当使用众所周知的“ traceroute”工具时，可以看到此决定的操作影响。 具体来说，该工具显示的IP地址将是链接的点对点地址，因此对于管理连接而言将不可访问。 这使某些故障排除更加复杂。</p>
+<p>克服此限制的一种方法是使用DNS子系统为这些点对点IP地址创建“反向”条目，这些IP地址指向与回送地址相同的名称。 然后可以通过将该名称解析为设备的“主要” IP地址（例如，其回送接口）来建立连接，该地址始终在BGP中发布。 但是，这会导致对DNS子系统的依赖，在中断期间可能不可用。</p>
+<p>另一种选择是使网络设备伪装IP地址，即用设备的“主要” IP地址重写设备发送的适当ICMP消息的源IP地址。 具体来说，ICMP目标不可达消息（类型3）代码3（端口不可达）和ICMP超时（类型11）代码0是“ traceroute”工具正确操作所必需的。 通过此修改，发送给设备的“ traceroute”探测将始终以“主” IP地址作为源发送回去，从而使操作员能够发现设备箱的“可访问” IP地址。 这具有将“入口点”的地址隐藏到设备中的缺点。 如果设备支持[RFC5837]，则即使返回地址是“主要” IP地址，也可以通过提供有关传入接口的信息来兼顾两全其美。</p>
+<h1 id="9-安全性考虑"><a href="#9-安全性考虑" class="headerlink" title="9. 安全性考虑"></a>9. 安全性考虑</h1><p>该设计不引入任何其他安全问题。 [RFC4271]和[RFC4272]中讨论了一般BGP安全注意事项。 由于DC是一个单一运营商域，因此本文档假定已进行边缘过滤，以防止从DC外围对BGP会话本身进行攻击。 对于大多数部署来说，这可能是一个更可行的选择，而不是必须像[RFC2385]中所述处理TCP MD5的密钥管理，或者解决在本文档发布时缺乏可用的TCP身份验证选项[RFC5925]的实现方式 。 通用TTL安全机制[RFC5082]也可以用于进一步降低BGP会话欺骗的风险。</p>
+<h1 id="10-参考文献"><a href="#10-参考文献" class="headerlink" title="10. 参考文献"></a>10. 参考文献</h1><h2 id="10-1-引用参考"><a href="#10-1-引用参考" class="headerlink" title="10.1. 引用参考"></a>10.1. 引用参考</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[RFC4271]  Rekhter, Y., Ed., Li, T., Ed., and S. Hares, Ed., "A</span><br><span class="line">           Border Gateway Protocol 4 (BGP-4)", RFC 4271,</span><br><span class="line">           DOI 10.17487/RFC4271, January 2006,</span><br><span class="line">           &lt;http://www.rfc-editor.org/info/rfc4271&gt;.</span><br><span class="line"></span><br><span class="line">[RFC6996]  Mitchell, J., "Autonomous System (AS) Reservation for</span><br><span class="line">           Private Use", BCP 6, RFC 6996, DOI 10.17487/RFC6996, July</span><br><span class="line">           2013, &lt;http://www.rfc-editor.org/info/rfc6996&gt;.</span><br></pre></td></tr></table></figure>
+<h2 id="10-2-信息参考"><a href="#10-2-信息参考" class="headerlink" title="10.2. 信息参考"></a>10.2. 信息参考</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br></pre></td><td class="code"><pre><span class="line"> [ALFARES2008]</span><br><span class="line">              Al-Fares, M., Loukissas, A., and A. Vahdat, "A Scalable,</span><br><span class="line">              Commodity Data Center Network Architecture",</span><br><span class="line">              DOI 10.1145/1402958.1402967, August 2008,</span><br><span class="line">              &lt;http://dl.acm.org/citation.cfm?id=1402967&gt;.</span><br><span class="line"></span><br><span class="line">   [ALLOWASIN]</span><br><span class="line">              Cisco Systems, "Allowas-in Feature in BGP Configuration</span><br><span class="line">              Example", February 2015,</span><br><span class="line">              &lt;http://www.cisco.com/c/en/us/support/docs/ip/</span><br><span class="line">              border-gateway-protocol-bgp/112236-allowas-in-bgp-config-</span><br><span class="line">              example.html&gt;.</span><br><span class="line"></span><br><span class="line">   [BGP-PIC]  Bashandy, A., Ed., Filsfils, C., and P. Mohapatra, "BGP</span><br><span class="line">              Prefix Independent Convergence", Work in Progress,</span><br><span class="line">              draft-ietf-rtgwg-bgp-pic-02, August 2016.</span><br><span class="line"></span><br><span class="line">   [CLOS1953] Clos, C., "A Study of Non-Blocking Switching Networks",</span><br><span class="line">              The Bell System Technical Journal, Vol. 32(2),</span><br><span class="line">              DOI 10.1002/j.1538-7305.1953.tb01433.x, March 1953.</span><br><span class="line"></span><br><span class="line">   [CONDITIONALROUTE]</span><br><span class="line">              Cisco Systems, "Configuring and Verifying the BGP</span><br><span class="line">              Conditional Advertisement Feature", August 2005,</span><br><span class="line">              &lt;http://www.cisco.com/c/en/us/support/docs/ip/</span><br><span class="line">              border-gateway-protocol-bgp/16137-cond-adv.html&gt;.</span><br><span class="line"></span><br><span class="line">   [CONS-HASH]</span><br><span class="line">              Wikipedia, "Consistent Hashing", July 2016,</span><br><span class="line">              &lt;https://en.wikipedia.org/w/</span><br><span class="line">              index.php?title=Consistent_hashing&amp;oldid=728825684&gt;.</span><br><span class="line"></span><br><span class="line">   [FB4POST]  Farrington, N. and A. Andreyev, "Facebook's Data Center</span><br><span class="line">              Network Architecture", May 2013,</span><br><span class="line">              &lt;http://nathanfarrington.com/papers/facebook-oic13.pdf&gt;.</span><br><span class="line"></span><br><span class="line">   [GREENBERG2009]</span><br><span class="line">              Greenberg, A., Hamilton, J., and D. Maltz, "The Cost of a</span><br><span class="line">              Cloud: Research Problems in Data Center Networks",</span><br><span class="line">              DOI 10.1145/1496091.1496103, January 2009,</span><br><span class="line">              &lt;http://dl.acm.org/citation.cfm?id=1496103&gt;.</span><br><span class="line"></span><br><span class="line">   [HADOOP]   Apache, "Apache Hadoop", April 2016,</span><br><span class="line">              &lt;https://hadoop.apache.org/&gt;.</span><br><span class="line">[IANA.AS]  IANA, "Autonomous System (AS) Numbers",</span><br><span class="line">              &lt;http://www.iana.org/assignments/as-numbers&gt;.</span><br><span class="line"></span><br><span class="line">   [IEEE8021D-1990]</span><br><span class="line">              IEEE, "IEEE Standard for Local and Metropolitan Area</span><br><span class="line">              Networks: Media Access Control (MAC) Bridges", IEEE</span><br><span class="line">              Std 802.1D, DOI 10.1109/IEEESTD.1991.101050, 1991,</span><br><span class="line">              &lt;http://ieeexplore.ieee.org/servlet/opac?punumber=2255&gt;.</span><br><span class="line"></span><br><span class="line">   [IEEE8021D-2004]</span><br><span class="line">              IEEE, "IEEE Standard for Local and Metropolitan Area</span><br><span class="line">              Networks: Media Access Control (MAC) Bridges", IEEE</span><br><span class="line">              Std 802.1D, DOI 10.1109/IEEESTD.2004.94569, June 2004,</span><br><span class="line">              &lt;http://ieeexplore.ieee.org/servlet/opac?punumber=9155&gt;.</span><br><span class="line"></span><br><span class="line">   [IEEE8021Q]</span><br><span class="line">              IEEE, "IEEE Standard for Local and Metropolitan Area</span><br><span class="line">              Networks: Bridges and Bridged Networks", IEEE Std 802.1Q,</span><br><span class="line">              DOI 10.1109/IEEESTD.2014.6991462,</span><br><span class="line">              &lt;http://ieeexplore.ieee.org/servlet/</span><br><span class="line">              opac?punumber=6991460&gt;.</span><br><span class="line"></span><br><span class="line">   [IEEE8023AD]</span><br><span class="line">              IEEE, "Amendment to Carrier Sense Multiple Access With</span><br><span class="line">              Collision Detection (CSMA/CD) Access Method and Physical</span><br><span class="line">              Layer Specifications - Aggregation of Multiple Link</span><br><span class="line">              Segments", IEEE Std 802.3ad,</span><br><span class="line">              DOI 10.1109/IEEESTD.2000.91610, October 2000,</span><br><span class="line">              &lt;http://ieeexplore.ieee.org/servlet/opac?punumber=6867&gt;.</span><br><span class="line"></span><br><span class="line">   [INTERCON] Dally, W. and B. Towles, "Principles and Practices of</span><br><span class="line">              Interconnection Networks", ISBN 978-0122007514, January</span><br><span class="line">              2004, &lt;http://dl.acm.org/citation.cfm?id=995703&gt;.</span><br><span class="line"></span><br><span class="line">   [JAKMA2008]</span><br><span class="line">              Jakma, P., "BGP Path Hunting", 2008,</span><br><span class="line">              &lt;https://blogs.oracle.com/paulj/entry/bgp_path_hunting&gt;.</span><br><span class="line"></span><br><span class="line">   [L3DSR]    Schaumann, J., "L3DSR - Overcoming Layer 2 Limitations of</span><br><span class="line">              Direct Server Return Load Balancing", 2011,</span><br><span class="line">              &lt;https://www.nanog.org/meetings/nanog51/presentations/</span><br><span class="line">              Monday/NANOG51.Talk45.nanog51-Schaumann.pdf&gt;.</span><br><span class="line"></span><br><span class="line">   [LINK]     Mohapatra, P. and R. Fernando, "BGP Link Bandwidth</span><br><span class="line">              Extended Community", Work in Progress, draft-ietf-idr-</span><br><span class="line">              link-bandwidth-06, January 2013.</span><br><span class="line"> [REMOVAL]  Mitchell, J., Rao, D., and R. Raszuk, "Private Autonomous</span><br><span class="line">              System (AS) Removal Requirements", Work in Progress,</span><br><span class="line">              draft-mitchell-grow-remove-private-as-04, April 2015.</span><br><span class="line"></span><br><span class="line">   [RFC2328]  Moy, J., "OSPF Version 2", STD 54, RFC 2328,</span><br><span class="line">              DOI 10.17487/RFC2328, April 1998,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc2328&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC2385]  Heffernan, A., "Protection of BGP Sessions via the TCP MD5</span><br><span class="line">              Signature Option", RFC 2385, DOI 10.17487/RFC2385, August</span><br><span class="line">              1998, &lt;http://www.rfc-editor.org/info/rfc2385&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC2992]  Hopps, C., "Analysis of an Equal-Cost Multi-Path</span><br><span class="line">              Algorithm", RFC 2992, DOI 10.17487/RFC2992, November 2000,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc2992&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC4272]  Murphy, S., "BGP Security Vulnerabilities Analysis",</span><br><span class="line">              RFC 4272, DOI 10.17487/RFC4272, January 2006,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc4272&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC4277]  McPherson, D. and K. Patel, "Experience with the BGP-4</span><br><span class="line">              Protocol", RFC 4277, DOI 10.17487/RFC4277, January 2006,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc4277&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC4786]  Abley, J. and K. Lindqvist, "Operation of Anycast</span><br><span class="line">              Services", BCP 126, RFC 4786, DOI 10.17487/RFC4786,</span><br><span class="line">              December 2006, &lt;http://www.rfc-editor.org/info/rfc4786&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC5082]  Gill, V., Heasley, J., Meyer, D., Savola, P., Ed., and C.</span><br><span class="line">              Pignataro, "The Generalized TTL Security Mechanism</span><br><span class="line">              (GTSM)", RFC 5082, DOI 10.17487/RFC5082, October 2007,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc5082&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC5837]  Atlas, A., Ed., Bonica, R., Ed., Pignataro, C., Ed., Shen,</span><br><span class="line">              N., and JR. Rivers, "Extending ICMP for Interface and</span><br><span class="line">              Next-Hop Identification", RFC 5837, DOI 10.17487/RFC5837,</span><br><span class="line">              April 2010, &lt;http://www.rfc-editor.org/info/rfc5837&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC5880]  Katz, D. and D. Ward, "Bidirectional Forwarding Detection</span><br><span class="line">              (BFD)", RFC 5880, DOI 10.17487/RFC5880, June 2010,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc5880&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC5925]  Touch, J., Mankin, A., and R. Bonica, "The TCP</span><br><span class="line">              Authentication Option", RFC 5925, DOI 10.17487/RFC5925,</span><br><span class="line">              June 2010, &lt;http://www.rfc-editor.org/info/rfc5925&gt;.</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">   [RFC6325]  Perlman, R., Eastlake 3rd, D., Dutt, D., Gai, S., and A.</span><br><span class="line">              Ghanwani, "Routing Bridges (RBridges): Base Protocol</span><br><span class="line">              Specification", RFC 6325, DOI 10.17487/RFC6325, July 2011,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc6325&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC6769]  Raszuk, R., Heitz, J., Lo, A., Zhang, L., and X. Xu,</span><br><span class="line">              "Simple Virtual Aggregation (S-VA)", RFC 6769,</span><br><span class="line">              DOI 10.17487/RFC6769, October 2012,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc6769&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC6774]  Raszuk, R., Ed., Fernando, R., Patel, K., McPherson, D.,</span><br><span class="line">              and K. Kumaki, "Distribution of Diverse BGP Paths",</span><br><span class="line">              RFC 6774, DOI 10.17487/RFC6774, November 2012,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc6774&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC6793]  Vohra, Q. and E. Chen, "BGP Support for Four-Octet</span><br><span class="line">              Autonomous System (AS) Number Space", RFC 6793,</span><br><span class="line">              DOI 10.17487/RFC6793, December 2012,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc6793&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC7067]  Dunbar, L., Eastlake 3rd, D., Perlman, R., and I.</span><br><span class="line">              Gashinsky, "Directory Assistance Problem and High-Level</span><br><span class="line">              Design Proposal", RFC 7067, DOI 10.17487/RFC7067, November</span><br><span class="line">              2013, &lt;http://www.rfc-editor.org/info/rfc7067&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC7130]  Bhatia, M., Ed., Chen, M., Ed., Boutros, S., Ed.,</span><br><span class="line">              Binderberger, M., Ed., and J. Haas, Ed., "Bidirectional</span><br><span class="line">              Forwarding Detection (BFD) on Link Aggregation Group (LAG)</span><br><span class="line">              Interfaces", RFC 7130, DOI 10.17487/RFC7130, February</span><br><span class="line">              2014, &lt;http://www.rfc-editor.org/info/rfc7130&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC7196]  Pelsser, C., Bush, R., Patel, K., Mohapatra, P., and O.</span><br><span class="line">              Maennel, "Making Route Flap Damping Usable", RFC 7196,</span><br><span class="line">              DOI 10.17487/RFC7196, May 2014,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc7196&gt;.</span><br><span class="line"></span><br><span class="line">   [RFC7911]  Walton, D., Retana, A., Chen, E., and J. Scudder,</span><br><span class="line">              "Advertisement of Multiple Paths in BGP", RFC 7911,</span><br><span class="line">              DOI 10.17487/RFC7911, July 2016,</span><br><span class="line">              &lt;http://www.rfc-editor.org/info/rfc7911&gt;.</span><br><span class="line"></span><br><span class="line">   [VENDOR-REMOVE-PRIVATE-AS]</span><br><span class="line">              Cisco Systems, "Removing Private Autonomous System Numbers</span><br><span class="line">              in BGP", August 2005,</span><br><span class="line">              &lt;http://www.cisco.com/en/US/tech/tk365/</span><br><span class="line">              technologies_tech_note09186a0080093f27.shtml&gt;.</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>本文是在看RFC7938《 Use of BGP for Routing in Large-Scale Data Centers》是翻译整理的资料。主要讲述了在大型数据中心使用BGP进行路由。</p>
+<p>原文链接：<a href="https://tools.ietf.org/rfc/rfc7938.txt" target="_blank" rel="noopener">https://tools.ietf.org/rfc/rfc7938.txt</a></p>
+</blockquote>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/" title="在大型数据中心使用BGP进行路由(RFC7938)">https://cshihong.github.io/2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/BGP/" rel="tag"># BGP</a>
+          
+            <a href="/tags/数据中心/" rel="tag"># 数据中心</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/18/BGP-in-the-datacenter-数据中心的BGP-数据中心网络架构-Clos网络架构/" rel="next" title="(BGP in the datacenter)数据中心的BGP,数据中心网络架构,Clos网络架构">
+                <i class="fa fa-chevron-left"></i> (BGP in the datacenter)数据中心的BGP,数据中心网络架构,Clos网络架构
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/14/WAF基本原理与部署方式/" rel="prev" title="WAF基本原理与部署方式">
+                WAF基本原理与部署方式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#摘要"><span class="nav-number">1.</span> <span class="nav-text">摘要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-简介"><span class="nav-number">2.</span> <span class="nav-text">1. 简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-网络设计需求"><span class="nav-number">3.</span> <span class="nav-text">2. 网络设计需求</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-带宽和流量模型"><span class="nav-number">3.1.</span> <span class="nav-text">2.1. 带宽和流量模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-CAPEX最小化"><span class="nav-number">3.2.</span> <span class="nav-text">2.2. CAPEX最小化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-OPEX最小化"><span class="nav-number">3.3.</span> <span class="nav-text">2.3. OPEX最小化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-流量工程"><span class="nav-number">3.4.</span> <span class="nav-text">2.4. 流量工程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-总结需求"><span class="nav-number">3.5.</span> <span class="nav-text">2.5. 总结需求</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-数据中心拓扑概述"><span class="nav-number">4.</span> <span class="nav-text">3. 数据中心拓扑概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-传统数据中心拓扑"><span class="nav-number">4.1.</span> <span class="nav-text">3.1. 传统数据中心拓扑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-思科网络拓扑"><span class="nav-number">4.2.</span> <span class="nav-text">3.2. 思科网络拓扑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-1-概述"><span class="nav-number">4.2.1.</span> <span class="nav-text">3.2.1 概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-2-Clos拓扑属性"><span class="nav-number">4.2.2.</span> <span class="nav-text">3.2.2. Clos拓扑属性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-3-扩展Clos拓扑"><span class="nav-number">4.2.3.</span> <span class="nav-text">3.2.3 扩展Clos拓扑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-4-管理Clos拓扑层的大小"><span class="nav-number">4.2.4.</span> <span class="nav-text">3.2.4 管理Clos拓扑层的大小</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-数据中心路由概述"><span class="nav-number">5.</span> <span class="nav-text">4. 数据中心路由概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-仅2层设计"><span class="nav-number">5.1.</span> <span class="nav-text">4.1. 仅2层设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-混合2层3层设计"><span class="nav-number">5.2.</span> <span class="nav-text">4.2. 混合2层3层设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-仅3层设计"><span class="nav-number">5.3.</span> <span class="nav-text">4.3. 仅3层设计</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-路由协议设计"><span class="nav-number">6.</span> <span class="nav-text">5. 路由协议设计</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-选择EBGP作为路由协议"><span class="nav-number">6.1.</span> <span class="nav-text">5.1. 选择EBGP作为路由协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-用于Clos拓扑的EBGP配置"><span class="nav-number">6.2.</span> <span class="nav-text">5.2. 用于Clos拓扑的EBGP配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-1-EBGP配置指南和示例ASN方案"><span class="nav-number">6.2.1.</span> <span class="nav-text">5.2.1 EBGP配置指南和示例ASN方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-2-私有ASNs的使用"><span class="nav-number">6.2.2.</span> <span class="nav-text">5.2.2 私有ASNs的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-3-前缀列表通告"><span class="nav-number">6.2.3.</span> <span class="nav-text">5.2.3. 前缀列表通告</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-4-外部连接"><span class="nav-number">6.2.4.</span> <span class="nav-text">5.2.4. 外部连接</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-5-在边缘的路由汇总"><span class="nav-number">6.2.5.</span> <span class="nav-text">5.2.5. 在边缘的路由汇总</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-ECMP注意事项"><span class="nav-number">7.</span> <span class="nav-text">6. ECMP注意事项</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-基本ECMP"><span class="nav-number">7.1.</span> <span class="nav-text">6.1. 基本ECMP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-多个ASN上的BGP-ECMP"><span class="nav-number">7.2.</span> <span class="nav-text">6.2. 多个ASN上的BGP ECMP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-加权ECMP"><span class="nav-number">7.3.</span> <span class="nav-text">6.3. 加权ECMP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-4-一致性Hash"><span class="nav-number">7.4.</span> <span class="nav-text">6.4. 一致性Hash</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-路由收敛特性"><span class="nav-number">8.</span> <span class="nav-text">7. 路由收敛特性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-故障检测时间"><span class="nav-number">8.1.</span> <span class="nav-text">7.1. 故障检测时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-2-事件传播时间"><span class="nav-number">8.2.</span> <span class="nav-text">7.2. 事件传播时间</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-3-Clos拓扑（Fan-Outs）的影响"><span class="nav-number">8.3.</span> <span class="nav-text">7.3. Clos拓扑（Fan-Outs）的影响</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-4-故障影响范围"><span class="nav-number">8.4.</span> <span class="nav-text">7.4. 故障影响范围</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-5-路由（Micro-Loops）微环路"><span class="nav-number">8.5.</span> <span class="nav-text">7.5 路由（Micro-Loops）微环路</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-额外的设计选型"><span class="nav-number">9.</span> <span class="nav-text">8. 额外的设计选型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-第三方路由注入"><span class="nav-number">9.1.</span> <span class="nav-text">8.1. 第三方路由注入</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-2-Clos拓扑内的路由汇总"><span class="nav-number">9.2.</span> <span class="nav-text">8.2. Clos拓扑内的路由汇总</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#8-2-1-崩溃的第1层设备层"><span class="nav-number">9.2.1.</span> <span class="nav-text">8.2.1. 崩溃的第1层设备层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-2-2-简单虚拟聚合"><span class="nav-number">9.2.2.</span> <span class="nav-text">8.2.2. 简单虚拟聚合</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-3-ICMP不可达消息伪装"><span class="nav-number">9.3.</span> <span class="nav-text">8.3. ICMP不可达消息伪装</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#9-安全性考虑"><span class="nav-number">10.</span> <span class="nav-text">9. 安全性考虑</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-参考文献"><span class="nav-number">11.</span> <span class="nav-text">10. 参考文献</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-1-引用参考"><span class="nav-number">11.1.</span> <span class="nav-text">10.1. 引用参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-信息参考"><span class="nav-number">11.2.</span> <span class="nav-text">10.2. 信息参考</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2020/04/23/在大型数据中心使用BGP进行路由-RFC7938/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

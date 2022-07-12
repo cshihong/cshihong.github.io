@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="IKEv2简介IKEv2介绍： 定义在RFC4306 ，更新与 RFC 5996. 不兼容IKEv1，IKEv1不支持认证，IKEv2支持认证，EAP。 支持NAT穿越。 IKEv2支持私密性、完整性、源认证。 工作在UDP 的 500 /4500端口。NAT-T用的是UDP4500端口。  IKE的安全机制： 身份认证 确认通信算双方的身份（对等体的IP地址或者名称），包括： 预共享密钥PSK（">
+<meta name="keywords" content="IPSec VPN,VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="IPSec VPN之IKEv2协议详解">
+<meta property="og:url" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="IKEv2简介IKEv2介绍： 定义在RFC4306 ，更新与 RFC 5996. 不兼容IKEv1，IKEv1不支持认证，IKEv2支持认证，EAP。 支持NAT穿越。 IKEv2支持私密性、完整性、源认证。 工作在UDP 的 500 /4500端口。NAT-T用的是UDP4500端口。  IKE的安全机制： 身份认证 确认通信算双方的身份（对等体的IP地址或者名称），包括： 预共享密钥PSK（">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/DH.PNG">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2协商.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2过程.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_main_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_main_1_1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_main_2.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_mian_3.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_main_4.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/通知.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/对比.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/v1和v2对比1.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/对比2.png">
+<meta property="og:updated_time" content="2019-04-18T03:47:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="IPSec VPN之IKEv2协议详解">
+<meta name="twitter:description" content="IKEv2简介IKEv2介绍： 定义在RFC4306 ，更新与 RFC 5996. 不兼容IKEv1，IKEv1不支持认证，IKEv2支持认证，EAP。 支持NAT穿越。 IKEv2支持私密性、完整性、源认证。 工作在UDP 的 500 /4500端口。NAT-T用的是UDP4500端口。  IKE的安全机制： 身份认证 确认通信算双方的身份（对等体的IP地址或者名称），包括： 预共享密钥PSK（">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/DH.PNG">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>IPSec VPN之IKEv2协议详解 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">IPSec VPN之IKEv2协议详解
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-09 16:46:38" itemprop="dateCreated datePublished" datetime="2019-04-09T16:46:38+08:00">2019-04-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-04-18 11:47:24" itemprop="dateModified" datetime="2019-04-18T11:47:24+08:00">2019-04-18</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 4,221</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 16</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="IKEv2简介"><a href="#IKEv2简介" class="headerlink" title="IKEv2简介"></a>IKEv2简介</h1><h2 id="IKEv2介绍："><a href="#IKEv2介绍：" class="headerlink" title="IKEv2介绍："></a>IKEv2介绍：</h2><ul>
+<li>定义在RFC4306 ，更新与 RFC 5996.</li>
+<li>不兼容IKEv1，IKEv1不支持认证，IKEv2支持认证，EAP。</li>
+<li>支持NAT穿越。</li>
+<li>IKEv2支持私密性、完整性、源认证。</li>
+<li>工作在UDP 的 500 /4500端口。NAT-T用的是UDP4500端口。</li>
+</ul>
+<h2 id="IKE的安全机制："><a href="#IKE的安全机制：" class="headerlink" title="IKE的安全机制："></a>IKE的安全机制：</h2><ul>
+<li><p>身份认证</p>
+<p>确认通信算双方的身份（对等体的IP地址或者名称），包括：</p>
+<p>预共享密钥PSK（pre-shared key）认证。</p>
+<p>数字签名RSA（rsa-signature）认证。</p>
+</li>
+<li><p>身份保护</p>
+</li>
+<li><p>DH（Diffie-Hellman）密钥交换算法</p>
+</li>
+<li><p>完善的向前安全性PFS（Perfect Forward Secrecy）</p>
+<p>短暂的一次性密钥系统称为“完美向前保密”</p>
+<p>在IPSec里，PFS是通过在IPSec SA协商阶段重新进行一个DH交换来实现的。</p>
+</li>
+</ul>
+<p><strong>DH交换算法：</strong></p>
+<p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/DH.PNG" alt="DH"></p>
+<center>图：DH交换算法</center>
+
+
+<h1 id="详解IKEv2主模式的协商过程"><a href="#详解IKEv2主模式的协商过程" class="headerlink" title="详解IKEv2主模式的协商过程"></a>详解IKEv2主模式的协商过程</h1><p>采用IKEv2协商安全联盟比IKEv1协商过程要简化的多。要建立一对IPSec SA，IKEv1需要经历两个阶段：“主模式＋快速模式”或者“野蛮模式＋快速模式”，前者至少需要交换9条消息，后者也至少需要6条消息。而IKEv2正常情况使用2次交换共4条消息就可以完成一对IPSec SA的建立，如果要求建立的IPSec SA大于一对时，每一对IPSec SA只需额外增加1次创建子SA交换，也就是2条消息就可以完成。</p>
+<p>IKEv2定义了三种交换：初始交换（Initial Exchanges）、创建子SA交换（Create_Child_SA Exchange）以及通知交换（Informational Exchange）。</p>
+<p>在IKEv2中将IKEv1中的主模式和野蛮模式换成了Inital Exchange，将快速模式阶段换成了CRATE_CHILD_SA.</p>
+<h2 id="初始交换："><a href="#初始交换：" class="headerlink" title="初始交换："></a>初始交换：</h2><p>正常情况下，IKEv2通过初始交换就可以完成第一对IPSec SA的协商建立。IKEv2初始交换对应IKEv1的第一阶段，初始交换包含两次交换四条消息。</p>
+<p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2协商.png" alt="IKEv2协商"></p>
+<center>图：初始交换过程图</center> 
+
+<p> 消息①和②属于第一次交换（称为IKE_SA_INIT交换），以明文方式完成IKE SA的参数协商，包括协商加密和验证算法，交换临时随机数和DH交换。IKE_SA_INIT交换后生成一个共享密钥材料，通过这个共享密钥材料可以衍生出IPSec SA的所有密钥。相当于IKEv1的主模式的第1,3个包。</p>
+<p>消息③和④属于第二次交换（称为IKE_AUTH交换），以加密方式完成身份认证、对前两条信息的认证和IPSec SA的参数协商。IKEv2支持RSA签名认证、预共享密钥认证以及扩展认证方法EAP（Extensible Authentication Protocol）。EAP认证是作为附加的IKE_AUTH交换在IKE中实现的，发起者通过在消息3中省去认证载荷来表明需要使用EAP认证。</p>
+<hr>
+<p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2过程.png" alt="IKEv2过程"></p>
+<center>图：IKEv2协商过程抓包,总共四个包</center>
+
+<p><strong>交换消息</strong> </p>
+<ul>
+<li>2个初始信息</li>
+<li>2个认证信息</li>
+</ul>
+<h2 id="IKEv2报文协商详细过程："><a href="#IKEv2报文协商详细过程：" class="headerlink" title="IKEv2报文协商详细过程："></a>IKEv2报文协商详细过程：</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Initiator                         Responder</span><br><span class="line">   -------------------------------------------------------------------</span><br><span class="line">   HDR, SAi1, KEi, Ni  --&gt;</span><br><span class="line">                                  &lt;--  HDR, SAr1, KEr, Nr, [CERTREQ]</span><br><span class="line"></span><br><span class="line">   HDR, SK &#123;IDi, [CERT,] [CERTREQ,]</span><br><span class="line">       [IDr,] AUTH, SAi2,</span><br><span class="line">       TSi, TSr&#125;  --&gt;</span><br><span class="line">                                     &lt;--  HDR, SK &#123;IDr, [CERT,] AUTH, SAr2, TSi, TSr&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>字段说明：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">AUTH        Authentication</span><br><span class="line">CERT        Certificate，证书</span><br><span class="line">CERTREQ     Certificate Request</span><br><span class="line">CP          Configuration</span><br><span class="line">D           Delete</span><br><span class="line">EAP         Extensible Authentication</span><br><span class="line"><span class="function">HDR         IKE <span class="title">header</span> <span class="params">(not a payload)</span>，IKE头部</span></span><br><span class="line"><span class="function">IDi         Identification - Initiator</span></span><br><span class="line"><span class="function">IDr         Identification - Responder</span></span><br><span class="line"><span class="function">KE          Key Exchange，发起方提供的密钥交换材料、有限使用最高安全级别的DH组</span></span><br><span class="line"><span class="function">Ni, Nr      Nonce，随机数</span></span><br><span class="line"><span class="function">N           Notify</span></span><br><span class="line"><span class="function">SA          Security Association，安全关联参数</span></span><br><span class="line"><span class="function">SK          Encrypted and Authenticated</span></span><br><span class="line"><span class="function">TSi         Traffic Selector - Initiator</span></span><br><span class="line"><span class="function">TSr         Traffic Selector - Responder</span></span><br><span class="line"><span class="function">V           Vendor ID</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>IKEv2中的消息交换都是以IKE_SA_INIT 和 IKE_AUTH开始的。在IKEv1中称为阶段一。这些初始交换通常是由4个消息组成，在大于一对IPSec SA的建立中，可以增加子SA。</p>
+<p>IKEv2的所有通信都是以request/response对组成。</p>
+<p>第一对消息（IKE_SA_INIT）进行协商密码算法、交换nonces，和DH算法。生成SKEYSEED，后续的消息使用密钥进行加密和验证。</p>
+<p>第二对消息（IKE_AUTH）操作在又IKE_SA_INIT所创建的IKE_SA之上。对前一对消息进行身份验证，交换身份和整数，并建立第一个CHILD_SA，这些消息的一部分是加密和完整的，使用通过IKE_SA_INIT交换建立的密钥来包加密。</p>
+<p>初始交换之后所有的消息都是加密传输的。</p>
+</blockquote>
+<h3 id="IKEv2协商过程的第1个包："><a href="#IKEv2协商过程的第1个包：" class="headerlink" title="IKEv2协商过程的第1个包："></a>IKEv2协商过程的第1个包：</h3><p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_main_1.png" alt="IKEv2_main_1"></p>
+<p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_main_1_1.png" alt="IKEv2_main_1_1"></p>
+<center>图：IKEv2协商过程的第一个包抓包示例</center>
+
+
+<p><strong>第一个包交换的信息如下：</strong></p>
+<p>IKE_SA_INIT: Message 1</p>
+<blockquote>
+<p>发起方提供基本的SA（安全关联）参数和密钥交换材料。等同与IKEv1的主模式的第1和第3个包。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Initiator                         Responder</span><br><span class="line">   -------------------------------------------------------------------</span><br><span class="line">   HDR, SAi1, KEi, Ni  --&gt;</span><br><span class="line">    </span><br><span class="line">----------------------------------</span><br><span class="line"> KEi：发起方提供的密钥交换材料，优先级使用最高安全级别的DH组</span><br></pre></td></tr></table></figure>
+<p>发起方发送：HDR包含安全参数索引（SPIs）、版本号和flags。SAi1有效载荷声明了发起方支持的IKE SA加密算法。KE有效载荷是发送方的DH值，Ni为发起方的随机数。</p>
+<p>第一个包：Responder SPI的值为0，Flags位的Initiator的值为1，标志位发起方。Message ID的值也为0，该值和下一个会回应方的Message ID值相同。用来标即区分一对request/response消息对。</p>
+<h3 id="IKEv2协商过程的第2个包："><a href="#IKEv2协商过程的第2个包：" class="headerlink" title="IKEv2协商过程的第2个包："></a>IKEv2协商过程的第2个包：</h3><p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_main_2.png" alt="IKEv2_main_2"></p>
+<center>图：IKEv2协商过程的第2个包抓包示例</center>
+
+
+<p><strong>第2个包的信息交换如下：</strong></p>
+<p>IKE_SA_INIT: Message 2</p>
+<blockquote>
+<p>接收方会一个可以接受的参数，并附带密钥交换内容和证书请求(可选)。等同于IKEv1的主模式的第2和第4个包。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">                   &lt;--  HDR, SAr1, KEr, Nr, [CERTREQ]</span><br><span class="line">                </span><br><span class="line">------------------------------------------------</span><br><span class="line"> SAri:接收方选择的密码学算法</span><br><span class="line"> KEr：接收方选择的密钥交换材料</span><br><span class="line"> Nr：接收方的随机数</span><br><span class="line"> CertReq: 整数请求，可选</span><br></pre></td></tr></table></figure>
+<p>回应方：从发起方提供的SAi1负载中选择一个可接受的加密组套件，封装在SAr1中，并发送双方都支持的DH算法的最高级封装在KEr负载中，以及发送回应方的Nr随机值。</p>
+<p>在回应方的报文中，SPIi为发起方的SPI,SPIr中填充自己生产的spi。Flags中的Response位置1，表示自己为回应方的报文。Message ID的值同第一个报文的Message ID，为0.</p>
+<p>第1个和第2个包交换完成后，每一方都能生成SKEYSEED，所有的密钥都是从这个密钥推导出来的。以后的消息除了消息头都会被加密和完整性保护。加密和完整性保护的密钥都是来自SKEYSEED，分别称为SK_e,用于加密，SK_a,用于认证，做完整性保护。会为每个方向计算单独的SK_a和SK_e。</p>
+<p>除了密钥来自DH算法的SK_e和SK_a之外，还会导出另一个两SK_d,用于生成子SA的密钥材料。符号SK{…}表示这些有效载荷已加密使用该方向的SK_e和SK_a保护完整性。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SKEYSEED = prf(Ni | Nr, g^ir)</span><br><span class="line">&#123;SK_d | SK_ai | SK_ar | SK_ei | SK_er | SK_pi | SK_pr &#125;</span><br><span class="line">                  = prf+ (SKEYSEED, Ni | Nr | SPIi | SPIr )</span><br><span class="line">-------------------------------------------------------</span><br><span class="line">  IKE SA; SK_ai and SK_ar used as a key to the integrity protection algorithm <span class="keyword">for</span> authenticating the component messages of subsequent exchanges;</span><br><span class="line">  <span class="function">SK_ei and SK_er used <span class="keyword">for</span> <span class="title">encrypting</span> <span class="params">(and of course decrypting)</span> all subsequent exchanges</span>; </span><br><span class="line">  and SK_pi and SK_pr, which are used when generating an AUTH payload.  </span><br><span class="line"> The lengths of SK_d, SK_pi,</span><br><span class="line"> and SK_pr MUST be the preferred key length of the PRF agreed upon.</span><br></pre></td></tr></table></figure>
+<h3 id="IKEv2协商过程的第3个包："><a href="#IKEv2协商过程的第3个包：" class="headerlink" title="IKEv2协商过程的第3个包："></a>IKEv2协商过程的第3个包：</h3><p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_mian_3.png" alt="IKEv2_mian_3"></p>
+<center>图：IKEv2协商过程的第3个包抓包示例</center>
+
+
+<p><strong>第3个包的信息如下：</strong></p>
+<p>IKE_AUTH: Message 1</p>
+<blockquote>
+<p>创建child SA相关的认证内容和参数（等于与IKEv1的主模式的第5个包和部分快速模式的包）</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HDR, SK &#123;IDi, [CERT,] [CERTREQ,]</span><br><span class="line">       [IDr,] AUTH, SAi2,</span><br><span class="line">       TSi, TSr&#125;  --&gt;</span><br><span class="line">-------------------------------------------</span><br><span class="line"> SK ：该负载被加密并且完整性保护。</span><br><span class="line"> IDi:发起方的身份信息</span><br><span class="line"> Cert：发起方的整数，可选</span><br><span class="line"> CertReq：发起方的证书请求，可选</span><br><span class="line"> IDr：期望的相应方的身份信息，可选</span><br><span class="line"> AUTH: 发起方认证数据，没有EAP就没有这个字段，可选</span><br><span class="line"> SAi2，发起方Child SA转换集</span><br><span class="line"> TSi/TSr: Child SA流量选择器   </span><br><span class="line"> 符号SK&#123;…&#125;表示这些有效载荷已加密使用该方向的SK_e和SK_a保护完整性。</span><br></pre></td></tr></table></figure>
+<p>发起方：除了HDR未加密，其余都被加密。IDi是发起方的有效身份载荷，用来证明自己的身份和完整性保护。也可以在CERT中发送整数有效载荷记忆在CertReq有效宰割中的信任列表。如果包含任何CERT有效载荷，必须提供第一个证书，包含用于验证AUTH字段的公钥。</p>
+<p>可选的有效负载IDr使发起者能够指定哪个响应者。当在有同一个IP地址的机器上可能有多个身份ID。如果响应者不接受发起方提出的IDr，响应者可能会使用其他一些IDr完成交换。如果发起方不接收相应方提供的IDr，发起方可以关闭这个SA协商。</p>
+<p>Tsi，Tsr是流量选择器，可以用来协商双方的感兴趣流。在IKEv2中可以协商，取感兴趣流的交集。但是在IKEv1中不能协商，只能双方互相配置为镜像地址。</p>
+<p>发起方使用SAi2负载来协商Child SA，SAi2用来描述CREATE_CHILD_SA的交换参数。</p>
+<p>第3个报文中的报文头是明文的，其余都是密文传输。在该报文中的Flags中的Initiator位置1，表示是发起方的报文。Message ID区别于上一对消息，为1。下一个回应的报文的Message ID和这个值相同。其余消息被封装到了Encrypted and Authenticated载荷中。</p>
+<h3 id="IEKv2协商过程的第4个包："><a href="#IEKv2协商过程的第4个包：" class="headerlink" title="IEKv2协商过程的第4个包："></a>IEKv2协商过程的第4个包：</h3><p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/IKEv2_main_4.png" alt="IKEv2_main_4"></p>
+<center>图：IKEv2协商过程的第4个包抓包示例</center>
+
+
+<p><strong>第4个包信息如下：</strong></p>
+<p>IKE_AUTH: Message 2</p>
+<blockquote>
+<p>创建于child SA相关的认证内容和参数。等同于IKEv1主模式的第6个包和部分快速模式的包。</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">                     &lt;--  HDR, SK &#123;IDr, [CERT,] AUTH,</span><br><span class="line">                                         SAr2, TSi, TSr&#125;</span><br><span class="line">----------------------------------------------------------</span><br><span class="line">SK: 负载被加密和完整性保护</span><br><span class="line">IDr：相应方的身份信息</span><br><span class="line">Cert：相应方的证书，可选</span><br><span class="line">AUTH：相应方的认证数据，没有EAP就没有这个字段，可选</span><br><span class="line">SAr2：相应方选择的Child SA转换集</span><br><span class="line">TSi/TSr: Child SA流量选择器，感兴趣流</span><br></pre></td></tr></table></figure>
+<p>响应方：使用IDr有效载荷声明其身份，可选发送一个或多个证书（同样这个证书需要有用于验证AUTH的公钥），AUTH：验证第二消息的身份和完整性保护。SAr2字段用于发送创建CREATE_CHILD_SA的提议材料。</p>
+<hr>
+<h2 id="创建子SA交换："><a href="#创建子SA交换：" class="headerlink" title="创建子SA交换："></a>创建子SA交换：</h2><p>当一个IKE SA需要创建多对IPSec SA时，需要使用创建子SA交换来协商多于一对的IPSec SA。另外，创建子SA交换还可以用于IKE SA的重协商。</p>
+<p>创建子SA交换包含一个交换两条消息，对应IKEv1协商阶段2，<strong>交换的发起者可以是初始交换的协商发起方，也可以是初始交换的协商响应方</strong>。创建子SA交换必须在初始交换完成后进行，交换消息由初始交换协商的密钥进行保护。</p>
+<p>类似于IKEv1，如果启用PFS，创建子SA交换需要额外进行一次DH交换，生成新的密钥材料。生成密钥材料后，子SA的所有密钥都从这个密钥材料衍生出来。</p>
+<h2 id="通知交换："><a href="#通知交换：" class="headerlink" title="通知交换："></a>通知交换：</h2><p>运行IKE协商的两端有时会传递一些控制信息，例如错误信息或者通告信息，这些信息在IKEv2中是通过通知交换完成的。如下图</p>
+<p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/通知.png" alt="通知"></p>
+<p>通知交换必须在IKE SA保护下进行，也就是说通知交换只能发生在初始交换之后。控制信息可能是IKE SA的，那么通知交换必须由该IKE SA来保护进行；也可能是某子SA的，那么该通知交换必须由生成该子SA的IKE SA来保护进行。</p>
+<h1 id="IKEv1和IKEv2的区别"><a href="#IKEv1和IKEv2的区别" class="headerlink" title="IKEv1和IKEv2的区别"></a>IKEv1和IKEv2的区别</h1><h2 id="IKEv1与IKEv2的区别："><a href="#IKEv1与IKEv2的区别：" class="headerlink" title="IKEv1与IKEv2的区别："></a>IKEv1与IKEv2的区别：</h2><p>可比较的角度：</p>
+<ol>
+<li><p>IPsec建立过程，报文角度</p>
+<p>阶段比较，IKEv1有两个阶段，IKEv2没有阶段。</p>
+<ul>
+<li><p>IKEv1</p>
+<p>IKEv1协商安全联盟主要分为两个阶段。</p>
+<p>IKEv1阶段1的目的是建立IKE SA，它支持两种协商模式：主模式和野蛮模式。主模式用6条ISAKMP消息完成协商。野蛮模式用3条ISAKMP消息完成协商。野蛮模式的优点是建立IKE SA的速度较快。但是由于野蛮模式密钥交换与身份认证一起进行无法提供身份保护。</p>
+<p>IKEv1阶段2的目的就是建立用来传输数据的IPSec SA，通过快速交换模式（3条ISAKMP消息）完成协商。</p>
+</li>
+<li><p>IKEv2</p>
+<p>IKEv2简化了安全联盟的协商过程。IKEv2正常情况使用2次交换共4条消息就可以完成一个IKE SA和一对IPSec SA，如果要求建立的IPSec SA大于一对时，每一对SA只需额外增加1次交换，也就是2条消息就可以完成。</p>
+</li>
+</ul>
+</li>
+<li><p>载荷角度</p>
+<p>AUTH，TSi，TSr，EAP</p>
+</li>
+<li><p>认证方法</p>
+<p>IKEv2支持EAP身份认证。IKEv2可以借助认证服务器对远程接入的PC、手机等进行身份认证、分配私网IP地址。IKEv1无法提供此功能，必须借助L2TP来分配私网地址。</p>
+</li>
+<li><p>支持远程接入</p>
+<p>L2TP OVER IPSEC———IKEV1解决方案</p>
+</li>
+<li><p>其他功能</p>
+<p>NAT -T   DPD</p>
+<p><strong>IKE SA的完整性算法支持情况不同。</strong></p>
+<p>IKE SA的完整性算法仅IKEv2支持，IKEv1不支持。</p>
+</li>
+<li><p>配置不同</p>
+</li>
+</ol>
+<ul>
+<li><p>DPD中超时重传实现不同。</p>
+<p>retry-interval参数仅IKEv1支持。表示发送DPD报文后，如果超过此时间间隔未收到正确的应答报文，DPD记录失败事件1次。当失败事件达到5次时，删除IKE SA和相应的IPSec SA。直到隧道中有流量时，两端重新协商建立IKE SA。</p>
+<p>对于IKEv2方式的IPSec SA，超时重传时间间隔从1到64以指数增长的方式增加。在8次尝试后还未收到对端发过来的报文，则认为对端已经下线，删除IKE SA和相应的IPSec SA。</p>
+</li>
+<li><p>IKE SA超时时间手工调整功能支持不同。</p>
+<p>IKEv2的IKE SA软超时为硬超时的9/10±一个随机数，所以IKEv2一般不存在两端同时发起重协商的情况，故IKEv2不需要配置软超时时间。</p>
+</li>
+</ul>
+<p><strong>IKEv1与IKEv2的对比：</strong></p>
+<p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/对比.png" alt="对比"></p>
+<p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/v1和v2对比1.png" alt="v1和v2对比1"></p>
+<center> 图：IKEv1和IKEv2区别</center>
+
+
+<p>区别：</p>
+<ul>
+<li>IKEv2：支持DPD，EAP认证方式，NAT-T，支持消息的确认（一端删除sa信息，另一端也会删除），支持自动协商感兴趣流，针对DOS的攻击防护，支持远程用户接入，最少4个包协商速度更快。</li>
+<li>IKEv1：远程用户接入必须结合L2TP、主模式9个包，野蛮模式6个包。不能协商感兴趣流，得互相配置为镜像。</li>
+</ul>
+<p><img src="/2019/04/09/IPSec-VPN之IKEv2协议详解/对比2.png" alt="对比2"></p>
+<center>图：IKEv1和IKEv2载荷对比</center>
+
+<hr>
+<h2 id="总结："><a href="#总结：" class="headerlink" title="总结："></a>总结：</h2><p><strong>IKEv1的主要问题：</strong></p>
+<ul>
+<li>不支持远程用户接入</li>
+<li>协商建立IPSec SA的时间太长</li>
+</ul>
+<p><strong>IKEv2的改进：</strong></p>
+<ul>
+<li>IKEv1是一个混合型协议，其自身的复杂性不可避免地带来一些安全及性能上的缺陷，已经成为目前实现IPSec系统的瓶颈。</li>
+<li>IKEv2协议保留了IKEv1的基本功能，并针对IKEv1研究过程中发现的问题进行修订，同时兼顾简洁性、高效性、安全性和见健壮性的需要，整合了IKEv1的相关文档，由RFC4306单个文档替代。通过核心功能最小化规定，新协议极大提高了不同IPSec VPN系统的互操作性。</li>
+</ul>
+<p><strong>IKEv2与IKEv1相比有以下优点：</strong></p>
+<ul>
+<li><p><strong>简化了安全联盟的协商过程，提高了协商效率。</strong></p>
+<p>IKEv1使用两个阶段为IPSec进行密钥协商并建立IPSec SA：第一阶段，通信双方协商和建立IKE本身使用的安全通道，建立一个IKE SA；第二阶段，利用这个已通过了认证和安全保护的安全通道，建立一对IPSec SA。IKEv2则简化了协商过程，在一次协商中可直接生成IPSec的密钥并建立IPSec SA。</p>
+</li>
+<li><p><strong>修复了多处公认的密码学方面的安全漏洞，提高了安全性能。</strong></p>
+</li>
+<li><p><strong>加入对EAP（Extensible Authentication Protocol）身份认证方式的支持，提高了认证方式的灵活性和可扩展性。</strong></p>
+<p>EAP是一种支持多种认证方法的认证协议，可扩展性是其最大的优点，即若想加入新的认证方式，可以像组件一样加入，而不用变动原来的认证体系。当前EAP认证已经广泛应用于拨号接入网络中。</p>
+</li>
+<li><p>通过EAP协议解决了远程接入用户的认证问题，彻底摆脱了L2TP的牵制。目前IKEv2已经广泛应用于远程接入网络中了。</p>
+</li>
+</ul>
+<hr>
+<blockquote>
+<p>参考文档：RFC 5996 </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/" title="IPSec VPN之IKEv2协议详解">https://cshihong.github.io/2019/04/09/IPSec-VPN之IKEv2协议详解/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/IPSec-VPN/" rel="tag"># IPSec VPN</a>
+          
+            <a href="/tags/VPN/" rel="tag"># VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/03/IPSec-VPN之IKE协议详解/" rel="next" title="IPSec VPN之IKE协议详解">
+                <i class="fa fa-chevron-left"></i> IPSec VPN之IKE协议详解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/09/IPsec-VPN各种场景配置示例/" rel="prev" title="IPsec VPN各种场景配置示例">
+                IPsec VPN各种场景配置示例 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#IKEv2简介"><span class="nav-number">1.</span> <span class="nav-text">IKEv2简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IKEv2介绍："><span class="nav-number">1.1.</span> <span class="nav-text">IKEv2介绍：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKE的安全机制："><span class="nav-number">1.2.</span> <span class="nav-text">IKE的安全机制：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#详解IKEv2主模式的协商过程"><span class="nav-number">2.</span> <span class="nav-text">详解IKEv2主模式的协商过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始交换："><span class="nav-number">2.1.</span> <span class="nav-text">初始交换：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IKEv2报文协商详细过程："><span class="nav-number">2.2.</span> <span class="nav-text">IKEv2报文协商详细过程：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#IKEv2协商过程的第1个包："><span class="nav-number">2.2.1.</span> <span class="nav-text">IKEv2协商过程的第1个包：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IKEv2协商过程的第2个包："><span class="nav-number">2.2.2.</span> <span class="nav-text">IKEv2协商过程的第2个包：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IKEv2协商过程的第3个包："><span class="nav-number">2.2.3.</span> <span class="nav-text">IKEv2协商过程的第3个包：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IEKv2协商过程的第4个包："><span class="nav-number">2.2.4.</span> <span class="nav-text">IEKv2协商过程的第4个包：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建子SA交换："><span class="nav-number">2.3.</span> <span class="nav-text">创建子SA交换：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通知交换："><span class="nav-number">2.4.</span> <span class="nav-text">通知交换：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IKEv1和IKEv2的区别"><span class="nav-number">3.</span> <span class="nav-text">IKEv1和IKEv2的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IKEv1与IKEv2的区别："><span class="nav-number">3.1.</span> <span class="nav-text">IKEv1与IKEv2的区别：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结："><span class="nav-number">3.2.</span> <span class="nav-text">总结：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/04/09/IPSec-VPN之IKEv2协议详解/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

@@ -1,0 +1,2485 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="OSPF报文头格式OSPF用IP报文直接封装协议报文，协议号为89。OSPF分为5种报文，Hello报文、DD报文、LSR报文、LSU报文和LSAck报文。 OSPF这五种报文具有相同的报文头格式，长度为24字节。 报文格式： 字段解释：   Version 1字节 版本，OSPF的版本号。对于OSPFv2来说，其值为2。     字段 长度 含义   Type 1字节 类型，OSPF报文的类型，">
+<meta name="keywords" content="路由基础,OSPF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OSPF报文类型">
+<meta property="og:url" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="OSPF报文头格式OSPF用IP报文直接封装协议报文，协议号为89。OSPF分为5种报文，Hello报文、DD报文、LSR报文、LSU报文和LSAck报文。 OSPF这五种报文具有相同的报文头格式，长度为24字节。 报文格式： 字段解释：   Version 1字节 版本，OSPF的版本号。对于OSPFv2来说，其值为2。     字段 长度 含义   Type 1字节 类型，OSPF报文的类型，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/ospf报文头格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/OSPF报文头抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/hello报文.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/hello抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/DD报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/DD抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/LSR报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/LSR抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/LSU报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/LSU抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/LSAck报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/LSAck抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/五种LSA报文头.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/I类.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/2累.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/3类.png">
+<meta property="og:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/4类.png">
+<meta property="og:updated_time" content="2019-08-25T01:55:46.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OSPF报文类型">
+<meta name="twitter:description" content="OSPF报文头格式OSPF用IP报文直接封装协议报文，协议号为89。OSPF分为5种报文，Hello报文、DD报文、LSR报文、LSU报文和LSAck报文。 OSPF这五种报文具有相同的报文头格式，长度为24字节。 报文格式： 字段解释：   Version 1字节 版本，OSPF的版本号。对于OSPFv2来说，其值为2。     字段 长度 含义   Type 1字节 类型，OSPF报文的类型，">
+<meta name="twitter:image" content="https://cshihong.github.io/2017/10/20/OSPF报文类型/ospf报文头格式.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2017/10/20/OSPF报文类型/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>OSPF报文类型 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2017/10/20/OSPF报文类型/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">OSPF报文类型
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-10-20 13:31:36" itemprop="dateCreated datePublished" datetime="2017-10-20T13:31:36+08:00">2017-10-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:55:46" itemprop="dateModified" datetime="2019-08-25T09:55:46+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 3,045</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 13</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="OSPF报文头格式"><a href="#OSPF报文头格式" class="headerlink" title="OSPF报文头格式"></a>OSPF报文头格式</h2><p>OSPF用IP报文直接封装协议报文，协议号为89。OSPF分为5种报文，Hello报文、DD报文、LSR报文、LSU报文和LSAck报文。</p>
+<p>OSPF这五种报文具有相同的报文头格式，长度为24字节。</p>
+<h3 id="报文格式："><a href="#报文格式：" class="headerlink" title="报文格式："></a>报文格式：</h3><p><img src="/2017/10/20/OSPF报文类型/ospf报文头格式.png" alt="ospf报文头格式"></p>
+<h3 id="字段解释："><a href="#字段解释：" class="headerlink" title="字段解释："></a>字段解释：</h3><table>
+<thead>
+<tr>
+<th>Version</th>
+<th>1字节</th>
+<th>版本，OSPF的版本号。对于OSPFv2来说，其值为2。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>字段</td>
+<td>长度</td>
+<td>含义</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>1字节</td>
+<td>类型，OSPF报文的类型，有下面几种类型：1：Hello报文；2：DD报文；3：LSR报文；4：LSU报文；5：LSAck报文。</td>
+</tr>
+<tr>
+<td>Packet length</td>
+<td>2字节</td>
+<td>OSPF报文的总长度，包括报文头在内，单位为字节。</td>
+</tr>
+<tr>
+<td>Router ID</td>
+<td>4字节</td>
+<td>发送该报文的路由器标识。</td>
+</tr>
+<tr>
+<td>Area ID</td>
+<td>4字节</td>
+<td>发送该报文的所属区域。</td>
+</tr>
+<tr>
+<td>Checksum</td>
+<td>2字节</td>
+<td>校验和，包含除了认证字段的整个报文的校验和。</td>
+</tr>
+<tr>
+<td>AuType</td>
+<td>2字节</td>
+<td>验证类型，值有如下几种表示， 0：不验证；1：简单认证；2：MD5认证。</td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>8字节</td>
+<td>鉴定字段，其数值根据验证类型而定。当验证类型为0时未作定义；类型为1时此字段为密码信息；类型为2时此字段包括Key ID、MD5验证数据长度和序列号的信息。MD5验证数据添加在OSPF报文后面，不包含在Authenticaiton字段中。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hello-报文抓包："><a href="#hello-报文抓包：" class="headerlink" title="hello 报文抓包："></a>hello 报文抓包：</h3><p><img src="/2017/10/20/OSPF报文类型/OSPF报文头抓包.png" alt="OSPF报文头抓包"></p>
+<p><center>图：OSPF报文头<center></center></center></p>
+<h2 id="OSPF-Hello报文格式"><a href="#OSPF-Hello报文格式" class="headerlink" title="OSPF Hello报文格式"></a>OSPF Hello报文格式</h2><p>Hello报文是最常用的一种报文，其作用为建立和维护邻接关系，周期性的在使能了OSPF的接口上发送。报文内容包括一些定时器的数值、DR、BDR以及自己已知的邻居。</p>
+<h3 id="OSPF-Hello报文格式："><a href="#OSPF-Hello报文格式：" class="headerlink" title="OSPF Hello报文格式："></a>OSPF Hello报文格式：</h3><p><img src="/2017/10/20/OSPF报文类型/hello报文.png" alt="hello报文"></p>
+<h3 id="字段解释：-1"><a href="#字段解释：-1" class="headerlink" title="字段解释："></a>字段解释：</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Network Mask</td>
+<td>32比特</td>
+<td>发送Hello报文的接口所在网络的掩码。</td>
+</tr>
+<tr>
+<td>HelloInterval</td>
+<td>16比特</td>
+<td>发送Hello报文的时间间隔。</td>
+</tr>
+<tr>
+<td>Options</td>
+<td>8比特</td>
+<td>可选项：E：允许Flood AS-External-LSAs MC：转发IP组播报文 N/P：处理Type-7 LSAs DC：处理按需链路</td>
+</tr>
+<tr>
+<td>Rtr Pri</td>
+<td>8比特</td>
+<td>DR优先级。默认为1。如果设置为0，则路由器不能参与DR或BDR的选举。</td>
+</tr>
+<tr>
+<td>RouterDeadInterval</td>
+<td>32比特</td>
+<td>失效时间。如果在此时间内未收到邻居发来的Hello报文，则认为邻居失效。</td>
+</tr>
+<tr>
+<td>Designated Router</td>
+<td>32比特</td>
+<td>DR的接口地址。</td>
+</tr>
+<tr>
+<td>Backup Designated Router</td>
+<td>32比特</td>
+<td>BDR的接口地址。</td>
+</tr>
+<tr>
+<td>Neighbor</td>
+<td>32比特</td>
+<td>邻居，以Router ID标识。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="OSPF-Hello-抓包："><a href="#OSPF-Hello-抓包：" class="headerlink" title="OSPF Hello 抓包："></a>OSPF Hello 抓包：</h3><p><img src="/2017/10/20/OSPF报文类型/hello抓包.png" alt="hello抓包"></p>
+<p><center>图：OSPF报文头<center></center></center></p>
+<h2 id="OSPF-DD-报文格式"><a href="#OSPF-DD-报文格式" class="headerlink" title="OSPF DD 报文格式"></a>OSPF DD 报文格式</h2><p>两台路由器在邻接关系初始化时，用DD报文（Database Description<br>Packet）来描述自己的LSDB，进行数据库的同步。报文内容包括LSDB中每一条LSA的Header（LSA的Header可以唯一标识一条LSA）。LSA<br>Header只占一条LSA的整个数据量的一小部分，这样可以减少路由器之间的协议报文流量，对端路由器根据LSA<br>Header就可以判断出是否已有这条LSA。在两台路由器交换DD报文的过程中，一台为Master，另一台为Slave。由Master规定起始序列号，每发送一个DD报文序列号加1，Slave方使用Master的序列号作为确认。</p>
+<h3 id="DD-报文格式："><a href="#DD-报文格式：" class="headerlink" title="DD 报文格式："></a>DD 报文格式：</h3><p><img src="/2017/10/20/OSPF报文类型/DD报文格式.png" alt="DD报文格式"></p>
+<h3 id="字段解释：-2"><a href="#字段解释：-2" class="headerlink" title="字段解释："></a>字段解释：</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Interface MTU</td>
+<td>16比特</td>
+<td>在不分片的情况下，此接口最大可发出的IP报文长度。</td>
+</tr>
+<tr>
+<td>Options</td>
+<td>8比特</td>
+<td>可选项：E：允许Flood AS-External-LSAs；MC：转发IP组播报文；N/P：处理Type-7 LSAs；DC：处理按需链路。</td>
+</tr>
+<tr>
+<td>I</td>
+<td>1比特</td>
+<td>当发送连续多个DD报文时，如果这是第一个DD报文，则置为1，否则置为0。</td>
+</tr>
+<tr>
+<td>M (More)</td>
+<td>1比特</td>
+<td>当发送连续多个DD报文时，如果这是最后一个DD报文，则置为0。否则置为1，表示后面还有其他的DD报文。</td>
+</tr>
+<tr>
+<td>M/S (Master/Slave)</td>
+<td>1比特</td>
+<td>当两台OSPF路由器交换DD报文时，首先需要确定双方的主从关系，Router ID大的一方会成为Master。当值为1时表示发送方为Master。</td>
+</tr>
+<tr>
+<td>DD sequence number</td>
+<td>32比特</td>
+<td>DD报文序列号。主从双方利用序列号来保证DD报文传输的可靠性和完整性。</td>
+</tr>
+<tr>
+<td>LSA Headers</td>
+<td>可变</td>
+<td>该DD报文中所包含的LSA的头部信息。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="DD-抓包："><a href="#DD-抓包：" class="headerlink" title="DD 抓包："></a>DD 抓包：</h3><p><img src="/2017/10/20/OSPF报文类型/DD抓包.png" alt="DD抓包"></p>
+<p><center>图： DD 报文抓包<center></center></center></p>
+<h2 id="OSPF-LSR报文格式"><a href="#OSPF-LSR报文格式" class="headerlink" title="OSPF LSR报文格式"></a>OSPF LSR报文格式</h2><p>两台路由器互相交换过DD报文之后，知道对端的路由器有哪些LSA是本地的LSDB所缺少的和哪些LSA是已经失效的，这时需要发送LSR报文（Link State Request Packet）向对方请求所需的LSA。内容包括所需要的LSA的摘要。LSR报文格式如下图所示，其中LS type、Link State ID和Advertising Router可以唯一标识出一个LSA，当两个LSA一样时，需要根据LSA中的LS sequence number、LS checksum和LS age来判断出所需要LSA的新旧。 </p>
+<h3 id="LDR报文格式："><a href="#LDR报文格式：" class="headerlink" title="LDR报文格式："></a>LDR报文格式：</h3><p><img src="/2017/10/20/OSPF报文类型/LSR报文格式.png" alt="LSR报文格式"></p>
+<h3 id="字段解释：-3"><a href="#字段解释：-3" class="headerlink" title="字段解释："></a>字段解释：</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LS type</td>
+<td>32比特</td>
+<td>LSA的类型号。</td>
+</tr>
+<tr>
+<td>Link State ID</td>
+<td>32比特</td>
+<td>根据LSA中的LS Type和LSA description在路由域中描述一个LSA。</td>
+</tr>
+<tr>
+<td>Advertising Router</td>
+<td>32比特</td>
+<td>产生此LSA的路由器的Router ID。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="LSR抓包："><a href="#LSR抓包：" class="headerlink" title="LSR抓包："></a>LSR抓包：</h3><p><img src="/2017/10/20/OSPF报文类型/LSR抓包.png" alt="LSR抓包"></p>
+<p><center>图：LSR 报文抓包<center></center></center></p>
+<h2 id="OSPF-LSU报文格式"><a href="#OSPF-LSU报文格式" class="headerlink" title="OSPF LSU报文格式"></a>OSPF LSU报文格式</h2><p>用来向对端Router发送其所需要的LSA或者泛洪自己更新的LSA，内容是多条LSA（全部内容）的集合。LSU报文（Link State Update<br>Packet）在支持组播和广播的链路上是以组播形式将LSA泛洪出去。为了实现Flooding的可靠性传输，需要LSAck报文对其进行确认。对没有收到确认报文的LSA进行重传，重传的LSA是直接发送到邻居的。</p>
+<h3 id="LSU报文格式："><a href="#LSU报文格式：" class="headerlink" title="LSU报文格式："></a>LSU报文格式：</h3><p><img src="/2017/10/20/OSPF报文类型/LSU报文格式.png" alt="LSU报文格式"></p>
+<h3 id="字段解释：-4"><a href="#字段解释：-4" class="headerlink" title="字段解释："></a>字段解释：</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Number of LSAs</td>
+<td>32比特</td>
+<td>LSA的数量。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="LSU抓包："><a href="#LSU抓包：" class="headerlink" title="LSU抓包："></a>LSU抓包：</h3><p><img src="/2017/10/20/OSPF报文类型/LSU抓包.png" alt="LSU抓包"></p>
+<p><center>图：LSU 报文抓包<center></center></center></p>
+<h2 id="OPSF-LSAck报文格式"><a href="#OPSF-LSAck报文格式" class="headerlink" title="OPSF LSAck报文格式"></a>OPSF LSAck报文格式</h2><p>用来对接收到的LSU报文进行确认。内容是需要确认的LSA的Header（一个LSAck报文可对多个LSA进行确认）。LSAck（Link State<br>Acknowledgment Packet）报文根据不同的链路以单播或组播的形式发送。</p>
+<h3 id="LSAck报文格式："><a href="#LSAck报文格式：" class="headerlink" title="LSAck报文格式："></a>LSAck报文格式：</h3><p><img src="/2017/10/20/OSPF报文类型/LSAck报文格式.png" alt="LSAck报文格式"></p>
+<h3 id="字段解释：-5"><a href="#字段解释：-5" class="headerlink" title="字段解释："></a>字段解释：</h3><table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LSAs Headers</td>
+<td>可变</td>
+<td>通过LSA的头部信息确认收到该LSA。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="LSAck抓包："><a href="#LSAck抓包：" class="headerlink" title="LSAck抓包："></a>LSAck抓包：</h3><p><img src="/2017/10/20/OSPF报文类型/LSAck抓包.png" alt="LSAck抓包"></p>
+<p><center>图：LSAck 报文抓包<center></center></center></p>
+<h2 id="常见的五种LSA"><a href="#常见的五种LSA" class="headerlink" title="常见的五种LSA"></a>常见的五种LSA</h2><p>常用的LSA共有5种，分别为：Router-LSA、Network-LSA、Network-summary-LSA、ASBR-summary-LSA和AS-External-LSA。</p>
+<p>所有的LSA都有相同的报文头：<img src="/2017/10/20/OSPF报文类型/五种LSA报文头.png" alt="五种LSA报文头"></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LS age</td>
+<td>16比特</td>
+<td>LSA产生后所经过的时间，以秒为单位。无论LSA是在链路上传送，还是保存在LSDB中，其值都会在不停的增长。</td>
+</tr>
+<tr>
+<td>Options</td>
+<td>8比特</td>
+<td>可选项：E：允许泛洪AS-External-LSA；MC：转发IP组播报文；N/P：处理Type-7 LSA；DC：处理按需链路。</td>
+</tr>
+<tr>
+<td>LS type</td>
+<td>8比特</td>
+<td>LSA的类型：Type1：Router-LSA   Type2：Network-LSA      Type3：Network-summary-LSA       Type4：ASBR-summary-LSA    Type5：AS-External-LSA      Type7：NSSA-LSA</td>
+</tr>
+<tr>
+<td>Link State ID</td>
+<td>32比特</td>
+<td>与LSA中的LS Type和LSA description一起在路由域中描述一个LSA。</td>
+</tr>
+<tr>
+<td>Advertising Router</td>
+<td>32比特</td>
+<td>产生此LSA的路由器的Router ID。</td>
+</tr>
+<tr>
+<td>LS sequence number</td>
+<td>32比特</td>
+<td>LSA的序列号。其他路由器根据这个值可以判断哪个LSA是最新的。</td>
+</tr>
+<tr>
+<td>LS checksum</td>
+<td>16比特</td>
+<td>除了LS age外其它各域的校验和。</td>
+</tr>
+<tr>
+<td>length</td>
+<td>16比特</td>
+<td>LSA的总长度，包括LSA Header，以字节为单位。</td>
+</tr>
+</tbody>
+</table>
+<h2 id="Router-LSA（1类）"><a href="#Router-LSA（1类）" class="headerlink" title="Router-LSA（1类）"></a>Router-LSA（1类）</h2><p>Router-LSA（Type1）：每个路由器都会产生，描述了路由器的链路状态和花费，在所属的区域内传播。</p>
+<p><img src="/2017/10/20/OSPF报文类型/I类.png" alt="I类"></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Link State ID</td>
+<td>32比特</td>
+<td>生成LSA的Router ID。</td>
+</tr>
+<tr>
+<td>V (Virtual Link)</td>
+<td>1比特</td>
+<td>如果产生此LSA的路由器是虚连接的端点，则置为1。</td>
+</tr>
+<tr>
+<td>E (External)</td>
+<td>1比特</td>
+<td>如果产生此LSA的路由器是ASBR，则置为1。</td>
+</tr>
+<tr>
+<td>B (Border)</td>
+<td>1比特</td>
+<td>如果产生此LSA的路由器是ABR，则置为1。</td>
+</tr>
+<tr>
+<td># links</td>
+<td>16比特</td>
+<td>LSA中所描述的链路信息的数量，包括路由器上处于某区域中的所有链路和接口。</td>
+</tr>
+<tr>
+<td>Link ID</td>
+<td>32比特</td>
+<td>路由器所接入的目标，其值取决于连接的类型：1：Router ID；2：DR的接口IP地址；3：网段／子网号；4：虚连接中对端的Router ID。</td>
+</tr>
+<tr>
+<td>Link Data</td>
+<td>32比特</td>
+<td>连接数据，其值取决于连接的类型：unnumbered P2P：接口的索引值；stub网络：子网掩码；其它连接：路由器接口的IP地址。</td>
+</tr>
+<tr>
+<td>Type</td>
+<td>8比特</td>
+<td>路由器连接的基本描述：1：点到点连接到另一台路由器；2：连接到传输网络；3：连接到stub网络；4：虚拟链路。</td>
+</tr>
+<tr>
+<td># TOS</td>
+<td>8比特</td>
+<td>连接不同的TOS数量。</td>
+</tr>
+<tr>
+<td>metric</td>
+<td>16比特</td>
+<td>链路的开销值。</td>
+</tr>
+<tr>
+<td>TOS</td>
+<td>8比特</td>
+<td>服务类型。</td>
+</tr>
+<tr>
+<td>TOS metric</td>
+<td>16比特</td>
+<td>和指定TOS值相关联的度量。</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[AR3]dis ospf <span class="number">1</span> lsdb router self-originate  </span><br><span class="line"></span><br><span class="line">	 OSPF Process <span class="number">1</span> with Router ID <span class="number">10.0</span><span class="number">.13</span><span class="number">.3</span></span><br><span class="line">		         Area: <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">		 Link State Database </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  Type      : Router</span><br><span class="line">  Ls id     : <span class="number">10.0</span><span class="number">.13</span><span class="number">.3</span></span><br><span class="line">  Adv rtr   : <span class="number">10.0</span><span class="number">.13</span><span class="number">.3</span>  </span><br><span class="line">  Ls age    : <span class="number">1128</span> </span><br><span class="line">  Len       : <span class="number">36</span> </span><br><span class="line">  Options   :  E  </span><br><span class="line">  seq#      : <span class="number">80000003</span> </span><br><span class="line">  chksum    : <span class="number">0xd911</span></span><br><span class="line">  Link count: <span class="number">1</span></span><br><span class="line">   * Link ID: <span class="number">10.0</span><span class="number">.13</span><span class="number">.1</span>    </span><br><span class="line">     Data   : <span class="number">10.0</span><span class="number">.13</span><span class="number">.3</span>    </span><br><span class="line">     Link Type: TransNet     </span><br><span class="line">     Metric : <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<h2 id="Network-LSA-2类"><a href="#Network-LSA-2类" class="headerlink" title="Network- LSA(2类)"></a>Network- LSA(2类)</h2><p>Network-LSA（Type2）：由广播网或NBMA网络中的DR产生,Network-LSA中记录了这一网络上所有路由器的Router<br>ID，描述本网段的链路状态，在所属的区域内传播。</p>
+<p><img src="/2017/10/20/OSPF报文类型/2累.png" alt="2累"></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Link State ID</td>
+<td>32比特</td>
+<td>DR的接口IP地址。</td>
+</tr>
+<tr>
+<td>Network Mask</td>
+<td>32比特</td>
+<td>该广播网或NBMA网络地址的掩码。</td>
+</tr>
+<tr>
+<td>Attached Router</td>
+<td>32比特</td>
+<td>连接在同一个网络上的所有路由器的Router ID，也包括DR的Router ID。</td>
+</tr>
+</tbody>
+</table>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">[AR2]dis ospf <span class="number">1</span> lsdb network self-originate </span><br><span class="line"></span><br><span class="line">	 OSPF Process <span class="number">1</span> with Router ID <span class="number">10.0</span><span class="number">.2</span><span class="number">.2</span></span><br><span class="line">		         Area: <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">		 Link State Database </span><br><span class="line"></span><br><span class="line">		         Area: <span class="number">0.0</span><span class="number">.0</span><span class="number">.1</span></span><br><span class="line">		 Link State Database </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  Type      : Network</span><br><span class="line">  Ls id     : <span class="number">10.0</span><span class="number">.25</span><span class="number">.2</span></span><br><span class="line">  Adv rtr   : <span class="number">10.0</span><span class="number">.2</span><span class="number">.2</span>  </span><br><span class="line">  Ls age    : <span class="number">925</span> </span><br><span class="line">  Len       : <span class="number">32</span> </span><br><span class="line">  Options   :  E  </span><br><span class="line">  seq#      : <span class="number">80000004</span> </span><br><span class="line">  chksum    : <span class="number">0xbe43</span></span><br><span class="line">  Net mask  : <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line">  Priority  : Low</span><br><span class="line">     Attached Router    <span class="number">10.0</span><span class="number">.2</span><span class="number">.2</span></span><br><span class="line">     Attached Router    <span class="number">10.0</span><span class="number">.5</span><span class="number">.5</span></span><br></pre></td></tr></table></figure>
+<h2 id="Summary-LSA（3类）"><a href="#Summary-LSA（3类）" class="headerlink" title="Summary-LSA（3类）"></a>Summary-LSA（3类）</h2><p>Network-summary-LSA（Type3）：描述区域内所有网段的路由，并通告给其他相关区域。</p>
+<p>ASBR-summary-LSA（Type4）：描述到ASBR的路由，通告给除ASBR所在区域的其他相关区域。</p>
+<p>Type3和Type4的LSA有相同的格式，它们都是由ABR产生。</p>
+<p><img src="/2017/10/20/OSPF报文类型/3类.png" alt="3类"></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Link State ID</td>
+<td>32比特</td>
+<td>通告的网络地址。如果是ASBR Summary LSA，此字段表示ASBR的Router ID。</td>
+</tr>
+<tr>
+<td>Network Mask</td>
+<td>32比特</td>
+<td>该广播网或NBMA网络地址的掩码。如果是ASBR Summary LSA，此字段无意义，设置为0.0.0.0。</td>
+</tr>
+<tr>
+<td>metric</td>
+<td>24比特</td>
+<td>到目的地址的路由开销。</td>
+</tr>
+<tr>
+<td>TOS</td>
+<td>8比特</td>
+<td>服务类型。</td>
+</tr>
+<tr>
+<td>TOS metric</td>
+<td>24比特</td>
+<td>和指定TOS值相关联的度量。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>通告缺省路由时，Link State ID和Network Mask都设置为0.0.0.0。</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[AR2]dis ospf <span class="number">1</span> lsdb summary self-originate </span><br><span class="line"></span><br><span class="line">	 OSPF Process <span class="number">1</span> with Router ID <span class="number">10.0</span><span class="number">.2</span><span class="number">.2</span></span><br><span class="line">		         Area: <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span></span><br><span class="line">		 Link State Database </span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  Type      : Sum-Net</span><br><span class="line">  Ls id     : <span class="number">10.0</span><span class="number">.15</span><span class="number">.0</span></span><br><span class="line">  Adv rtr   : <span class="number">10.0</span><span class="number">.2</span><span class="number">.2</span>  </span><br><span class="line">  Ls age    : <span class="number">199</span> </span><br><span class="line">  Len       : <span class="number">28</span> </span><br><span class="line">  Options   :  E  </span><br><span class="line">  seq#      : <span class="number">80000005</span> </span><br><span class="line">  chksum    : <span class="number">0xda55</span></span><br><span class="line">  Net mask  : <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span></span><br><span class="line">  Tos <span class="number">0</span>  metric: <span class="number">2</span></span><br><span class="line">  Priority  : Low</span><br></pre></td></tr></table></figure>
+<h2 id="ASBR-Summary-LSA-4类"><a href="#ASBR-Summary-LSA-4类" class="headerlink" title="ASBR-Summary-LSA(4类)"></a>ASBR-Summary-LSA(4类)</h2><p>ASBR-Summary-LSA（Type4）：描述到ASBR的路由，通告给除ASBR所在区域的其他相关区域。</p>
+<p>Type3和Type4的LSA有相同的格式，它们都是由ABR产生。</p>
+<h2 id="AS-External-LSA（5类）"><a href="#AS-External-LSA（5类）" class="headerlink" title="AS-External-LSA（5类）"></a>AS-External-LSA（5类）</h2><p>AS-External-LSA（Type5）：由ASBR产生，描述到AS外部的路由，这是五种LSA中，唯一一种通告到所有区域（除了Stub区域和NSSA区域）的LSA。</p>
+<p><img src="/2017/10/20/OSPF报文类型/4类.png" alt="4类"></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Link State ID</td>
+<td>32比特</td>
+<td>通告的网络地址。</td>
+</tr>
+<tr>
+<td>Network Mask</td>
+<td>32比特</td>
+<td>通告的目的地址的掩码。</td>
+</tr>
+<tr>
+<td>E</td>
+<td>1比特</td>
+<td>外部度量值类型：0：第一类外部路由；1：第二类外部路由。</td>
+</tr>
+<tr>
+<td>metric</td>
+<td>24比特</td>
+<td>到目的地址的路由开销。</td>
+</tr>
+<tr>
+<td>Forwarding Address</td>
+<td>32比特</td>
+<td>到所通告的目的地址的报文将被转发到这个地址。</td>
+</tr>
+<tr>
+<td>External Route Tag</td>
+<td>32比特</td>
+<td>添加到外部路由上的标记。OSPF本身并不使用这个字段，它可以用来对外部路由进行管理。</td>
+</tr>
+<tr>
+<td>TOS</td>
+<td>8比特</td>
+<td>服务类型。</td>
+</tr>
+<tr>
+<td>TOS metric</td>
+<td>24比特</td>
+<td>TOS附加距离信息。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Type5的LSA可以用来通告缺省路由，此时Link State ID和Network Mask都设置为0.0.0.0。</strong> </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&lt;AR3&gt;dis ospf lsdb ase </span><br><span class="line"></span><br><span class="line">	 OSPF Process <span class="number">1</span> with Router ID <span class="number">10.0</span><span class="number">.13</span><span class="number">.3</span></span><br><span class="line">		 Link State Database</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  Type      : External</span><br><span class="line">  Ls id     : <span class="number">192.168</span><span class="number">.10</span><span class="number">.0</span></span><br><span class="line">  Adv rtr   : <span class="number">10.0</span><span class="number">.4</span><span class="number">.4</span>  </span><br><span class="line">  Ls age    : <span class="number">766</span> </span><br><span class="line">  Len       : <span class="number">36</span> </span><br><span class="line">  Options   :  E  </span><br><span class="line">  seq#      : <span class="number">80000005</span> </span><br><span class="line">  chksum    : <span class="number">0x48fe</span></span><br><span class="line">  Net mask  : <span class="number">255.255</span><span class="number">.255</span><span class="number">.0</span> </span><br><span class="line">  TOS <span class="number">0</span>  Metric: <span class="number">1</span> </span><br><span class="line">  E type    : <span class="number">2</span></span><br><span class="line">  Forwarding Address : <span class="number">0.0</span><span class="number">.0</span><span class="number">.0</span> </span><br><span class="line">  Tag       : <span class="number">1</span> </span><br><span class="line">  Priority  : Low</span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2017/10/20/OSPF报文类型/" title="OSPF报文类型">https://cshihong.github.io/2017/10/20/OSPF报文类型/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/路由基础/" rel="tag"># 路由基础</a>
+          
+            <a href="/tags/OSPF/" rel="tag"># OSPF</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/19/OSPF学习笔记/" rel="next" title="OSPF学习笔记">
+                <i class="fa fa-chevron-left"></i> OSPF学习笔记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/20/OSPF命令行配置/" rel="prev" title="OSPF命令行配置">
+                OSPF命令行配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#OSPF报文头格式"><span class="nav-number">1.</span> <span class="nav-text">OSPF报文头格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#报文格式："><span class="nav-number">1.1.</span> <span class="nav-text">报文格式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字段解释："><span class="nav-number">1.2.</span> <span class="nav-text">字段解释：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hello-报文抓包："><span class="nav-number">1.3.</span> <span class="nav-text">hello 报文抓包：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OSPF-Hello报文格式"><span class="nav-number">2.</span> <span class="nav-text">OSPF Hello报文格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-Hello报文格式："><span class="nav-number">2.1.</span> <span class="nav-text">OSPF Hello报文格式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字段解释：-1"><span class="nav-number">2.2.</span> <span class="nav-text">字段解释：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OSPF-Hello-抓包："><span class="nav-number">2.3.</span> <span class="nav-text">OSPF Hello 抓包：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OSPF-DD-报文格式"><span class="nav-number">3.</span> <span class="nav-text">OSPF DD 报文格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DD-报文格式："><span class="nav-number">3.1.</span> <span class="nav-text">DD 报文格式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字段解释：-2"><span class="nav-number">3.2.</span> <span class="nav-text">字段解释：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DD-抓包："><span class="nav-number">3.3.</span> <span class="nav-text">DD 抓包：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OSPF-LSR报文格式"><span class="nav-number">4.</span> <span class="nav-text">OSPF LSR报文格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LDR报文格式："><span class="nav-number">4.1.</span> <span class="nav-text">LDR报文格式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字段解释：-3"><span class="nav-number">4.2.</span> <span class="nav-text">字段解释：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSR抓包："><span class="nav-number">4.3.</span> <span class="nav-text">LSR抓包：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OSPF-LSU报文格式"><span class="nav-number">5.</span> <span class="nav-text">OSPF LSU报文格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LSU报文格式："><span class="nav-number">5.1.</span> <span class="nav-text">LSU报文格式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字段解释：-4"><span class="nav-number">5.2.</span> <span class="nav-text">字段解释：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSU抓包："><span class="nav-number">5.3.</span> <span class="nav-text">LSU抓包：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OPSF-LSAck报文格式"><span class="nav-number">6.</span> <span class="nav-text">OPSF LSAck报文格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LSAck报文格式："><span class="nav-number">6.1.</span> <span class="nav-text">LSAck报文格式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字段解释：-5"><span class="nav-number">6.2.</span> <span class="nav-text">字段解释：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LSAck抓包："><span class="nav-number">6.3.</span> <span class="nav-text">LSAck抓包：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见的五种LSA"><span class="nav-number">7.</span> <span class="nav-text">常见的五种LSA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Router-LSA（1类）"><span class="nav-number">8.</span> <span class="nav-text">Router-LSA（1类）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Network-LSA-2类"><span class="nav-number">9.</span> <span class="nav-text">Network- LSA(2类)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Summary-LSA（3类）"><span class="nav-number">10.</span> <span class="nav-text">Summary-LSA（3类）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ASBR-Summary-LSA-4类"><span class="nav-number">11.</span> <span class="nav-text">ASBR-Summary-LSA(4类)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AS-External-LSA（5类）"><span class="nav-number">12.</span> <span class="nav-text">AS-External-LSA（5类）</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2017/10/20/OSPF报文类型/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

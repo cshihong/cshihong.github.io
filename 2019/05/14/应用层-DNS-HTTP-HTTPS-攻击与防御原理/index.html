@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="网络层攻击：TCP、UDP类攻击  网络层攻击可参考：网络层(TCP/UDP)攻击与防御原理   DNS类报文攻击防御简要笔记： 针对DNS   Anti-ddos ，针对缓存服务器虚假源  (1）源认证发送UDP 53的DNS请求 —————请用TCP 53的DNS请求 分为两种情况  客户端不支持TCP 53被动模式：首包丢弃 服务端不支持TCP 53Anti-ddos设备把TCP 53转换">
+<meta name="keywords" content="网络攻击,DDoS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="应用层(DNS&#x2F;HTTP&#x2F;HTTPS)攻击与防御原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="网络层攻击：TCP、UDP类攻击  网络层攻击可参考：网络层(TCP/UDP)攻击与防御原理   DNS类报文攻击防御简要笔记： 针对DNS   Anti-ddos ，针对缓存服务器虚假源  (1）源认证发送UDP 53的DNS请求 —————请用TCP 53的DNS请求 分为两种情况  客户端不支持TCP 53被动模式：首包丢弃 服务端不支持TCP 53Anti-ddos设备把TCP 53转换">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/dns.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/虚假源dns.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/dns_r.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/dns_reply.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/未知dns.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/投毒.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/缓存防御.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/应用层-DNS-HTTP-HTTPS-攻击与防御原理/http.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/应用层-DNS-HTTP-HTTPS-攻击与防御原理/http重定向.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/302.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/验证码.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/post重定向.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/ssl.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/应用层-DNS-HTTP-HTTPS-攻击与防御原理/https源认证.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/ssl防御.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/sip.png">
+<meta property="og:updated_time" content="2019-08-25T01:41:14.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="应用层(DNS&#x2F;HTTP&#x2F;HTTPS)攻击与防御原理">
+<meta name="twitter:description" content="网络层攻击：TCP、UDP类攻击  网络层攻击可参考：网络层(TCP/UDP)攻击与防御原理   DNS类报文攻击防御简要笔记： 针对DNS   Anti-ddos ，针对缓存服务器虚假源  (1）源认证发送UDP 53的DNS请求 —————请用TCP 53的DNS请求 分为两种情况  客户端不支持TCP 53被动模式：首包丢弃 服务端不支持TCP 53Anti-ddos设备把TCP 53转换">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/dns.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>应用层(DNS/HTTP/HTTPS)攻击与防御原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">应用层(DNS/HTTP/HTTPS)攻击与防御原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-05-14 22:49:34" itemprop="dateCreated datePublished" datetime="2019-05-14T22:49:34+08:00">2019-05-14</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:41:14" itemprop="dateModified" datetime="2019-08-25T09:41:14+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 8,042</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 29</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p>网络层攻击：TCP、UDP类攻击</p>
+<blockquote>
+<p>网络层攻击可参考：<a href="https://cshihong.github.io/2019/05/14/%E7%BD%91%E7%BB%9C%E5%B1%82-TCP-UDP-%E6%94%BB%E5%87%BB%E4%B8%8E%E9%98%B2%E5%BE%A1%E5%8E%9F%E7%90%86/"><strong>网络层(TCP/UDP)攻击与防御原理</strong></a></p>
+</blockquote>
+<hr>
+<h1 id="DNS类报文攻击防御"><a href="#DNS类报文攻击防御" class="headerlink" title="DNS类报文攻击防御"></a>DNS类报文攻击防御</h1><p><strong>简要笔记：</strong></p>
+<p>针对DNS  </p>
+<p><strong>Anti-ddos ，针对缓存服务器</strong><br>虚假源</p>
+<ul>
+<li><p>(1）源认证<br>发送UDP 53的DNS请求 —————请用TCP 53的DNS请求</p>
+<p>分为两种情况</p>
+<ol>
+<li>客户端不支持TCP 53<br>被动模式：首包丢弃</li>
+<li>服务端不支持TCP 53<br>Anti-ddos设备把TCP 53转换UDP 53, 以服务器建立关系</li>
+</ol>
+</li>
+</ul>
+<p>真实源 : 限速</p>
+<p><strong>针对授权服务器</strong> </p>
+<p>防御方法：源认证（重定向）</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">发DNS请求www.huawei.com--------------不对，请求ww.abc.com</span><br><span class="line"></span><br><span class="line">发DNS请求www.abc.com -----------------------不对，请求www.huawe.com</span><br><span class="line"></span><br><span class="line">发DNS请求www.huawei.com---------------------加入白名单</span><br></pre></td></tr></table></figure>
+<p>NGFW —–不针对<br>防御方法： 源探测   重定向</p>
+<blockquote>
+<p>详细原理请看下面的详细过程。</p>
+</blockquote>
+<h2 id="DNS正常交互过程："><a href="#DNS正常交互过程：" class="headerlink" title="DNS正常交互过程："></a>DNS正常交互过程：</h2><p>当用户上网访问某个网站时，会向DNS缓存服务器发出该网站的域名，以请求其IP地址。当DNS缓存服务器查找不到该域名与IP地址对应关系时，它会向授权DNS服务器发出域名查询请求。为了减少Internet上DNS的通信量，DNS缓存服务器会将查询到的域名和IP地址对应关系存储在自己的本地缓存中。后续再有主机请求该域名时，DNS缓存服务器会直接用缓存区中的记录信息回应，直到该记录老化，被删除。</p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/dns.png" alt="dns"></p>
+<center>图：DNS正常交互过程</center>
+
+<p>缓存服务器比较常见的攻击包括：</p>
+<ul>
+<li>DNS Request Flood攻击</li>
+<li>DNS Reply Flood攻击</li>
+<li>未知域名攻击</li>
+<li>DNS缓存投毒攻击</li>
+<li>异常DNS报文攻击</li>
+</ul>
+<p>授权服务器比较常见的攻击包括：</p>
+<ul>
+<li>DNS Request Flood攻击</li>
+<li>未知域名攻击</li>
+<li>异常DNS报文攻击</li>
+</ul>
+<h2 id="DNS-Request-Flood攻击与防御原理："><a href="#DNS-Request-Flood攻击与防御原理：" class="headerlink" title="DNS Request Flood攻击与防御原理："></a>DNS Request Flood攻击与防御原理：</h2><p>DNS Request Flood攻击既可以针对DNS缓存服务器，又可以针对DNS授权服务器。</p>
+<h3 id="攻击原理："><a href="#攻击原理：" class="headerlink" title="攻击原理："></a>攻击原理：</h3><ul>
+<li><p>针对缓存服务器攻击</p>
+<p><strong>攻击者直接或间接向DNS缓存服务器发送大量不存在的域名解析请求</strong>，导致DNS缓存服务器不停向授权服务器发送解析请求，最终导致DNS缓存服务器超载，影响正常业务。</p>
+</li>
+<li><p>针对授权服务器攻击</p>
+<p>攻击者直接或间接向DNS授权服务器发送<strong>大量不存在的子域名请求</strong>，致使DNS服务器严重超载，无法继续响应正常用户的DNS请求，从而达到攻击的目的。</p>
+</li>
+</ul>
+<p>DNS Request Flood攻击源可能是虚假源，也可能是真实源。针对不同类型的攻击源，采取的防御方式也不同。</p>
+<h3 id="Anti-DDoS防御方式："><a href="#Anti-DDoS防御方式：" class="headerlink" title="Anti-DDoS防御方式："></a>Anti-DDoS防御方式：</h3><h4 id="针对虚假源攻击缓存服务器："><a href="#针对虚假源攻击缓存服务器：" class="headerlink" title="针对虚假源攻击缓存服务器："></a>针对虚假源攻击缓存服务器：</h4><p>源认证方式可以有效防御DNS Request Flood虚假源攻击。Anti-DDoS设备基于目的地址对DNS Request报文的速率进行统计，当DNS Request报文的速率超过阈值时，启动源认证防御。<strong>源认证只针对访问受攻击域名的源IP地址实施</strong>，以减少误判和避免对正常业务的访问延时。源认证包括以下两种模式：</p>
+<ul>
+<li><p><strong>基本模式</strong>：在源认证过程中Anti-DDoS设备会触发客户端以TCP报文发送DNS请求，用以验证源IP的合法性，但在一定程度上会消耗DNS缓存服务器的TCP连接资源。</p>
+</li>
+<li><p><strong>被动模式</strong>：“被动”模式是将每个源IP地址发送的首包丢弃，触发重新请求，然后对DNS重传报文进行域名检查，如果后续报文和首包请求的域名相同则将源IP地址加入白名单。</p>
+<p>这种被动模式防御方法在现网上是防御DNS缓存服务器的虚假源Request flood攻击的首选。</p>
+</li>
+</ul>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/虚假源dns.png" alt="虚假源dns"></p>
+<center>图：针对缓存服务器攻击防御原理(基本模式)</center>
+
+<h4 id="针对虚假源攻击授权服务器防御原理："><a href="#针对虚假源攻击授权服务器防御原理：" class="headerlink" title="针对虚假源攻击授权服务器防御原理："></a>针对虚假源攻击授权服务器防御原理：</h4><p>授权服务器源认证（即重定向方式），可以有效防御DNS Request Flood虚假源攻击。重定向只针对访问受攻击域名的源IP地址实施，以减少误判和避免对正常业务的访问延时。</p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/dns_r.png" alt="dns_r"></p>
+<center>图：anti-ddos针对授权服务器dns request flood攻击防御原理</center>
+
+<p>如上图所示，Anti-DDoS设备基于目的地址对DNS Request报文的速率进行统计，当DNS Request报文的速率超过阈值时，启动重定向。</p>
+<ol>
+<li>Anti-DDoS设备返回给请求源一个别名地址，如果请求源是虚假源，则不会回应重定向报文，认证不通过，报文丢弃。</li>
+<li>如果请求源是真实源，则重新请求Anti-DDoS设备发送的重定向地址。认证通过，Anti-DDoS设备将此真实源加入白名单。</li>
+<li>Anti-DDoS设备再次重定向正确的地址，请求源重新请求正确地址，报文命中白名单，直接通过Anti-DDoS设备，到达授权服务器，完成报文交互。</li>
+</ol>
+<h4 id="针对真实源攻击的防御原理"><a href="#针对真实源攻击的防御原理" class="headerlink" title="针对真实源攻击的防御原理:"></a>针对真实源攻击的防御原理:</h4><p>如果是真实源攻击，经过上述防御过程后，通过的DNS报文还很大，则可以继续采用以下方式进行防御。</p>
+<p><strong>DNS请求报文限速：</strong>对于大流量的DNS Request flood攻击也是一种非常有效的防御方式，Anti-DDoS设备支持以下几种DNS request报文限速。</p>
+<ul>
+<li><p><strong>指定域名限速</strong></p>
+<p>对匹配了指定域名的DNS request报文进行限速，Anti-DDoS设备将直接丢弃超出阈值的DNS request报文。</p>
+<p>建议该指定DNS域名为发生攻击后的被访问频率最高Top N域名，可以从DNS报表的“请求Top N趋势”分析中获取被访问频率最高的Top N域名及其访问流量，被攻击域名一般在受攻击前不在Top N访问中，受攻击后才出现在Top N访问中。另外，当未知域名检测上报异常事件，通过配置异常抓包任务提取指纹，从指纹中也可获取未知域名。</p>
+</li>
+<li><p><strong>源IP限速</strong></p>
+<p>对匹配了的DNS request报文进行限速，Anti-DDoS设备将直接丢弃超出阈值的DNS request报文。</p>
+<p>限速可以针对指定源IP地址或者非指定源IP地址。如果是针对指定源IP地址限速，则建议该指定IP地址为发生攻击后，访问频率最高Top N源IP地址，可以从DNS报表的“请求Top N趋势”分析中获取访问频率最高的Top N源IP地址及其访问流量，此源IP地址一般在受攻击前不在Top N访问中，受攻击后才出现在Top N访问中。</p>
+</li>
+</ul>
+<p>另外，Anti-DDoS设备还支持对异常DNS报文的检查，根据预定义的规则分别从以下三个方面进行检测：</p>
+<ul>
+<li>DNS报文的格式：Anti-DDoS设备对报文格式进行检查，并将非标准格式的DNS报文直接丢弃。</li>
+<li>DNS报文的长度：通常情况下，<strong>基于UDP协议的DNS报文长度都小于512字节，超过512字节的则往往采用基于TCP协议的DNS报文请求</strong>。而现网中，很多DNS Flood经常采用超大DNS报文以造成拥塞链路，比如DNS反射攻击，因此报文长度在防御DNS flood攻击上是一个有效的手段。将DNS报文的长度限制在“最大报文长度”范围内。当DNS报文的长度超出阈值时，Anti-DDoS设备将直接丢弃超出长度的DNS请求报文。</li>
+<li>DNS报文的TTL：尤其对DNS缓存服务器防护，一般都是采用就近服务原则，比如：北京电信DNS缓存服务器主要服务对象应该是北京电信用户，所以DNS报文的TTL条数应该局限于一个范围内。Anti-DDoS设备将DNS报文的跳数限制在“DNS报文允许跳数”或“DNS报文允许跳数范围”内。当DNS报文的跳数超出阈值时，Anti-DDoS设备将直接丢弃该DNS请求报文。</li>
+</ul>
+<h3 id="防火墙防御DNS-request-Flood攻击方式："><a href="#防火墙防御DNS-request-Flood攻击方式：" class="headerlink" title="防火墙防御DNS request Flood攻击方式："></a>防火墙防御DNS request Flood攻击方式：</h3><ol>
+<li><p><strong>针对缓存服务器：请求TCP的DNS</strong></p>
+<p>和Anti-DDoS针对缓存服务器防御的基本模式相同，都是利用让客户端重新发送TCP的DNS来验证。</p>
+<blockquote>
+<p>原理：当客户端向DNS服务器发起查询请求时，DNS回应报文里有一个TC标志位，如果TC标志位置1，就表示需要通过TCP方式查询。FW就是利用这一机制针对缓存服务器防御DNS Flood攻击。</p>
+<p>缺点：并不是所有的客户端都支持以TCP方式发送DNS请求。</p>
+</blockquote>
+</li>
+<li><p>针对授权服务器：授权服务器源认证（即重定向方式）</p>
+<p>该防御方式同Anti-DDoS的针对授权服务器的防御方式。</p>
+</li>
+</ol>
+<h2 id="DNS-Reply-Flood攻击与防御原理："><a href="#DNS-Reply-Flood攻击与防御原理：" class="headerlink" title="DNS Reply Flood攻击与防御原理："></a>DNS Reply Flood攻击与防御原理：</h2><p>此攻击主要针对DNS缓存服务器。</p>
+<h3 id="攻击原理：-1"><a href="#攻击原理：-1" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>DNS Reply Flood是指攻击者在一定条件下将大量伪造的DNS应答包发送给某个DNS服务器或主机，从而消耗服务器的处理性能。</p>
+<p><strong>DNS反射攻击是DNS Reply Flood的一种典型攻击</strong>，指攻击者模拟被攻击目标向现网发送大量的DNS查询请求，并将请求的回应报文长度放大后发送到攻击目标，导致攻击目标收到大量的DNS回应报文，所在网络链路拥塞。</p>
+<h3 id="Anti-DDoS针对DNS-Reply-Flood防御原理："><a href="#Anti-DDoS针对DNS-Reply-Flood防御原理：" class="headerlink" title="Anti-DDoS针对DNS Reply Flood防御原理："></a>Anti-DDoS针对DNS Reply Flood防御原理：</h3><h4 id="针对虚假源攻击防御原理："><a href="#针对虚假源攻击防御原理：" class="headerlink" title="针对虚假源攻击防御原理："></a>针对虚假源攻击防御原理：</h4><p>Anti-DDoS设备基于目的地址对DNS回应报文速率进行统计，当DNS回应报文速率超过阈值时，启动源认证或会话检查：</p>
+<p><strong>源认证</strong>：当Anti-DDoS设备收到DNS Reply报文时，构造携带新的Query ID和源端口的DNS Request探测报文。当发送源响应探测报文，再次发出DNS Reply报文时，检查DNS Reply报文中的Query ID和源端口与DNS Request报文中是否一致，如果一致则将源IP地址加入白名单。</p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/dns_reply.png" alt="dns_reply"></p>
+<center>图：DNS Reply Flood源认证防御</center>
+
+<p><strong>会话检查： </strong>主要针对DNS反射攻击，当Anti-DDoS设备收到DNS Reply报文时，检查是否存在会话，存在则允许报文通过，否则丢弃报文。<strong>对白名单中的源IP地址也会进行检查。</strong></p>
+<p>建议在Anti-DDoS设备直路部署时使用。旁路部署动态引流时，报文来回路径不一致，因此检查不到引流前已经建立的会话，该防范不适用。</p>
+<h4 id="针对真实源攻击防御方式："><a href="#针对真实源攻击防御方式：" class="headerlink" title="针对真实源攻击防御方式："></a>针对真实源攻击防御方式：</h4><p>如果经过上述防御过程后，通过的DNS reply报文还很大，则可以继续采用限速的方式进行防御。</p>
+<ul>
+<li>指定域名限速</li>
+<li>源IP限速</li>
+<li>DNS报文的格式检查</li>
+<li>DNS报文的长度检查</li>
+<li>DNS报文的TTL</li>
+</ul>
+<blockquote>
+<p>Anti-DDoS设备针对真实源DNS Reply Foold攻击防御原理同,针对DNS Request Flood攻击防御原理。</p>
+</blockquote>
+<h3 id="防火墙针对DNS-Reply-Flood防御方式："><a href="#防火墙针对DNS-Reply-Flood防御方式：" class="headerlink" title="防火墙针对DNS Reply Flood防御方式："></a>防火墙针对DNS Reply Flood防御方式：</h3><p>FW基于目的地址对DNS回应报文速率进行统计，当DNS回应报文速率超过阈值时，启动<strong>源认证</strong>。</p>
+<blockquote>
+<p>源认证具体过程同Anti-DDoS的源认证方式。</p>
+</blockquote>
+<h2 id="未知域名攻击与防御原理："><a href="#未知域名攻击与防御原理：" class="headerlink" title="未知域名攻击与防御原理："></a>未知域名攻击与防御原理：</h2><p>此攻击针对DNS缓存服务器和DNS授权服务器。</p>
+<h3 id="攻击原理：-2"><a href="#攻击原理：-2" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p><strong>攻击者向缓存服务器发送大量变换的不存在域名请求报文：</strong></p>
+<ol>
+<li>缓存服务器收到请求报文后首先查询自身的缓存列表，发现域名不存在。</li>
+<li>缓存服务器向授权服务器发送域名请求。</li>
+<li>授权服务器查询后，确认域名不存在，回应未知域名（No such name）报文。</li>
+<li>缓存服务器向攻击者发送No such name报文。</li>
+</ol>
+<p>在未知域名攻击过程中，攻击者发送大量的伪造请求报文，导致缓存服务器和授权服务器不断对不存在域名进行查询，耗尽服务器性能，从而达到攻击目的。</p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/未知dns.png" alt="未知dns"></p>
+<center>图：未知域名攻击原理</center>
+
+<h3 id="Anti-DDoS防御原理："><a href="#Anti-DDoS防御原理：" class="headerlink" title="Anti-DDoS防御原理："></a>Anti-DDoS防御原理：</h3><p>虽然现网也有因域名输入错误，导致服务器回应No such name报文，但正常情况下，No such name报文比例很小。通过监控DNS服务器回应报文中No such name报文突增来快速发现未知域名攻击，并对No such name报文限速来防御未知域名攻击。</p>
+<p>当一秒钟内No such name请求报文与所有请求报文的比例超出阈值时，Anti-DDoS设备将向管理中心上报异常事件。同时，建议配置异常抓包任务，然后从抓包文件中提取指纹，即可提取出具体的未知域名，同时将其添加到“对指定域名请求报文限速”的域名列表中，从<strong>而可针对未知域名的请求报文进行限速。</strong></p>
+<h2 id="DNS缓存投毒攻击与防御原理："><a href="#DNS缓存投毒攻击与防御原理：" class="headerlink" title="DNS缓存投毒攻击与防御原理："></a>DNS缓存投毒攻击与防御原理：</h2><p>此攻击主要针对DNS缓存服务器。</p>
+<h3 id="攻击原理：-3"><a href="#攻击原理：-3" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>DNS缓存投毒是攻击者先向DNS缓存服务器发送一个不存在域名的请求报文，触发缓存服务器向DNS授权服务器发出查询请求，同时攻击者向缓存服务器发送大量的伪造回应报文，以期在DNS授权服务器回应到达之前命中缓存服务器的请求信息，<strong>将恶意授权服务器地址置入DNS缓存服务器缓存项中，篡改某些网站的域名和IP地址对应关系。</strong>后续针对此三级域名的子域名解析请求转到恶意DNS授权服务器，导致用户请求被发送到钓鱼网站、反政府网站等。</p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/投毒.png" alt="投毒"></p>
+<center>图：DNS缓存投毒攻击原理</center>
+
+<h3 id="Anti-DDoS防御原理：-1"><a href="#Anti-DDoS防御原理：-1" class="headerlink" title="Anti-DDoS防御原理："></a>Anti-DDoS防御原理：</h3><p>通过<strong>会话检查</strong>防御DNS缓存投毒是最有效的防御方式。通过检查DNS Reply报文中的Query ID和域名与DNS Request报文中是否匹配来决定是否允许报文通过。</p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/缓存防御.png" alt="缓存防御"></p>
+<center>图：DNS缓存投毒防御原理</center>
+
+<ol>
+<li>当DNS缓存服务器向授权服务器发出域名查询请求时，Anti-DDoS设备记录会话信息及请求报文中的Query ID和域名。</li>
+<li>当Anti-DDoS设备收到回应报文时，检查会话是否存在，回应报文中的Query ID和域名与请求报文中的Query ID和域名是否匹配。<ul>
+<li>如果命中会话，并且Query ID和域名与请求报文中的Query ID和域名匹配，则放行该报文。</li>
+<li>如果没有命中会话，则丢弃该报文。</li>
+<li>如果命中会话，但是域名或Query ID与请求报文不匹配，则丢弃该报文，同时要删除该会话，以免后续投毒报文完成投毒。</li>
+</ul>
+</li>
+</ol>
+<h1 id="HTTP类报文攻击与防御原理"><a href="#HTTP类报文攻击与防御原理" class="headerlink" title="HTTP类报文攻击与防御原理"></a>HTTP类报文攻击与防御原理</h1><h2 id="正常的HTTP报文交换过程："><a href="#正常的HTTP报文交换过程：" class="headerlink" title="正常的HTTP报文交换过程："></a>正常的HTTP报文交换过程：</h2><p><img src="应用层-DNS-HTTP-HTTPS-攻击与防御原理/http.png" alt="http"></p>
+<center>图：HTTP报文正常的交换过程</center>
+
+<ol>
+<li>客户端向服务器发出连接请求，HTTP是基于TCP之上的，客户端与服务器之间首先建立三次握手连接。</li>
+<li>客户端向服务器发送请求GET，在服务器回应之前可多次发送请求报文。</li>
+<li>服务器进行应答200 OK，在应答中添加应答长度；并传输数据。</li>
+<li>传输结束，客户端与服务器之间拆除TCP连接。</li>
+</ol>
+<hr>
+<p>HTTP报文重定向过程：</p>
+<p><img src="应用层-DNS-HTTP-HTTPS-攻击与防御原理/http重定向.png" alt="http重定向"></p>
+<center>图：http重定向报文交互过程</center>
+
+<p><strong>HTTP简要笔记：</strong></p>
+<p>针对HTTP FLOOD攻击，防御方法： </p>
+<ul>
+<li>(1) 基本模式 </li>
+<li>(2) 增强模式（验证码模式）</li>
+<li>(3)302重定向</li>
+</ul>
+<p>HTTP慢速攻击</p>
+<ul>
+<li>slow post </li>
+<li>slow headers</li>
+</ul>
+<p>NGFW防御方法： </p>
+<ul>
+<li>基本源探测</li>
+<li>高级源探测</li>
+</ul>
+<h2 id="HTTP-Flood攻击与防御原理："><a href="#HTTP-Flood攻击与防御原理：" class="headerlink" title="HTTP Flood攻击与防御原理："></a>HTTP Flood攻击与防御原理：</h2><h3 id="攻击原理：-4"><a href="#攻击原理：-4" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>攻击者通过代理或僵尸主机向目标服务器发起大量的HTTP报文，请求涉及数据库操作的URI（Universal Resource Identifier）或其它消耗系统资源的URI，造成服务器资源耗尽，无法响应正常请求。例如门户网站经常受到的HTTP Flood攻击，攻击的最大特征就是选择消耗服务器CPU或内存资源的URI，如具有数据库操作的URI。</p>
+<h3 id="Anti-DDoS防御原理：-2"><a href="#Anti-DDoS防御原理：-2" class="headerlink" title="Anti-DDoS防御原理："></a>Anti-DDoS防御原理：</h3><h4 id="HTTP-GET-Flood源认证："><a href="#HTTP-GET-Flood源认证：" class="headerlink" title="HTTP GET Flood源认证："></a>HTTP GET Flood源认证：</h4><p>HTTP GET Flood源认证防御方式是防御HTTP GET Flood最常用的手段。这种防御方式适用于客户端为浏览器的HTTP服务器场景，因为浏览器支持完整的HTTP协议栈，可以正常回应重定向报文或者是验证码。Anti-DDoS设备基于目的IP地址对HTTP报文进行统计，当HTTP报文达到设定的告警阈值时，启动源认证防御功能，源认证防御包含以下三种方式：</p>
+<p><strong>(1)302重定向模式：</strong></p>
+<p>302重定向模式能针对网页中的内嵌资源（比如：图片）进行重定向。当用户请求的页面与页面内嵌资源不在同一个服务器上，内嵌资源所在服务器发生异常时，可以对嵌套资源服务器启动302重定向防御，探测访问源是否为真实浏览器。<strong>真实浏览器支持重定向功能，可以自动完成重定向过程，不会影响客户体验。</strong></p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/302.png" alt="302"></p>
+<center>图：302重定向原理</center>
+
+<p><strong>当网络中有HTTP代理服务器时，只要有一次源认证通过，Anti-DDoS设备就会将代理服务器IP地址加入白名单，后续僵尸主机通过使用代理服务器就会绕开源认证，导致防御失效。在这种有代理服务器的网络中，建议开启代理检测功能，检测HTTP请求是否为通过代理发出的请求。</strong>如果是，Anti-DDoS设备会从HTTP报文中获取请求者的实际IP地址，将通过认证的真实IP地址和代理服务器IP地址加入白名单，后续只有此实际源IP地址发送的报文才能直接通过，其他源IP发送报文时，Anti-DDoS设备会对其进行源认证，达到防御效果。</p>
+<blockquote>
+<p>总结：当有HTTP代理服务器时，Anti-DDoS设备应开启代理检查功能。</p>
+</blockquote>
+<hr>
+<p><strong>（2）增强模式（验证码认证):</strong></p>
+<p>有些僵尸工具实现了重定向功能，或者攻击过程中使用的免费代理支持重定向功能，导致基本模式的防御失效，通过推送验证码的方式可以避免此类防御失效。此时通过让用户输入验证码，可以判断HTTP访问是否由真实的用户发起，而不是僵尸工具发起的访问。因为僵尸网络攻击依靠自动植入PC的僵尸工具发起，无法自动响应随机变化的验证码，故可以有效的防御攻击。<strong>为避免防御对正常用户体验的影响，此防御方式仅对超过源访问阈值的异常源实施。</strong></p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/验证码.png" alt="验证码"></p>
+<center>图：验证码认证流程</center>
+
+<blockquote>
+<p>源认证对于机顶盒做视频点播场景防护、或者部分移动网络防护不适用。当客户端是机顶盒、特定移动网络时，客户端无法输入验证码，建议使用动态指纹学习或URI监控防御。</p>
+</blockquote>
+<ul>
+<li>META refresh：该模式可有效阻止来自非浏览器客户端的访问，如果僵尸工具没有实现完整的HTTP协议栈，不支持自动重定向，无法通过认证。而浏览器支持自动重定向，可以通过认证。该模式不会影响用户体验，但防御效果低于增强模式。</li>
+<li>JavaScript重定向模式：当用户请求的页面或者页面内嵌的资源所在的服务器发生异常时，利用JavaScript重定向功能，探测访问源是否真实。真实浏览器可以执行JavaScript，自动完成重定向，不会影响客户体验。</li>
+<li>cookie防御模式：该模式可有效阻止来自非浏览器客户端的访问，当服务器请求发生异常时，利用真实浏览器可以记录cookie功能，探测是否为真实源。</li>
+</ul>
+<p>如果在允许的认证时间周期内，对同一源IP地址的认证次数大于最大值时，则将该源IP地址判定为攻击源，加入动态黑名单。</p>
+<h4 id="HTTP-POST-Flood源认证："><a href="#HTTP-POST-Flood源认证：" class="headerlink" title="HTTP POST Flood源认证："></a>HTTP POST Flood源认证：</h4><p>H<strong>TTP POST Flood是通过发送大量POST请求攻击服务器，以占用服务器大量资源的一种攻击方式。</strong>HTTP POST Flood源认证防御方式是防御HTTP POST Flood最常用的手段。这种防御方式适用于客户端为浏览器且浏览器使用cookie的HTTP服务器场景，采用Anti-DDoS设备对客户端的浏览器注入Cookie机制，客户端再次请求时会在HTTP报头（Header）上附加Cookie，Anti-DDoS设备通过检测Cookie的真实性进行HTTP POST Flood的攻击防范，以有效保护Web服务器安全。</p>
+<p>（1）重定向模式：</p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/post重定向.png" alt="post重定向"></p>
+<center>图：重定向模式处理过程</center>
+
+<ol>
+<li>Anti-DDoS设备替代目标服务器与客户端完成三次握手。</li>
+<li>Anti-DDoS设备在收到客户端发送的POST请求后，回应“307临时重定向”，并在响应报头中附加上由客户端IP生成的Cookie，再发送给客户端。</li>
+<li>如果客户端浏览器真实，在收到“307临时重定向”后，Anti-DDoS设备生成的Cookie就会写入到浏览器中。正常用户再次使用POST请求Web页面时，Anti-DDoS设备将会收到带有Cookie的POST请求，并验证Cookie是否正确。如果正确则将客户端IP加入到HTTP白名单里，同时使用“408请求超时间”进行响应。</li>
+<li>Anti-DDoS设备会在源IP监控表中统计Cookie的验证次数和时间间隔，如果单位时间内的验证次数超过一定的警戒值，则认为此IP为攻击源，并切断此攻击源的HTTP流量。</li>
+<li>真实客户端浏览器在收到“408请求超时”后，会自动再次进行请求，此时客户端源IP已加入到白名单，后续的HTTP请求将直接透过Anti-DDoS设备到达服务器，进行正常的Web访问。</li>
+</ol>
+<p><strong>(2)增加模式（验证码认证）：</strong></p>
+<p>此模式下，HTTP POST报文同HTTP GET报文的验证机制一致。</p>
+<blockquote>
+<p>HTTP Post 防御当前使用的是浏览器Cookie的机制，浏览器的安全级别是由Cookie限制的。只有浏览器的安全级别为最低级别才接受所有的Cookie，如果浏览器Cookie级别较高，存在HTTP POST防御认证不通过的风险。</p>
+</blockquote>
+<hr>
+<ul>
+<li><p><strong>HTTP源统计</strong></p>
+<p>HTTP源统计是在基于目的IP流量异常的基础上，再启动针对源IP流量进行统计。Anti-DDoS设备首先对到达目的IP的流量进行统计，当目的IP流量触发告警阈值时，再启动到达这个目的IP的每个源的流量进行统计，判定具体某个源流量异常，并对源IP的流量进行防御。</p>
+<p>HTTP源统计功能可以更准确的定位异常源，并对异常源发出的流量进行防御。</p>
+</li>
+<li><p><strong>URI监测</strong></p>
+<p>URI监测是HTTP源认证防御的补充功能，当通过HTTP源认证的流量还是超过阈值时，可以启用URI监测。Anti-DDoS设备对HTTP源认证过程中加入白名单的源IP也会进行URI监测。</p>
+<p>当指定时间内，某个URI的访问流量超过一定阈值时，Anti-DDoS设备启动针对源IP的URI行为监测。当这个源IP地址对某个URI的访问数与总访问数的比例超过阈值时，则将该源IP地址作为攻击源并加入动态黑名单。在配置URI监测时，可将消耗内存或计算资源多、容易受攻击的URI加入“重点监测URI”列表。</p>
+</li>
+<li><p><strong>URI源指纹学习功能</strong></p>
+<p>指纹学习方法适用于攻击源访问的URI比较固定。因为如果要形成攻击效果，攻击者一般都事先探测，找到容易消耗系统资源的URI作为攻击目标，然后一个攻击源的一个会话上会有多个针对该URI的请求，最终呈现为该源对选定的URI发送大量的请求报文。动态指纹学习正是基于这个原理，Anti-DDoS设备对源访问的URI进行指纹学习，找到攻击目标URI指纹，如果对该URI指纹的命中次数高于设置的阈值就将该源加入黑名单。</p>
+</li>
+</ul>
+<hr>
+<h3 id="防火墙针对HTTP-Flood攻击防御方式："><a href="#防火墙针对HTTP-Flood攻击防御方式：" class="headerlink" title="防火墙针对HTTP Flood攻击防御方式："></a>防火墙针对HTTP Flood攻击防御方式：</h3><ul>
+<li>HTTP Flood源认证<ul>
+<li>基本模式（META刷新）</li>
+<li>增强模式（验证码认证）</li>
+<li>302重定向模式</li>
+</ul>
+</li>
+</ul>
+<h2 id="HTTP慢速攻击与防御原理："><a href="#HTTP慢速攻击与防御原理：" class="headerlink" title="HTTP慢速攻击与防御原理："></a>HTTP慢速攻击与防御原理：</h2><h3 id="攻击原理：-5"><a href="#攻击原理：-5" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>HTTP慢速攻击是利用HTTP现有合法机制，在建立了<strong>与HTTP服务器的连接后，尽量长时间保持该连接，不释放，达到对HTTP服务器的攻击</strong>。常见的攻击有两种：</p>
+<ul>
+<li><strong>Slow POST</strong>: 攻击者发送Post报文向服务器请求提交数据，将总报文长度设置为一个很大的数值，但是在随后的数据发送中，每次只发送很小的报文，这样导致服务器端一直等待攻击者发送数据。</li>
+<li><strong>Slow headers:</strong> 攻击者通过GET或者POST向服务器建立连接，但是HTTP头字段不发送结束符，之后发送其他字段进行保活。服务器会一直等待头信息中结束符而导致连接始终被占用。</li>
+</ul>
+<h3 id="防御原理："><a href="#防御原理：" class="headerlink" title="防御原理："></a>防御原理：</h3><p>针对HTTP慢速攻击的特点，Anti-DDoS设备对每秒钟HTTP并发连接数进行检查，当每秒钟HTTP并发连接数超过设定值时，会触发HTTP报文检查，检查出以下任意一种情况，都认定受到HTTP慢速连接攻击，则将该源IP地址判定为攻击源，加入动态黑名单，同时断开此IP地址与HTTP服务器的连接。</p>
+<ul>
+<li>连续多个HTTP POST报文的总长度都很大，但是其HTTP载荷长度都很小。</li>
+<li>连续多个HTTP GET/POST报文的报文头都没有结束标识。</li>
+</ul>
+<h1 id="HTTPS类报文攻击与防御"><a href="#HTTPS类报文攻击与防御" class="headerlink" title="HTTPS类报文攻击与防御"></a>HTTPS类报文攻击与防御</h1><h2 id="正常SSL交互过程："><a href="#正常SSL交互过程：" class="headerlink" title="正常SSL交互过程："></a>正常SSL交互过程：</h2><p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/ssl.png" alt="ssl"></p>
+<center>图：正常SSL报文交换过程</center>
+
+<ol>
+<li><p>客户端发送的第一条消息为ClientHello，其中包含了客户端所推荐的加密参数和准备使用的加密算法。</p>
+</li>
+<li><p>服务器以三条消息进行响应：</p>
+<ol>
+<li>发送选择加密算法的ServerHello。</li>
+<li>服务器发送携带自己公钥的Certificate消息。</li>
+<li>服务器发送表示握手阶段不再有任何消息的ServerHelloDone。</li>
+</ol>
+</li>
+<li><p>客户端发送一条Client Key Exchange消息，将一个随机生成的使用服务器公钥加密的密钥发送给服务器。</p>
+</li>
+<li><p>Change Cipher Spec消息表示客户端在此之后发送的所有消息都将使用刚刚商定的密钥进行加密。</p>
+</li>
+<li><p>Finished消息包含了对整个连接过程的校验，是通过先计算已交互的握手消息的Hash值，再利用协商好的密钥对Hash值加密得到的。</p>
+<p>服务器利用同样地方法计算已交互的握手信息的Hash值与Finished消息解密结果比较，就能够判断要使用的加密算法是否是安全商定的。</p>
+</li>
+<li><p>一旦服务器接收到了客户端的Finished消息，它就会发送自己的Change Cipher Spec和Finished消息，于是连接就准备好进行应用数据的传输了。</p>
+</li>
+</ol>
+<h2 id="HTTPS-Flood攻击与防御原理："><a href="#HTTPS-Flood攻击与防御原理：" class="headerlink" title="HTTPS Flood攻击与防御原理："></a>HTTPS Flood攻击与防御原理：</h2><h3 id="攻击原理：-6"><a href="#攻击原理：-6" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>攻击者通过代理、僵尸网络或者直接向目标服务器发起大量的HTTPS连接，造成服务器资源耗尽，无法响应正常的请求。</p>
+<h3 id="Anti-DDoS防御原理：-3"><a href="#Anti-DDoS防御原理：-3" class="headerlink" title="Anti-DDoS防御原理："></a>Anti-DDoS防御原理：</h3><p>通过<strong>源认证</strong>对HTTPS业务端口的连接耗尽进行防御，Anti-DDoS设备基于目的地址对HTTPS请求报文速率进行统计，当HTTPS请求速率超过阈值时，启动源认证防御。</p>
+<p><img src="应用层-DNS-HTTP-HTTPS-攻击与防御原理/https源认证.png" alt="https源认证"></p>
+<center>图：HTTPS源认证流程</center>
+
+<h3 id="防火墙针对HTTPS-Flood的防御原理："><a href="#防火墙针对HTTPS-Flood的防御原理：" class="headerlink" title="防火墙针对HTTPS Flood的防御原理："></a>防火墙针对HTTPS Flood的防御原理：</h3><p>防火墙防御原理同Anti-DDoS设备防御原理。不过是FW代替服务器与客户端完成TCP三次握手。而Anti-DDoS是通过清洗设备进行代替。</p>
+<h2 id="SSL-DoS-DDoS攻击与防御原理："><a href="#SSL-DoS-DDoS攻击与防御原理：" class="headerlink" title="SSL-DoS/DDoS攻击与防御原理："></a>SSL-DoS/DDoS攻击与防御原理：</h2><h3 id="攻击原理：-7"><a href="#攻击原理：-7" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>SSL握手的过程中，<strong>在协商加密算法时服务器CPU的开销是客户端开销的15倍左右</strong>。攻击者利用这一特点，在一个TCP连接中不停地快速重新协商（这种行为是被SSL所允许的），从而耗尽服务器CPU资源，这种攻击叫做SSL-DoS。如果多个僵尸主机向服务器发起SSL-DoS，则叫做SSL-DDoS攻击。</p>
+<h3 id="Anti-DDoS防御原理：-4"><a href="#Anti-DDoS防御原理：-4" class="headerlink" title="Anti-DDoS防御原理："></a>Anti-DDoS防御原理：</h3><p>Anti-DDoS设备基于目的地址对HTTPS请求报文速率进行统计，当HTTPS请求速率超过阈值时，启动源认证防御和SSL防御：</p>
+<blockquote>
+<p>源认证的过程和防御HTTPS Flood攻击的源认证相同。</p>
+</blockquote>
+<p><strong>SSL防御：</strong></p>
+<p><strong>在检查周期内，如果某个源IP地址到目的IP地址的某个会话上的协商次数超过阈值，则将此会话标记为异常会话，在异常会话检查周期内，如果异常会话数超过阈值时，判定该源IP地址异常，将该源IP地址加入黑名单。</strong></p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/ssl防御.png" alt="ssl防御"></p>
+<center>图：SSL防御原理</center>
+
+<hr>
+<blockquote>
+<p>有关HTTPS的DDoS攻击防护思路可以参考以下这篇博文：</p>
+<p>出自绿盟科技博客：<a href="http://blog.nsfocus.net/https-ddos-attack-defense-ideas/" target="_blank" rel="noopener">HTTPS的DDoS攻击防护思路</a>  <a href="http://blog.nsfocus.net/https-ddos-attack-defense-ideas/" target="_blank" rel="noopener">http://blog.nsfocus.net/https-ddos-attack-defense-ideas/</a></p>
+</blockquote>
+<hr>
+<h1 id="其它类型的Flood攻击"><a href="#其它类型的Flood攻击" class="headerlink" title="其它类型的Flood攻击"></a>其它类型的Flood攻击</h1><h2 id="SIP-Flood攻击与防御原理："><a href="#SIP-Flood攻击与防御原理：" class="headerlink" title="SIP Flood攻击与防御原理："></a>SIP Flood攻击与防御原理：</h2><h3 id="攻击原理：-8"><a href="#攻击原理：-8" class="headerlink" title="攻击原理："></a>攻击原理：</h3><p>SIP(Session Initiation Protocol)是一个应用层的信令控制协议。用于创建、修改和释放一个或多个参与者的会话。这些会话可以是Internet多媒体会议、IP电话或多媒体分发。例如，SIP服务提供商可以建立包含语音、视频和聊天内容的全新媒体。</p>
+<p>攻击者通过发送大量的INVITE消息到SIP服务器，导致被攻击SIP服务器分配大量的资源用以记录和跟踪会话，直到资源耗尽而无法响应合法用户的呼叫请求；或者针对VoIP设备在SIP协议实现上的漏洞构造并发送相应的畸形SIP报文，从而导致SIP服务器拒绝服务。</p>
+<h3 id="Anti-DDoS防御原理：-5"><a href="#Anti-DDoS防御原理：-5" class="headerlink" title="Anti-DDoS防御原理："></a>Anti-DDoS防御原理：</h3><p>Options方法用于SIP协议通信双方查询对方支持的方法、内容类型、扩展等。SIP<strong>源认证</strong>是发送OPTIONS请求报文作为探测报文探测源的真实性，如果发送端的源IP真实存在，就会对该探测报文进行回应，Anti-DDoS设备检查回应报文是否正确，正确则允许通过，将源IP地址加入白名单，否则丢弃报文。</p>
+<p><img src="/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/sip.png" alt="sip"></p>
+<center>图：SIP源认证</center>
+
+<blockquote>
+<p>防火墙的防御方法同Anti-DDoS。</p>
+</blockquote>
+<h2 id="ARP-Flood防御原理："><a href="#ARP-Flood防御原理：" class="headerlink" title="ARP Flood防御原理："></a>ARP Flood防御原理：</h2><p>ARP flood攻击是指攻击者通过修改ARP报文中的源IP地址和源MAC地址，向攻击目标大量发送伪造的ARP报文，拥塞网络。</p>
+<p>FW对于ARP flood攻击一般采用<strong>限流</strong>策略。FW针对目的IP进行统计，当到达同一目的IP地址的ARP流量达到告警阈值时，启动限流策略，丢弃超过上限的ARP报文。</p>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/" title="应用层(DNS/HTTP/HTTPS)攻击与防御原理">https://cshihong.github.io/2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/网络攻击/" rel="tag"># 网络攻击</a>
+          
+            <a href="/tags/DDoS/" rel="tag"># DDoS</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/05/14/网络层-TCP-UDP-攻击与防御原理/" rel="next" title="网络层(TCP/UDP)攻击与防御原理">
+                <i class="fa fa-chevron-left"></i> 网络层(TCP/UDP)攻击与防御原理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/16/单包攻击原理与防御/" rel="prev" title="单包攻击原理与防御">
+                单包攻击原理与防御 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DNS类报文攻击防御"><span class="nav-number">1.</span> <span class="nav-text">DNS类报文攻击防御</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS正常交互过程："><span class="nav-number">1.1.</span> <span class="nav-text">DNS正常交互过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-Request-Flood攻击与防御原理："><span class="nav-number">1.2.</span> <span class="nav-text">DNS Request Flood攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理："><span class="nav-number">1.2.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Anti-DDoS防御方式："><span class="nav-number">1.2.2.</span> <span class="nav-text">Anti-DDoS防御方式：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#针对虚假源攻击缓存服务器："><span class="nav-number">1.2.2.1.</span> <span class="nav-text">针对虚假源攻击缓存服务器：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#针对虚假源攻击授权服务器防御原理："><span class="nav-number">1.2.2.2.</span> <span class="nav-text">针对虚假源攻击授权服务器防御原理：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#针对真实源攻击的防御原理"><span class="nav-number">1.2.2.3.</span> <span class="nav-text">针对真实源攻击的防御原理:</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#防火墙防御DNS-request-Flood攻击方式："><span class="nav-number">1.2.3.</span> <span class="nav-text">防火墙防御DNS request Flood攻击方式：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS-Reply-Flood攻击与防御原理："><span class="nav-number">1.3.</span> <span class="nav-text">DNS Reply Flood攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-1"><span class="nav-number">1.3.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Anti-DDoS针对DNS-Reply-Flood防御原理："><span class="nav-number">1.3.2.</span> <span class="nav-text">Anti-DDoS针对DNS Reply Flood防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#针对虚假源攻击防御原理："><span class="nav-number">1.3.2.1.</span> <span class="nav-text">针对虚假源攻击防御原理：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#针对真实源攻击防御方式："><span class="nav-number">1.3.2.2.</span> <span class="nav-text">针对真实源攻击防御方式：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#防火墙针对DNS-Reply-Flood防御方式："><span class="nav-number">1.3.3.</span> <span class="nav-text">防火墙针对DNS Reply Flood防御方式：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#未知域名攻击与防御原理："><span class="nav-number">1.4.</span> <span class="nav-text">未知域名攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-2"><span class="nav-number">1.4.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Anti-DDoS防御原理："><span class="nav-number">1.4.2.</span> <span class="nav-text">Anti-DDoS防御原理：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DNS缓存投毒攻击与防御原理："><span class="nav-number">1.5.</span> <span class="nav-text">DNS缓存投毒攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-3"><span class="nav-number">1.5.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Anti-DDoS防御原理：-1"><span class="nav-number">1.5.2.</span> <span class="nav-text">Anti-DDoS防御原理：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTP类报文攻击与防御原理"><span class="nav-number">2.</span> <span class="nav-text">HTTP类报文攻击与防御原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#正常的HTTP报文交换过程："><span class="nav-number">2.1.</span> <span class="nav-text">正常的HTTP报文交换过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP-Flood攻击与防御原理："><span class="nav-number">2.2.</span> <span class="nav-text">HTTP Flood攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-4"><span class="nav-number">2.2.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Anti-DDoS防御原理：-2"><span class="nav-number">2.2.2.</span> <span class="nav-text">Anti-DDoS防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP-GET-Flood源认证："><span class="nav-number">2.2.2.1.</span> <span class="nav-text">HTTP GET Flood源认证：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP-POST-Flood源认证："><span class="nav-number">2.2.2.2.</span> <span class="nav-text">HTTP POST Flood源认证：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#防火墙针对HTTP-Flood攻击防御方式："><span class="nav-number">2.2.3.</span> <span class="nav-text">防火墙针对HTTP Flood攻击防御方式：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP慢速攻击与防御原理："><span class="nav-number">2.3.</span> <span class="nav-text">HTTP慢速攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-5"><span class="nav-number">2.3.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#防御原理："><span class="nav-number">2.3.2.</span> <span class="nav-text">防御原理：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#HTTPS类报文攻击与防御"><span class="nav-number">3.</span> <span class="nav-text">HTTPS类报文攻击与防御</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#正常SSL交互过程："><span class="nav-number">3.1.</span> <span class="nav-text">正常SSL交互过程：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTPS-Flood攻击与防御原理："><span class="nav-number">3.2.</span> <span class="nav-text">HTTPS Flood攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-6"><span class="nav-number">3.2.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Anti-DDoS防御原理：-3"><span class="nav-number">3.2.2.</span> <span class="nav-text">Anti-DDoS防御原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#防火墙针对HTTPS-Flood的防御原理："><span class="nav-number">3.2.3.</span> <span class="nav-text">防火墙针对HTTPS Flood的防御原理：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSL-DoS-DDoS攻击与防御原理："><span class="nav-number">3.3.</span> <span class="nav-text">SSL-DoS/DDoS攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-7"><span class="nav-number">3.3.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Anti-DDoS防御原理：-4"><span class="nav-number">3.3.2.</span> <span class="nav-text">Anti-DDoS防御原理：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其它类型的Flood攻击"><span class="nav-number">4.</span> <span class="nav-text">其它类型的Flood攻击</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SIP-Flood攻击与防御原理："><span class="nav-number">4.1.</span> <span class="nav-text">SIP Flood攻击与防御原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#攻击原理：-8"><span class="nav-number">4.1.1.</span> <span class="nav-text">攻击原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Anti-DDoS防御原理：-5"><span class="nav-number">4.1.2.</span> <span class="nav-text">Anti-DDoS防御原理：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ARP-Flood防御原理："><span class="nav-number">4.2.</span> <span class="nav-text">ARP Flood防御原理：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/05/14/应用层-DNS-HTTP-HTTPS-攻击与防御原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

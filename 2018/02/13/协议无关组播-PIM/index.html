@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="PIM简介PIM（Protocol Independent Multicast）称为协议无关组播。这里的协议无关指的是与单播路由协议无关，即PIM不需要维护专门的单播路由信息。作为组播路由解决方案，它直接利用单播路由表的路由信息，对组播报文执行RPF（Reverse Path Forwarding，逆向路径转发）检查，检查通过后创建组播路由表项，从而转发组播报文。 目前设备实际支持的PIM协议包括">
+<meta name="keywords" content="路由基础,组播">
+<meta property="og:type" content="article">
+<meta property="og:title" content="协议无关组播-PIM">
+<meta property="og:url" content="https://cshihong.github.io/2018/02/13/协议无关组播-PIM/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="PIM简介PIM（Protocol Independent Multicast）称为协议无关组播。这里的协议无关指的是与单播路由协议无关，即PIM不需要维护专门的单播路由信息。作为组播路由解决方案，它直接利用单播路由表的路由信息，对组播报文执行RPF（Reverse Path Forwarding，逆向路径转发）检查，检查通过后创建组播路由表项，从而转发组播报文。 目前设备实际支持的PIM协议包括">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/13/协议无关组播-PIM/地域空间.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/13/协议无关组播-PIM/组地址范围.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/02/13/协议无关组播-PIM/PIM%20gr.png">
+<meta property="og:updated_time" content="2019-08-25T01:51:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="协议无关组播-PIM">
+<meta name="twitter:description" content="PIM简介PIM（Protocol Independent Multicast）称为协议无关组播。这里的协议无关指的是与单播路由协议无关，即PIM不需要维护专门的单播路由信息。作为组播路由解决方案，它直接利用单播路由表的路由信息，对组播报文执行RPF（Reverse Path Forwarding，逆向路径转发）检查，检查通过后创建组播路由表项，从而转发组播报文。 目前设备实际支持的PIM协议包括">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/02/13/协议无关组播-PIM/地域空间.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/02/13/协议无关组播-PIM/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>协议无关组播-PIM | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/02/13/协议无关组播-PIM/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">协议无关组播-PIM
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-02-13 22:53:12" itemprop="dateCreated datePublished" datetime="2018-02-13T22:53:12+08:00">2018-02-13</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:51:24" itemprop="dateModified" datetime="2019-08-25T09:51:24+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/路由交换/" itemprop="url" rel="index"><span itemprop="name">路由交换</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 10,385</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 39</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="PIM简介"><a href="#PIM简介" class="headerlink" title="PIM简介"></a>PIM简介</h1><p>PIM（Protocol Independent Multicast）称为协议无关组播。这里的协议无关指的是与单播路由协议无关，即PIM不需要维护专门的单播路由信息。作为组播路由解决方案，它直接利用单播路由表的路由信息，对组播报文执行RPF（Reverse Path Forwarding，逆向路径转发）检查，检查通过后创建组播路由表项，从而转发组播报文。</p>
+<p>目前设备实际支持的PIM协议包括：PIM-DM（PIM-Dense Mode）、PIM-SM（PIM-Sparse Mode）。</p>
+<h2 id="PIM的基本概念："><a href="#PIM的基本概念：" class="headerlink" title="PIM的基本概念："></a>PIM的基本概念：</h2><h3 id="组播分发树："><a href="#组播分发树：" class="headerlink" title="组播分发树："></a>组播分发树：</h3><p>PIM网络以组播组为单位在路由器上建立一点到多点的组播转发路径。由于组播转发路径呈现树型结构，也称为组播分发树MDT（Multicast Distribution Tree）。</p>
+<p>组播分发树主要包括以下两种：</p>
+<ul>
+<li>以组播源为根，组播组成员为叶子的组播分发树称为SPT（Shortest Path Tree）。SPT同时适用于PIM-DM网络和PIM-SM网络。</li>
+<li>以RP（Rendezvous Point）为根，组播组成员为叶子的组播分发树称为RPT（RP Tree）。RPT适用于PIM-SM网络。</li>
+</ul>
+<h3 id="PIM路由器："><a href="#PIM路由器：" class="headerlink" title="PIM路由器："></a>PIM路由器：</h3><p>在接口上使能了PIM协议的路由器即为PIM路由器。在建立组播分发树的过程中，PIM路由器又分为以下几种：</p>
+<ul>
+<li>叶子路由器：与用户主机相连的PIM路由器，但连接的用户主机不一定为组成员。</li>
+<li>第一跳路由器：组播转发路径上，与组播源相连且负责转发该组播源发出的组播数据的PIM路由器。</li>
+<li>最后一跳路由器：组播转发路径上，与组播组成员相连且负责向该组成员转发组播数据的PIM路由器。</li>
+<li>中间路由器：组播转发路径上，第一跳路由器与最后一跳路由器之间的PIM路由器。</li>
+</ul>
+<h3 id="PIM路由表项："><a href="#PIM路由表项：" class="headerlink" title="PIM路由表项："></a>PIM路由表项：</h3><p>PIM路由表项即通过PIM协议建立的组播路由表项。PIM网络中存在两种路由表项：（S，G）路由表项或（ <em> ，G）路由表项。S表示组播源，G表示组播组， </em> 表示任意。</p>
+<ul>
+<li>（S，G）路由表项主要用于在PIM网络中建立SPT。对于PIM-DM网络和PIM-SM网络适用。</li>
+<li>（*，G）路由表项主要用于在PIM网络中建立RPT。对于PIM-SM网络适用。</li>
+</ul>
+<p>PIM路由器上可能同时存在两种路由表项。当收到源地址为S，组地址为G的组播报文，且RPF检查通过的情况下，按照如下的规则转发：</p>
+<ul>
+<li>如果存在（S，G）路由表项，则由（S，G）路由表项指导报文转发。</li>
+<li>如果不存在（S，G）路由表项，只存在（ <em> ，G）路由表项，则先依照（ </em> ，G）路由表项创建（S，G）路由表项，再由（S，G）路由表项指导报文转发。</li>
+</ul>
+<p>PIM路由表项中主要用于指导转发的信息如下：</p>
+<ul>
+<li>组播源地址。</li>
+<li>组播组地址。</li>
+<li>上游接口：本地路由器上接收到组播数据的接口。</li>
+<li>下游接口：将组播数据转发出去的接口。</li>
+</ul>
+<h1 id="PIM-DM"><a href="#PIM-DM" class="headerlink" title="PIM-DM"></a>PIM-DM</h1><h2 id="基本原理："><a href="#基本原理：" class="headerlink" title="基本原理："></a>基本原理：</h2><h4 id="基本原理"><a href="#基本原理" class="headerlink" title="基本原理"></a>基本原理</h4><p>PIM-DM使用“推（Push）模式”转发组播报文，一般应用于组播组成员规模相对较小、相对密集的网络。在实现过程中，它会假设网络中的组成员分布非常稠密，每个网段都可能存在组成员。当有活跃的组播源出现时，PIM-DM会将组播源发来的组播报文扩散到整个网络的PIM路由器上，再裁剪掉不存在组成员的分支。PIM-DM通过周期性的进行“扩散（Flooding）—剪枝（Prune）”，来构建并维护一棵连接组播源和组成员的单向无环SPT（Source Specific Shortest Path Tree）。如果在下一次“扩散-剪枝”进行前，被裁剪掉的分支由于其叶子路由器上有新的组成员加入而希望提前恢复转发状态，也可通过嫁接（Graft）机制主动恢复其对组播报文的转发。</p>
+<p>PIM-DM的关键工作机制包括<strong>邻居发现、扩散、剪枝、嫁接、断言和状态刷新</strong>。其中，扩散、剪枝、嫁接是构建SPT的主要方法。</p>
+<h2 id="邻居发现（Neighbor-Discovery）："><a href="#邻居发现（Neighbor-Discovery）：" class="headerlink" title="邻居发现（Neighbor Discovery）："></a>邻居发现（Neighbor Discovery）：</h2><p>PIM路由器上每个使能了PIM协议的接口都会对外发送Hello报文。封装Hello报文的组播报文的目的地址是<strong>224.0.0.13（表示同一网段中所有PIM路由器</strong>）、源地址为接口的IP地址、TTL数值为1。</p>
+<p>Hello报文的作用：发现PIM邻居、协调各项PIM协议报文参数、维持邻居关系。</p>
+<ul>
+<li><p>发现PIM邻居</p>
+<p>同一网段中的PIM路由器都必须接收目的地址为224.0.0.13的组播报文。这样直接相连的PIM路由器之间通过交互Hello报文以后，就可以彼此知道自己的邻居信息，建立邻居关系。</p>
+<p>只有邻居关系建立成功后，PIM路由器才能接收其他PIM协议报文，从而创建组播路由表项。</p>
+</li>
+<li><p>协调各项PIM协议报文参数</p>
+<p>Hello报文中携带多项PIM协议报文参数，主要用于PIM邻居之间PIM协议报文的控制。具体如下：</p>
+<ul>
+<li>DR_Priority：表示各路由器接口竞选DR的优先级，优先级越高越容易获胜。</li>
+<li>Holdtime：表示保持邻居为可达状态的超时时间。如果在超时时间内没有收到PIM邻居发送的Hello报文，路由器则认为邻居不可达。</li>
+<li>LAN_Delay：表示共享网段内传输Prune报文的延迟时间。</li>
+<li>Neighbor-Tracking：表示邻居跟踪功能。</li>
+<li>Override-Interval：表示Hello报文中携带的否决剪枝的时间间隔。</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>维持邻居关系</p>
+<p>PIM路由器之间周期性地发送Hello报文。如果Holdtime超时还没有收到该PIM邻居发出的新的Hello报文，PIM路由器就认为该邻居不可达，将其从邻居列表中清除。</p>
+<p>PIM邻居的变化将导致网络中组播拓扑的变化。如果组播分发树上的某上游邻居或下游邻居不可达，将导致组播路由重新收敛，组播分发树迁移。</p>
+</li>
+</ul>
+<h2 id="扩散（Flooding）"><a href="#扩散（Flooding）" class="headerlink" title="扩散（Flooding）:"></a>扩散（Flooding）:</h2><p>当PIM-DM网络中出现活跃的组播源之后，组播源发送的组播报文将在全网内扩散。当PIM路由器接收到组播报文，根据单播路由表进行RPF检查通过后，就会在该路由器上创建（S，G）表项，下游接口列表中包括除上游接口之外与所有PIM邻居相连的接口，后续到达的组播报文将从各个下游接口转发出去。</p>
+<p>最后组播报文扩散到达叶子路由器，会出现以下两种情况：</p>
+<ul>
+<li>若与该叶子路由器相连用户网段上存在组成员，则将与该网段相连的接口加入（S，G）表项的下游接口列表中，后续的组播报文会向组成员转发。</li>
+<li>若与该叶子路由器相连用户网段上不存在组成员，且不需要向其下游PIM邻居转发组播报文，则执行剪枝动作。</li>
+</ul>
+<h2 id="剪枝（Prune）："><a href="#剪枝（Prune）：" class="headerlink" title="剪枝（Prune）："></a>剪枝（Prune）：</h2><p>当PIM路由器接收到组播报文后，RPF检查通过，但是下游网段没有组播报文需求。此时PIM路由器会向上游发送剪枝报文，通知上游路由器禁止相应下游接口的转发，将其从（S，G）表项的下游接口列表中删除。剪枝操作由叶子路由器发起，逐跳向上，最终组播转发路径上只存在与组成员相连的分支。</p>
+<p>路由器为被裁剪的下游接口启动一个剪枝定时器，定时器超时后接口恢复转发。组播报文重新在全网范围内扩散，新加入的组成员可以接收到组播报文。随后，下游不存在组成员的叶子路由器将向上发起剪枝操作。通过这种周期性的扩散-剪枝，PIM-DM周期性的刷新SPT。</p>
+<p>当下游接口被剪枝后：</p>
+<ul>
+<li>如果下游叶子路由器有组成员加入，并且希望在下次“扩散-剪枝”前就恢复组播报文转发，则执行嫁接动作。</li>
+<li>如果下游叶子路由器一直没有组成员加入，希望该接口保持抑制转发状态，则执行状态刷新动作。</li>
+</ul>
+<h2 id="嫁接（Graft）："><a href="#嫁接（Graft）：" class="headerlink" title="嫁接（Graft）："></a>嫁接（Graft）：</h2><p>PIM-DM通过嫁接机制，使有新组成员加入的网段快速得到组播报文。叶子路由器通过IGMP了解到与其相连的用户网段上，组播组G有新的组成员加入。随后叶子路由器会向上游发送Graft报文，请求上游路由器恢复相应出接口转发，将其添加在（S，G）表项下游接口列表中。</p>
+<p>嫁接过程从叶子路由器开始，到有组播报文到达的路由器结束。</p>
+<h2 id="状态刷新（State-Refresh）："><a href="#状态刷新（State-Refresh）：" class="headerlink" title="状态刷新（State Refresh）："></a>状态刷新（State Refresh）：</h2><p>在PIM-DM网络中，为了避免被裁剪的接口因为“剪枝定时器”超时而恢复转发，离组播源最近的第一跳路由器会周期性地触发State<br>Refresh报文在全网内扩散。收到State Refresh报文的PIM路由器会刷新剪枝定时器的状态。被裁剪接口的下游叶子路由器如果一直没有组成员加入，该接口将一直处于抑制转发状态。</p>
+<h2 id="断言（Assert）："><a href="#断言（Assert）：" class="headerlink" title="断言（Assert）："></a>断言（Assert）：</h2><p>当一个网段内有多个相连的PIM路由器RPF检查通过向该网段转发组播报文时，则需要通过断言机制来保证只有一个PIM路由器向该网段转发组播报文。PIM路由器在接收到邻居路由器发送的相同组播报文后，会以组播的方式向本网段的所有PIM路由器发送Assert报文，其中目的地址为永久组地址224.0.0.13。其它PIM路由器在接收到Assert报文后，将自身参数与对方报文中携带的参数做比较，进行Assert竞选。竞选规则如下：</p>
+<ol>
+<li>单播路由协议优先级较高者获胜。</li>
+<li>如果优先级相同，则到组播源的开销较小者获胜。</li>
+<li>如果以上都相同，则下游接口IP地址最大者获胜。</li>
+</ol>
+<p>根据Assert竞选结果，路由器将执行不同的操作：</p>
+<ul>
+<li>获胜一方的下游接口称为Assert Winner，将负责后续对该网段组播报文的转发。</li>
+<li>落败一方的下游接口称为Assert Loser，后续不会对该网段转发组播报文，PIM路由器也会将其从（S，G）表项下游接口列表中删除。</li>
+</ul>
+<p>Assert竞选结束后，该网段上只存在一个下游接口，只传输一份组播报文。所有Assert Loser可以周期性地恢复组播报文转发，从而引发周期性的Assert竞选。</p>
+<h1 id="PIM-SM"><a href="#PIM-SM" class="headerlink" title="PIM-SM"></a>PIM-SM</h1><h2 id="基本原理（ASM模型）："><a href="#基本原理（ASM模型）：" class="headerlink" title="基本原理（ASM模型）："></a>基本原理（ASM模型）：</h2><p>在ASM（Any-Source Multicast）模型中，PIM-SM使用“拉（Pull）模式”转发组播报文，一般应用于组播组成员规模相对较大、相对稀疏的网络。基于这一种稀疏的网络模型，它的实现方法是：</p>
+<ul>
+<li>在网络中维护一台重要的PIM路由器：汇聚点RP（Rendezvous Point），可以为随时出现的组成员或组播源服务。网络中所有PIM路由器都知道RP的位置。</li>
+<li>当网络中出现组成员（用户主机通过IGMP加入某组播组G）时，最后一跳路由器向RP发送Join报文，逐跳创建（ * ，G）表项，生成一棵以RP为根的RPT。</li>
+<li>当网络中出现活跃的组播源（组播源向某组播组G发送第一个组播数据）时，第一跳路由器将组播数据封装在Register报文中<strong>单播</strong>发往RP，在RP上创建（S，G）表项，注册源信息。</li>
+</ul>
+<p>在ASM模型中，PIM-SM的关键机制包括邻居发现、DR竞选、RP发现、RPT构建、组播源注册、SPT切换、断言；同时也可通过配置BSR（Bootstrap Router）管理域来实现单个PIM-SM域的精细化管理。</p>
+<h2 id="DR竞选："><a href="#DR竞选：" class="headerlink" title="DR竞选："></a>DR竞选：</h2><p>在组播源或组成员所在的网段，通常同时连接着多台PIM路由器。这些PIM路由器之间通过交互Hello报文成为PIM邻居，Hello报文中携带DR优先级和该网段接口地址。PIM路由器将自身条件与对方报文中携带的信息进行比较，选举出DR来负责源端或组成员端组播报文的收发。竞选规则如下：</p>
+<ul>
+<li>DR优先级较高者获胜（网段中所有PIM路由器都支持DR优先级）。</li>
+<li>如果DR优先级相同或该网段存在至少一台PIM路由器不支持在Hello报文中携带DR优先级，则IP地址较大者获胜。</li>
+</ul>
+<p>如果当前DR出现故障，将导致PIM邻居关系超时，其他PIM邻居之间会触发新一轮的DR竞选。</p>
+<p>在ASM模型中，DR主要作用如下：</p>
+<ul>
+<li>在连接组播源的共享网段，由DR负责向RP发送Register注册报文。与组播源相连的DR称为源端DR。</li>
+<li>在连接组成员的共享网段，由DR负责向RP发送Join加入报文。与组成员相连的DR称为组成员端DR。</li>
+</ul>
+<h2 id="RP发现："><a href="#RP发现：" class="headerlink" title="RP发现："></a>RP发现：</h2><p>汇聚点RP为网络中一台重要的PIM路由器，用于处理源端DR注册信息及组成员加入请求，网络中的所有PIM路由器都必须知道RP的地址，类似于一个供求信息的汇聚中心。</p>
+<p>一个RP可以同时为多个组播组服务，但一个组播组只能对应一个RP。目前可以通过以下方式配置RP：</p>
+<ul>
+<li><p>静态RP：在网络中的所有PIM路由器上配置相同的RP地址，静态指定RP的位置。</p>
+</li>
+<li><p>动态RP：在PIM域内选择几台PIM路由器，配置C-RP（Candidate-RP，候选RP）来动态竞选出RP。同时，还需要通过配置C-BSR（Candidate-BSR，候选BSR）选举出<strong>BSR，来收集C-RP的通告信息</strong>，向PIM-SM域内的所有PIM路由器发布。</p>
+<p>C-BSR在竞选的时候，开始时每个C-BSR都认为自己是BSR，向全网发送Bootstrap报文。Bootstrap报文中携带C-BSR地址、C-BSR的优先级。每一台PIM路由器都收到所有C-BSR发出的Bootstrap报文，通过比较这些C-BSR信息，竞选产生BSR。竞选规则如下：</p>
+<ul>
+<li>优先级较高者获胜（优先级数值越大优先级越高）。</li>
+<li>如果优先级相同，IP地址较大者获胜。</li>
+</ul>
+</li>
+</ul>
+<p><strong>C-RP的竞选过程如下：</strong></p>
+<ul>
+<li>C-RP向BSR发送Advertisement报文，报文中携带C-RP地址、服务的组范围和C-RP优先级。</li>
+<li>BSR将这些信息汇总为RP-Set，封装在Bootstrap报文中，发布给全网的每一台PIM-SM路由器。</li>
+<li><p>各PIM路由器根据RP-Set，使用相同的规则进行计算和比较，从多个针对特定组的C-RP中竞选出该组RP。规则如下：<br>​</p>
+<ul>
+<li>与用户加入的组地址匹配的C-RP服务的组范围掩码最长者获胜。</li>
+<li>如果以上比较结果相同，则C-RP优先级较高者获胜（优先级数值越小优先级越高）。</li>
+<li>如果以上比较结果都相同，则执行Hash函数，计算结果较大者获胜。</li>
+<li>如果以上比较结果都相同，则C-RP的IP地址较大者获胜</li>
+</ul>
+<p>由于所有PIM路由器使用相同的RP-Set和竞选规则，所以得到的组播组与RP之间的对应关系也相同。PIM路由器将“组播组—RP”对应关系保存下来，指导后续的组播操作。</p>
+</li>
+</ul>
+<h2 id="RPT构建："><a href="#RPT构建：" class="headerlink" title="RPT构建："></a>RPT构建：</h2><p>PIM-SM RPT是一棵以RP为根，以存在组成员关系的PIM路由器为叶子的组播分发树。</p>
+<p>在RPT构建过程中，PIM路由器在发送Join报文时，会进行RPF检测查找到达RP的单播路由，单播路由的出接口为上游接口，下一跳为RPF邻居。Join报文从组成员端DR开始逐跳发送，直至到RP。</p>
+<h2 id="组播源注册："><a href="#组播源注册：" class="headerlink" title="组播源注册："></a>组播源注册：</h2><p>在PIM-SM网络中，任何一个新出现的组播源都必须首先在RP处“注册”，继而才能将组播报文传输到组成员。具体过程如下：</p>
+<ol>
+<li>组播源将组播报文发给源端DR。</li>
+<li>源端DR接收到组播报文后，将其封装在Register报文中，发送给RP。</li>
+<li>RP接收到Register报文，将其解封装，建立（S，G）表项，并将组播数据沿RPT发送到达组成员。</li>
+</ol>
+<h2 id="SPT切换："><a href="#SPT切换：" class="headerlink" title="SPT切换："></a>SPT切换：</h2><p>在PIM-SM网络中，一个组播组只对应一个RP，只构建一棵RPT。在未进行SPT切换的情况下，所有发往该组的组播报文都必须先封装在注册报文中发往RP，RP解封装后，再沿RPT分发。RP是所有组播报文必经的中转站，当组播报文速率逐渐变大时，对RP形成巨大的负担。为了解决此问题，PIM-SM允许RP或组成员端DR通过触发SPT切换来减轻RP的负担。</p>
+<ul>
+<li><p>RP触发SPT切换</p>
+<p>RP收到源端DR的注册报文后，将封装在Register报文中的组播报文沿RPT转发给组成员，同时RP会向源端DR逐跳发送Join报文。发送过程中在PIM路由器创建（S，G）表项，从而建立了RP到源的SPT。</p>
+<p>SPT树建立成功后，源端DR直接将组播报文转发到RP，使源端DR和RP免除了频繁的封装与解封装。</p>
+</li>
+<li><p>组成员端DR触发SPT切换</p>
+</li>
+</ul>
+<p>STP切换机制：组成员端DR周期性检测组播报文的转发速率，一旦发现（S，G）报文的转发速率超过阈值，则触发SPT切换：</p>
+<ol>
+<li>组成员端DR逐跳向源端DR逐跳发送Join报文并创建（S，G）表项，建立源端DR到组成员DR的SPT。</li>
+<li>SPT建立后，组成员端DR会沿着RPT逐跳向RP发送剪枝报文，删除（*，G）表项中相应的下游接口。剪枝结束后，RP不再沿RPT转发组播报文到组成员端。</li>
+<li>如果SPT不经过RP，RP会继续向源端DR逐跳发送剪枝报文，删除（S，G）表项中相应的下游接口。剪枝结束后，源端DR不再沿“源端DR-RP”的SPT转发组播报文到RP。</li>
+</ol>
+<blockquote>
+<p>缺省情况下，设备一般未设置组播报文转发速率的阈值，RP或者组成员端DR在接收到第一份组播报文时都会触发各自的SPT切换。</p>
+</blockquote>
+<h2 id="BSR管理域："><a href="#BSR管理域：" class="headerlink" title="BSR管理域："></a>BSR管理域：</h2><p>为了实现网络管理精细化，可以选择将一个PIM-SM网络划分为多个BSR管理域和一个Global域。这样一方面可以有效地分担单一BSR的管理压力，另一方面可以使用私有组地址为特定区域的用户提供专门服务。</p>
+<p>每个BSR管理域中维护一个BSR，为某一特定地址范围的组播组服务。Global域中维护一个BSR，为所有剩余的组播组服务。</p>
+<p>下文将从地域空间、组地址范围、组播功能三个角度分析BSR管理域和Global域的关系。</p>
+<h3 id="地域空间："><a href="#地域空间：" class="headerlink" title="地域空间："></a>地域空间：</h3><p><img src="/2018/02/13/协议无关组播-PIM/地域空间.png" alt="地域空间"></p>
+<p><center>图：BSR管理域_地址空间<center></center></center></p>
+<p>如上图所示，对于有相同组地址的不同管理域，各BSR管理域所包含的PIM路由器互不相同，同一PIM路由器不能同时属于多个BSR管理域。各BSR管理域在地域上相互独立，且相互隔离。BSR管理域是针对特定地址范围的组播组的管理区域，属于此范围的组播报文只能在本管理域内传播，无法通过BSR管理域边界。</p>
+<p>Global域包含PIM-SM网络内的全部PIM路由器。不属于任意BSR管理域的组播报文，可以在整个PIM网络范围内传播。</p>
+<h3 id="组地址范围："><a href="#组地址范围：" class="headerlink" title="组地址范围："></a>组地址范围：</h3><p><img src="/2018/02/13/协议无关组播-PIM/组地址范围.png" alt="组地址范围"></p>
+<p><center>图：BSR管理域_组地址范围<center></center></center></p>
+<p>每个BSR管理域为特定地址范围的组播组提供服务，不同的BSR管理域服务的组播组范围可以重叠。该组播地址只在本BSR管理域内有效，相当于私有组地址。如上图所示，BSR1域和BSR3域对应的组地址范围出现重叠。</p>
+<p>不属于任何BSR管理域的组播组，一律属于Global域的服务范围。如上图所示，Global域组地址范围是除G1、G2之外的G-G1-G2。</p>
+<h3 id="组播功能："><a href="#组播功能：" class="headerlink" title="组播功能："></a>组播功能：</h3><p>Global域和每个BSR管理域都包含针对自己域的C-RP和BSR设备，这些设备在行使相应功能时，仅在本域内有效。即BSR机制和RP竞选在各管理域之间是隔离的。</p>
+<p>每个BSR管理域都有自己的边界，该管理域的组播信息（C-RP宣告报文、BSR自举报文等）不能跨越域传播。同时Global域的组播信息可以在整个Global域内传递，可以穿越任意BSR管理域。</p>
+<h2 id="基本原理（SSM模型）："><a href="#基本原理（SSM模型）：" class="headerlink" title="基本原理（SSM模型）："></a>基本原理（SSM模型）：</h2><p>SSM模型是借助PIM-SM的部分技术和IGMPv3/MLDv2来实现的，无需维护RP、无需构建RPT、无需注册组播源，可以直接在源与组成员之间建立SPT。</p>
+<p>SSM的特点是网络用户能够预先知道组播源的具体位置。因此用户在加入组播组时，可以明确指定从哪些源接收信息。组成员端DR了解到用户主机的需求后，直接向源端DR发送Join报文。Join报文逐跳向上传输，在源与组成员之间建立SPT。</p>
+<p>在SSM模型中，PIM-SM的关键机制包括邻居发现、DR竞选、构建SPT。</p>
+<h2 id="Anycast-RP"><a href="#Anycast-RP" class="headerlink" title="Anycast RP:"></a>Anycast RP:</h2><p>配置基于PIM协议的Anycast RP功能时，当RP收到源DR发送的注册报文后，对注册报文的源地址进行判断，如果是从源DR发送过来的，将注册报文转发给Anycast RP对等体，如果注册报文是从Anycast RP对等体发送过来的，则不进行转发。</p>
+<p>RP转发注册报文时，需要将源地址替换为Anycast RP本地地址，目的地址替换为Anycast RP对等体地址。从而达到Anycast RP之间相互学习源组信息的目的。</p>
+<ul>
+<li>Anycast RP集合的成员与外部均建立MSDP对等体；</li>
+<li>将Anycast RP集合中的RP分为两部分，其中一部分与外部建立MSDP对等体，另外一部分不建立MSDP对等体，当与外部建立了MSDP对等体的RP收到MSDP SA报文时，转换为注册报文发送给其它未建立MSDP对等体的RP。</li>
+</ul>
+<p><strong>注意事项</strong></p>
+<p>每个Anycast RP最多可以配置16个对等体。</p>
+<p>在同一PIM SM域内配置Anycast RP，Anycast RP之间逻辑上需要配置为全连接结构，即任意两两Anycast RP之间配置为Anycast RP对等体。</p>
+<p><strong>通过Anycast RP，可以实现：</strong></p>
+<ul>
+<li>RP路径最优：组播源向距离最近的RP进行注册，建立路径最优的SPT；接收者向距离最近的RP发起加入，建立路径最优的RPT。</li>
+<li>RP间的负载分担：每个RP上只需维护PIM-SM域内的部分源/组信息、转发部分的组播数据，从而实现了RP间的负载分担。</li>
+<li>RP间的冗余备份：当某RP失效后，原先在该RP上注册或加入的组播源或接收者会自动选择就近的RP进行注册或加入操作，从而实现了RP间的冗余备份。</li>
+</ul>
+<h1 id="PIM-BFD和PIM-GR"><a href="#PIM-BFD和PIM-GR" class="headerlink" title="PIM BFD和PIM GR"></a>PIM BFD和PIM GR</h1><h2 id="PIM-BFD："><a href="#PIM-BFD：" class="headerlink" title="PIM BFD："></a>PIM BFD：</h2><p>为了减小设备故障对业务的影响，提高网络的可靠性，网络设备需要快速检测到与相邻设备间的通信故障，以便及时采取措施，保证业务继续进行。</p>
+<p>BFD（Bidirectional Forwarding Detection）检测机制可提供毫秒级的快速检测，并采用单一机制对所有类型的介质、协议层进行检测，实现全网统一的检测机制。其检测原理是在两个系统间建立BFD会话，并沿它们之间的路径周期性发送BFD检测报文，如果一方在检测周期内没有收到BFD检测报文，则认为该路径发生了故障。</p>
+<h3 id="在PIM中的应用："><a href="#在PIM中的应用：" class="headerlink" title="在PIM中的应用："></a>在PIM中的应用：</h3><p>在组播的应用中，如果共享网段上的当前DR或Assert winner发生故障，其他PIM邻居会等到邻居关系超时或Assert timer超时才触发新一轮的DR竞选或Assert竞选过程，导致组播数据传输中断，中断的时间将不小于邻居关系的超时时间或Assert timer超时时间，通常是秒级。</p>
+<p>PIM BFD能够在毫秒级内检测共享网段内的链路状态，快速响应PIM邻居故障。如果配置了PIM BFD功能的接口在检测周期内没有收到当前DR或Assert winner发送的BFD检测报文，则认为当前DR或Assert winner发生故障，BFD快速把会话状态通告给RM，再由RM通告给PIM。PIM模块触发新一轮的DR竞选或Assert竞选过程，而不是等到邻居关系超时或Assert timer超时，从而缩小组播数据传输的中断时间，提高组播数据传输的可靠性。</p>
+<h2 id="PIM-GR："><a href="#PIM-GR：" class="headerlink" title="PIM GR："></a>PIM GR：</h2><p>滑重启GR（Graceful Restart）属于高可靠性HA（High Availability）技术的一种，实现协议重启时业务的不间断转发（Multicast Non-Stop Forwarding）能力。PIM GR是一种组播协议GR。在具有双主控板的设备上，PIM GR可以在设备进行主备倒换时实现用户组播流量的正常转发。</p>
+<p>目前，仅PIM-SM（ASM模型）与PIM-SM（SSM模型）支持PIM GR，PIM-DM不支持PIM GR。</p>
+<h3 id="基本原理：-1"><a href="#基本原理：-1" class="headerlink" title="基本原理："></a>基本原理：</h3><p>PIM GR依赖于单播GR。设备进行主备倒换期间，新主控板的PIM协议需要从下游邻居重新学习PIM加入状态，同时还需要从IGMP成员主机学习加入的组成员。新主控板的PIM协议通过以上过程完成如下动作：</p>
+<ul>
+<li>重新计算PIM组播路由表项。</li>
+<li>维持下游邻居的加入状态。</li>
+<li>更新转发平面的组播路由表项。</li>
+</ul>
+<p>通过PIM GR，设备可以达到主备倒换后快速恢复新的主用主控板的PIM路由表项及刷新接口板组播转发表项的目的，从而最大限度地减少主备倒换对用户组播流量转发的影响。</p>
+<h3 id="工作机制："><a href="#工作机制：" class="headerlink" title="工作机制："></a>工作机制：</h3><p>PIM GR建立在单播GR的基础上，整个PIM GR的过程分为三个阶段：开始阶段（GR_START）、同步阶段（GR_SYNC）和完成阶段（GR_END）。</p>
+<p><img src="/2018/02/13/协议无关组播-PIM/PIM gr.png" alt="PIM gr"></p>
+<p><center>图：PIM GR示意图<center></center></center></p>
+<p><strong>GR_START</strong></p>
+<ol>
+<li><p>RouterA发生主备倒换，PIM协议启动GR定时器，PIM GR进入开始阶段，同时单播开始进行GR。</p>
+</li>
+<li><p>PIM协议向所有使能PIM-SM的接口发送携带新的Generation ID的Hello报文。</p>
+</li>
+<li><p>RouterA的下游邻居RouterB、RouterD发现RPF邻居的Generation ID改变，向RouterA重新发送Join/Prune报文。</p>
+</li>
+<li><p>若网络中使用动态RP，当网络中的邻居收到Generation ID改变的Hello报文后，向RouterA单播发送BSR报文，恢复RouterA的BSR及RP信息。</p>
+</li>
+<li><p>RouterA通过接收下游RouterB、RouterD发送的Join/Prune报文，在空的入接口表中创建PIM路由表项，记录下游的加入信息。</p>
+<p>在此期间，转发模块转发表项保持不变，维持组播业务数据的转发。</p>
+</li>
+</ol>
+<p><strong>GR_SYNC</strong></p>
+<p>单播GR结束，PIM GR进入同步阶段，根据单播路由信息建立组播分发树，恢复PIM路由表项的入接口，更新到源或到RP的加入队列，并通知组播转发模块更新转发表。</p>
+<p><strong>GR_END</strong></p>
+<p>GR定时器超时，PIM协议完成GR，并通知组播转发模块。组播转发模块老化GR期间未更新的转发表项。</p>
+<h1 id="PIM学习笔记："><a href="#PIM学习笔记：" class="headerlink" title="PIM学习笔记："></a>PIM学习笔记：</h1><h2 id="Hello消息作用："><a href="#Hello消息作用：" class="headerlink" title="Hello消息作用："></a>Hello消息作用：</h2><p>PIM中的hello报文发送间隔是30s，邻居的超时时间为3.5（105s）倍的hello interval时间。</p>
+<p>在PIM-DM网络中，刚启动的组播路由器需要使用Hello消息来发现邻居，并维护邻居关系。路由器之间周期性的发送Hello 消息来构建和维护SPT数。</p>
+<p>Pim timer hello interval， 在接口视图下配置发送hello消息的时间间隔。hello消息默认周期是30s。</p>
+<p>除了维护邻居关系外，Hello消息还具有一个重要的功能就是在多个路由器网段中选举DR指定路由器。DR充当IGMPv1查询器。在IGMP概述中已经提到过IGMPv1中查询器的选举路由组播协议决定。</p>
+<p>在PIM-DM中各路由器通过比较hello消息中携带的优先级和IP地址，为多路由器网段选举指定路由器DR，充当IGMPv1的查询器。</p>
+<p>当DR出现故障时，接收hello消息将会超时，邻居路由器之间会触发新的DR选举过程。</p>
+<p>pim hello-opthion holdtime interval在接口视图下配置hello消息超时时间。默认情况下超时时间为105s.</p>
+<p><strong>PIM DR的选举过程：</strong></p>
+<ol>
+<li>优先级大的。（默认为1）</li>
+<li>IP地址大的。</li>
+</ol>
+<blockquote>
+<p>注：在PIM-DM模式下，DR只用于充当IGMPv1版本的查询者，没有其他用途。</p>
+</blockquote>
+<h2 id="RPF检测的顺序："><a href="#RPF检测的顺序：" class="headerlink" title="RPF检测的顺序："></a>RPF检测的顺序：</h2><p>一、优先级优先（默认）:</p>
+<ol>
+<li>如果同时存在单播和组播路由（用于RPF检查的组播路由条目），比较优先级，优先级越小越优。</li>
+<li>如果优先级一样，组播静态&gt;MBGP&gt;单播（默认情况下组播静态优先级为1，MBGP优先级为255，单播路由需要视协议而定。）</li>
+<li>如果都是单播路由，比较路由的掩码长度，掩码查毒越长越优。</li>
+<li>如果掩码长度一样，比较下一跳的IP地址，IP地址越大越优。</li>
+</ol>
+<p>二、掩码长度优先：</p>
+<ol>
+<li>如果同时存在单播和组播路由，比较掩码长度，掩码长度越长越优。</li>
+<li>如有掩码长度一样，比较路由协议优先级，优先级越小越优。</li>
+<li>如果优先级一样，组播静态&gt;MBGP&gt;单播。</li>
+<li>如果都是单播路由，比较下一跳的IP地址，IP地址越大越优。</li>
+</ol>
+<h2 id="Assert"><a href="#Assert" class="headerlink" title="Assert:"></a>Assert:</h2><p>利用Assert选举出广播网中的winner和loser，winner在广播网中只能有一个，loser可以有多个。只有weinner可以装发组播流量，而loser只能被动监听winner状态，而不能发送组播流。</p>
+<p><strong>什么情况下才会触发assert机制？</strong></p>
+<p>如果下游接口接受到自己发送的组播流，就会触发assert选举。</p>
+<p><strong>Assert报文中携带的内容：</strong></p>
+<ol>
+<li>包含Assert报文发送者到达组播源所使用的路由协议优先级。</li>
+<li>包含Assert报文发送者到达组播源的距离（metric）。</li>
+<li>包含Assert报文发送者的IP地址。</li>
+</ol>
+<p><strong>Assert的选举过程：</strong></p>
+<ol>
+<li>比较发送者到达组播路由协议的优先级，越小越优。</li>
+<li>如果优先级一样， 比较到达组播源的距离（metric），距离越小越优。</li>
+<li>如果metric也一样，比较报文发送者的IP地址，IP地址越大越优。</li>
+</ol>
+<h2 id="RP"><a href="#RP" class="headerlink" title="RP:"></a>RP:</h2><p>在PIM-SM组播网络里，当当共享树树根的节点称为RP（Rendezovous Ponit）。</p>
+<p><strong>RP的作用：</strong></p>
+<ol>
+<li>共享树里所有组播流都通过RP装发到接收者。</li>
+<li>RP可以负责几个或者所有组播组的转发，网络中可以有一个或过个RP。用户通过配置命令，可以限制RP只为IP地址在一定范围的组播组服务。一个RP可以同时为多个组播组服务，但一个组播组只能对应一个RP。所有该组成员和向该组播发送数据的组播源都向唯一的RP汇聚。</li>
+</ol>
+<p><strong>RP的发现：</strong></p>
+<ol>
+<li><p>静态RP：在PIM域中所有PIM路由器上逐一进行配置，静态指定RP。</p>
+<p>static-rp rp-Address //指定静态RP的IP地址。</p>
+</li>
+<li><p>动态RP：在PIM域内选择几台PIM路由器，配置称为C-RP(Candidate-RP),最后从C-RP中竞选产生RP。</p>
+<p>使用动态RP，必须同时配置C-BSR（Candidate-BootStarp Router）。由C-BSR竞选产生BSR。</p>
+</li>
+</ol>
+<p>RP是PIM-SM域中的核心路由器，在小型并且简单的网络中，组播信息量少，全网络仅依靠给一个RP进行信息装发即可，此时可以在SM域中个路由器上静态指定RP位置。但是更多的情况下，PIM-SM网络规模都很大，通过RP转发的组播信息量巨大，为了缓解RP的负担同时优化共享树的拓扑结构，不同组播组应该对应不同的RP，此时就需要自举机制来动态选举RP，配置自举路由器BSR（BootStrap ROuter）。</p>
+<h2 id="BSR："><a href="#BSR：" class="headerlink" title="BSR："></a>BSR：</h2><p>第一步：需要在组播网络中选举BSR，在组播网络中可以指定多个C—BSR（候选BSR），多个C-BSR之间需要进行比较，选举出一台BSR设备。在一个组播网络中只能有一台BSR，但可以有多台C-BSR。</p>
+<p><strong>BSR的选举过程：</strong></p>
+<ol>
+<li>比较优先级，优先级越大优越。（默认优先级为0）</li>
+<li>如果优先级一样，比较IP地址，IP地址越大越优。</li>
+</ol>
+<p>注：BSR只负责收集C-RP的信息，然后利用BSR报文通告到整个组播网络，最终的RP选举由叶路由器决定。</p>
+<p><strong>RP的选举过程：</strong></p>
+<ol>
+<li><p>比较C-RP可以负责的组播组掩码长度，掩码长度越长越优。</p>
+</li>
+<li><p>如果组播掩码长度一致，比较C-RP的优先级，优先级越小越优。（默认优先级为0）</p>
+</li>
+<li><p>如果优先级也一样，比较HASH值，hash值越大越优。</p>
+<p>HASH值的计算涉及：组地址、Hash Mask（由BSR通告）、C-RP地址。</p>
+</li>
+<li><p>​</p>
+</li>
+</ol>
+<h1 id="PIM（IPv4）配置命令"><a href="#PIM（IPv4）配置命令" class="headerlink" title="PIM（IPv4）配置命令"></a>PIM（IPv4）配置命令</h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br></pre></td><td class="code"><pre><span class="line">display pim grafts</span><br><span class="line"><span class="comment">//anycast-rp</span></span><br><span class="line"><span class="comment">//来配置Anycast RP，并进入Anycast-RP视图</span></span><br><span class="line"><span class="keyword">auto</span>-rp listening enable</span><br><span class="line"><span class="comment">//使能Auto-RP侦听功能，即路由器能够接收Auto-RP宣告和发现报文，从中学习RP信息。</span></span><br><span class="line">bsm semantic fragmentation</span><br><span class="line"><span class="comment">//使能BSR报文分片功能。</span></span><br><span class="line">bsr-policy</span><br><span class="line"><span class="comment">//限定合法BSR地址范围，使路由器丢弃来自该地址范围之外的自举报文，从而防止BSR欺骗。</span></span><br><span class="line">c-bsr</span><br><span class="line"><span class="comment">//配置C-BSR。</span></span><br><span class="line">c-bsr admin-scope</span><br><span class="line"><span class="comment">//使能路由器的BSR管理域功能。</span></span><br><span class="line">c-bsr global</span><br><span class="line"><span class="comment">//配置路由器为Global域中的C-BSR。</span></span><br><span class="line">c-bsr group</span><br><span class="line"><span class="comment">//配置C-BSR服务的管理域组地址范围。</span></span><br><span class="line">c-bsr hash-length <span class="number">30</span></span><br><span class="line"><span class="comment">//配置C-BSR的全局性哈希掩码长度。</span></span><br><span class="line">c-bsr holdtime <span class="number">130</span></span><br><span class="line"><span class="comment">//配置C-BSR等待接收BSR发送的Bootstrap报文的超时时间。</span></span><br><span class="line">c-bsr interval <span class="number">60</span></span><br><span class="line"><span class="comment">//来配置BSR发送Bootstrap报文的时间间隔。</span></span><br><span class="line">c-bsr priority <span class="number">0</span></span><br><span class="line"><span class="comment">//配置C-BSR的全局优先级。</span></span><br><span class="line">c-rp</span><br><span class="line"><span class="comment">//配置路由器向BSR通告自己为候选RP。</span></span><br><span class="line">c-rp advertisement-interval <span class="number">60</span></span><br><span class="line"><span class="comment">//配置C-RP周期性发送Advertisement报文的时间间隔。</span></span><br><span class="line">c-rp holdtime <span class="number">150</span></span><br><span class="line"><span class="comment">//配置BSR等待接收该C-RP发送Advertisement报文的超时时间。</span></span><br><span class="line">c-rp priority <span class="number">0</span></span><br><span class="line"><span class="comment">//配置C-RP的全局性优先级。</span></span><br><span class="line">crp-policy</span><br><span class="line"><span class="comment">//限定合法的C-RP地址范围及其服务的组播组地址范围，使</span></span><br><span class="line"><span class="comment">//BSR丢弃来自该地址范围之外的C-RP报文，从而防止C-RP欺骗。</span></span><br><span class="line">display pim bsr-info</span><br><span class="line"><span class="comment">//查看PIM-SM域中BSR自举路由器的信息。</span></span><br><span class="line">display pim claimed-route</span><br><span class="line"><span class="comment">//查看PIM使用的单播路由信息。</span></span><br><span class="line">display pim grafts</span><br><span class="line"><span class="comment">//查看未确认的PIM-DM嫁接报文。</span></span><br><span class="line">display pim interface</span><br><span class="line"><span class="comment">//查看接口上的PIM信息。</span></span><br><span class="line">display pim neighbor</span><br><span class="line"><span class="comment">//查看PIM邻居信息。</span></span><br><span class="line">display pim routing-table</span><br><span class="line"><span class="comment">//查看PIM协议组播路由表的内容。</span></span><br><span class="line">display pim rp-info</span><br><span class="line"><span class="comment">//查看组播组对应的RP信息。</span></span><br><span class="line">graceful-restart</span><br><span class="line"><span class="comment">//使能PIM GR功能。</span></span><br><span class="line">graceful-restart period <span class="number">120</span></span><br><span class="line"><span class="comment">//配置PIM GR的最小周期。</span></span><br><span class="line"><span class="comment">//缺省情况下，PIM GR最小周期为120秒。</span></span><br><span class="line">hello-option dr-priority <span class="number">1</span></span><br><span class="line"><span class="comment">//配置路由器竞选成为DR（Designated Router）的优先级。</span></span><br><span class="line">hello-option holdtime <span class="number">105</span></span><br><span class="line"><span class="comment">//配置路由器等待接收其PIM邻居发送Hello报文的超时时间。</span></span><br><span class="line"><span class="comment">//缺省情况下，路由器等待接收其PIM邻居发送Hello报文的超时时间是105秒。</span></span><br><span class="line">hello-option lan-delay <span class="number">500</span></span><br><span class="line"><span class="comment">//配置共享网段上传输Prune报文的延迟时间。</span></span><br><span class="line"><span class="comment">//缺省情况下，共享网段上传输Prune报文的延迟时间是500毫秒。</span></span><br><span class="line">hello-option neighbor-tracking</span><br><span class="line"><span class="comment">//使能邻居跟踪功能。</span></span><br><span class="line">hello-option override-interval <span class="number">2500</span></span><br><span class="line"><span class="comment">//配置Hello报文中携带的否决剪枝的时间间隔。</span></span><br><span class="line"><span class="comment">//缺省情况下，Hello报文中携带的否决剪枝的时间间隔是2500毫秒。</span></span><br><span class="line">holdtime assert <span class="number">180</span></span><br><span class="line"><span class="comment">//配置路由器上所有PIM接口保持Assert状态的超时时间。</span></span><br><span class="line"><span class="comment">//缺省情况下，路由器上所有PIM接口保持Assert状态的超时时间是180秒。</span></span><br><span class="line">holdtime join-prune <span class="number">210</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">  配置Join/Prune报文的保持时间。接收到Join/Prune报</span></span><br><span class="line"><span class="comment">  文的路由器依据该报文自身携带的保持时间来确定对应下游</span></span><br><span class="line"><span class="comment">  接口保持加入或剪枝状态的时间。</span></span><br><span class="line"><span class="comment">  缺省情况下，Join/Prune报文的保持时间是210秒。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">join-prune max-packet-length <span class="number">8100</span></span><br><span class="line"><span class="comment">//配置PIM-SM发送的Join/Prune报文的最大长度。</span></span><br><span class="line">join-prune periodic-messages <span class="built_in">queue</span>-size <span class="number">1020</span></span><br><span class="line"><span class="comment">//配置PIM-SM每秒发送周期性Join/Prune报文中包含的表项数目。</span></span><br><span class="line">join-prune triggered-message-cache disable</span><br><span class="line"><span class="comment">//配置去使能实时触发的Join/Prune报文打包功能。</span></span><br><span class="line">local-address</span><br><span class="line"><span class="comment">//配置Anycast RP本地地址。</span></span><br><span class="line">neighbor-check</span><br><span class="line"><span class="comment">//使能PIM邻居检查功能。</span></span><br><span class="line">peer <span class="number">10.2</span><span class="number">.2</span><span class="number">.2</span> fwd-msdp-sa</span><br><span class="line"><span class="comment">//配置Anycast RP对等体。</span></span><br><span class="line"><span class="comment">//fwd-msdp-sa:指定将收到的MSDP SA报文提取源组信息</span></span><br><span class="line"><span class="comment">//后封装成注册报文向Anycast RP对等体转发。</span></span><br><span class="line">pim bfd</span><br><span class="line"><span class="comment">//调整接口上的PIM BFD参数。</span></span><br><span class="line">pim bfd enable</span><br><span class="line"><span class="comment">//在接口上使能PIM BFD功能。</span></span><br><span class="line">pim bsr-boundary</span><br><span class="line"><span class="comment">//在接口上配置PIM-SM域的BSR边界。</span></span><br><span class="line">pim dm</span><br><span class="line"><span class="comment">//在接口上使能PIM-DM。</span></span><br><span class="line">pim hello-option dr-priority</span><br><span class="line"><span class="comment">//配置PIM接口竞选成为DR的优先级。</span></span><br><span class="line">pim hello-option holdtime <span class="number">105</span></span><br><span class="line"><span class="comment">//配置PIM接口等待接收PIM邻居发送Hello报文的超时时间。</span></span><br><span class="line"> pim holdtime assert180</span><br><span class="line"> <span class="comment">//配置PIM接口保持Assert状态的超时时间。</span></span><br><span class="line"> pim neighbor-policy</span><br><span class="line"> <span class="comment">//用来过滤接口上的PIM邻居。</span></span><br><span class="line"> pim require-genid</span><br><span class="line"> <span class="comment">//配置PIM接口拒绝无Generation ID参数的Hello报文。</span></span><br><span class="line"> <span class="comment">//缺省情况下，PIM接口接收无Generation ID参数的Hello报文。</span></span><br><span class="line"> pim silent</span><br><span class="line"> <span class="comment">//在接口上使能PIM Silent功能。</span></span><br><span class="line"> <span class="comment">/*</span></span><br><span class="line"><span class="comment">   为了避免恶意主机模拟PIM Hello报文攻击路由器，可</span></span><br><span class="line"><span class="comment">   以在直连用户的接口上执行pim silent命令，将接口设</span></span><br><span class="line"><span class="comment">   置为PIM消极模式。接口进入消极状态后，禁止接收和转</span></span><br><span class="line"><span class="comment">   发任何PIM协议报文，删除该接口上的所有PIM邻居以及</span></span><br><span class="line"><span class="comment">   PIM状态机，并自动成为DR。同时，该接口上的IGMP功</span></span><br><span class="line"><span class="comment">   能不受影响。</span></span><br><span class="line"><span class="comment">    PIM silent仅适用于与用户主机网段直连的接口，且</span></span><br><span class="line"><span class="comment">    网段上只能连接一台PIM路由器。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">pim sm</span><br><span class="line"><span class="comment">//在接口上使能PIM-SM。</span></span><br><span class="line">pim state-refresh-capable</span><br><span class="line"><span class="comment">//在接口上使能PIM-DM状态刷新。</span></span><br><span class="line"><span class="comment">//缺省情况下，PIM-DM状态刷新功能已使能。</span></span><br><span class="line">pim timer dr-<span class="keyword">switch</span>-delay</span><br><span class="line"><span class="comment">//在接口上使能PIM DR切换延迟功能</span></span><br><span class="line"> pim timer graft-retry <span class="number">3</span></span><br><span class="line"><span class="comment">//在接口上配置重传嫁接（Graft）报文的时间间隔。  </span></span><br><span class="line">pim timer hello <span class="number">30</span></span><br><span class="line"><span class="comment">//在接口上配置发送Hello报文的时间间隔。</span></span><br><span class="line">  probe-interval <span class="number">5</span></span><br><span class="line"><span class="comment">//配置路由器向RP发送Probe报文（空注册报文）的时间间隔。</span></span><br><span class="line"><span class="keyword">register</span>-header-checksum</span><br><span class="line"><span class="comment">//配置仅根据Register注册报文头信息来计算校验和。</span></span><br><span class="line"><span class="keyword">register</span>-source</span><br><span class="line"><span class="comment">//指定源DR发送注册报文的源地址。</span></span><br><span class="line"><span class="keyword">register</span>-suppression-timeout <span class="number">60</span></span><br><span class="line"><span class="comment">//来配置路由器保持注册抑制状态的超时时间。</span></span><br><span class="line">source-lifetime <span class="number">210</span></span><br><span class="line"><span class="comment">//配置路由器上（S，G）或者（*，G）表项的超时时间。</span></span><br><span class="line">spt-<span class="keyword">switch</span>-threshold</span><br><span class="line"> <span class="comment">//设置组成员端DR加入SPT的组播报文速率阈值。</span></span><br><span class="line"><span class="comment">//缺省情况下，从RPT收到第一个组播数据包后立即进行SPT切换。</span></span><br><span class="line">state-refresh-interval60</span><br><span class="line"><span class="comment">//配置路由器发送PIM状态刷新报文（State-Refresh）的时间间隔。</span></span><br><span class="line">state-refresh-rate-limit <span class="number">30</span></span><br><span class="line"><span class="comment">//配置接收下一个PIM状态刷新报文前必须经过的最小时间长度。</span></span><br><span class="line"> state-refresh-ttl <span class="number">255</span></span><br><span class="line"><span class="comment">//配置发送PIM状态刷新报文的TTL值。</span></span><br><span class="line"><span class="keyword">static</span>-rp</span><br><span class="line"><span class="comment">//配置静态RP。</span></span><br><span class="line">  timer spt-<span class="keyword">switch</span> <span class="number">15</span></span><br><span class="line">  <span class="comment">//配置在RPT切换到SPT前检查组播数据速率是否达到阈值的时间间隔。</span></span><br></pre></td></tr></table></figure>
+<hr>
+<blockquote>
+<p>参考资料：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/02/13/协议无关组播-PIM/" title="协议无关组播-PIM">https://cshihong.github.io/2018/02/13/协议无关组播-PIM/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/路由基础/" rel="tag"># 路由基础</a>
+          
+            <a href="/tags/组播/" rel="tag"># 组播</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/02/13/组播侦听者发现协议MLD/" rel="next" title="组播侦听者发现协议MLD">
+                <i class="fa fa-chevron-left"></i> 组播侦听者发现协议MLD
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/02/17/组播源发现协议-MSDP/" rel="prev" title="组播源发现协议-MSDP">
+                组播源发现协议-MSDP <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PIM简介"><span class="nav-number">1.</span> <span class="nav-text">PIM简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PIM的基本概念："><span class="nav-number">1.1.</span> <span class="nav-text">PIM的基本概念：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#组播分发树："><span class="nav-number">1.1.1.</span> <span class="nav-text">组播分发树：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PIM路由器："><span class="nav-number">1.1.2.</span> <span class="nav-text">PIM路由器：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PIM路由表项："><span class="nav-number">1.1.3.</span> <span class="nav-text">PIM路由表项：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PIM-DM"><span class="nav-number">2.</span> <span class="nav-text">PIM-DM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本原理："><span class="nav-number">2.1.</span> <span class="nav-text">基本原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基本原理"><span class="nav-number">2.1.0.1.</span> <span class="nav-text">基本原理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#邻居发现（Neighbor-Discovery）："><span class="nav-number">2.2.</span> <span class="nav-text">邻居发现（Neighbor Discovery）：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#扩散（Flooding）"><span class="nav-number">2.3.</span> <span class="nav-text">扩散（Flooding）:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#剪枝（Prune）："><span class="nav-number">2.4.</span> <span class="nav-text">剪枝（Prune）：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#嫁接（Graft）："><span class="nav-number">2.5.</span> <span class="nav-text">嫁接（Graft）：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态刷新（State-Refresh）："><span class="nav-number">2.6.</span> <span class="nav-text">状态刷新（State Refresh）：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#断言（Assert）："><span class="nav-number">2.7.</span> <span class="nav-text">断言（Assert）：</span></a></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#PIM-SM"><span class="nav-number">3.</span> <span class="nav-text">PIM-SM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本原理（ASM模型）："><span class="nav-number">3.1.</span> <span class="nav-text">基本原理（ASM模型）：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DR竞选："><span class="nav-number">3.2.</span> <span class="nav-text">DR竞选：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RP发现："><span class="nav-number">3.3.</span> <span class="nav-text">RP发现：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RPT构建："><span class="nav-number">3.4.</span> <span class="nav-text">RPT构建：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组播源注册："><span class="nav-number">3.5.</span> <span class="nav-text">组播源注册：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SPT切换："><span class="nav-number">3.6.</span> <span class="nav-text">SPT切换：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BSR管理域："><span class="nav-number">3.7.</span> <span class="nav-text">BSR管理域：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#地域空间："><span class="nav-number">3.7.1.</span> <span class="nav-text">地域空间：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#组地址范围："><span class="nav-number">3.7.2.</span> <span class="nav-text">组地址范围：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#组播功能："><span class="nav-number">3.7.3.</span> <span class="nav-text">组播功能：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本原理（SSM模型）："><span class="nav-number">3.8.</span> <span class="nav-text">基本原理（SSM模型）：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Anycast-RP"><span class="nav-number">3.9.</span> <span class="nav-text">Anycast RP:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PIM-BFD和PIM-GR"><span class="nav-number">4.</span> <span class="nav-text">PIM BFD和PIM GR</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PIM-BFD："><span class="nav-number">4.1.</span> <span class="nav-text">PIM BFD：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#在PIM中的应用："><span class="nav-number">4.1.1.</span> <span class="nav-text">在PIM中的应用：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PIM-GR："><span class="nav-number">4.2.</span> <span class="nav-text">PIM GR：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本原理：-1"><span class="nav-number">4.2.1.</span> <span class="nav-text">基本原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工作机制："><span class="nav-number">4.2.2.</span> <span class="nav-text">工作机制：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PIM学习笔记："><span class="nav-number">5.</span> <span class="nav-text">PIM学习笔记：</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hello消息作用："><span class="nav-number">5.1.</span> <span class="nav-text">Hello消息作用：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RPF检测的顺序："><span class="nav-number">5.2.</span> <span class="nav-text">RPF检测的顺序：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Assert"><span class="nav-number">5.3.</span> <span class="nav-text">Assert:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RP"><span class="nav-number">5.4.</span> <span class="nav-text">RP:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BSR："><span class="nav-number">5.5.</span> <span class="nav-text">BSR：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PIM（IPv4）配置命令"><span class="nav-number">6.</span> <span class="nav-text">PIM（IPv4）配置命令</span></a></li></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/02/13/协议无关组播-PIM/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

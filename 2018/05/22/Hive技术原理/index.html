@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Hive概述数据仓库的概念：数据仓库（Data Warehouse）是一个面向主题的（Subject Oriented）、集成的（Integrated）、相对稳定的（Non-Volatile）、反映历史变化（Time Variant）的数据集合，用于支持管理决策。 传统数据仓库面临的挑战： 无法满足快速增长的海量数据存储需求。 无法有效处理不同类型的数据。 计算和处理能力不足。  Hive简介：">
+<meta name="keywords" content="Hadoop,Hive">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hive技术原理">
+<meta property="og:url" content="https://cshihong.github.io/2018/05/22/Hive技术原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="Hive概述数据仓库的概念：数据仓库（Data Warehouse）是一个面向主题的（Subject Oriented）、集成的（Integrated）、相对稳定的（Non-Volatile）、反映历史变化（Time Variant）的数据集合，用于支持管理决策。 传统数据仓库面临的挑战： 无法满足快速增长的海量数据存储需求。 无法有效处理不同类型的数据。 计算和处理能力不足。  Hive简介：">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/Hadoop.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/对比1.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/对比2.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/Hive.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/位置.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/Hive架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/Fusion.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/HCatalog.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/WebHCat架构.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/数据存储模型.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/区别.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/jion.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/group.png">
+<meta property="og:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/过程.png">
+<meta property="og:updated_time" content="2019-11-15T14:34:28.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hive技术原理">
+<meta name="twitter:description" content="Hive概述数据仓库的概念：数据仓库（Data Warehouse）是一个面向主题的（Subject Oriented）、集成的（Integrated）、相对稳定的（Non-Volatile）、反映历史变化（Time Variant）的数据集合，用于支持管理决策。 传统数据仓库面临的挑战： 无法满足快速增长的海量数据存储需求。 无法有效处理不同类型的数据。 计算和处理能力不足。  Hive简介：">
+<meta name="twitter:image" content="https://cshihong.github.io/2018/05/22/Hive技术原理/Hadoop.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2018/05/22/Hive技术原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Hive技术原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2018/05/22/Hive技术原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Hive技术原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-05-22 16:43:16" itemprop="dateCreated datePublished" datetime="2018-05-22T16:43:16+08:00">2018-05-22</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-15 22:34:28" itemprop="dateModified" datetime="2019-11-15T22:34:28+08:00">2019-11-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/大数据/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 2,497</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 9</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Hive概述"><a href="#Hive概述" class="headerlink" title="Hive概述"></a>Hive概述</h1><h2 id="数据仓库的概念："><a href="#数据仓库的概念：" class="headerlink" title="数据仓库的概念："></a>数据仓库的概念：</h2><p>数据仓库（Data Warehouse）是一个面向主题的（Subject Oriented）、集成的（Integrated）、相对稳定的（Non-Volatile）、反映历史变化（Time Variant）的数据集合，用于支持管理决策。</p>
+<h2 id="传统数据仓库面临的挑战："><a href="#传统数据仓库面临的挑战：" class="headerlink" title="传统数据仓库面临的挑战："></a>传统数据仓库面临的挑战：</h2><ol>
+<li>无法满足快速增长的海量数据存储需求。</li>
+<li>无法有效处理不同类型的数据。</li>
+<li>计算和处理能力不足。</li>
+</ol>
+<h2 id="Hive简介："><a href="#Hive简介：" class="headerlink" title="Hive简介："></a>Hive简介：</h2><ul>
+<li>Hive是一个构建于Hadoop顶层的<strong>数据仓库工具</strong>，可以查询和管理PB级别的分布式数据。</li>
+<li>支持大规模数据存储、分析，具有良好的可扩展性</li>
+<li>某种程度上可以看作是<strong>用户编程接口</strong>，本身不存储和处理数据。</li>
+<li>依赖分布式文件系统HDFS存储数据。</li>
+<li>依赖分布式并行计算模型MapReduce处理数据。</li>
+<li>定义了简单的类似SQL 的查询语言——HiveQL。</li>
+<li>用户可以通过编写的HiveQL语句运行MapReduce任务。</li>
+<li>可以很容易把原来构建在关系数据库上的数据仓库应用程序移植到Hadoop平台上。</li>
+<li>是一个可以提供有效、合理、直观组织和使用数据的分析工具。</li>
+</ul>
+<p>Hive具有的特点非常适用于数据仓库。</p>
+<p><strong>（1）采用批处理方式处理海量数据</strong></p>
+<ul>
+<li>Hive需要把HiveQL语句转换成MapReduce任务进行运行。</li>
+<li>数据仓库存储的是静态数据，对静态数据的分析适合采用批处理方式，不需要快速响应给出结果，而且数据本身也不会频繁变化。</li>
+</ul>
+<p><strong>（2）提供适合数据仓库操作的工具</strong></p>
+<ul>
+<li>Hive本身提供了一系列对数据进行<strong>提取、转换、加载（ETL）</strong>的工具，可以存储、查询和分析存储在Hadoop中的大规模数据。</li>
+<li>这些工具能够很好地满足数据仓库各种应用场景。</li>
+</ul>
+<p><strong>（3）支持MapReduce，Tez，Spark等多种计算引擎。</strong></p>
+<p><strong>（4）可以直接访问HDFS文件以及HBase。</strong></p>
+<p><strong>（5）易用易编程</strong>。</p>
+<h2 id="Hive与Hadoop生态系统中其他组件的关系："><a href="#Hive与Hadoop生态系统中其他组件的关系：" class="headerlink" title="Hive与Hadoop生态系统中其他组件的关系："></a>Hive与Hadoop生态系统中其他组件的关系：</h2><p><img src="/2018/05/22/Hive技术原理/Hadoop.png" alt="Hadoop"></p>
+<p><center>图：Hadoop生态系统<center></center></center></p>
+<ul>
+<li>Hive依赖于HDFS 存储数据</li>
+<li>Hive依赖于MapReduce 处理数据</li>
+<li>在某些场景下Pig可以作为Hive的替代工具</li>
+<li>HBase 提供数据的实时访问</li>
+</ul>
+<h2 id="Hive的优缺点："><a href="#Hive的优缺点：" class="headerlink" title="Hive的优缺点："></a>Hive的优缺点：</h2><p>Hive的优点：</p>
+<ol>
+<li>高可靠、高容错：HiveServer采用集群模式。双MetaStor。超时重试机制。</li>
+<li>类SQL：类似SQL语法，内置大量函数。</li>
+<li>可扩展：自定义存储格式，自定义函数。</li>
+<li>多接口：Beeline，JDBC，ODBC，Python，Thrift。</li>
+</ol>
+<p>Hive的缺点：</p>
+<ol>
+<li>延迟较高：默认MR为执行引擎，MR延迟较高。</li>
+<li>不支持雾化视图：Hive支持普通视图，不支持雾化视图。Hive不能再视图上更新、插入、删除数据。</li>
+<li>不适用OLTP：暂不支持列级别的数据添加、更新、删除操作。</li>
+<li>暂不支持存储过程：当前版本不支持存储过程，只能通过UDF来实现一些逻辑处理。</li>
+</ol>
+<h2 id="Hive与传统数据库的对比分析："><a href="#Hive与传统数据库的对比分析：" class="headerlink" title="Hive与传统数据库的对比分析："></a>Hive与传统数据库的对比分析：</h2><p>Hive在很多方面和传统的关系数据库类似，但是它的底层依赖的是HDFS和MapReduce，所以在很多方面又有别于传统数据库。</p>
+<p><img src="/2018/05/22/Hive技术原理/对比1.png" alt="对比1"></p>
+<p><img src="/2018/05/22/Hive技术原理/对比2.png" alt="对比2"></p>
+<h2 id="Hive在企业中的部署和作用："><a href="#Hive在企业中的部署和作用：" class="headerlink" title="Hive在企业中的部署和作用："></a>Hive在企业中的部署和作用：</h2><h3 id="Hive在企业大数据分析平台中的应用："><a href="#Hive在企业大数据分析平台中的应用：" class="headerlink" title="Hive在企业大数据分析平台中的应用："></a>Hive在企业大数据分析平台中的应用：</h3><p><img src="/2018/05/22/Hive技术原理/Hive.png" alt="Hive"></p>
+<p><center>图：企业中一种常见的大数据分析平台部署框架<center></center></center></p>
+<h3 id="Hive在Facebook公司中的应用："><a href="#Hive在Facebook公司中的应用：" class="headerlink" title="Hive在Facebook公司中的应用："></a>Hive在Facebook公司中的应用：</h3><ul>
+<li>基于Oracle的数据仓库系统已经无法满足激增的业务需求</li>
+<li>Facebook公司开发了数据仓库工具Hive，并在企业内部进行了大量部署</li>
+</ul>
+<h3 id="Hive在FusionInsight中的位置："><a href="#Hive在FusionInsight中的位置：" class="headerlink" title="Hive在FusionInsight中的位置："></a>Hive在FusionInsight中的位置：</h3><p><img src="/2018/05/22/Hive技术原理/位置.png" alt="位置"></p>
+<p><center>图：Hive在FusionInsight中的位置<center></center></center></p>
+<p>Hive是一种数据仓库处理工具，使用类SQL的HiveQL语言实现数据查询功能，所有的Hive数据都存储在HDFS中。</p>
+<h2 id="Hive应用场景："><a href="#Hive应用场景：" class="headerlink" title="Hive应用场景："></a>Hive应用场景：</h2><ol>
+<li>数据挖掘：用户行为分析；兴趣分区；区域展示；</li>
+<li>非实时分析：日志分析；文本分析。</li>
+<li>数据汇总：每天/每周用户点击数，流量统计。</li>
+<li>数据仓库：数据抽取，加载，转换（ETL）。</li>
+</ol>
+<h1 id="Hive功能与架构"><a href="#Hive功能与架构" class="headerlink" title="Hive功能与架构"></a>Hive功能与架构</h1><h2 id="Hive系统架构："><a href="#Hive系统架构：" class="headerlink" title="Hive系统架构："></a>Hive系统架构：</h2><p><img src="/2018/05/22/Hive技术原理/架构.png" alt="架构"></p>
+<p><img src="/2018/05/22/Hive技术原理/Hive架构.png" alt="Hive架构"></p>
+<p><center>图：Hive系统架构<center></center></center></p>
+<p>用户接口模块包括CLI、HWI、JDBC、ODBC、Thrift Server。</p>
+<p>驱动模块（Driver）包括编译器、优化器、执行器等，负责把HiveSQL语句转换成一系列MapReduce作业。</p>
+<p>元数据存储模块（Metastore）是一个独立的关系型数据库（自带derby数据库，或MySQL数据库）。</p>
+<h2 id="FusionInsight-HD中Hive的架构："><a href="#FusionInsight-HD中Hive的架构：" class="headerlink" title="FusionInsight HD中Hive的架构："></a>FusionInsight HD中Hive的架构：</h2><p><img src="/2018/05/22/Hive技术原理/Fusion.png" alt="Fusion"></p>
+<p><center>图：FusionInsight中Hive的架构<center></center></center></p>
+<p>Hive分为三个角色：HiveServer、MetaStore、WebHcat。</p>
+<ul>
+<li>HiveServer：将用户提交的HQL语句进行编译，解析成对应的Yarn任务，Spark任务或者HDFS操作，从而完成数据的提取，转换，分析。</li>
+<li>MetaStroe：提供元数据服务。</li>
+<li>WebHcat：对外提供基于Htpps洗衣的元数据访问、DDL查询等服务。</li>
+</ul>
+<h2 id="HCatalog架构："><a href="#HCatalog架构：" class="headerlink" title="HCatalog架构："></a>HCatalog架构：</h2><p><img src="/2018/05/22/Hive技术原理/HCatalog.png" alt="HCatalog"></p>
+<p><center>图：HCatalog架构<center></center></center></p>
+<p>HCatalog包括Hcatalog Client和Hcatalog Server：</p>
+<ul>
+<li>HCatalog CLient包括命令行工具CLI和Clent jar包（用于给Pig， MR提供元数据读写支持）。</li>
+<li>HCatalog通过Hive提供的HiveMetaStoreClent对象来间接访问MetaStore。</li>
+<li>HCatalog对外提供Hcatloader，HCatinputFormat来读取数据；提供HCatStore,HCatOutputFormat来写入数据。</li>
+</ul>
+<h2 id="WebHCat架构："><a href="#WebHCat架构：" class="headerlink" title="WebHCat架构："></a>WebHCat架构：</h2><p><img src="/2018/05/22/Hive技术原理/WebHCat架构.png" alt="WebHCat架构"></p>
+<p><center>图：WebHCat架构<center></center></center></p>
+<p>WebHCat提供Rest接口，是用户能够通过安全的HTTPS协议执行以下操作：</p>
+<ol>
+<li>执行Hive DDL操作。</li>
+<li>运行Hive HQL任务。</li>
+<li>运行MapReduce任务。</li>
+</ol>
+<h2 id="Hive数据存储模型："><a href="#Hive数据存储模型：" class="headerlink" title="Hive数据存储模型："></a>Hive数据存储模型：</h2><p><img src="/2018/05/22/Hive技术原理/数据存储模型.png" alt="数据存储模型"></p>
+<p><center>图：Hive数据存储模型<center></center></center></p>
+<p><strong>分区：数据表可以按照某个字段的值划分分区。</strong></p>
+<ul>
+<li>每个分区是一个目录。</li>
+<li>分区数量不固定。</li>
+<li>分区下可再有分区或者桶。</li>
+</ul>
+<p><strong>桶：数据可以根据桶的方式将不同数据放入不同的桶中。</strong></p>
+<ul>
+<li>每个桶是一个文件。</li>
+<li>建表时指定桶个数，桶内可排序。</li>
+<li>数据按照某个字段的值Hash后放入某个桶中。</li>
+</ul>
+<p><strong>Hive可以创建托管表和外部表：</strong></p>
+<ul>
+<li>默认创建托管表，Hiva会将数据移动到数据仓库的目录。</li>
+<li>创建外部表，这时Hiva会到仓库目录以外的位置访问数据。</li>
+<li>如果所有处理都由Hive完成，建议使用托管表。</li>
+<li>如果要用Hive和其他工具来处理同一个数据集，建议使用外部表。</li>
+<li><img src="/2018/05/22/Hive技术原理/区别.png" alt="区别"></li>
+</ul>
+<p><strong>Hive支持的函数：</strong></p>
+<p>Hive内置函数：</p>
+<ol>
+<li>数据函数：如round(),fllor(), abs(), rand()等。</li>
+<li>日期函数：如to_date(), month(), day().</li>
+<li>字符串函数,如trim(), length(), substr()等。</li>
+</ol>
+<p>UDF（User-Defined Funcation）用户自定义函数。</p>
+<h2 id="Hive工作原理："><a href="#Hive工作原理：" class="headerlink" title="Hive工作原理："></a>Hive工作原理：</h2><h3 id="（1）SQL语句转换成MapReduce作业的基本原理："><a href="#（1）SQL语句转换成MapReduce作业的基本原理：" class="headerlink" title="（1）SQL语句转换成MapReduce作业的基本原理："></a>（1）SQL语句转换成MapReduce作业的基本原理：</h3><p><img src="/2018/05/22/Hive技术原理/jion.png" alt="jion"></p>
+<p><center>图：join的实现原理<center></center></center></p>
+<p><img src="/2018/05/22/Hive技术原理/group.png" alt="group"></p>
+<p><center>图：group by实现原理<center></center></center></p>
+<p>存在一个分组（Group By）操作，其功能是把表Score的不同片段按照rank和level的组合值进行合并，计算不同rank和level的组和值分别有几条记录。</p>
+<h3 id="（2）Hive中SQL查询转换成MapReduce作用的过程："><a href="#（2）Hive中SQL查询转换成MapReduce作用的过程：" class="headerlink" title="（2）Hive中SQL查询转换成MapReduce作用的过程："></a>（2）Hive中SQL查询转换成MapReduce作用的过程：</h3><p>当用户向Hive输入一段命令或查询时，Hive需要与Hadoop交互工作来完成该操作：</p>
+<ol>
+<li>驱动模块接收该命令或查询编译器</li>
+<li>对该命令或查询进行解析编译</li>
+<li>由优化器对该命令或查询进行优化计算</li>
+<li>该命令或查询通过执行器进行执行</li>
+</ol>
+<p>详细如果如下：</p>
+<p><img src="/2018/05/22/Hive技术原理/过程.png" alt="过程"></p>
+<p><center>图：SQL查询转换成MapReduce作业的过程<center></center></center></p>
+<ol>
+<li>第1步：由Hive驱动模块中的编译器对用户输入的SQL语言进行词法和语法解析，将SQL语句转化为抽象语法树的形式。</li>
+<li>第2步：抽象语法树的结构仍很复杂，不方便直接翻译为MapReduce算法程序，因此，把抽象语法书转化为查询块。</li>
+<li>第3步：把查询块转换成逻辑查询计划，里面包含了许多逻辑操作符。</li>
+<li>第4步：重写逻辑查询计划，进行优化，合并多余操作，减少MapReduce任务数量。</li>
+<li>第5步：将逻辑操作符转换成需要执行的具体MapReduce任务。</li>
+<li>第6步：对生成的MapReduce任务进行优化，生成最终的MapReduce任务执行计划。</li>
+<li>第7步：由Hive驱动模块中的执行器，对最终的MapReduce任务进行执行输出。</li>
+</ol>
+<p><strong>几点说明：</strong></p>
+<ul>
+<li>当启动MapReduce程序时，Hive本身是不会生成MapReduce算法程序的。</li>
+<li>需要通过一个表示“Job执行计划”的XML文件驱动执行内置的、原生的Mapper和Reducer模块。</li>
+<li>Hive通过和JobTracker通信来初始化MapReduce任务，不必直接部署在JobTracker所在的管理节点上执行。</li>
+<li>通常在大型集群上，会有专门的网关机来部署Hive工具。网关机的作用主要是远程操作和管理节点上的JobTracker通信来执行任务。</li>
+<li>数据文件通常存储在HDFS上，HDFS由名称节点管理。</li>
+</ul>
+<p>#Hive增强特性</p>
+<h2 id="Hive增强特性-Colocation："><a href="#Hive增强特性-Colocation：" class="headerlink" title="Hive增强特性-Colocation："></a>Hive增强特性-Colocation：</h2><p>Colocation（同分布）：将存在关联关系的数据或可能进行管理操作的数据存储在相同的存储节点上。</p>
+<p>文件级同分布实现文件的快速访问，避免了因数据搬迁带来的大量网络开销。</p>
+<h2 id="Hive增强特性–Hbase记录批量删除："><a href="#Hive增强特性–Hbase记录批量删除：" class="headerlink" title="Hive增强特性–Hbase记录批量删除："></a>Hive增强特性–Hbase记录批量删除：</h2><p>在Hive on HBase功能汇总，FusionInsight HD Hive提供了对HBase表的单条数据的删除功能，通过特定的语法，Hive可以将HBase表中符合条件的一条或多条数据批量清除。</p>
+<h2 id="Hive增强特性–流控特性："><a href="#Hive增强特性–流控特性：" class="headerlink" title="Hive增强特性–流控特性："></a>Hive增强特性–流控特性：</h2><p>通过流控特性，可以实现：</p>
+<ul>
+<li>当前已经建立连接数据阈值控制。</li>
+<li>每个用户已经建立的连接数阈值控制。</li>
+<li>单位时间内所有建立的连接数阈值控制。</li>
+</ul>
+<hr>
+<blockquote>
+<p>以上内容为听华为大数据培训课程和大学MOOC上厦门大学 林子雨的《大数据技术原理与应用》课程而整理的笔记。</p>
+<p><strong><a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">大数据技术原理与应用</a></strong>： <a href="https://www.icourse163.org/course/XMU-1002335004" target="_blank" rel="noopener">https://www.icourse163.org/course/XMU-1002335004</a> </p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2018/05/22/Hive技术原理/" title="Hive技术原理">https://cshihong.github.io/2018/05/22/Hive技术原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hadoop/" rel="tag"># Hadoop</a>
+          
+            <a href="/tags/Hive/" rel="tag"># Hive</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/20/云数据库/" rel="next" title="云数据库">
+                <i class="fa fa-chevron-left"></i> 云数据库
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/22/Impala技术原理/" rel="prev" title="Impala技术原理">
+                Impala技术原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Hive概述"><span class="nav-number">1.</span> <span class="nav-text">Hive概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据仓库的概念："><span class="nav-number">1.1.</span> <span class="nav-text">数据仓库的概念：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#传统数据仓库面临的挑战："><span class="nav-number">1.2.</span> <span class="nav-text">传统数据仓库面临的挑战：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive简介："><span class="nav-number">1.3.</span> <span class="nav-text">Hive简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive与Hadoop生态系统中其他组件的关系："><span class="nav-number">1.4.</span> <span class="nav-text">Hive与Hadoop生态系统中其他组件的关系：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive的优缺点："><span class="nav-number">1.5.</span> <span class="nav-text">Hive的优缺点：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive与传统数据库的对比分析："><span class="nav-number">1.6.</span> <span class="nav-text">Hive与传统数据库的对比分析：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive在企业中的部署和作用："><span class="nav-number">1.7.</span> <span class="nav-text">Hive在企业中的部署和作用：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive在企业大数据分析平台中的应用："><span class="nav-number">1.7.1.</span> <span class="nav-text">Hive在企业大数据分析平台中的应用：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive在Facebook公司中的应用："><span class="nav-number">1.7.2.</span> <span class="nav-text">Hive在Facebook公司中的应用：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hive在FusionInsight中的位置："><span class="nav-number">1.7.3.</span> <span class="nav-text">Hive在FusionInsight中的位置：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive应用场景："><span class="nav-number">1.8.</span> <span class="nav-text">Hive应用场景：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Hive功能与架构"><span class="nav-number">2.</span> <span class="nav-text">Hive功能与架构</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive系统架构："><span class="nav-number">2.1.</span> <span class="nav-text">Hive系统架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FusionInsight-HD中Hive的架构："><span class="nav-number">2.2.</span> <span class="nav-text">FusionInsight HD中Hive的架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HCatalog架构："><span class="nav-number">2.3.</span> <span class="nav-text">HCatalog架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WebHCat架构："><span class="nav-number">2.4.</span> <span class="nav-text">WebHCat架构：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive数据存储模型："><span class="nav-number">2.5.</span> <span class="nav-text">Hive数据存储模型：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive工作原理："><span class="nav-number">2.6.</span> <span class="nav-text">Hive工作原理：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#（1）SQL语句转换成MapReduce作业的基本原理："><span class="nav-number">2.6.1.</span> <span class="nav-text">（1）SQL语句转换成MapReduce作业的基本原理：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#（2）Hive中SQL查询转换成MapReduce作用的过程："><span class="nav-number">2.6.2.</span> <span class="nav-text">（2）Hive中SQL查询转换成MapReduce作用的过程：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive增强特性-Colocation："><span class="nav-number">2.7.</span> <span class="nav-text">Hive增强特性-Colocation：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive增强特性–Hbase记录批量删除："><span class="nav-number">2.8.</span> <span class="nav-text">Hive增强特性–Hbase记录批量删除：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Hive增强特性–流控特性："><span class="nav-number">2.9.</span> <span class="nav-text">Hive增强特性–流控特性：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2018/05/22/Hive技术原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>

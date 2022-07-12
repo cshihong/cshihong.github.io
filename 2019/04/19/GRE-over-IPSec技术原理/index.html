@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+  
+  
+    
+  
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.css">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+
+  
+
+<link href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.2/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/favicon.ico?v=6.6.0" color="#222">
+
+
+  <link rel="manifest" href="/images/favicon.ico">
+
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="GRE原理GRE简介：General Routing Encapsulation，简称GRE，是一种三层VPN封装技术。GRE可以对某些网络层协议（如IPX、Apple Talk、IP等）的报文进行封装，使封装后的报文能够在另一种网络中（如IPv4）传输，从而解决了跨越异种网络的报文传输问题。异种报文传输的通道称为Tunnel（隧道）。 GRE报文封装： 图：GRE报文格式  其中：  净荷（Pa">
+<meta name="keywords" content="VPN,IPsec VPN">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GRE over IPSec技术原理">
+<meta property="og:url" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/index.html">
+<meta property="og:site_name" content="曹世宏的博客">
+<meta property="og:description" content="GRE原理GRE简介：General Routing Encapsulation，简称GRE，是一种三层VPN封装技术。GRE可以对某些网络层协议（如IPX、Apple Talk、IP等）的报文进行封装，使封装后的报文能够在另一种网络中（如IPv4）传输，从而解决了跨越异种网络的报文传输问题。异种报文传输的通道称为Tunnel（隧道）。 GRE报文封装： 图：GRE报文格式  其中：  净荷（Pa">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/gre报文格式.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/gre抓包.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/封装.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/拓扑.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/安全策略.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/测试.png">
+<meta property="og:image" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/ipsec%20sa.png">
+<meta property="og:updated_time" content="2019-08-25T01:43:26.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GRE over IPSec技术原理">
+<meta name="twitter:description" content="GRE原理GRE简介：General Routing Encapsulation，简称GRE，是一种三层VPN封装技术。GRE可以对某些网络层协议（如IPX、Apple Talk、IP等）的报文进行封装，使封装后的报文能够在另一种网络中（如IPv4）传输，从而解决了跨越异种网络的报文传输问题。异种报文传输的通道称为Tunnel（隧道）。 GRE报文封装： 图：GRE报文格式  其中：  净荷（Pa">
+<meta name="twitter:image" content="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/gre报文格式.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="曹世宏的博客" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>GRE over IPSec技术原理 | 曹世宏的博客</title>
+  
+
+
+
+
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?3d1d06c1df5d2fe94237f55bad4858bc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion .logo-line-before i { left: initial; }
+    .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">曹世宏的博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <h1 class="site-subtitle" itemprop="description">记录一些学习资料</h1>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="曹世宏">
+      <meta itemprop="description" content="你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。">
+      <meta itemprop="image" content="/images/touxiang.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="曹世宏的博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">GRE over IPSec技术原理
+
+              
+            
+          </h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-04-19 16:27:37" itemprop="dateCreated datePublished" datetime="2019-04-19T16:27:37+08:00">2019-04-19</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-08-25 09:43:26" itemprop="dateModified" datetime="2019-08-25T09:43:26+08:00">2019-08-25</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/网络安全/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="post-meta-item-icon">
+            <i class="fa fa-eye"></i>
+             阅读次数： 
+            <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+			<span class="post-meta-divider">|</span>
+			<span title="post.wordcount"><span class="post-meta-item-icon"><i class="fa fa-file-word-o"></i></span>字数： 2,163</span>
+			<span class="post-meta-item-text">|</span>
+			<span title="post.min2read"><span class="post-meta-item-icon"><i class="fa fa-clock-o"></i></span>阅读时长： 9</span>
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="GRE原理"><a href="#GRE原理" class="headerlink" title="GRE原理"></a>GRE原理</h1><h2 id="GRE简介："><a href="#GRE简介：" class="headerlink" title="GRE简介："></a>GRE简介：</h2><p>General Routing Encapsulation，简称GRE，是一种三层VPN封装技术。GRE可以对某些网络层协议（如IPX、Apple Talk、IP等）的报文进行封装，使封装后的报文能够在另一种网络中（如IPv4）传输，从而解决了跨越异种网络的报文传输问题。异种报文传输的通道称为Tunnel（隧道）。</p>
+<h2 id="GRE报文封装："><a href="#GRE报文封装：" class="headerlink" title="GRE报文封装："></a>GRE报文封装：</h2><p><img src="/2019/04/19/GRE-over-IPSec技术原理/gre报文格式.png" alt="gre报文格式"></p>
+<center>图：GRE报文格式</center>
+
+<p>其中：</p>
+<ul>
+<li>净荷（Payload）：系统收到的需要封装和路由的数据报称为净荷。 </li>
+<li>乘客协议（Passenger Protocol）：封装前的报文协议称为乘客协议。 </li>
+<li>封装协议（Encapsulation Protocol）：上述的GRE协议称为封装协议，也称为运载协议（Carrier Protocol）。 </li>
+<li>传输协议（Transport Protocol或者Delivery Protocol）：负责对封装后的报文进行转发的协议称为传输协议。</li>
+</ul>
+<p>GRE能够承载的乘客协议包括IPv4、IPv6和MPLS协议，GRE所使用的运输协议是IPv4协议。</p>
+<p><strong>GRE首部各字段解释如下：</strong></p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>长度</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C</td>
+<td>1 bit</td>
+<td>校验和验证位。如果该位置1，表示GRE头插入了校验和（Checksum）字段；该位为0表示GRE头不包含校验和字段。</td>
+</tr>
+<tr>
+<td>K</td>
+<td>1 bit</td>
+<td>关键字位。如果该位置1，表示GRE头插入了关键字（Key）字段；该位为0表示GRE头不包含关键字字段。</td>
+</tr>
+<tr>
+<td>Recursion</td>
+<td>3 bits</td>
+<td>用来表示GRE报文被封装的层数。完成一次GRE封装后将该字段加1。如果封装层数大于3，则丢弃该报文。该字段的作用是防止报文被无限次的封装。</td>
+</tr>
+<tr>
+<td>Flags</td>
+<td>5 bits</td>
+<td>预留字段。当前必须设为0。</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>3 bits</td>
+<td>版本字段，必须置为0。Version为1是使用在RFC2637的PPTP中。</td>
+</tr>
+<tr>
+<td>Protocol Type</td>
+<td>16 bits</td>
+<td>乘客协议的协议类型。</td>
+</tr>
+<tr>
+<td>Checksum</td>
+<td>16 bits</td>
+<td>对GRE头及其负载的校验和字段。</td>
+</tr>
+<tr>
+<td>Key</td>
+<td>31 bits</td>
+<td>关键字字段，隧道接收端用于对收到的报文进行验证。</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>因为VRP中的GRE头不包含源路由字段，因此Bit 1、Bit 3和Bit 4都置为0。</p>
+</blockquote>
+<p><img src="/2019/04/19/GRE-over-IPSec技术原理/gre抓包.png" alt="gre抓包"></p>
+<center>图：GRE报文抓包示例</center>
+
+<blockquote>
+<p><strong>GRE的的上层协议是IP，协议号为47.</strong></p>
+</blockquote>
+<h2 id="GRE的实现–隧道接口："><a href="#GRE的实现–隧道接口：" class="headerlink" title="GRE的实现–隧道接口："></a>GRE的实现–隧道接口：</h2><p>隧道接口（Tunnel接口）是为实现报文的封装而提供的一种点对点类型的虚拟接口，与Loopback接口类似，都是一种逻辑接口。</p>
+<p>隧道接口必须配置的四项：<strong>封装类型、隧道接口地址、源地址、目的地址。</strong></p>
+<h2 id="GRE的应用场景："><a href="#GRE的应用场景：" class="headerlink" title="GRE的应用场景："></a>GRE的应用场景：</h2><ul>
+<li>GRE over IPSec</li>
+<li>IPv6 over IPv4</li>
+<li>扩大条数受限的网络工作范围</li>
+<li>GRE VPN</li>
+</ul>
+<h2 id="GRE的优缺点："><a href="#GRE的优缺点：" class="headerlink" title="GRE的优缺点："></a>GRE的优缺点：</h2><p><strong>优点：</strong></p>
+<ul>
+<li><p>支持多种上层协议</p>
+</li>
+<li><p><strong>支持组播，QoS</strong></p>
+<p>支持组播，就意味着可以运行组播类协议，如动态路由。</p>
+</li>
+</ul>
+<p><strong>缺点：–薄弱的安全性</strong></p>
+<ul>
+<li>不支持加密</li>
+<li>较弱的身份认证机制</li>
+<li>较弱的数据完整性校验</li>
+</ul>
+<h1 id="GRE-over-IPSec"><a href="#GRE-over-IPSec" class="headerlink" title="GRE over IPSec"></a>GRE over IPSec</h1><h2 id="IPSec的优缺点分析："><a href="#IPSec的优缺点分析：" class="headerlink" title="IPSec的优缺点分析："></a>IPSec的优缺点分析：</h2><p><strong>IPSec缺点：</strong></p>
+<ul>
+<li>只支持IP协议的封装，不支持多层上层协议</li>
+<li><strong>不支持组播</strong></li>
+</ul>
+<p><strong>IPSec的优点 —较强的安全性：</strong></p>
+<ul>
+<li>支持加密</li>
+<li>支持身份验证机制</li>
+<li>支持数据完整性校验</li>
+</ul>
+<h2 id="GRE-over-IPSec："><a href="#GRE-over-IPSec：" class="headerlink" title="GRE over IPSec："></a>GRE over IPSec：</h2><p>GRE over IPSec可利用GRE和IPSec的优势，通过GRE将组播、广播和非IP报文封装成普通的IP报文，通过IPSec为封装后的IP报文提供安全地通信，进而可以提供在总部和分支之间安全地传送广播、组播的业务，例如视频会议或动态路由协议消息等。</p>
+<p>当网关之间采用GRE over IPSec连接时，先进行GRE封装，再进行IPSec封装。GRE over IPSec使用的封装模式为可以是隧道模式也可以是传输模式。因为隧道模式跟传输模式相比增加了IPSec头，导致报文长度更长，更容易导致分片，所以推荐采用传输模式GRE over IPSec。</p>
+<p><img src="/2019/04/19/GRE-over-IPSec技术原理/封装.png" alt="封装"></p>
+<center>图：GRE over IPSec报文封装和隧道协商过程</center>
+
+<p>IPSec封装过程中增加的IP头即源地址为IPSec网关应用IPSec安全策略的接口地址，目的地址即IPSec对等体中应用IPSec安全策略的接口地址。</p>
+<p>IPSec需要保护的数据流为从GRE起点到GRE终点的数据流。GRE封装过程中增加的IP头即源地址为GRE隧道的源端地址，目的地址为GRE隧道的目的端地址。</p>
+<h2 id="GER-over-IPSec的两种封装模式："><a href="#GER-over-IPSec的两种封装模式：" class="headerlink" title="GER over IPSec的两种封装模式："></a>GER over IPSec的两种封装模式：</h2><p>(1) 传输模式  ——-建议采用</p>
+<ul>
+<li>2个IP头部     原始IP头部   GRE头部</li>
+</ul>
+<p>(2) 隧道模式 </p>
+<ul>
+<li>3个IP头部   原始IP头部   GRE头部    IPSEC头部</li>
+</ul>
+<h1 id="GRE-over-IPSec配置实验"><a href="#GRE-over-IPSec配置实验" class="headerlink" title="GRE over IPSec配置实验"></a>GRE over IPSec配置实验</h1><h2 id="实验拓扑图："><a href="#实验拓扑图：" class="headerlink" title="实验拓扑图："></a>实验拓扑图：</h2><p>FW1和FW2之间建立GRE over IPSec隧道，使PC1网络好PC2网络用户可通过隧道互相访问。</p>
+<p><img src="/2019/04/19/GRE-over-IPSec技术原理/拓扑.png" alt="拓扑"></p>
+<center>图：GRE Over IPSec实验拓扑图</center>
+
+<h2 id="实验一：IPSec策略在物理接口调用："><a href="#实验一：IPSec策略在物理接口调用：" class="headerlink" title="实验一：IPSec策略在物理接口调用："></a>实验一：IPSec策略在物理接口调用：</h2><h3 id="配置思路："><a href="#配置思路：" class="headerlink" title="配置思路："></a>配置思路：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">第一步： 完成接口基本配置。</span><br><span class="line">第二步：分别创建GRE隧道接口，并配置 GRE 隧道接口的 IP 地址、源地址和目的地址。</span><br><span class="line">FW1:</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Tunnel0</span></span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 172.16.1.1 255.255.255.0 </span></span><br><span class="line"><span class="class"> <span class="title">tunnel</span>-<span class="title">protocol</span> <span class="title">gre</span></span></span><br><span class="line"><span class="class"> <span class="title">source</span> 202.100.1.10</span></span><br><span class="line"><span class="class"> <span class="title">destination</span> 202.100.1.11</span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"><span class="title">FW2</span></span></span><br><span class="line"><span class="class"><span class="title">interface</span> <span class="title">Tunnel0</span></span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 172.16.1.2 255.255.255.0 </span></span><br><span class="line"><span class="class"> <span class="title">tunnel</span>-<span class="title">protocol</span> <span class="title">gre</span></span></span><br><span class="line"><span class="class"> <span class="title">source</span> 202.100.1.11</span></span><br><span class="line"><span class="class"> <span class="title">destination</span> 202.100.1.10</span></span><br><span class="line"><span class="class">  </span></span><br><span class="line"><span class="class">第三步：配置静态路由，将出接口指定为 <span class="title">GRE</span> 隧道接口，将流量引入到隧道中。</span></span><br><span class="line"><span class="class">注意：也可以动态路由方式</span></span><br><span class="line">FW1:</span><br><span class="line"> ip route-<span class="keyword">static</span> <span class="number">10.1</span>.2.0 <span class="number">255.255</span>.255.0 Tunnel0</span><br><span class="line"></span><br><span class="line">FW2</span><br><span class="line"> ip route-<span class="keyword">static</span> <span class="number">10.1</span>.1.0 <span class="number">255.255</span>.255.0 Tunnel0</span><br><span class="line"></span><br><span class="line">第四步：配置 IPSec 隧道。包括配置 IPSec 策略的基本信息、配置待加密的数据流和配置安全提议。</span><br><span class="line">IPSEC配置：</span><br><span class="line">阶段一：</span><br><span class="line">ike proposal <span class="number">10</span></span><br><span class="line"> authentication-algorithm sha2-<span class="number">256</span></span><br><span class="line"> integrity-algorithm aes-xcbc-<span class="number">96</span> hmac-sha2-<span class="number">256</span></span><br><span class="line"></span><br><span class="line">ike peer <span class="number">10</span>           </span><br><span class="line"> pre-shared-key Huawei@<span class="number">123</span></span><br><span class="line"> ike-proposal <span class="number">10</span>  </span><br><span class="line"> remote-address <span class="number">202.100</span>.1.11</span><br><span class="line"></span><br><span class="line">阶段二：</span><br><span class="line">acl number <span class="number">3000</span></span><br><span class="line"> rule <span class="number">5</span> permit ip source <span class="number">202.100</span>.1.10 <span class="number">0</span> destination <span class="number">202.100</span>.1.11 <span class="number">0</span></span><br><span class="line">注意: 保护的是GRE的隧道 </span><br><span class="line"></span><br><span class="line">ipsec proposal <span class="number">10</span>  </span><br><span class="line"> encapsulation-mode auto</span><br><span class="line"> esp authentication-algorithm sha2-<span class="number">256</span></span><br><span class="line">#</span><br><span class="line">ipsec policy ipsec_policy <span class="number">10</span> isakmp</span><br><span class="line"> security acl <span class="number">3000</span></span><br><span class="line"> ike-peer <span class="number">10</span>  </span><br><span class="line"> proposal <span class="number">10</span>  </span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GigabitEthernet0</span>/0/2  --------------在物理接口调用 </span></span><br><span class="line"><span class="class"> <span class="title">ip</span> <span class="title">address</span> 202.100.1.10 255.255.255.0</span></span><br><span class="line"><span class="class"> <span class="title">ipsec</span> <span class="title">policy</span> <span class="title">ipsec_policy</span></span></span><br></pre></td></tr></table></figure>
+<p><strong>安全策略的放行：</strong></p>
+<p><img src="/2019/04/19/GRE-over-IPSec技术原理/安全策略.png" alt="安全策略"></p>
+<center>图：安全策略的放行</center>
+
+<blockquote>
+<p><strong>注意：关于需不需要放行gre流量的问题。</strong><br><strong>因为gre头部是在esp头部或公网IP头部中封装的，实际流量会被esp加密传输。应该是不需要放行gre的，但是在实际测试中需要放行。</strong></p>
+<p><strong>在华为防火墙实际测试中，放行gre流量后IPSec SA可以正常建立，双方的主机也可以互相通信。而不放行gre的话，IPSec SA可以正常建立，但是双方的主机不能互相通信。</strong></p>
+</blockquote>
+<h3 id="检查测试："><a href="#检查测试：" class="headerlink" title="检查测试："></a>检查测试：</h3><p><img src="/2019/04/19/GRE-over-IPSec技术原理/测试.png" alt="测试"></p>
+<center>图：PC1与PC2的连通性测试</center>
+
+<hr>
+<p><img src="/2019/04/19/GRE-over-IPSec技术原理/ipsec sa.png" alt="ipsec sa"></p>
+<center>图：IPSec SA状态</center>
+
+<h2 id="实验二：IPSec策略在Tunnel口调用："><a href="#实验二：IPSec策略在Tunnel口调用：" class="headerlink" title="实验二：IPSec策略在Tunnel口调用："></a>实验二：IPSec策略在Tunnel口调用：</h2><h3 id="配置思路：-1"><a href="#配置思路：-1" class="headerlink" title="配置思路："></a>配置思路：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">IPSEC 配置思路：  </span><br><span class="line">阶段一: </span><br><span class="line">ike proposal <span class="number">10</span></span><br><span class="line"> authentication-algorithm sha2-<span class="number">256</span></span><br><span class="line"> integrity-algorithm aes-xcbc-<span class="number">96</span> hmac-sha2-<span class="number">256</span></span><br><span class="line">#</span><br><span class="line">ike peer <span class="number">10</span>            </span><br><span class="line"> pre-shared-key Huawei@<span class="number">123</span></span><br><span class="line"> ike-proposal <span class="number">10</span></span><br><span class="line"> </span><br><span class="line">注意：不能配置remote-address.</span><br><span class="line"></span><br><span class="line">阶段二:</span><br><span class="line">不需要感兴趣流 </span><br><span class="line">ipsec proposal <span class="number">10</span></span><br><span class="line"> encapsulation-mode auto</span><br><span class="line"> esp</span><br><span class="line">#</span><br><span class="line">ipsec profile ipsec_pro</span><br><span class="line"> ike-peer <span class="number">10</span></span><br><span class="line"> proposal <span class="number">10</span></span><br><span class="line"></span><br><span class="line">不能调用ACL </span><br><span class="line"></span><br><span class="line">调用：</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Tunnel0</span></span></span><br><span class="line"><span class="class"> <span class="title">ipsec</span> <span class="title">profile</span> <span class="title">ipsec_pro</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">放行策略：</span></span><br><span class="line"><span class="class"><span class="title">security</span>-<span class="title">policy</span></span></span><br><span class="line"><span class="class"> <span class="title">rule</span> <span class="title">name</span> <span class="title">IPSEC1</span></span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">zone</span> <span class="title">local</span></span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">zone</span> <span class="title">untrust</span></span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">zone</span> <span class="title">local</span></span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">zone</span> <span class="title">untrust</span></span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">address</span> 202.100.1.10 <span class="title">mask</span> 255.255.255.255</span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">address</span> 202.100.1.11 <span class="title">mask</span> 255.255.255.255</span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">address</span> 202.100.1.10 <span class="title">mask</span> 255.255.255.255</span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">address</span> 202.100.1.11 <span class="title">mask</span> 255.255.255.255</span></span><br><span class="line"><span class="class">  <span class="title">service</span> <span class="title">ISAKMP</span></span></span><br><span class="line"><span class="class">  <span class="title">service</span> <span class="title">esp</span></span></span><br><span class="line"><span class="class">  <span class="title">action</span> <span class="title">permit</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class"> <span class="title">rule</span> <span class="title">name</span> <span class="title">IPSEC2</span></span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">zone</span> <span class="title">trust</span></span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">zone</span> <span class="title">vpn</span></span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">zone</span> <span class="title">trust</span></span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">zone</span> <span class="title">vpn</span></span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">address</span> 10.1.1.0 <span class="title">mask</span> 255.255.255.0</span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">address</span> 10.1.2.0 <span class="title">mask</span> 255.255.255.0</span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">address</span> 10.1.1.0 <span class="title">mask</span> 255.255.255.0</span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">address</span> 10.1.2.0 <span class="title">mask</span> 255.255.255.0</span></span><br><span class="line"><span class="class">  <span class="title">action</span> <span class="title">permit</span>    </span></span><br><span class="line"><span class="class">                       </span></span><br><span class="line"><span class="class">  <span class="title">rule</span> <span class="title">name</span> <span class="title">vpn_local</span>  ----------只需要放行<span class="title">VPN</span>-<span class="title">LOCAL</span></span></span><br><span class="line"><span class="class">  <span class="title">source</span>-<span class="title">zone</span> <span class="title">vpn</span></span></span><br><span class="line"><span class="class">  <span class="title">destination</span>-<span class="title">zone</span> <span class="title">local</span> </span></span><br><span class="line"><span class="class">  <span class="title">service</span> <span class="title">gre</span></span></span><br><span class="line"><span class="class">  <span class="title">action</span> <span class="title">permit</span></span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p> <strong>注意：当在Tunnel口调用IPSec后，可以成功建立IPSec SA，需要流量的触发。但是在防火墙的Web管理界面的IPSec监控中看不到有关IPSec的信息，只能通过命令行查看。</strong></p>
+<p><strong>在配置IPSec Profile（模板）的时候：</strong></p>
+<ul>
+<li><strong>不能配置远端的IP地址</strong></li>
+<li><strong>不能绑定ACL，即感兴趣流</strong></li>
+</ul>
+<p><strong>在Tunnel口上绑定IPSec策略时，放行gre的流量的方向是，从vpn –&gt; local的方向的流量。</strong></p>
+</blockquote>
+<hr>
+<hr>
+<blockquote>
+<p>参考文档：华为HedEx文档</p>
+</blockquote>
+<hr>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/images/微信.png" alt="曹世宏 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/images/支付宝.jpg" alt="曹世宏 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+      <div>
+        
+
+
+
+  
+
+
+
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>曹世宏</li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    
+    <a href="https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/" title="GRE over IPSec技术原理">https://cshihong.github.io/2019/04/19/GRE-over-IPSec技术原理/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fa fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！</li>
+<br>
+  <li class="post-copyright-link">
+    <strong>字节跳动社招内推：<a href="https://job.toutiao.com/s/Jy89E4s">https://job.toutiao.com/s/Jy89E4s</a></strong><br>
+    <strong>字节跳动校招内推码：<a href="https://job.toutiao.com/s/Jy8BSv6">YYG5KEY</a></strong><br>
+    <strong>字节跳动校招投递链接:<a href="https://job.toutiao.com/s/Jy8BSv6">https://job.toutiao.com/s/Jy8BSv6</a></strong><br>
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/VPN/" rel="tag"># VPN</a>
+          
+            <a href="/tags/IPsec-VPN/" rel="tag"># IPsec VPN</a>
+          
+        </div>
+      
+
+      
+      
+        <div class="post-widgets">
+        
+
+        
+
+        
+          
+          <div class="social_share">
+            
+               <div>
+                 
+  <div class="bdsharebuttonbox">
+    <a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a href="#" class="bds_douban" data-cmd="douban" title="分享到豆瓣网"></a>
+    <a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a>
+    <a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+    <a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a href="#" class="bds_tieba" data-cmd="tieba" title="分享到百度贴吧"></a>
+    <a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+    <a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+    <a href="#" class="bds_more" data-cmd="more"></a>
+    <a class="bds_count" data-cmd="count"></a>
+  </div>
+  <script>
+    window._bd_share_config = {
+      "common": {
+        "bdText": "",
+        "bdMini": "2",
+        "bdMiniList": false,
+        "bdPic": ""
+      },
+      "share": {
+        "bdSize": "16",
+        "bdStyle": "0"
+      },
+      "image": {
+        "viewList": ["tsina", "douban", "sqq", "qzone", "weixin", "twi", "fbook"],
+        "viewText": "分享到：",
+        "viewSize": "16"
+      }
+    }
+  </script>
+
+<script>
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+               </div>
+            
+            
+               <div id="needsharebutton-postbottom">
+                 <span class="btn">
+                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                 </span>
+               </div>
+            
+          </div>
+        
+        </div>
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/17/IPSec的高可靠性/" rel="next" title="IPSec的高可靠性">
+                <i class="fa fa-chevron-left"></i> IPSec的高可靠性
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/05/06/DSVPN基础原理/" rel="prev" title="DSVPN基础原理">
+                DSVPN基础原理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+      <div id="lv-container" data-id="city" data-uid="MTAyMC8zMDc1NS83MzA3"></div>
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/touxiang.jpg" alt="曹世宏">
+            
+              <p class="site-author-name" itemprop="name">曹世宏</p>
+              <p class="site-description motion-element" itemprop="description">你的责任就是你的方向，你的经历就是你的资本，你的性格就是你的命运。</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">264</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">25</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">135</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/cshihong/cshihong.github.io" title="GitHub &rarr; https://github.com/cshihong/cshihong.github.io" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:cshihong96@gmail.com" title="E-Mail &rarr; mailto:cshihong96@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" title="qq &rarr; https://user.qzone.qq.com/731507579?ptlang=2052&source=friendlist" rel="noopener" target="_blank"><i class="fa fa-fw fa-qq"></i>qq</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="http://blog.csdn.net/qq_38265137" title="CSDN &rarr; http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank"><i class="fa fa-fw fa-meh-o"></i>CSDN</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://blog.csdn.net/qq_38265137" title="http://blog.csdn.net/qq_38265137" rel="noopener" target="_blank">我的CSDN</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" title="http://support.huawei.com/learning/NavigationAction!createNavi?navId=MW000001_term1000025144&lang=zh" rel="noopener" target="_blank">华为培训认证</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://bbs.hh010.com/" title="http://bbs.hh010.com/" rel="noopener" target="_blank">鸿鹄论坛</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://m.blog.csdn.net/home/index" title="http://m.blog.csdn.net/home/index" rel="noopener" target="_blank">CSDN博客</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.cnblogs.com/" title="https://www.cnblogs.com/" rel="noopener" target="_blank">博客园</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.w3school.com.cn/index.html" title="http://www.w3school.com.cn/index.html" rel="noopener" target="_blank">w3cshool</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.51cto.com" title="http://www.51cto.com" rel="noopener" target="_blank">51cto</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GRE原理"><span class="nav-number">1.</span> <span class="nav-text">GRE原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GRE简介："><span class="nav-number">1.1.</span> <span class="nav-text">GRE简介：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GRE报文封装："><span class="nav-number">1.2.</span> <span class="nav-text">GRE报文封装：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GRE的实现–隧道接口："><span class="nav-number">1.3.</span> <span class="nav-text">GRE的实现–隧道接口：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GRE的应用场景："><span class="nav-number">1.4.</span> <span class="nav-text">GRE的应用场景：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GRE的优缺点："><span class="nav-number">1.5.</span> <span class="nav-text">GRE的优缺点：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GRE-over-IPSec"><span class="nav-number">2.</span> <span class="nav-text">GRE over IPSec</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#IPSec的优缺点分析："><span class="nav-number">2.1.</span> <span class="nav-text">IPSec的优缺点分析：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GRE-over-IPSec："><span class="nav-number">2.2.</span> <span class="nav-text">GRE over IPSec：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GER-over-IPSec的两种封装模式："><span class="nav-number">2.3.</span> <span class="nav-text">GER over IPSec的两种封装模式：</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GRE-over-IPSec配置实验"><span class="nav-number">3.</span> <span class="nav-text">GRE over IPSec配置实验</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#实验拓扑图："><span class="nav-number">3.1.</span> <span class="nav-text">实验拓扑图：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实验一：IPSec策略在物理接口调用："><span class="nav-number">3.2.</span> <span class="nav-text">实验一：IPSec策略在物理接口调用：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置思路："><span class="nav-number">3.2.1.</span> <span class="nav-text">配置思路：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检查测试："><span class="nav-number">3.2.2.</span> <span class="nav-text">检查测试：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实验二：IPSec策略在Tunnel口调用："><span class="nav-number">3.3.</span> <span class="nav-text">实验二：IPSec策略在Tunnel口调用：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#配置思路：-1"><span class="nav-number">3.3.1.</span> <span class="nav-text">配置思路：</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017 – <span itemprop="copyrightYear">2022</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">曹世宏</span>
+
+  
+
+  
+</div>
+
+<div class="theme-info">
+  <div class="powered-by"></div>
+  <span class="post-count">全站共 1.1m 字</span>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv" title="总访客量">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+
+  
+    <span class="site-pv" title="总访问量">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+  <script>
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=66140664";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+      <div id="needsharebutton-float">
+        <span class="btn">
+          <i class="fa fa-share-alt" aria-hidden="true"></i>
+        </span>
+      </div>
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.min.js"></script>
+  
+
+  
+  
+    <script src="//cdn.jsdelivr.net/velocity/1.2.1/velocity.ui.min.js"></script>
+  
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+    <script>
+      window.livereOptions = {
+        refer: '2019/04/19/GRE-over-IPSec技术原理/'
+      };
+      (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+      })(document, 'script');
+    </script>
+  
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+  
+  
+    
+  
+  <script src="//cdn.jsdelivr.net/gh/theme-next/theme-next-needmoreshare2@1.0.0/needsharebutton.min.js"></script>
+
+  <script>
+    
+      pbOptions = {};
+      
+          pbOptions.iconStyle = "box";
+      
+          pbOptions.boxForm = "horizontal";
+      
+          pbOptions.position = "bottomCenter";
+      
+          pbOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,Mailto";
+      
+      new needShareButton('#needsharebutton-postbottom', pbOptions);
+    
+    
+      flOptions = {};
+      
+          flOptions.iconStyle = "box";
+      
+          flOptions.boxForm = "horizontal";
+      
+          flOptions.position = "middleRight";
+      
+          flOptions.networks = "Weibo,Wechat,Douban,QQZone,Twitter,Facebook,";
+      
+      new needShareButton('#needsharebutton-float', flOptions);
+    
+  </script>
+
+  
+
+  
+
+  
+  <script src="/js/src/js.cookie.js?v=6.6.0"></script>
+  <script src="/js/src/scroll-cookie.js?v=6.6.0"></script>
+
+
+  
+
+  
+
+  
+  <style>
+    .copy-btn {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      color: #333;
+      white-space: nowrap;
+      vertical-align: middle;
+      cursor: pointer;
+      background-color: #eee;
+      background-image: linear-gradient(#fcfcfc, #eee);
+      border: 1px solid #d5d5d5;
+      border-radius: 3px;
+      user-select: none;
+      outline: 0;
+    }
+
+    .highlight-wrap .copy-btn {
+      transition: opacity .3s ease-in-out;
+      opacity: 0;
+      padding: 2px 6px;
+      position: absolute;
+      right: 4px;
+      top: 8px;
+    }
+
+    .highlight-wrap:hover .copy-btn,
+    .highlight-wrap .copy-btn:focus {
+      opacity: 1
+    }
+
+    .highlight-wrap {
+      position: relative;
+    }
+  </style>
+  <script>
+    $('.highlight').each(function (i, e) {
+      var $wrap = $('<div>').addClass('highlight-wrap')
+      $(e).after($wrap)
+      $wrap.append($('<button>').addClass('copy-btn').append('复制').on('click', function (e) {
+        var code = $(this).parent().find('.code').find('.line').map(function (i, e) {
+          return $(e).text()
+        }).toArray().join('\n')
+        var ta = document.createElement('textarea')
+        document.body.appendChild(ta)
+        ta.style.position = 'absolute'
+        ta.style.top = '0px'
+        ta.style.left = '0px'
+        ta.value = code
+        ta.select()
+        ta.focus()
+        var result = document.execCommand('copy')
+        document.body.removeChild(ta)
+        
+          if(result)$(this).text('复制成功')
+          else $(this).text('复制失败')
+        
+        $(this).blur()
+      })).on('mouseleave', function (e) {
+        var $b = $(this).find('.copy-btn')
+        setTimeout(function () {
+          $b.text('复制')
+        }, 300)
+      }).append(e)
+    })
+  </script>
+
+
+  
+  
+
+  
+  
+
+  
+
+
+</body>
+</html>
